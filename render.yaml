@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: aurapc-backend
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    branch: main
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: PORT
+        value: 10000
+    autoDeploy: true
