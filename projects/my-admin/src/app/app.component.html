@@ -1,0 +1,115 @@
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">AuraPC Admin</div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="#" class="active">Dashboard</a></li>
+        <li><a href="#">Products</a></li>
+        <li><a href="#">Orders</a></li>
+        <li><a href="#">Users</a></li>
+        <li><a href="#">Settings</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="admin-header">
+      <div class="search-bar">
+        <input type="text" placeholder="Search orders, products...">
+      </div>
+      <div class="user-profile">
+        <span>Admin User</span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<style>
+  .admin-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 260px;
+    background: var(--surface-dark);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-weight: 700;
+    background: linear-gradient(90deg, #8a2be2, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sidebar-nav {
+    padding: 1.5rem 0;
+    flex: 1;
+  }
+
+  .sidebar-nav ul {
+    list-style: none;
+  }
+
+  .sidebar-nav a {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+
+  .sidebar-nav a:hover,
+  .sidebar-nav a.active {
+    background: rgba(138, 43, 226, 0.1);
+    color: var(--text-main);
+    border-left: 4px solid var(--primary);
+  }
+
+  .main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-header {
+    height: 80px;
+    padding: 0 2rem;
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-content {
+    padding: 2rem;
+    flex: 1;
+  }
+
+  .search-bar input {
+    padding: 0.5rem 1rem;
+    background: var(--surface-dark);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--text-main);
+    width: 300px;
+  }
+</style>
