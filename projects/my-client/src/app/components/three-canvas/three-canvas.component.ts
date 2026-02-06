@@ -2,11 +2,10 @@ import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@ang
 import * as THREE from 'three';
 
 @Component({
-  selector: 'app-three-canvas',
-  standalone: true,
-  imports: [],
-  templateUrl: './three-canvas.component.html',
-  styleUrl: './three-canvas.component.css'
+    selector: 'app-three-canvas',
+    imports: [],
+    templateUrl: './three-canvas.component.html',
+    styleUrl: './three-canvas.component.css'
 })
 export class ThreeCanvasComponent implements AfterViewInit, OnDestroy {
   @ViewChild('canvasContainer', { static: true }) canvasContainer!: ElementRef;
