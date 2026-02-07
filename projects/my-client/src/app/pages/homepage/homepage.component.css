@@ -958,9 +958,19 @@
 }
 
 @media (max-width: 768px) {
-  .hero__title {
-    padding: 0 1rem;
-  }
+  .hero { min-height: 480px; }
+  .hero__title { padding: 0 1rem; }
+  .hero__hint { bottom: 1.25rem; font-size: 0.75rem; padding: 0 1rem; }
+  /* Touch-friendly hotspot: min 44px tap target */
+  .hotspot { padding: 14px; min-width: 44px; min-height: 44px; }
+  .hotspot__dot { width: 18px; height: 18px; }
+  .hotspot__ping { width: 48px; height: 48px; }
+  .hotspot__label { font-size: 12px; padding: 8px 12px; }
+  .hotspot:active .hotspot__dot { transform: scale(1.2); }
+  .info-panel { right: 4%; left: 4%; width: auto; max-width: 100%; }
+  .intro__logo { width: 72px; height: 72px; }
+  .intro__bar { width: 160px; }
+  .intro { gap: 2rem; }
 
   .categories__grid {
     grid-template-columns: repeat(2, 1fr);

@@ -15,6 +15,7 @@ import { isPlatformBrowser } from '@angular/common';
 export class HeaderComponent {
   activeMenu = signal<string>('products');
   isScrolled = signal<boolean>(false);
+  menuOpen = signal<boolean>(false);
   private isBrowser: boolean;
 
   readonly assets = {
@@ -38,7 +39,12 @@ export class HeaderComponent {
     this.isScrolled.set(window.scrollY > 80);
   }
 
-  setActiveMenu(menuId: string): void { this.activeMenu.set(menuId); }
+  setActiveMenu(menuId: string): void {
+    this.activeMenu.set(menuId);
+    this.menuOpen.set(false);
+  }
+  toggleMenu(): void { this.menuOpen.update(v => !v); }
+  closeMenu(): void { this.menuOpen.set(false); }
   toggleSearch(): void { console.log('Toggle search'); }
   openUser(): void { console.log('Open user account'); }
   openCart(): void { console.log('Open cart'); }

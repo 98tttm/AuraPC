@@ -116,6 +116,8 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
   introComplete = signal(false);
   activeHotspot = signal<Hotspot | null>(null);
   loadProgress = signal(0);
+  /** Trên mobile không load 3D model (tránh WASM OOM), chỉ hiện scene nền */
+  private isMobile = false;
 
   /* Build hotspots from config */
   hotspots: Hotspot[] = HOTSPOT_CONFIG.map(cfg => ({
@@ -168,6 +170,7 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
   private initThreeJS(): void {
     const c = this.heroCanvas.nativeElement;
     const w = c.clientWidth, h = c.clientHeight;
+    this.isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x05050f);
@@ -177,12 +180,12 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
     this.camera.position.copy(this.defaultCameraPos);
     this.camera.lookAt(this.defaultLookAt);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: !this.isMobile, powerPreference: this.isMobile ? 'low-power' : 'default' });
     this.renderer.setSize(w, h);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(this.isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.4;
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = !this.isMobile;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     c.appendChild(this.renderer.domElement);
 
@@ -255,7 +258,7 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
     });
     this.scene.add(new THREE.Mesh(skyGeo, skyMat));
 
-    const cnt = 2500, pos = new Float32Array(cnt * 3);
+    const cnt = this.isMobile ? 800 : 2500, pos = new Float32Array(cnt * 3);
     for (let i = 0; i < cnt; i++) {
       const t = Math.random() * 6.28, p = Math.acos(2 * Math.random() - 1), r = 25 + Math.random() * 40;
       pos[i * 3] = r * Math.sin(p) * Math.cos(t);
@@ -288,23 +291,32 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
   /* ============================== MODEL ============================== */
 
   private loadModel(): void {
-    /* Safety: nếu sau 30s model vẫn chưa xong → hiện scene trống */
+    /* Mobile: không load model (tránh WASM OOM, texture lỗi) — hiện scene nền ngay */
+    if (this.isMobile) {
+      const bar = document.querySelector('.intro__bar-fill') as HTMLElement;
+      if (bar) { bar.style.width = '100%'; bar.style.marginLeft = '0'; bar.style.animation = 'none'; }
+      this.loadProgress.set(100);
+      setTimeout(() => this.finishIntro(), 800);
+      return;
+    }
+
+    /* Safety: nếu sau 25s model vẫn chưa xong → hiện scene trống */
     const safetyTimer = setTimeout(() => {
       if (!this.modelLoaded()) {
-        console.warn('[AuraPC] Model load timeout (30s). Showing scene without model.');
+        console.warn('[AuraPC] Model load timeout. Showing scene without model.');
         this.finishIntro();
       }
-    }, 30_000);
+    }, 25_000);
 
     const loader = new GLTFLoader();
+    loader.manager.onError = (url) => console.warn('[AuraPC] Resource load failed:', url);
 
-    /* DRACO decoder — dùng CDN để không phải bundle thêm wasm */
+    /* DRACO decoder — dùng CDN; chỉ dùng trên desktop */
     const draco = new DRACOLoader();
     draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
     draco.preload();
     loader.setDRACOLoader(draco);
 
-    /* Ưu tiên bản nén DRACO+WebP (3MB) — fallback sang bản gốc (67MB) */
     const modelUrl = 'assets/models/GamingPC-opt.glb';
     console.log('[AuraPC] Loading model:', modelUrl);
 

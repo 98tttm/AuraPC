@@ -5,7 +5,12 @@
         <img [src]="assets.logo" alt="AuraPC Logo" class="logo-image">
         <span class="logo-text">AuraPC</span>
       </a>
-      <ul class="nav-menu">
+      <button class="nav-burger" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Menu">
+        <span class="nav-burger__line"></span>
+        <span class="nav-burger__line"></span>
+        <span class="nav-burger__line"></span>
+      </button>
+      <ul class="nav-menu" [class.nav-menu--open]="menuOpen()">
         @for (item of menuItems; track item.id) {
         <li class="nav-item" [class.active]="activeMenu() === item.id">
           <a (click)="setActiveMenu(item.id)">{{ item.label }}</a>
@@ -39,4 +44,7 @@
       </div>
     </div>
   </nav>
+  @if (menuOpen()) {
+  <div class="nav-overlay" (click)="closeMenu()" role="button" tabindex="0" aria-label="Đóng menu"></div>
+  }
 </header>
