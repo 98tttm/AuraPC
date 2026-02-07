@@ -1,0 +1,254 @@
+<!-- ============================================
+     INTRO: Clean logo + loading bar
+     ============================================ -->
+@if (!introComplete()) {
+  <div class="intro" [class.intro--exit]="modelLoaded()">
+    <div class="intro__glow"></div>
+    <img src="assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png"
+         alt="AuraPC" class="intro__logo">
+    <div class="intro__bar">
+      <div class="intro__bar-fill"></div>
+    </div>
+  </div>
+}
+
+<!-- ============================================
+     HERO: Interactive 3D Model
+     ============================================ -->
+<section class="hero">
+  <div class="hero__canvas" #heroCanvas></div>
+  <div class="hero__vignette"></div>
+
+  <!-- Hotspot dots -->
+  @if (introComplete()) {
+    @for (hs of hotspots; track hs.id) {
+      <button
+        class="hotspot"
+        [class.hotspot--hidden]="!hs.visible || !!activeHotspot()"
+        [style.left.px]="hs.screenX"
+        [style.top.px]="hs.screenY"
+        (click)="onHotspotClick(hs); $event.stopPropagation()"
+        [attr.aria-label]="hs.label">
+        <span class="hotspot__ping"></span>
+        <span class="hotspot__dot"></span>
+        <span class="hotspot__label">{{ hs.label }}</span>
+      </button>
+    }
+  }
+
+  <!-- Product Info Panel -->
+  @if (activeHotspot(); as hs) {
+    <div class="info-panel">
+      <button class="info-panel__close" (click)="onZoomOut()" aria-label="Quay lại">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h3 class="info-panel__title">{{ hs.label }}</h3>
+      <p class="info-panel__desc">{{ hs.description }}</p>
+      <ul class="info-panel__specs">
+        @for (spec of hs.specs; track spec) {
+          <li>{{ spec }}</li>
+        }
+      </ul>
+      <div class="info-panel__actions">
+        <a href="#" class="info-panel__btn">Xem sản phẩm</a>
+        <button class="info-panel__back" (click)="onZoomOut()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Quay lại tổng quan
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Scroll hint -->
+  @if (introComplete() && !activeHotspot()) {
+    <div class="hero__hint">
+      <p>Kéo để xoay &bull; Click vào điểm sáng để khám phá</p>
+      <div class="hero__scroll-line"></div>
+    </div>
+  }
+</section>
+
+<!-- ============================================
+     SECTION 2: PROMO BANNERS
+     ============================================ -->
+<section class="promo">
+  <div class="container">
+    <div class="promo__grid fade-in">
+      <div class="promo__main">
+        <div class="promo__card promo__card--large">
+          <div class="promo__card-overlay"><span class="promo__card-tag">GAMING COMPUTER</span></div>
+        </div>
+      </div>
+      <div class="promo__side">
+        <div class="promo__card promo__card--small">
+          <div class="promo__card-overlay"><span class="promo__card-tag">SPECIAL PROMO</span></div>
+        </div>
+        <div class="promo__card promo__card--small">
+          <div class="promo__card-overlay"><span class="promo__card-tag">SPECIAL PROMO</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 3: FEATURED PRODUCTS
+     ============================================ -->
+<section class="featured">
+  <div class="container">
+    <div class="featured__grid">
+      <div class="featured__card fade-in-left">
+        <div class="featured__image"></div>
+        <div class="featured__info">
+          <h2 class="featured__name">SABRE V2 PRO CF</h2>
+          <p class="featured__desc">CARBON FIBER LIGHTEDIT</p>
+          <a href="#" class="featured__btn">MUA NGAY</a>
+        </div>
+      </div>
+      <div class="featured__card fade-in-right">
+        <div class="featured__image featured__image--alt"></div>
+        <div class="featured__info">
+          <h2 class="featured__name">VENGEANCE a7500</h2>
+          <p class="featured__desc">STEP UP YOUR GAME</p>
+          <a href="#" class="featured__btn">MUA NGAY</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 4: CATEGORY GRID
+     ============================================ -->
+<section class="categories">
+  <div class="container">
+    <h2 class="section-title fade-in">KHÁM PHÁ THEO DANH MỤC</h2>
+    <div class="categories__grid stagger-children">
+      @for (cat of categories; track cat.label) {
+        <div class="categories__item fade-in">
+          <div class="categories__img-wrapper"><div class="categories__img-placeholder"></div></div>
+          <p class="categories__label">{{ cat.label }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 5: BLOG / GUIDES
+     ============================================ -->
+<section class="blog">
+  <div class="container">
+    <div class="blog__header fade-in">
+      <h2 class="section-title section-title--left">HƯỚNG DẪN &amp; MẸO HAY</h2>
+      <a href="#" class="blog__explore">Khám phá ngay &rarr;</a>
+    </div>
+    <div class="blog__grid stagger-children">
+      @for (post of blogs; track post.title) {
+        <div class="blog__card fade-in">
+          <div class="blog__card-image"></div>
+          <div class="blog__card-body">
+            <span class="blog__card-tag">{{ post.tag }}</span>
+            <h3 class="blog__card-title">{{ post.title }}</h3>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 6: WHY AURA PC
+     ============================================ -->
+<section class="why-aura">
+  <div class="container">
+    <div class="why-aura__content">
+      <div class="why-aura__text fade-in-left">
+        <h2 class="why-aura__title">VÌ SAO NÊN MUA TRỰC TIẾP TỪ AURA PC?</h2>
+        <a href="#" class="blog__explore">Khám phá ngay &rarr;</a>
+      </div>
+      <div class="why-aura__benefits stagger-children">
+        @for (benefit of benefits; track benefit.title) {
+          <div class="why-aura__benefit fade-in">
+            <div class="why-aura__icon">{{ benefit.icon }}</div>
+            <p class="why-aura__benefit-title">{{ benefit.title }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 7: AURA LAB + DEALS
+     ============================================ -->
+<section class="auralab">
+  <div class="container">
+    <div class="auralab__grid">
+      <div class="auralab__main fade-in-left">
+        <div class="auralab__image-wrapper"><div class="auralab__image-placeholder"></div></div>
+        <div class="auralab__info">
+          <h2 class="auralab__title">AURA LAB</h2>
+          <p class="auralab__desc">Tự tay lắp ráp máy tính trong không gian 3D.</p>
+          <a href="#" class="auralab__btn">BẮT ĐẦU LẮP RÁP</a>
+        </div>
+      </div>
+      <div class="auralab__side">
+        <div class="auralab__deal fade-in-right">
+          <div class="auralab__deal-content">
+            <span class="auralab__deal-badge">AURA PC BUILDER</span>
+            <a href="#" class="auralab__deal-btn">XÂY DỰNG NGAY</a>
+          </div>
+        </div>
+        <div class="auralab__deal fade-in-right">
+          <div class="auralab__deal-content">
+            <h3 class="auralab__deal-title">ƯU ĐÃI ĐẶC BIỆT</h3>
+            <a href="#" class="auralab__deal-btn">XEM NGAY</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <h3 class="footer__logo">AuraPC</h3>
+        <p class="footer__tagline">"Your Vision, Our Logic"</p>
+        <div class="footer__social">
+          <a href="#" class="footer__social-link">FB</a>
+          <a href="#" class="footer__social-link">IG</a>
+          <a href="#" class="footer__social-link">YT</a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Thông tin</h4>
+        <ul class="footer__links">
+          <li><a href="#">Trang chủ</a></li><li><a href="#">Sản phẩm</a></li>
+          <li><a href="#">AuraLab</a></li><li><a href="#">Hướng dẫn</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Hỗ trợ</h4>
+        <ul class="footer__links">
+          <li><a href="#">Liên hệ</a></li><li><a href="#">Bảo hành</a></li>
+          <li><a href="#">Đổi trả</a></li><li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Liên hệ</h4>
+        <ul class="footer__links">
+          <li>0987655755</li><li>support&#64;aurapc.vn</li><li>TP. Hồ Chí Minh</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2026 AuraPC. All rights reserved.</p></div>
+  </div>
+</footer>
