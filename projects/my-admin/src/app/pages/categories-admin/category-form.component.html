@@ -1,0 +1,30 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ id() ? 'Sửa danh mục' : 'Thêm danh mục' }}</h1>
+    <a routerLink="/categories" class="btn">← Danh sách</a>
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  <form (ngSubmit)="submit()" class="form">
+    <div class="field">
+      <label>Tên *</label>
+      <input type="text" [(ngModel)]="model.name" name="name" required />
+    </div>
+    <div class="field">
+      <label>Slug</label>
+      <input type="text" [(ngModel)]="model.slug" name="slug" />
+    </div>
+    <div class="field">
+      <label>Thứ tự</label>
+      <input type="number" [(ngModel)]="model.order" name="order" min="0" />
+    </div>
+    <div class="field">
+      <label><input type="checkbox" [(ngModel)]="model.active" name="active" /> Hiển thị</label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">{{ id() ? 'Cập nhật' : 'Tạo' }}</button>
+      <a routerLink="/categories" class="btn">Hủy</a>
+    </div>
+  </form>
+</div>

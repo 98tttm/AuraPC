@@ -1,0 +1,9 @@
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: #1a1a2e; color: #fff; padding: 1.5rem 0; flex-shrink: 0; }
+.sidebar__logo { margin: 0 1rem 1.5rem; font-size: 1.25rem; font-weight: 700; }
+.sidebar__logo a { color: inherit; text-decoration: none; }
+.sidebar__nav { display: flex; flex-direction: column; gap: 0.25rem; }
+.sidebar__link { padding: 0.6rem 1.25rem; color: rgba(255,255,255,0.8); text-decoration: none; transition: background 0.2s, color 0.2s; }
+.sidebar__link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sidebar__link.active { background: rgba(255,109,45,0.2); color: #ff6d2d; }
+.main { flex: 1; background: #0f0f1a; color: #e0e0e0; padding: 2rem; overflow: auto; }

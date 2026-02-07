@@ -1,0 +1,12 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.page-header h1 { margin: 0; font-size: 1.5rem; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.table th { color: rgba(255,255,255,0.8); font-weight: 600; }
+.alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+.alert-error { background: rgba(229,57,53,0.2); color: #ffcdd2; }
+.btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9rem; }
+.btn-primary { background: #ff6d2d; color: #fff; }
+.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; margin-right: 0.5rem; }
+.btn-danger { background: rgba(229,57,53,0.8); color: #fff; }
+.btn-danger:hover { background: #e53935; }

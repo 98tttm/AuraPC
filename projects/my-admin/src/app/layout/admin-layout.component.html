@@ -1,0 +1,14 @@
+<div class="layout">
+  <aside class="sidebar">
+    <h1 class="sidebar__logo"><a routerLink="/">AuraPC Admin</a></h1>
+    <nav class="sidebar__nav">
+      <a routerLink="/" [class.active]="router.url === '/' || router.url === ''" class="sidebar__link">Dashboard</a>
+      <a routerLink="/products" routerLinkActive="active" class="sidebar__link">Sản phẩm</a>
+      <a routerLink="/categories" routerLinkActive="active" class="sidebar__link">Danh mục</a>
+      <a routerLink="/blogs" routerLinkActive="active" class="sidebar__link">Bài viết</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

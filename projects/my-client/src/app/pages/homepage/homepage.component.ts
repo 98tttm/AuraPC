@@ -1,10 +1,13 @@
 import {
-  Component, ElementRef, ViewChild, AfterViewInit, OnDestroy,
+  Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, OnInit,
   ChangeDetectionStrategy, ChangeDetectorRef, NgZone,
   PLATFORM_ID, Inject, signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import * as THREE from 'three';
+import { ApiService, Product, Category, BlogPost } from '../../core/services/api.service';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -81,12 +84,12 @@ interface Hotspot {
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomepageComponent implements AfterViewInit, OnDestroy {
+export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('heroCanvas', { static: false }) heroCanvas!: ElementRef<HTMLDivElement>;
 
   private scene!: THREE.Scene;
@@ -118,6 +121,8 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
   modelLoaded = signal(false);
   introComplete = signal(false);
   activeHotspot = signal<Hotspot | null>(null);
+  /** Bật sau khi intro xong một chút để hai khối hero text trượt vào bằng transition (tránh lần 2 ẩn không trượt) */
+  heroTextVisible = signal(false);
   loadProgress = signal(0);
   /** Trên mobile không load 3D model (tránh WASM OOM), chỉ hiện scene nền */
   private isMobile = false;
@@ -132,29 +137,44 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
     screenX: 0, screenY: 0, visible: false,
   }));
 
-  /* Section data */
-  readonly categories = [
-    { label: '// VỎ MÁY' }, { label: '// MÁY TÍNH\nCHƠI GAME' },
-    { label: '// BỘ NHỚ RAM' }, { label: '// BÀN PHÍM' }, { label: '// TAI NGHE' },
-    { label: '// NGUỒN\nMÁY TÍNH' }, { label: '// TẢN NHIỆT' },
-    { label: '// CHUỘT\nGAMING' }, { label: '// QUẠT\nTẢN NHIỆT' }, { label: '// BÀN GHẾ\nGAMING' },
-  ];
-  readonly blogs = [
-    { tag: 'BLOG', title: 'Giải thích về CORSAIR SSD Toolbox' },
-    { tag: 'GAME NEWS', title: 'Yêu cầu hệ thống và cấu hình đề xuất cho Marathon' },
-    { tag: 'BLOG', title: 'VENGEANCE RGB RS DDR5 so với VENGEANCE RGB DDR5: Khác nhau?' },
-  ];
+  /* Section data from API */
+  featuredProducts = signal<Product[]>([]);
+  apiCategories = signal<Category[]>([]);
+  apiBlogs = signal<BlogPost[]>([]);
   readonly benefits = [
     { icon: '🚚', title: 'GIAO HÀNG\nNHANH' }, { icon: '⚙️', title: 'CẤU HÌNH\nĐỘC QUYỀN' },
     { icon: '💬', title: 'TƯ VẤN\nTRỰC TIẾP' }, { icon: '🛡️', title: 'BẢO HÀNH\nAN TÂM' },
   ];
 
+  productImageUrl(p: Product): string {
+    const img = p.images?.[0];
+    return img?.url || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
+  }
+  productPrice(p: Product): number { return p.salePrice ?? p.price; }
+  blogCoverUrl(b: BlogPost): string { return b.coverImage || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png'; }
+
   constructor(
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: Object,
+    private api: ApiService,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+  }
+
+  ngOnInit(): void {
+    this.api.getFeaturedProducts(8).subscribe({
+      next: (list) => this.featuredProducts.set(Array.isArray(list) ? list : []),
+      error: () => {},
+    });
+    this.api.getCategories().subscribe({
+      next: (list) => this.apiCategories.set(list),
+      error: () => {},
+    });
+    this.api.getBlogs(1, 6).subscribe({
+      next: (res) => this.apiBlogs.set(res.items || []),
+      error: () => {},
+    });
   }
 
   ngAfterViewInit(): void {
@@ -438,6 +458,10 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.introComplete.set(true);
       this.cdr.detectChanges();
+      setTimeout(() => {
+        this.heroTextVisible.set(true);
+        this.cdr.detectChanges();
+      }, 450);
     }, exitDelay);
   }
 

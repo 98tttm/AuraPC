@@ -1,0 +1,9 @@
+.form { max-width: 400px; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; margin-bottom: 0.35rem; color: rgba(255,255,255,0.8); }
+.field input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; box-sizing: border-box; }
+.actions { margin-top: 1.5rem; display: flex; gap: 0.75rem; }
+.alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+.alert-error { background: rgba(229,57,53,0.2); color: #ffcdd2; }
+.btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9rem; background: rgba(255,255,255,0.1); color: #e0e0e0; }
+.btn-primary { background: #ff6d2d; color: #fff; }

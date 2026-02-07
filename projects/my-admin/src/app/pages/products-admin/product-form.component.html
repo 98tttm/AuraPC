@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ id() ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
+    <a routerLink="/products" class="btn">← Danh sách</a>
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  <form (ngSubmit)="submit()" class="form">
+    <div class="field">
+      <label>Tên *</label>
+      <input type="text" [(ngModel)]="model.name" name="name" required />
+    </div>
+    <div class="field">
+      <label>Slug</label>
+      <input type="text" [(ngModel)]="model.slug" name="slug" placeholder="tu-dong-tao-neu-de-trong" />
+    </div>
+    <div class="field">
+      <label>Mô tả ngắn</label>
+      <input type="text" [(ngModel)]="model.shortDescription" name="shortDescription" />
+    </div>
+    <div class="field">
+      <label>Mô tả</label>
+      <textarea [(ngModel)]="model.description" name="description" rows="4"></textarea>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Giá *</label>
+        <input type="number" [(ngModel)]="model.price" name="price" min="0" step="1000" />
+      </div>
+      <div class="field">
+        <label>Giá sale</label>
+        <input type="number" [(ngModel)]="model.salePrice" name="salePrice" min="0" step="1000" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Danh mục</label>
+        <select [(ngModel)]="model.category" name="category">
+          <option [ngValue]="undefined">-- Chọn --</option>
+          @for (c of categories(); track c._id) {
+            <option [ngValue]="c._id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Tồn kho</label>
+        <input type="number" [(ngModel)]="model.stock" name="stock" min="0" />
+      </div>
+    </div>
+    <div class="field row check">
+      <label><input type="checkbox" [(ngModel)]="model.featured" name="featured" /> Nổi bật</label>
+      <label><input type="checkbox" [(ngModel)]="model.active" name="active" /> Hiển thị</label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">{{ id() ? 'Cập nhật' : 'Tạo' }}</button>
+      <a routerLink="/products" class="btn">Hủy</a>
+    </div>
+  </form>
+</div>

@@ -19,6 +19,26 @@
   <div class="hero__canvas" #heroCanvas></div>
   <div class="hero__vignette"></div>
 
+  <!-- Hai khối text: trượt vào bằng transition, ẩn cùng hướng lúc xuất hiện (trái ra trái, phải ra phải) + mờ -->
+  @if (introComplete()) {
+    <div class="hero__text hero__text--left" [class.hero__text--visible]="heroTextVisible()" [class.hero__text--hidden]="!!activeHotspot()">
+      <h2 class="hero__text-heading">
+        <span class="hero__text-heading-line hero__text-heading-line--1">Khám phá</span>
+        <span class="hero__text-heading-line hero__text-heading-line--2 hero__text-accent">công nghệ Aura</span>
+      </h2>
+      <p class="hero__text-sub">Cấu hình đỉnh cao cho những giới hạn mới</p>
+      <span class="hero__text-line"></span>
+    </div>
+    <div class="hero__text hero__text--right" [class.hero__text--visible]="heroTextVisible()" [class.hero__text--hidden]="!!activeHotspot()">
+      <h2 class="hero__text-heading">
+        <span class="hero__text-heading-line hero__text-heading-line--1">Cá nhân hóa</span>
+        <span class="hero__text-heading-line hero__text-heading-line--2">chỉ với <span class="hero__text-accent">một</span> chạm</span>
+      </h2>
+      <p class="hero__text-sub">Trải nghiệm vượt trội thực tế ảo</p>
+      <span class="hero__text-line"></span>
+    </div>
+  }
+
   <!-- Hotspot dots -->
   @if (introComplete()) {
     @for (hs of hotspots; track hs.id) {
@@ -52,7 +72,7 @@
         }
       </ul>
       <div class="info-panel__actions">
-        <a href="#" class="info-panel__btn">Xem sản phẩm</a>
+        <a routerLink="/" class="info-panel__btn">Xem sản phẩm</a>
         <button class="info-panel__back" (click)="onZoomOut()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -100,24 +120,27 @@
      ============================================ -->
 <section class="featured">
   <div class="container">
+    <h2 class="section-title fade-in">SẢN PHẨM NỔI BẬT</h2>
     <div class="featured__grid">
-      <div class="featured__card fade-in-left">
-        <div class="featured__image"></div>
-        <div class="featured__info">
-          <h2 class="featured__name">SABRE V2 PRO CF</h2>
-          <p class="featured__desc">CARBON FIBER LIGHTEDIT</p>
-          <a href="#" class="featured__btn">MUA NGAY</a>
-        </div>
-      </div>
-      <div class="featured__card fade-in-right">
-        <div class="featured__image featured__image--alt"></div>
-        <div class="featured__info">
-          <h2 class="featured__name">VENGEANCE a7500</h2>
-          <p class="featured__desc">STEP UP YOUR GAME</p>
-          <a href="#" class="featured__btn">MUA NGAY</a>
-        </div>
-      </div>
+      @for (p of featuredProducts(); track p._id) {
+        <a [routerLink]="['/']" class="featured__card fade-in-left">
+          <div class="featured__image">
+            <img [src]="productImageUrl(p)" [alt]="p.name" />
+          </div>
+          <div class="featured__info">
+            <h2 class="featured__name">{{ p.name }}</h2>
+            <p class="featured__desc">{{ p.shortDescription || (productPrice(p) | number:'1.0-0') + '₫' }}</p>
+            <span class="featured__btn">MUA NGAY</span>
+          </div>
+        </a>
+      }
     </div>
+    @if (featuredProducts().length === 0 && !introComplete()) {
+      <div class="featured__grid">
+        <div class="featured__card fade-in-left"><div class="featured__image"></div><div class="featured__info"><h2 class="featured__name">—</h2><p class="featured__desc">Đang tải...</p></div></div>
+        <div class="featured__card fade-in-right"><div class="featured__image featured__image--alt"></div><div class="featured__info"><h2 class="featured__name">—</h2><p class="featured__desc">Đang tải...</p></div></div>
+      </div>
+    }
   </div>
 </section>
 
@@ -128,11 +151,11 @@
   <div class="container">
     <h2 class="section-title fade-in">KHÁM PHÁ THEO DANH MỤC</h2>
     <div class="categories__grid stagger-children">
-      @for (cat of categories; track cat.label) {
-        <div class="categories__item fade-in">
+      @for (cat of apiCategories(); track cat._id) {
+        <a routerLink="/" class="categories__item fade-in">
           <div class="categories__img-wrapper"><div class="categories__img-placeholder"></div></div>
-          <p class="categories__label">{{ cat.label }}</p>
-        </div>
+          <p class="categories__label">{{ cat.name }}</p>
+        </a>
       }
     </div>
   </div>
@@ -145,17 +168,17 @@
   <div class="container">
     <div class="blog__header fade-in">
       <h2 class="section-title section-title--left">HƯỚNG DẪN &amp; MẸO HAY</h2>
-      <a href="#" class="blog__explore">Khám phá ngay &rarr;</a>
+      <a routerLink="/" class="blog__explore">Khám phá ngay &rarr;</a>
     </div>
     <div class="blog__grid stagger-children">
-      @for (post of blogs; track post.title) {
-        <div class="blog__card fade-in">
-          <div class="blog__card-image"></div>
+      @for (post of apiBlogs(); track post._id) {
+        <a routerLink="/" class="blog__card fade-in">
+          <div class="blog__card-image"><img [src]="blogCoverUrl(post)" [alt]="post.title" /></div>
           <div class="blog__card-body">
-            <span class="blog__card-tag">{{ post.tag }}</span>
+            <span class="blog__card-tag">BLOG</span>
             <h3 class="blog__card-title">{{ post.title }}</h3>
           </div>
-        </div>
+        </a>
       }
     </div>
   </div>
@@ -215,40 +238,3 @@
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer__grid">
-      <div class="footer__brand">
-        <h3 class="footer__logo">AuraPC</h3>
-        <p class="footer__tagline">"Your Vision, Our Logic"</p>
-        <div class="footer__social">
-          <a href="#" class="footer__social-link">FB</a>
-          <a href="#" class="footer__social-link">IG</a>
-          <a href="#" class="footer__social-link">YT</a>
-        </div>
-      </div>
-      <div class="footer__col">
-        <h4 class="footer__col-title">Thông tin</h4>
-        <ul class="footer__links">
-          <li><a href="#">Trang chủ</a></li><li><a href="#">Sản phẩm</a></li>
-          <li><a href="#">AuraLab</a></li><li><a href="#">Hướng dẫn</a></li>
-        </ul>
-      </div>
-      <div class="footer__col">
-        <h4 class="footer__col-title">Hỗ trợ</h4>
-        <ul class="footer__links">
-          <li><a href="#">Liên hệ</a></li><li><a href="#">Bảo hành</a></li>
-          <li><a href="#">Đổi trả</a></li><li><a href="#">FAQ</a></li>
-        </ul>
-      </div>
-      <div class="footer__col">
-        <h4 class="footer__col-title">Liên hệ</h4>
-        <ul class="footer__links">
-          <li>0987655755</li><li>support&#64;aurapc.vn</li><li>TP. Hồ Chí Minh</li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer__bottom"><p>&copy; 2026 AuraPC. All rights reserved.</p></div>
-  </div>
-</footer>

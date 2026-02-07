@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Sản phẩm</h1>
+    <a routerLink="/products/new" class="btn btn-primary">Thêm sản phẩm</a>
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  @if (loading()) {
+    <p>Đang tải...</p>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tên</th>
+          <th>Giá</th>
+          <th>Danh mục</th>
+          <th>Nổi bật</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of items(); track p._id) {
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ price(p) | number:'1.0-0' }}₫</td>
+            <td>{{ categoryName(p) }}</td>
+            <td>{{ p.featured ? 'Có' : 'Không' }}</td>
+            <td>
+              <a [routerLink]="['/products', p._id, 'edit']" class="btn btn-sm">Sửa</a>
+              <button type="button" class="btn btn-sm btn-danger" (click)="delete(p._id!, p.name)">Xóa</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (items().length === 0) {
+      <p>Chưa có sản phẩm nào.</p>
+    }
+  }
+</div>

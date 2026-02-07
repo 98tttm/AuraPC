@@ -3,22 +3,30 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 
-// Kết nối Database
+const categoryRoutes = require('./routes/categoryRoutes');
+const productRoutes = require('./routes/productRoutes');
+const blogRoutes = require('./routes/blogRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const adminProductRoutes = require('./routes/admin/productRoutes');
+const adminCategoryRoutes = require('./routes/admin/categoryRoutes');
+const adminBlogRoutes = require('./routes/admin/blogRoutes');
+
 connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.get('/', (req, res) => {
-    res.send('AuraPC Server is running...');
-});
+app.get('/', (req, res) => res.send('AuraPC Server is running...'));
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`Server đang chạy trên cổng ${PORT}`);
-});
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/categories', adminCategoryRoutes);
+app.use('/api/admin/blogs', adminBlogRoutes);
+
+app.listen(PORT, () => console.log(`Server đang chạy trên cổng ${PORT}`));

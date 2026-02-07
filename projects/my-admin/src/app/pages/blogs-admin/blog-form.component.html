@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ id() ? 'Sửa bài viết' : 'Thêm bài viết' }}</h1>
+    <a routerLink="/blogs" class="btn">← Danh sách</a>
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  <form (ngSubmit)="submit()" class="form">
+    <div class="field">
+      <label>Tiêu đề *</label>
+      <input type="text" [(ngModel)]="model.title" name="title" required />
+    </div>
+    <div class="field">
+      <label>Slug</label>
+      <input type="text" [(ngModel)]="model.slug" name="slug" />
+    </div>
+    <div class="field">
+      <label>Mô tả ngắn</label>
+      <textarea [(ngModel)]="model.excerpt" name="excerpt" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <label>Nội dung</label>
+      <textarea [(ngModel)]="model.content" name="content" rows="8"></textarea>
+    </div>
+    <div class="field">
+      <label>Ảnh bìa (URL)</label>
+      <input type="text" [(ngModel)]="model.coverImage" name="coverImage" />
+    </div>
+    <div class="field">
+      <label>Tác giả</label>
+      <input type="text" [(ngModel)]="model.author" name="author" />
+    </div>
+    <div class="field">
+      <label><input type="checkbox" [(ngModel)]="model.published" name="published" /> Xuất bản</label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">{{ id() ? 'Cập nhật' : 'Tạo' }}</button>
+      <a routerLink="/blogs" class="btn">Hủy</a>
+    </div>
+  </form>
+</div>

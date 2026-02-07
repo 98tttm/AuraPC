@@ -14,6 +14,7 @@
   /* Typography */
   --font-heading: 'Satoshi', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --font-hero: 'UTM Nokia', system-ui, 'Segoe UI', sans-serif;
 }
 
 /* ===== Base Reset ===== */
