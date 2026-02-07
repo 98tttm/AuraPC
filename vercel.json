@@ -1,6 +1,9 @@
 {
   "buildCommand": "npm run build -- my-client --configuration=production",
-  "outputDirectory": "dist/my-client",
+  "outputDirectory": "dist/my-client/browser",
   "framework": null,
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
