@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build -- my-client --configuration=production",
+  "outputDirectory": "dist/my-client",
+  "framework": null,
+  "installCommand": "npm install"
+}
