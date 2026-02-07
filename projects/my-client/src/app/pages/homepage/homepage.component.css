@@ -194,45 +194,33 @@
 }
 
 /* ===== Hotspot Dots ===== */
+/* Nút có kích thước 0 để (left,top) = đúng điểm 3D; chấm + ping căn giữa tại đó */
 .hotspot {
   position: absolute;
   z-index: 10;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
   transform: translate(-50%, -50%);
   background: none;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
   padding: 0;
 }
 
-.hotspot__dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-orange);
-  border: 2px solid rgba(255,255,255,0.9);
-  box-shadow: 0 0 15px rgba(255, 109, 45, 0.6);
-  position: relative;
-  z-index: 2;
-  transition: transform 0.3s;
-}
-
-.hotspot:hover .hotspot__dot {
-  transform: scale(1.3);
-}
-
+/* Hiệu ứng vòng sáng — căn giữa đúng vị trí thật (tâm nút) */
 .hotspot__ping {
   position: absolute;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 109, 45, 0.5);
-  animation: hotspotPing 2s ease-out infinite;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 109, 45, 0.5);
+  animation: hotspotPing 2s ease-out infinite;
+  pointer-events: none;
 }
 
 @keyframes hotspotPing {
@@ -240,7 +228,33 @@
   100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
 }
 
+/* Chấm cam — cùng tâm với ping, đúng vị trí 3D */
+.hotspot__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 15px rgba(255, 109, 45, 0.6);
+  z-index: 2;
+  transition: transform 0.3s;
+}
+
+.hotspot:hover .hotspot__dot {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+/* Nhãn nằm bên phải, không ảnh hưởng tâm chấm */
 .hotspot__label {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  margin-left: 12px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
@@ -251,14 +265,13 @@
   border-radius: 20px;
   white-space: nowrap;
   opacity: 0;
-  transform: translateX(-8px);
   transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
 }
 
 .hotspot:hover .hotspot__label {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(-50%) translateX(0);
 }
 
 /* ===== Product Info Panel ===== */
@@ -962,11 +975,12 @@
   .hero__title { padding: 0 1rem; }
   .hero__hint { bottom: 1.25rem; font-size: 0.75rem; padding: 0 1rem; }
   /* Touch-friendly hotspot: min 44px tap target */
-  .hotspot { padding: 14px; min-width: 44px; min-height: 44px; }
+  /* Vùng bấm 48x48, tâm vẫn tại (screenX, screenY) */
+  .hotspot { width: 48px; height: 48px; margin-left: -24px; margin-top: -24px; }
   .hotspot__dot { width: 18px; height: 18px; }
   .hotspot__ping { width: 48px; height: 48px; }
-  .hotspot__label { font-size: 12px; padding: 8px 12px; }
-  .hotspot:active .hotspot__dot { transform: scale(1.2); }
+  .hotspot__label { font-size: 12px; padding: 8px 12px; margin-left: 10px; }
+  .hotspot:active .hotspot__dot { transform: translate(-50%, -50%) scale(1.2); }
   .info-panel { right: 4%; left: 4%; width: auto; max-width: 100%; }
   .intro__logo { width: 72px; height: 72px; }
   .intro__bar { width: 160px; }

@@ -18,51 +18,54 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
  *    y: 0 = day (san),  1 = dinh (cao nhat)
  *    z: 0 = phia sau,   1 = phia truoc (huong camera)
  *
- *  cameraOffset: vi tri camera khi zoom vao (tuong doi voi hotspot)
- *    x dương = camera sang phai,  y dương = camera len tren,  z dương = camera ra truoc
+ *  GÓC CAMERA khi bấm chấm: chỉnh cameraOffset (ngay dưới relativePos từng hotspot)
+ *    x dương = camera đặt sang phải,  âm = sang trái
+ *    y dương = camera cao lên,       âm = thấp xuống
+ *    z dương = camera GẦN hơn (cận cảnh),  z nhỏ = camera xa hơn
+ *  Camera luôn nhìn vào đúng điểm chấm (hotspot); cameraOffset chỉ đổi vị trí đặt máy quay.
  * ========================================================================== */
 const HOTSPOT_CONFIG = [
   {
     id: 'case', label: 'PC Case',
     description: 'Vỏ case gaming cao cấp với thiết kế airflow tối ưu, kính cường lực và hệ thống RGB đồng bộ.',
     specs: ['Mid-Tower ATX', 'Kính cường lực', 'Tản nước 360mm', 'RGB Sync'],
-    relativePos: { x: 0.90, y: 0.78, z: 0.45 },
-    cameraOffset: { x: 2.0, y: 0.8, z: 2.5 },
+    relativePos: { x: 0.45, y: 0.7, z: 0.05 },
+    cameraOffset: { x: 2.0, y: 0.3, z: 2.5 },
   },
   {
     id: 'monitor', label: 'Dual Monitor',
     description: 'Hệ thống dual monitor gaming 27" QHD 165Hz, tấm nền IPS sắc nét.',
     specs: ['2x 27" QHD', '165Hz / 1ms', 'IPS Panel', 'HDR400'],
-    relativePos: { x: 0.55, y: 0.76, z: 0.40 },
-    cameraOffset: { x: 0, y: 0.5, z: 3.0 },
+    relativePos: { x: 0.3, y: 0.76, z: 0.40 },
+    cameraOffset: { x: 2.5, y: 0.5, z: 0.7 },
   },
   {
     id: 'keyboard', label: 'Bàn phím cơ',
     description: 'Bàn phím cơ gaming với switch Cherry MX, RGB per-key.',
     specs: ['Cherry MX Red', 'RGB Per-Key', 'TKL Layout', 'USB-C'],
-    relativePos: { x: 0.52, y: 0.44, z: 0.60 },
-    cameraOffset: { x: 0, y: 1.5, z: 2.0 },
+    relativePos: { x: 0.40, y: 0.60, z: 0.50 },
+    cameraOffset: { x: 2, y: 1.0, z: -0.5 },
   },
   {
     id: 'chair', label: 'Gaming Chair',
     description: 'Ghế gaming ergonomic với tựa lưng 4D, đệm memory foam.',
     specs: ['Tựa tay 4D', 'Memory Foam', 'Khung thép', 'Ngả 180°'],
-    relativePos: { x: 0.10, y: 0.55, z: 0.85 },
-    cameraOffset: { x: -2.0, y: 1.0, z: 2.5 },
+    relativePos: { x: 0.65, y: 0.50, z: 0.65 },
+    cameraOffset: { x: 2.50, y: 1.0, z: -4.0 },
   },
   {
     id: 'mouse', label: 'Gaming Mouse',
     description: 'Chuột gaming siêu nhẹ 58g, cảm biến 25K DPI.',
     specs: ['58g Siêu nhẹ', '25,600 DPI', 'Switch quang học', 'Wireless'],
-    relativePos: { x: 0.36, y: 0.44, z: 0.60 },
-    cameraOffset: { x: 0.5, y: 1.2, z: 1.8 },
+    relativePos: { x: 0.40, y: 0.60, z: 0.25 },
+    cameraOffset: { x: 0.80, y: 1.0, z: -0.5 },
   },
   {
     id: 'headset', label: 'Headset',
     description: 'Tai nghe gaming 7.1 surround, driver 50mm, micro khử ồn.',
     specs: ['7.1 Surround', 'Driver 50mm', 'Micro ClearCast', 'Wireless'],
-    relativePos: { x: 0.72, y: 0.48, z: 0.48 },
-    cameraOffset: { x: 1.0, y: 0.8, z: 2.0 },
+    relativePos: { x: 0.40, y: 0.6, z: 0.85 },
+    cameraOffset: { x: 0.80, y: 1.0, z: -0.5 },
   },
 ];
 
@@ -413,9 +416,13 @@ export class HomepageComponent implements AfterViewInit, OnDestroy {
       hs.cameraPos.set(wx + hs.cameraOffset.x, wy + hs.cameraOffset.y, wz + hs.cameraOffset.z);
     }
 
-    /* Adjust camera for this model */
-    this.defaultLookAt.set(fc.x, fc.y * 0.7, fc.z);
-    this.defaultCameraPos.set(0, fs.y * 0.7, fs.z * 1.2 + 3);
+    /* Camera mặc định: góc front-left, cao — ghế bên trái, bàn/màn hình từ giữa sang phải */
+    this.defaultLookAt.set(fc.x, fc.y, fc.z);
+    this.defaultCameraPos.set(
+      fc.x + 5.50,
+      fc.y + 1.0,
+      fc.z - 3.0
+    );
     this.camera.position.copy(this.defaultCameraPos);
     this.controls.target.copy(this.defaultLookAt);
 
