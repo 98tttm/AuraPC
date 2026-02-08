@@ -2,6 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { IntroStateService } from './core/services/intro-state.service';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +10,15 @@ import { FooterComponent } from './components/footer/footer.component';
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <app-header></app-header>
+    @if (introState.shellVisible()) {
+      <app-header></app-header>
+    }
     <main>
       <router-outlet></router-outlet>
     </main>
-    <app-footer></app-footer>
+    @if (introState.shellVisible()) {
+      <app-footer></app-footer>
+    }
   `,
   styles: [`
     main {
@@ -21,4 +26,6 @@ import { FooterComponent } from './components/footer/footer.component';
     }
   `],
 })
-export class AppComponent {}
+export class AppComponent {
+  constructor(public introState: IntroStateService) {}
+}

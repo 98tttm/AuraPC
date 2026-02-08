@@ -41,11 +41,37 @@
 }
 .nav-indicator--visible { opacity: 1; }
 
-.nav-search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 400px; }
-.nav-search__input { flex: 1; padding: 8px 14px; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; }
-.nav-search__input::placeholder { color: rgba(255,255,255,0.5); }
-.nav-search__btn { padding: 8px 16px; background: var(--accent-orange, #FF6D2D); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
-.nav-search__close { width: 36px; height: 36px; padding: 0; background: rgba(255,255,255,0.1); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-size: 20px; line-height: 1; }
+.nav-search {
+  display: flex; align-items: center; gap: 0;
+  width: 100%; max-width: 520px;
+  background: #fff; border-radius: 9999px;
+  padding: 4px 4px 4px 18px; overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+}
+.nav-search__input {
+  flex: 1; min-width: 0; padding: 6px 12px 6px 0;
+  border: none; background: transparent; color: #1a1a1a; font-size: 14px;
+}
+.nav-search__input::placeholder { color: rgba(0,0,0,0.45); }
+.nav-search__input:focus { outline: none; }
+.nav-search__icon {
+  width: 18px; height: 18px; display: block; flex-shrink: 0;
+}
+.nav-search__btn {
+  width: 32px; height: 32px; padding: 0; flex-shrink: 0;
+  background: transparent; color: rgba(0,0,0,0.55); border: none;
+  border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-search__btn:hover { color: #1a1a1a; background: rgba(0,0,0,0.06); }
+.nav-search__close {
+  width: 32px; height: 32px; padding: 0; flex-shrink: 0;
+  background: #fff; border: none; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.55); transition: background 0.2s, color 0.2s;
+  margin-left: 2px;
+}
+.nav-search__close:hover { background: rgba(0,0,0,0.08); color: #1a1a1a; }
 
 .nav-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
 .action-btn--active { color: var(--accent-orange); }

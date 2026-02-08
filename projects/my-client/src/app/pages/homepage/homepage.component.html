@@ -3,6 +3,8 @@
      ============================================ -->
 @if (!introComplete()) {
   <div class="intro" [class.intro--exit]="modelLoaded()">
+    <video class="intro__video" autoplay muted loop playsinline preload="auto"
+           src="assets/video/universe.mp4"></video>
     <div class="intro__glow"></div>
     <img src="assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png"
          alt="AuraPC" class="intro__logo">
@@ -12,6 +14,8 @@
   </div>
 }
 
+<!-- Nội dung chính: hiện dần khi intro biến mất -->
+<div class="main-reveal" [class.main-reveal--visible]="introComplete()">
 <!-- ============================================
      HERO: Interactive 3D Model
      ============================================ -->
@@ -93,24 +97,38 @@
 </section>
 
 <!-- ============================================
-     SECTION 2: PROMO BANNERS
+     SECTION 2: ICON STRIP (logo hãng công nghệ – cuộn tự động)
+     Hàng 1: phải → trái. Hàng 2: trái → phải.
      ============================================ -->
-<section class="promo">
-  <div class="container">
-    <div class="promo__grid fade-in">
-      <div class="promo__main">
-        <div class="promo__card promo__card--large">
-          <div class="promo__card-overlay"><span class="promo__card-tag">GAMING COMPUTER</span></div>
+<section class="icon-strip">
+  <video class="icon-strip__video" autoplay muted loop playsinline
+         src="assets/video/universe.mp4"></video>
+  <div class="icon-strip__row icon-strip__row--1" aria-hidden="true">
+    <div class="icon-strip__track">
+      @for (logo of iconStripLogos; track 'a'+$index) {
+        <div class="icon-strip__item">
+          <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
         </div>
-      </div>
-      <div class="promo__side">
-        <div class="promo__card promo__card--small">
-          <div class="promo__card-overlay"><span class="promo__card-tag">SPECIAL PROMO</span></div>
+      }
+      @for (logo of iconStripLogos; track 'b'+$index) {
+        <div class="icon-strip__item">
+          <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
         </div>
-        <div class="promo__card promo__card--small">
-          <div class="promo__card-overlay"><span class="promo__card-tag">SPECIAL PROMO</span></div>
+      }
+    </div>
+  </div>
+  <div class="icon-strip__row icon-strip__row--2" aria-hidden="true">
+    <div class="icon-strip__track icon-strip__track--reverse">
+      @for (logo of iconStripLogos; track 'c'+$index) {
+        <div class="icon-strip__item">
+          <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
         </div>
-      </div>
+      }
+      @for (logo of iconStripLogos; track 'd'+$index) {
+        <div class="icon-strip__item">
+          <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -237,4 +255,5 @@
     </div>
   </div>
 </section>
+</div><!-- .main-reveal -->
 

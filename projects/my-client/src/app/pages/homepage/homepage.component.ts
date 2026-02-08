@@ -8,6 +8,7 @@ import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import * as THREE from 'three';
 import { ApiService, Product, Category, BlogPost } from '../../core/services/api.service';
+import { IntroStateService } from '../../core/services/intro-state.service';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -146,6 +147,30 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     { icon: '💬', title: 'TƯ VẤN\nTRỰC TIẾP' }, { icon: '🛡️', title: 'BẢO HÀNH\nAN TÂM' },
   ];
 
+  /** Logo hãng công nghệ trong assets/logotech – ~20 ô (lặp để fill). */
+  readonly iconStripLogos = [
+    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD' },
+    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS' },
+    { src: 'assets/logotech/asus-rog-1-logo.svg', alt: 'ASUS ROG' },
+    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair' },
+    { src: 'assets/logotech/Deepcool-logo-black.png', alt: 'Deepcool' },
+    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel' },
+    { src: 'assets/logotech/Kingston-logo.png', alt: 'Kingston' },
+    { src: 'assets/logotech/lenovo-logo.png', alt: 'Lenovo' },
+    { src: 'assets/logotech/logo-edra.png', alt: 'Edra' },
+    { src: 'assets/logotech/logo-acer-inkythuatso-2-01-27-15-49-45.jpg', alt: 'Acer' },
+    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA' },
+    { src: 'assets/logotech/msi.png', alt: 'MSI' },
+    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer' },
+    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD' },
+    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS' },
+    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair' },
+    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel' },
+    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA' },
+    { src: 'assets/logotech/msi.png', alt: 'MSI' },
+    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer' },
+  ];
+
   productImageUrl(p: Product): string {
     const img = p.images?.[0];
     return img?.url || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
@@ -158,6 +183,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: Object,
     private api: ApiService,
+    private introState: IntroStateService,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -197,7 +223,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x05050f);
-    this.scene.fog = new THREE.FogExp2(0x05050f, 0.025);
+    this.scene.fog = new THREE.FogExp2(0x05050f, 0.02);
 
     this.camera = new THREE.PerspectiveCamera(45, w / h, 0.01, 500);
     this.camera.position.copy(this.defaultCameraPos);
@@ -268,12 +294,14 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private createBackground(): void {
+    // Không gian vũ trụ 3D: gradient trời + sao (không dùng video)
     const skyGeo = new THREE.SphereGeometry(80, 32, 32);
     const skyMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false,
+      side: THREE.BackSide,
+      depthWrite: false,
       uniforms: {
-        topColor: { value: new THREE.Color(0x0c0c30) },
-        midColor: { value: new THREE.Color(0x0a1225) },
+        topColor: { value: new THREE.Color(0x0e0e3a) },
+        midColor: { value: new THREE.Color(0x0a1528) },
         bottomColor: { value: new THREE.Color(0x050508) },
       },
       vertexShader: `varying vec3 vWP; void main(){ vWP=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
@@ -281,7 +309,8 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.scene.add(new THREE.Mesh(skyGeo, skyMat));
 
-    const cnt = this.isMobile ? 800 : 2500, pos = new Float32Array(cnt * 3);
+    const cnt = this.isMobile ? 1200 : 3500;
+    const pos = new Float32Array(cnt * 3);
     for (let i = 0; i < cnt; i++) {
       const t = Math.random() * 6.28, p = Math.acos(2 * Math.random() - 1), r = 25 + Math.random() * 40;
       pos[i * 3] = r * Math.sin(p) * Math.cos(t);
@@ -291,7 +320,11 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     const sg = new THREE.BufferGeometry();
     sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     this.particles = new THREE.Points(sg, new THREE.PointsMaterial({
-      color: 0xffffff, size: 0.08, transparent: true, opacity: 0.6, sizeAttenuation: true,
+      color: 0xffffff,
+      size: this.isMobile ? 0.12 : 0.18,
+      transparent: true,
+      opacity: 0.85,
+      sizeAttenuation: true,
     }));
     this.scene.add(this.particles);
   }
@@ -454,9 +487,10 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.modelLoaded()) return; // already done
     this.modelLoaded.set(true);
     this.cdr.detectChanges();
-    const exitDelay = 1200;
+    const exitDelay = 1800;
     setTimeout(() => {
       this.introComplete.set(true);
+      this.introState.setIntroComplete(); // hiện header/footer sau khi intro biến mất
       this.cdr.detectChanges();
       setTimeout(() => {
         this.heroTextVisible.set(true);
