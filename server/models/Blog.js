@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
 
+/**
+ * Schema khớp MongoDB: title, slug, excerpt, content, coverImage, author, publishedAt, category, handle, url.
+ */
 const blogSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    slug: { type: String, required: true },
     excerpt: { type: String, default: '' },
     content: { type: String, default: '' },
     coverImage: { type: String, default: '' },
@@ -11,7 +14,7 @@ const blogSchema = new mongoose.Schema(
     published: { type: Boolean, default: false },
     publishedAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 blogSchema.index({ slug: 1 });

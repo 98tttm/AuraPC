@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(20, parseInt(req.query.limit, 10) || 10);
     const skip = (page - 1) * limit;
-    const filter = { published: true };
+    const filter = { $or: [{ published: true }, { published: { $exists: false } }] };
     const [items, total] = await Promise.all([
       Blog.find(filter).sort({ publishedAt: -1, createdAt: -1 }).skip(skip).limit(limit).lean(),
       Blog.countDocuments(filter),
@@ -23,7 +23,7 @@ router.get('/by-slug/:slug', async (req, res) => {
   try {
     const post = await Blog.findOne({
       slug: req.params.slug,
-      published: true,
+      $or: [{ published: true }, { published: { $exists: false } }],
     }).lean();
     if (!post) return res.status(404).json({ error: 'Post not found' });
     res.json(post);

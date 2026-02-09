@@ -1,0 +1,1280 @@
+[
+  {
+    "category_id": "laptop",
+    "parent_id": null,
+    "level": 1,
+    "name": "Laptop",
+    "slug": "laptop",
+    "source_url": "https://xgear.net/collections/laptop",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "MSI",
+    "slug": "laptop-msi",
+    "source_url": "https://xgear.net/collections/laptop-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gaming-msi-creator",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Creator",
+    "slug": "laptop-gaming-msi-creator",
+    "source_url": "https://xgear.net/collections/laptop-gaming-msi-creator",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-cyborg-thin-gf-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Cyborg / Thin GF",
+    "slug": "laptop-msi-cyborg-thin-gf-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-cyborg-thin-gf-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-sword-katana-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Sword / Katana",
+    "slug": "laptop-msi-sword-katana-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-sword-katana-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-crosshair-pulse-gp-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Crosshair | Vector",
+    "slug": "laptop-msi-crosshair-pulse-gp-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-crosshair-pulse-gp-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-ge-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Raider GE",
+    "slug": "laptop-msi-ge-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-ge-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-gs-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Stealth GS",
+    "slug": "laptop-msi-gs-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-gs-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-gt-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "Titan",
+    "slug": "laptop-msi-gt-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-gt-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-msi-rtx-5000-series",
+    "parent_id": "laptop-msi",
+    "level": 3,
+    "name": "MSI RTX 5000",
+    "slug": "laptop-msi-rtx-5000-series",
+    "source_url": "https://xgear.net/collections/laptop-msi-rtx-5000-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-lenovo",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "LENOVO",
+    "slug": "laptop-lenovo",
+    "source_url": "https://xgear.net/collections/laptop-lenovo",
+    "source": "xgear"
+  },
+  {
+    "category_id": "loq-series",
+    "parent_id": "laptop-lenovo",
+    "level": 3,
+    "name": "LOQ Series",
+    "slug": "loq-series",
+    "source_url": "https://xgear.net/collections/loq-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "legion-gaming",
+    "parent_id": "laptop-lenovo",
+    "level": 3,
+    "name": "Legion",
+    "slug": "legion-gaming",
+    "source_url": "https://xgear.net/collections/legion-gaming",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gigabyte",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "GIGABYTE | AORUS",
+    "slug": "laptop-gigabyte",
+    "source_url": "https://xgear.net/collections/laptop-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gaming-gigabyte-aero",
+    "parent_id": "laptop-gigabyte",
+    "level": 3,
+    "name": "Aero",
+    "slug": "laptop-gaming-gigabyte-aero",
+    "source_url": "https://xgear.net/collections/laptop-gaming-gigabyte-aero",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gaming-gigabyte-aorus",
+    "parent_id": "laptop-gigabyte",
+    "level": 3,
+    "name": "Aorus",
+    "slug": "laptop-gaming-gigabyte-aorus",
+    "source_url": "https://xgear.net/collections/laptop-gaming-gigabyte-aorus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "gigabyte-a16-series",
+    "parent_id": "laptop-gigabyte",
+    "level": 3,
+    "name": "A16 Series",
+    "slug": "gigabyte-a16-series",
+    "source_url": "https://xgear.net/collections/gigabyte-a16-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gigabyte-rtx-5000-series",
+    "parent_id": "laptop-gigabyte",
+    "level": 3,
+    "name": "Gigabyte RTX 5000",
+    "slug": "laptop-gigabyte-rtx-5000-series",
+    "source_url": "https://xgear.net/collections/laptop-gigabyte-rtx-5000-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-acer",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "ACER | PREDATOR",
+    "slug": "laptop-acer",
+    "source_url": "https://xgear.net/collections/laptop-acer",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nitro-5",
+    "parent_id": "laptop-acer",
+    "level": 3,
+    "name": "Nitro",
+    "slug": "nitro-5",
+    "source_url": "https://xgear.net/collections/nitro-5",
+    "source": "xgear"
+  },
+  {
+    "category_id": "helios",
+    "parent_id": "laptop-acer",
+    "level": 3,
+    "name": "Helios",
+    "slug": "helios",
+    "source_url": "https://xgear.net/collections/helios",
+    "source": "xgear"
+  },
+  {
+    "category_id": "aspire",
+    "parent_id": "laptop-acer",
+    "level": 3,
+    "name": "Aspire",
+    "slug": "aspire",
+    "source_url": "https://xgear.net/collections/aspire",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-asus",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "ASUS",
+    "slug": "laptop-asus",
+    "source_url": "https://xgear.net/collections/laptop-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "rog-series",
+    "parent_id": "laptop-asus",
+    "level": 3,
+    "name": "ASUS ROG",
+    "slug": "rog-series",
+    "source_url": "https://xgear.net/collections/rog-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "strix-g",
+    "parent_id": "rog-series",
+    "level": 4,
+    "name": "ROG Strix G",
+    "slug": "strix-g",
+    "source_url": "https://xgear.net/collections/strix-g",
+    "source": "xgear"
+  },
+  {
+    "category_id": "zephyrus",
+    "parent_id": "rog-series",
+    "level": 4,
+    "name": "ROG Zephyrus",
+    "slug": "zephyrus",
+    "source_url": "https://xgear.net/collections/zephyrus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "flow",
+    "parent_id": "rog-series",
+    "level": 4,
+    "name": "ROG Flow",
+    "slug": "flow",
+    "source_url": "https://xgear.net/collections/flow",
+    "source": "xgear"
+  },
+  {
+    "category_id": "scar",
+    "parent_id": "rog-series",
+    "level": 4,
+    "name": "Scar",
+    "slug": "scar",
+    "source_url": "https://xgear.net/collections/scar",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tuf-series",
+    "parent_id": "laptop-asus",
+    "level": 3,
+    "name": "TUF Series",
+    "slug": "tuf-series",
+    "source_url": "https://xgear.net/collections/tuf-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-asus-rtx-5000-series",
+    "parent_id": "laptop-asus",
+    "level": 3,
+    "name": "ASUS RTX 5000 Series",
+    "slug": "laptop-asus-rtx-5000-series",
+    "source_url": "https://xgear.net/collections/laptop-asus-rtx-5000-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "vivobook",
+    "parent_id": "laptop-asus",
+    "level": 3,
+    "name": "Vivobook",
+    "slug": "vivobook",
+    "source_url": "https://xgear.net/collections/vivobook",
+    "source": "xgear"
+  },
+  {
+    "category_id": "asus-v16-gaming-creator",
+    "parent_id": "vivobook",
+    "level": 4,
+    "name": "Vivobook Gaming",
+    "slug": "asus-v16-gaming-creator",
+    "source_url": "https://xgear.net/collections/asus-v16-gaming-creator",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-van-phong",
+    "parent_id": "vivobook",
+    "level": 4,
+    "name": "Vivobook văn phòng",
+    "slug": "laptop-van-phong",
+    "source_url": "https://xgear.net/collections/laptop-van-phong",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-hp",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "HP",
+    "slug": "laptop-hp",
+    "source_url": "https://xgear.net/collections/laptop-gaming-hp-victus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gaming-hp-victus",
+    "parent_id": "laptop-hp",
+    "level": 3,
+    "name": "Victus",
+    "slug": "laptop-gaming-hp-victus",
+    "source_url": "https://xgear.net/collections/laptop-gaming-hp-victus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "omen",
+    "parent_id": "laptop-hp",
+    "level": 3,
+    "name": "Omen",
+    "slug": "omen",
+    "source_url": "https://xgear.net/collections/omen",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-hp-rtx-5000-series",
+    "parent_id": "laptop-hp",
+    "level": 3,
+    "name": "HP RTX 5000 Series",
+    "slug": "laptop-hp-rtx-5000-series",
+    "source_url": "https://xgear.net/collections/laptop-hp-rtx-5000-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-gaming-ai",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "Laptop A.I",
+    "slug": "laptop-gaming-ai",
+    "source_url": "https://xgear.net/collections/laptop-gaming-ai",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-sinh-vien",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "SINH VIÊN",
+    "slug": "laptop-sinh-vien",
+    "source_url": "https://xgear.net/collections/laptop-sinh-vien",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-hi-end",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "Hi - End",
+    "slug": "laptop-hi-end",
+    "source_url": "https://xgear.net/collections/laptop-hi-end",
+    "source": "xgear"
+  },
+  {
+    "category_id": "laptop-van-phong",
+    "parent_id": "laptop",
+    "level": 2,
+    "name": "Văn phòng",
+    "slug": "laptop-van-phong",
+    "source_url": "https://xgear.net/collections/laptop-van-phong",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc",
+    "parent_id": null,
+    "level": 1,
+    "name": "PC",
+    "slug": "pc",
+    "source_url": "https://xgear.net/collections/pc",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-asus",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC Asus",
+    "slug": "pc-asus",
+    "source_url": "https://xgear.net/collections/pc-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-msi",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC MSI",
+    "slug": "pc-msi",
+    "source_url": "https://xgear.net/collections/pc-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-gigabyte",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC Gigabyte",
+    "slug": "pc-gigabyte",
+    "source_url": "https://xgear.net/collections/pc-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-gaming",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC gaming",
+    "slug": "pc-gaming",
+    "source_url": "https://xgear.net/collections/pc-gaming",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-do-hoa",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC đồ họa",
+    "slug": "pc-do-hoa",
+    "source_url": "https://xgear.net/collections/pc-do-hoa",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-van-phong",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC văn phòng",
+    "slug": "pc-van-phong",
+    "source_url": "https://xgear.net/collections/pc-van-phong",
+    "source": "xgear"
+  },
+  {
+    "category_id": "pc-gaming-ai",
+    "parent_id": "pc",
+    "level": 2,
+    "name": "PC AI",
+    "slug": "pc-gaming-ai",
+    "source_url": "https://xgear.net/collections/pc-gaming-ai",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh",
+    "parent_id": null,
+    "level": 1,
+    "name": "Màn hình",
+    "slug": "man-hinh",
+    "source_url": "https://xgear.net/collections/man-hinh",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-asus",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Asus",
+    "slug": "man-hinh-asus",
+    "source_url": "https://xgear.net/collections/man-hinh-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-samsung",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Samsung",
+    "slug": "man-hinh-samsung",
+    "source_url": "https://xgear.net/collections/man-hinh-samsung",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-gigabyte",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Gigabyte",
+    "slug": "man-hinh-gigabyte",
+    "source_url": "https://xgear.net/collections/man-hinh-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-koorui",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Koorui",
+    "slug": "man-hinh-koorui",
+    "source_url": "https://xgear.net/collections/man-hinh-koorui",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-msi",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "MSI",
+    "slug": "man-hinh-msi",
+    "source_url": "https://xgear.net/collections/man-hinh-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-aoc",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "AOC",
+    "slug": "man-hinh-aoc",
+    "source_url": "https://xgear.net/collections/man-hinh-aoc",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-philips",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Philips",
+    "slug": "man-hinh-philips",
+    "source_url": "https://xgear.net/collections/man-hinh-philips",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-dell",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Dell",
+    "slug": "man-hinh-dell",
+    "source_url": "https://xgear.net/collections/man-hinh-dell",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-gaming",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Gaming",
+    "slug": "man-hinh-gaming",
+    "source_url": "https://xgear.net/collections/man-hinh-gaming",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-do-hoa",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Đồ họa",
+    "slug": "man-hinh-do-hoa",
+    "source_url": "https://xgear.net/collections/man-hinh-do-hoa",
+    "source": "xgear"
+  },
+  {
+    "category_id": "man-hinh-di-dong",
+    "parent_id": "man-hinh",
+    "level": 2,
+    "name": "Di động",
+    "slug": "man-hinh-di-dong",
+    "source_url": "https://xgear.net/collections/man-hinh-di-dong",
+    "source": "xgear"
+  },
+  {
+    "category_id": "linh-kien",
+    "parent_id": null,
+    "level": 1,
+    "name": "Linh Kiện",
+    "slug": "linh-kien",
+    "source_url": "https://xgear.net/collections/linh-kien",
+    "source": "xgear"
+  },
+  {
+    "category_id": "cpu",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "CPU",
+    "slug": "cpu",
+    "source_url": "https://xgear.net/collections/cpu",
+    "source": "xgear"
+  },
+  {
+    "category_id": "cpu-intel",
+    "parent_id": "cpu",
+    "level": 3,
+    "name": "CPU Intel",
+    "slug": "cpu-intel",
+    "source_url": "https://xgear.net/collections/cpu-intel",
+    "source": "xgear"
+  },
+  {
+    "category_id": "cpu-amd",
+    "parent_id": "cpu",
+    "level": 3,
+    "name": "CPU AMD",
+    "slug": "cpu-amd",
+    "source_url": "https://xgear.net/collections/cpu-amd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "Mainboard",
+    "slug": "mainboard",
+    "source_url": "https://xgear.net/collections/mainboard",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-asus",
+    "parent_id": "mainboard",
+    "level": 3,
+    "name": "Mainboard Asus",
+    "slug": "mainboard-asus",
+    "source_url": "https://xgear.net/collections/mainboard-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-asus-amd",
+    "parent_id": "mainboard-asus",
+    "level": 4,
+    "name": "Mainboard AMD",
+    "slug": "mainboard-asus-amd",
+    "source_url": "https://xgear.net/collections/mainboard-asus-amd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-asus-intel",
+    "parent_id": "mainboard-asus",
+    "level": 4,
+    "name": "Mainboard Intel",
+    "slug": "mainboard-asus-intel",
+    "source_url": "https://xgear.net/collections/mainboard-asus-intel",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-z890-asus-series",
+    "parent_id": "mainboard-asus",
+    "level": 4,
+    "name": "Mainboard Z890 Series",
+    "slug": "mainboard-z890-asus-series",
+    "source_url": "https://xgear.net/collections/mainboard-z890-asus-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-gigabyte",
+    "parent_id": "mainboard",
+    "level": 3,
+    "name": "Mainboard Gigabyte",
+    "slug": "mainboard-gigabyte",
+    "source_url": "https://xgear.net/collections/mainboard-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-gigabyte-amd",
+    "parent_id": "mainboard-gigabyte",
+    "level": 4,
+    "name": "Mainboard AMD",
+    "slug": "mainboard-gigabyte-amd",
+    "source_url": "https://xgear.net/collections/mainboard-gigabyte-amd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-gigabyte-intel",
+    "parent_id": "mainboard-gigabyte",
+    "level": 4,
+    "name": "Mainboard Intel",
+    "slug": "mainboard-gigabyte-intel",
+    "source_url": "https://xgear.net/collections/mainboard-gigabyte-intel",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-gigabyte-x870",
+    "parent_id": "mainboard-gigabyte",
+    "level": 4,
+    "name": "Mainboard X870",
+    "slug": "mainboard-gigabyte-x870",
+    "source_url": "https://xgear.net/collections/mainboard-gigabyte-x870",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-z890-gigabyte-series",
+    "parent_id": "mainboard-gigabyte",
+    "level": 4,
+    "name": "Mainboard Z890 Series",
+    "slug": "mainboard-z890-gigabyte-series",
+    "source_url": "https://xgear.net/collections/mainboard-z890-gigabyte-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-msi",
+    "parent_id": "mainboard",
+    "level": 3,
+    "name": "Mainboard MSI",
+    "slug": "mainboard-msi",
+    "source_url": "https://xgear.net/collections/mainboard-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-msi-amd",
+    "parent_id": "mainboard-msi",
+    "level": 4,
+    "name": "Mainboard AMD",
+    "slug": "mainboard-msi-amd",
+    "source_url": "https://xgear.net/collections/mainboard-msi-amd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-msi-intel",
+    "parent_id": "mainboard-msi",
+    "level": 4,
+    "name": "Mainboard Intel",
+    "slug": "mainboard-msi-intel",
+    "source_url": "https://xgear.net/collections/mainboard-msi-intel",
+    "source": "xgear"
+  },
+  {
+    "category_id": "mainboard-msi-z890-series",
+    "parent_id": "mainboard-msi",
+    "level": 4,
+    "name": "Mainboard Z890 Series",
+    "slug": "mainboard-msi-z890-series",
+    "source_url": "https://xgear.net/collections/mainboard-msi-z890-series",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "RAM",
+    "slug": "ram",
+    "source_url": "https://xgear.net/collections/ram",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-laptop",
+    "parent_id": "ram",
+    "level": 3,
+    "name": "RAM Laptop",
+    "slug": "ram-laptop",
+    "source_url": "https://xgear.net/collections/ram-laptop",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-pc",
+    "parent_id": "ram",
+    "level": 3,
+    "name": "RAM PC",
+    "slug": "ram-pc",
+    "source_url": "https://xgear.net/collections/ram-pc",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-corsair",
+    "parent_id": "ram-pc",
+    "level": 4,
+    "name": "RAM Corsair",
+    "slug": "ram-corsair",
+    "source_url": "https://xgear.net/collections/ram-corsair",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-g-skill",
+    "parent_id": "ram-pc",
+    "level": 4,
+    "name": "RAM G.skill",
+    "slug": "ram-g-skill",
+    "source_url": "https://xgear.net/collections/ram-g-skill",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-kingston",
+    "parent_id": "ram-pc",
+    "level": 4,
+    "name": "RAM Kingston",
+    "slug": "ram-kingston",
+    "source_url": "https://xgear.net/collections/ram-kingston",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ram-teamgroup",
+    "parent_id": "ram-pc",
+    "level": 4,
+    "name": "RAM TeamGroup",
+    "slug": "ram-teamgroup",
+    "source_url": "https://xgear.net/collections/ram-teamgroup",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ssd",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "SSD",
+    "slug": "ssd",
+    "source_url": "https://xgear.net/collections/ssd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ssd-250gb-256gb",
+    "parent_id": "ssd",
+    "level": 3,
+    "name": "250GB - 256GB",
+    "slug": "ssd-250gb-256gb",
+    "source_url": "https://xgear.net/collections/ssd-250gb-256gb",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ssd-500gb-512gb",
+    "parent_id": "ssd",
+    "level": 3,
+    "name": "500GB - 512GB",
+    "slug": "ssd-500gb-512gb",
+    "source_url": "https://xgear.net/collections/ssd-500gb-512gb",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ssd-1tb-2tb",
+    "parent_id": "ssd",
+    "level": 3,
+    "name": "1TB - 2TB",
+    "slug": "ssd-1tb-2tb",
+    "source_url": "https://xgear.net/collections/ssd-1tb-2tb",
+    "source": "xgear"
+  },
+  {
+    "category_id": "o-cung-di-dong",
+    "parent_id": "ssd",
+    "level": 3,
+    "name": "Ổ cứng di động",
+    "slug": "o-cung-di-dong",
+    "source_url": "https://xgear.net/collections/o-cung-di-dong",
+    "source": "xgear"
+  },
+  {
+    "category_id": "hdd",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "HDD",
+    "slug": "hdd",
+    "source_url": "https://xgear.net/collections/hdd",
+    "source": "xgear"
+  },
+  {
+    "category_id": "hdd-laptop",
+    "parent_id": "hdd",
+    "level": 3,
+    "name": "HDD Laptop",
+    "slug": "hdd-laptop",
+    "source_url": "https://xgear.net/collections/hdd-laptop",
+    "source": "xgear"
+  },
+  {
+    "category_id": "hdd-pc",
+    "parent_id": "hdd",
+    "level": 3,
+    "name": "HDD PC",
+    "slug": "hdd-pc",
+    "source_url": "https://xgear.net/collections/hdd-pc",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-psu",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "Nguồn máy tính",
+    "slug": "nguon-psu",
+    "source_url": "https://xgear.net/collections/nguon-psu",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-asus",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn Asus",
+    "slug": "nguon-asus",
+    "source_url": "https://xgear.net/collections/nguon-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-cooler-master",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn Cooler Master",
+    "slug": "nguon-cooler-master",
+    "source_url": "https://xgear.net/collections/nguon-cooler-master",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-corsair",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn Corsair",
+    "slug": "nguon-corsair",
+    "source_url": "https://xgear.net/collections/nguon-corsair",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-deepcool",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn Deepcool",
+    "slug": "nguon-deepcool",
+    "source_url": "https://xgear.net/collections/nguon-deepcool",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-gigabyte",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn Gigabyte",
+    "slug": "nguon-gigabyte",
+    "source_url": "https://xgear.net/collections/nguon-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "nguon-msi",
+    "parent_id": "nguon-psu",
+    "level": 3,
+    "name": "Nguồn MSI",
+    "slug": "nguon-msi",
+    "source_url": "https://xgear.net/collections/nguon-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-cpu",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "Tản nhiệt CPU",
+    "slug": "tan-nhiet-cpu",
+    "source_url": "https://xgear.net/collections/tan-nhiet-cpu",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-asus",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt Asus",
+    "slug": "tan-nhiet-asus",
+    "source_url": "https://xgear.net/collections/tan-nhiet-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-cooler-master",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt Cooler Master",
+    "slug": "tan-nhiet-cooler-master",
+    "source_url": "https://xgear.net/collections/tan-nhiet-cooler-master",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-corsair",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt Corsair",
+    "slug": "tan-nhiet-corsair",
+    "source_url": "https://xgear.net/collections/tan-nhiet-corsair",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-deepcool",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt Deepcool",
+    "slug": "tan-nhiet-deepcool",
+    "source_url": "https://xgear.net/collections/tan-nhiet-deepcool",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-gigabyte",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt Gigabyte",
+    "slug": "tan-nhiet-gigabyte",
+    "source_url": "https://xgear.net/collections/tan-nhiet-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tan-nhiet-msi",
+    "parent_id": "tan-nhiet-cpu",
+    "level": 3,
+    "name": "Tản nhiệt MSI",
+    "slug": "tan-nhiet-msi",
+    "source_url": "https://xgear.net/collections/tan-nhiet-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-may-tinh",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "Case máy tính",
+    "slug": "case-may-tinh",
+    "source_url": "https://xgear.net/collections/case-may-tinh",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-mik",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case MIK",
+    "slug": "case-mik",
+    "source_url": "https://xgear.net/collections/case-mik",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-deepcool",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Deepcool",
+    "slug": "case-deepcool",
+    "source_url": "https://xgear.net/collections/case-deepcool",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-cooler-master",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Cooler Master",
+    "slug": "case-cooler-master",
+    "source_url": "https://xgear.net/collections/case-cooler-master",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-nzxt",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case NZXT",
+    "slug": "case-nzxt",
+    "source_url": "https://xgear.net/collections/case-nzxt",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-msi",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case MSI",
+    "slug": "case-msi",
+    "source_url": "https://xgear.net/collections/case-msi",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-hyte",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case HYTE",
+    "slug": "case-hyte",
+    "source_url": "https://xgear.net/collections/case-hyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-corsair",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Corsair",
+    "slug": "case-corsair",
+    "source_url": "https://xgear.net/collections/case-corsair",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-asus",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Asus",
+    "slug": "case-asus",
+    "source_url": "https://xgear.net/collections/case-asus",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-gigabyte",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Gigabyte",
+    "slug": "case-gigabyte",
+    "source_url": "https://xgear.net/collections/case-gigabyte",
+    "source": "xgear"
+  },
+  {
+    "category_id": "case-xigmatek",
+    "parent_id": "case-may-tinh",
+    "level": 3,
+    "name": "Case Xigmatek",
+    "slug": "case-xigmatek",
+    "source_url": "https://xgear.net/collections/case-xigmatek",
+    "source": "xgear"
+  },
+  {
+    "category_id": "quat-case",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "Quạt Case",
+    "slug": "quat-case",
+    "source_url": "https://xgear.net/collections/quat-case",
+    "source": "xgear"
+  },
+  {
+    "category_id": "quat-deepcool",
+    "parent_id": "quat-case",
+    "level": 3,
+    "name": "Quạt Deepcool",
+    "slug": "quat-deepcool",
+    "source_url": "https://xgear.net/collections/quat-deepcool",
+    "source": "xgear"
+  },
+  {
+    "category_id": "quat-xigmatek",
+    "parent_id": "quat-case",
+    "level": 3,
+    "name": "Quạt Xigmatek",
+    "slug": "quat-xigmatek",
+    "source_url": "https://xgear.net/collections/quat-xigmatek",
+    "source": "xgear"
+  },
+  {
+    "category_id": "vga",
+    "parent_id": "linh-kien",
+    "level": 2,
+    "name": "VGA",
+    "slug": "vga",
+    "source_url": "https://xgear.net/collections/vga",
+    "source": "xgear"
+  },
+  {
+    "category_id": "gaming-gear",
+    "parent_id": null,
+    "level": 1,
+    "name": "Gaming Gear",
+    "slug": "gaming-gear",
+    "source_url": "https://xgear.net/collections/gaming-gear",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ban-phim-may-tinh",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Bàn phím",
+    "slug": "ban-phim-may-tinh",
+    "source_url": "https://xgear.net/collections/ban-phim",
+    "source": "xgear"
+  },
+  {
+    "category_id": "chuot-may-tinh",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Chuột",
+    "slug": "chuot-may-tinh",
+    "source_url": "https://xgear.net/collections/chuot-may-tinh",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tai-nghe-may-tinh",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Tai nghe",
+    "slug": "tai-nghe-may-tinh",
+    "source_url": "https://xgear.net/collections/tai-nghe",
+    "source": "xgear"
+  },
+  {
+    "category_id": "lot-chuot",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Lót chuột",
+    "slug": "lot-chuot",
+    "source_url": "https://xgear.net/collections/lot-chuot",
+    "source": "xgear"
+  },
+  {
+    "category_id": "microphone",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Microphone",
+    "slug": "microphone",
+    "source_url": "https://xgear.net/collections/microphone",
+    "source": "xgear"
+  },
+  {
+    "category_id": "loa",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Loa",
+    "slug": "loa",
+    "source_url": "https://xgear.net/collections/loa",
+    "source": "xgear"
+  },
+  {
+    "category_id": "tay-cam",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Tay cầm",
+    "slug": "tay-cam",
+    "source_url": "https://xgear.net/collections/tay-cam",
+    "source": "xgear"
+  },
+  {
+    "category_id": "webcam",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Webcam",
+    "slug": "webcam",
+    "source_url": "https://xgear.net/collections/webcam",
+    "source": "xgear"
+  },
+  {
+    "category_id": "dia-choi-game",
+    "parent_id": "gaming-gear",
+    "level": 2,
+    "name": "Đĩa chơi game",
+    "slug": "dia-choi-game",
+    "source_url": "https://xgear.net/collections/dia-choi-game",
+    "source": "xgear"
+  },
+  {
+    "category_id": "phu-kien",
+    "parent_id": null,
+    "level": 1,
+    "name": "Phụ kiện",
+    "slug": "phu-kien",
+    "source_url": "https://xgear.net/collections/phu-kien",
+    "source": "xgear"
+  },
+  {
+    "category_id": "balo-tui-xach",
+    "parent_id": "phu-kien",
+    "level": 2,
+    "name": "Balo",
+    "slug": "balo-tui-xach",
+    "source_url": "https://xgear.net/collections/balo-tui-xach",
+    "source": "xgear"
+  },
+  {
+    "category_id": "phu-kien-pc",
+    "parent_id": "phu-kien",
+    "level": 2,
+    "name": "Phụ kiện PC",
+    "slug": "phu-kien-pc",
+    "source_url": "https://xgear.net/collections/phu-kien-pc",
+    "source": "xgear"
+  },
+  {
+    "category_id": "thiet-bi-mang",
+    "parent_id": "phu-kien",
+    "level": 2,
+    "name": "Thiết bị mạng",
+    "slug": "thiet-bi-mang",
+    "source_url": "https://xgear.net/collections/thiet-bi-mang",
+    "source": "xgear"
+  },
+  {
+    "category_id": "ban-ghe",
+    "parent_id": null,
+    "level": 1,
+    "name": "Bàn - Ghế",
+    "slug": "ban-ghe",
+    "source_url": "https://gearvn.com/collections/ghe-gia-tot",
+    "source": "gearvn"
+  },
+  {
+    "category_id": "ghe-gia-tot",
+    "parent_id": "ban-ghe",
+    "level": 2,
+    "name": "Ghế giá tốt",
+    "slug": "ghe-gia-tot",
+    "source_url": "https://gearvn.com/collections/ghe-gia-tot",
+    "source": "gearvn"
+  },
+  {
+    "category_id": "ghe-cong-thai-hoc",
+    "parent_id": "ban-ghe",
+    "level": 2,
+    "name": "Ghế công thái học",
+    "slug": "ghe-cong-thai-hoc",
+    "source_url": "https://gearvn.com/collections/ghe-cong-thai-hoc",
+    "source": "gearvn"
+  },
+  {
+    "category_id": "ban-gaming",
+    "parent_id": "ban-ghe",
+    "level": 2,
+    "name": "Bàn Gaming",
+    "slug": "ban-gaming",
+    "source_url": "https://gearvn.com/collections/ban-gaming",
+    "source": "gearvn"
+  },
+  {
+    "category_id": "ban-cong-thai-hoc",
+    "parent_id": "ban-ghe",
+    "level": 2,
+    "name": "Bàn Công Thái Học",
+    "slug": "ban-cong-thai-hoc",
+    "source_url": "https://gearvn.com/collections/ban-cong-thai-hoc",
+    "source": "gearvn"
+  }
+]

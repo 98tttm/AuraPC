@@ -1,0 +1,736 @@
+<div class="pl-page">
+  <nav class="pl-breadcrumb">
+    <a routerLink="/" [queryParams]="{}" queryParamsHandling="">Trang chủ</a>
+    @if (categoryBreadcrumb().length === 0) {
+    <span class="pl-breadcrumb__sep">/</span>
+    <span class="pl-breadcrumb__current">Tất cả sản phẩm</span>
+    }
+    @for (cat of categoryBreadcrumb(); track cat.id; let last = $last) {
+    <span class="pl-breadcrumb__sep">/</span>
+    @if (last) {
+    <span class="pl-breadcrumb__current">{{ cat.name }}</span>
+    } @else {
+    <a [routerLink]="['/san-pham']" [queryParams]="{category: cat.id}" queryParamsHandling="">{{ cat.name }}</a>
+    }
+    }
+  </nav>
+
+  <!-- Nút mở bộ lọc trên mobile: luôn thấy, bấm sẽ cuộn tới sidebar -->
+  <div class="pl-filter-trigger" aria-hidden="true">
+    <button type="button" class="pl-filter-trigger__btn" (click)="scrollToFilterSidebar()">
+      <span class="pl-filter-trigger__icon" aria-hidden="true">⚙</span>
+      Bộ lọc nâng cao
+    </button>
+  </div>
+
+  <div class="pl-container">
+    <!-- Sidebar bộ lọc kiểu Long Châu: accordion thu gọn/mở -->
+    <aside id="pl-sidebar" class="pl-sidebar" role="region" aria-label="Bộ lọc nâng cao">
+      <h3 class="pl-sidebar__title">Bộ lọc nâng cao</h3>
+
+      @if (brandOptions().length > 0) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('brand')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('brand')">
+          <span>Thương hiệu</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedBrands().length === 0">
+            <input type="checkbox" name="filter-brand-all" [checked]="selectedBrands().length === 0"
+              (change)="selectBrand(null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (b of brandOptions(); track b) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedBrands().includes(b)">
+            <input type="checkbox" name="filter-brand-item" [value]="b" [checked]="selectedBrands().includes(b)"
+              (change)="selectBrand(b)" />
+            <span>{{ b }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('price')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('price')">
+          <span>Giá bán</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          @for (r of priceRanges; track r.id) {
+          <label class="pl-filter-section__opt"
+            [class.pl-filter-section__opt--active]="selectedPriceRangeId() === r.id">
+            <input type="radio" name="filter-price" [value]="r.id" [checked]="selectedPriceRangeId() === r.id"
+              (change)="selectPriceRange(r.id)" />
+            <span>{{ r.label }}</span>
+          </label>
+          }
+        </div>
+      </div>
+
+      @if (isLaptopCategory() && laptopFilters(); as filters) {
+      @if (filters.cpu.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('cpu')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('cpu')">
+          <span>CPU</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedCpu()">
+            <input type="radio" name="filter-cpu" [checked]="!selectedCpu()" (change)="setFilterParam('cpu', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of filters.cpu; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedCpu() === val">
+            <input type="radio" name="filter-cpu" [value]="val" [checked]="selectedCpu() === val"
+              (change)="setFilterParam('cpu', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (filters.gpu.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('gpu')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('gpu')">
+          <span>GPU / VGA</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedGpu()">
+            <input type="radio" name="filter-gpu" [checked]="!selectedGpu()" (change)="setFilterParam('gpu', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of filters.gpu; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedGpu() === val">
+            <input type="radio" name="filter-gpu" [value]="val" [checked]="selectedGpu() === val"
+              (change)="setFilterParam('gpu', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (filters.screenInch.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('screen')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('screen')">
+          <span>Kích thước màn hình</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedScreenInch()">
+            <input type="radio" name="filter-screen" [checked]="!selectedScreenInch()"
+              (change)="setFilterParam('screenInch', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of filters.screenInch; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedScreenInch() === val">
+            <input type="radio" name="filter-screen" [value]="val" [checked]="selectedScreenInch() === val"
+              (change)="setFilterParam('screenInch', val)" />
+            <span>{{ val }}"</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (filters.storage.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('storage')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('storage')">
+          <span>Ổ cứng</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedStorage()">
+            <input type="radio" name="filter-storage" [checked]="!selectedStorage()"
+              (change)="setFilterParam('storage', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of filters.storage; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedStorage() === val">
+            <input type="radio" name="filter-storage" [value]="val" [checked]="selectedStorage() === val"
+              (change)="setFilterParam('storage', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (filters.ram.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ram')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ram')">
+          <span>RAM</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedRam()">
+            <input type="radio" name="filter-ram" [checked]="!selectedRam()" (change)="setFilterParam('ram', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of filters.ram; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedRam() === val">
+            <input type="radio" name="filter-ram" [value]="val" [checked]="selectedRam() === val"
+              (change)="setFilterParam('ram', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+
+      <!-- Bộ lọc Linh Kiện: CPU (Dòng CPU, Socket, Số nhân) -->
+      @if (isCpuCategory() && componentFilters(); as f) {
+      @if (f.type === 'cpu' && (f.cpuSeries.length || f.cpuSocket.length || f.cpuCores.length)) {
+      @if (f.cpuSeries.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('cpuSeries')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('cpuSeries')">
+          <span>Dòng CPU</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedCpuSeries()">
+            <input type="radio" name="filter-cpuSeries" [checked]="!selectedCpuSeries()"
+              (change)="setFilterParam('cpuSeries', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.cpuSeries; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedCpuSeries() === val">
+            <input type="radio" name="filter-cpuSeries" [value]="val" [checked]="selectedCpuSeries() === val"
+              (change)="setFilterParam('cpuSeries', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.cpuSocket.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('cpuSocket')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('cpuSocket')">
+          <span>Socket</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedCpuSocket()">
+            <input type="radio" name="filter-cpuSocket" [checked]="!selectedCpuSocket()"
+              (change)="setFilterParam('cpuSocket', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.cpuSocket; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedCpuSocket() === val">
+            <input type="radio" name="filter-cpuSocket" [value]="val" [checked]="selectedCpuSocket() === val"
+              (change)="setFilterParam('cpuSocket', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.cpuCores.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('cpuCores')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('cpuCores')">
+          <span>Số nhân</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedCpuCores()">
+            <input type="radio" name="filter-cpuCores" [checked]="!selectedCpuCores()"
+              (change)="setFilterParam('cpuCores', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.cpuCores; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedCpuCores() === val">
+            <input type="radio" name="filter-cpuCores" [value]="val" [checked]="selectedCpuCores() === val"
+              (change)="setFilterParam('cpuCores', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- Mainboard: Socket, Chuẩn RAM, Chipset -->
+      @if (isMainboardCategory() && componentFilters(); as f) {
+      @if (f.type === 'mainboard' && (f.mbSocket.length || f.mbRamType.length || f.mbChipset.length)) {
+      @if (f.mbSocket.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mbSocket')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mbSocket')">
+          <span>Socket</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMbSocket()">
+            <input type="radio" name="filter-mbSocket" [checked]="!selectedMbSocket()"
+              (change)="setFilterParam('mbSocket', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mbSocket; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedMbSocket() === val">
+            <input type="radio" name="filter-mbSocket" [value]="val" [checked]="selectedMbSocket() === val"
+              (change)="setFilterParam('mbSocket', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.mbRamType.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mbRamType')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mbRamType')">
+          <span>Chuẩn RAM</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMbRamType()">
+            <input type="radio" name="filter-mbRamType" [checked]="!selectedMbRamType()"
+              (change)="setFilterParam('mbRamType', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mbRamType; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedMbRamType() === val">
+            <input type="radio" name="filter-mbRamType" [value]="val" [checked]="selectedMbRamType() === val"
+              (change)="setFilterParam('mbRamType', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.mbChipset.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mbChipset')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mbChipset')">
+          <span>Chipset</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMbChipset()">
+            <input type="radio" name="filter-mbChipset" [checked]="!selectedMbChipset()"
+              (change)="setFilterParam('mbChipset', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mbChipset; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedMbChipset() === val">
+            <input type="radio" name="filter-mbChipset" [value]="val" [checked]="selectedMbChipset() === val"
+              (change)="setFilterParam('mbChipset', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- RAM: Chuẩn RAM, Dung lượng, Bus -->
+      @if (isRamCategory() && componentFilters(); as f) {
+      @if (f.type === 'ram' && (f.ramType.length || f.ramCapacity.length || f.ramBus.length)) {
+      @if (f.ramType.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ramType')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ramType')">
+          <span>Chuẩn RAM</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedRamType()">
+            <input type="radio" name="filter-ramType" [checked]="!selectedRamType()"
+              (change)="setFilterParam('ramType', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ramType; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedRamType() === val">
+            <input type="radio" name="filter-ramType" [value]="val" [checked]="selectedRamType() === val"
+              (change)="setFilterParam('ramType', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.ramCapacity.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ramCapacity')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ramCapacity')">
+          <span>Dung lượng</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedRamCapacity()">
+            <input type="radio" name="filter-ramCapacity" [checked]="!selectedRamCapacity()"
+              (change)="setFilterParam('ramCapacity', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ramCapacity; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedRamCapacity() === val">
+            <input type="radio" name="filter-ramCapacity" [value]="val" [checked]="selectedRamCapacity() === val"
+              (change)="setFilterParam('ramCapacity', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.ramBus.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ramBus')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ramBus')">
+          <span>Tốc độ / Bus</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedRamBus()">
+            <input type="radio" name="filter-ramBus" [checked]="!selectedRamBus()"
+              (change)="setFilterParam('ramBus', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ramBus; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedRamBus() === val">
+            <input type="radio" name="filter-ramBus" [value]="val" [checked]="selectedRamBus() === val"
+              (change)="setFilterParam('ramBus', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- SSD: Dung lượng, Giao tiếp, Form -->
+      @if (isSsdCategory() && componentFilters(); as f) {
+      @if (f.type === 'ssd' && (f.ssdCapacity.length || f.ssdInterface.length || f.ssdForm.length)) {
+      @if (f.ssdCapacity.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ssdCapacity')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ssdCapacity')">
+          <span>Dung lượng</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedSsdCapacity()">
+            <input type="radio" name="filter-ssdCapacity" [checked]="!selectedSsdCapacity()"
+              (change)="setFilterParam('ssdCapacity', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ssdCapacity; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedSsdCapacity() === val">
+            <input type="radio" name="filter-ssdCapacity" [value]="val" [checked]="selectedSsdCapacity() === val"
+              (change)="setFilterParam('ssdCapacity', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.ssdInterface.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ssdInterface')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ssdInterface')">
+          <span>Giao tiếp</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedSsdInterface()">
+            <input type="radio" name="filter-ssdInterface" [checked]="!selectedSsdInterface()"
+              (change)="setFilterParam('ssdInterface', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ssdInterface; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedSsdInterface() === val">
+            <input type="radio" name="filter-ssdInterface" [value]="val" [checked]="selectedSsdInterface() === val"
+              (change)="setFilterParam('ssdInterface', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.ssdForm.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('ssdForm')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('ssdForm')">
+          <span>Form / Loại</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedSsdForm()">
+            <input type="radio" name="filter-ssdForm" [checked]="!selectedSsdForm()"
+              (change)="setFilterParam('ssdForm', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.ssdForm; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedSsdForm() === val">
+            <input type="radio" name="filter-ssdForm" [value]="val" [checked]="selectedSsdForm() === val"
+              (change)="setFilterParam('ssdForm', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- VGA: Dòng VGA, VRAM -->
+      @if (isVgaCategory() && componentFilters(); as f) {
+      @if (f.type === 'vga' && (f.vgaSeries.length || f.vram.length)) {
+      @if (f.vgaSeries.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('vgaSeries')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('vgaSeries')">
+          <span>Dòng VGA</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedVgaSeries()">
+            <input type="radio" name="filter-vgaSeries" [checked]="!selectedVgaSeries()"
+              (change)="setFilterParam('vgaSeries', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.vgaSeries; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedVgaSeries() === val">
+            <input type="radio" name="filter-vgaSeries" [value]="val" [checked]="selectedVgaSeries() === val"
+              (change)="setFilterParam('vgaSeries', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.vram.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('vram')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('vram')">
+          <span>VRAM</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedVram()">
+            <input type="radio" name="filter-vram" [checked]="!selectedVram()"
+              (change)="setFilterParam('vram', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.vram; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedVram() === val">
+            <input type="radio" name="filter-vram" [value]="val" [checked]="selectedVram() === val"
+              (change)="setFilterParam('vram', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- Bàn phím: Switch, Layout, Kết nối -->
+      @if (isKeyboardCategory() && componentFilters(); as f) {
+      @if (f.type === 'keyboard' && (f.kbSwitch.length || f.kbLayout.length || f.kbConnection.length)) {
+      @if (f.kbSwitch.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('kbSwitch')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('kbSwitch')">
+          <span>Switch</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedKbSwitch()">
+            <input type="radio" name="filter-kbSwitch" [checked]="!selectedKbSwitch()"
+              (change)="setFilterParam('kbSwitch', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.kbSwitch; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedKbSwitch() === val">
+            <input type="radio" name="filter-kbSwitch" [value]="val" [checked]="selectedKbSwitch() === val"
+              (change)="setFilterParam('kbSwitch', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.kbLayout.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('kbLayout')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('kbLayout')">
+          <span>Layout</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedKbLayout()">
+            <input type="radio" name="filter-kbLayout" [checked]="!selectedKbLayout()"
+              (change)="setFilterParam('kbLayout', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.kbLayout; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedKbLayout() === val">
+            <input type="radio" name="filter-kbLayout" [value]="val" [checked]="selectedKbLayout() === val"
+              (change)="setFilterParam('kbLayout', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.kbConnection.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('kbConnection')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('kbConnection')">
+          <span>Kết nối</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedKbConnection()">
+            <input type="radio" name="filter-kbConnection" [checked]="!selectedKbConnection()"
+              (change)="setFilterParam('kbConnection', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.kbConnection; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedKbConnection() === val">
+            <input type="radio" name="filter-kbConnection" [value]="val" [checked]="selectedKbConnection() === val"
+              (change)="setFilterParam('kbConnection', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+
+      <!-- Chuột: DPI, Trọng lượng, Kết nối -->
+      @if (isMouseCategory() && componentFilters(); as f) {
+      @if (f.type === 'mouse' && (f.mouseDpi.length || f.mouseWeight.length || f.mouseConnection.length)) {
+      @if (f.mouseDpi.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mouseDpi')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mouseDpi')">
+          <span>DPI</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMouseDpi()">
+            <input type="radio" name="filter-mouseDpi" [checked]="!selectedMouseDpi()"
+              (change)="setFilterParam('mouseDpi', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mouseDpi; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedMouseDpi() === val">
+            <input type="radio" name="filter-mouseDpi" [value]="val" [checked]="selectedMouseDpi() === val"
+              (change)="setFilterParam('mouseDpi', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.mouseWeight.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mouseWeight')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mouseWeight')">
+          <span>Trọng lượng</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMouseWeight()">
+            <input type="radio" name="filter-mouseWeight" [checked]="!selectedMouseWeight()"
+              (change)="setFilterParam('mouseWeight', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mouseWeight; track val) {
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="selectedMouseWeight() === val">
+            <input type="radio" name="filter-mouseWeight" [value]="val" [checked]="selectedMouseWeight() === val"
+              (change)="setFilterParam('mouseWeight', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      @if (f.mouseConnection.length) {
+      <div class="pl-filter-section" [class.pl-filter-section--open]="isFilterSectionOpen('mouseConnection')">
+        <button type="button" class="pl-filter-section__header" (click)="toggleFilterSection('mouseConnection')">
+          <span>Kết nối</span>
+          <span class="pl-filter-section__arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="pl-filter-section__body">
+          <label class="pl-filter-section__opt" [class.pl-filter-section__opt--active]="!selectedMouseConnection()">
+            <input type="radio" name="filter-mouseConnection" [checked]="!selectedMouseConnection()"
+              (change)="setFilterParam('mouseConnection', null)" />
+            <span>Tất Cả</span>
+          </label>
+          @for (val of f.mouseConnection; track val) {
+          <label class="pl-filter-section__opt"
+            [class.pl-filter-section__opt--active]="selectedMouseConnection() === val">
+            <input type="radio" name="filter-mouseConnection" [value]="val"
+              [checked]="selectedMouseConnection() === val" (change)="setFilterParam('mouseConnection', val)" />
+            <span>{{ val }}</span>
+          </label>
+          }
+        </div>
+      </div>
+      }
+      }
+      }
+    </aside>
+
+    <main class="pl-main">
+      <!-- Category tags -->
+      <div class="pl-tags">
+        @for (tag of categoryTags(); track tag.id) {
+        <button type="button" class="pl-tags__btn" [class.pl-tags__btn--active]="selectedCategoryId() === tag.id"
+          (click)="selectCategory(tag.id)">
+          {{ tag.name }}
+        </button>
+        }
+      </div>
+
+      <!-- Sort bar -->
+      <div class="pl-sort">
+        @for (opt of sortOptions; track opt.value) {
+        <button type="button" class="pl-sort__btn" [class.pl-sort__btn--active]="currentSort() === opt.value"
+          (click)="setSort(opt.value)">
+          {{ opt.label }}
+        </button>
+        }
+      </div>
+
+      @if (loadingProducts()) {
+      <div class="pl-grid pl-grid--loading">
+        @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="pl-card pl-card--skeleton"></div>
+        }
+      </div>
+      } @else if (products().length === 0) {
+      <div class="pl-empty">
+        <p>Chưa có sản phẩm phù hợp.</p>
+      </div>
+      } @else {
+      <div class="pl-grid">
+        @for (p of products(); track p.slug || p._id) {
+        <a [routerLink]="['/san-pham', p.slug]" class="pl-card">
+          <div class="pl-card__img-wrap">
+            <img [src]="productImage(p)" [alt]="p.name" class="pl-card__img" />
+            @if (p.featured) {
+            <span class="pl-card__banner pl-card__banner--right">BEST SELLER</span>
+            }
+            @if (hasSale(p)) {
+            <span class="pl-card__discount">Giảm {{ salePercent(p) }}%</span>
+            }
+          </div>
+          @if (getSpecLines(p).length) {
+          <div class="pl-card__specs">
+            @for (line of getSpecLines(p); track line.label + line.value) {
+            <span class="pl-card__spec">{{ line.value }}</span>
+            }
+          </div>
+          }
+          <h3 class="pl-card__name">{{ p.name }}</h3>
+          <div class="pl-card__price">
+            <span class="pl-card__price-current">{{ priceLabel(p) }}</span>
+            @if (oldPriceLabel(p)) {
+            <span class="pl-card__price-old">{{ oldPriceLabel(p) }}</span>
+            }
+          </div>
+        </a>
+        }
+      </div>
+      @if (hasMore()) {
+      <div class="pl-load-more">
+        <button type="button" class="pl-load-more__btn" [disabled]="loadingMore()" (click)="loadMore()">
+          {{ loadingMore() ? 'Đang tải...' : 'Xem thêm ' + remainingCount() + ' sản phẩm' }}
+        </button>
+      </div>
+      }
+      }
+    </main>
+  </div>
+</div>

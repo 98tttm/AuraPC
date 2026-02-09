@@ -27,16 +27,26 @@
   @if (introComplete()) {
     <div class="hero__text hero__text--left" [class.hero__text--visible]="heroTextVisible()" [class.hero__text--hidden]="!!activeHotspot()">
       <h2 class="hero__text-heading">
-        <span class="hero__text-heading-line hero__text-heading-line--1">Khám phá</span>
-        <span class="hero__text-heading-line hero__text-heading-line--2 hero__text-accent">công nghệ Aura</span>
+        @if (heroHeaderSet() === 0) {
+          <span class="hero__text-heading-line hero__text-heading-line--1">Khám phá</span>
+          <span class="hero__text-heading-line hero__text-heading-line--2 hero__text-accent">công nghệ Aura</span>
+        } @else {
+          <span class="hero__text-heading-line hero__text-heading-line--1">BƯỚC VÀO</span>
+          <span class="hero__text-heading-line hero__text-heading-line--2 hero__text-accent">HỆ SINH THÁI AURA</span>
+        }
       </h2>
       <p class="hero__text-sub">Cấu hình đỉnh cao cho những giới hạn mới</p>
       <span class="hero__text-line"></span>
     </div>
     <div class="hero__text hero__text--right" [class.hero__text--visible]="heroTextVisible()" [class.hero__text--hidden]="!!activeHotspot()">
       <h2 class="hero__text-heading">
-        <span class="hero__text-heading-line hero__text-heading-line--1">Cá nhân hóa</span>
-        <span class="hero__text-heading-line hero__text-heading-line--2">chỉ với <span class="hero__text-accent">một</span> chạm</span>
+        @if (heroHeaderSet() === 0) {
+          <span class="hero__text-heading-line hero__text-heading-line--1">Cá nhân hóa</span>
+          <span class="hero__text-heading-line hero__text-heading-line--2">chỉ với <span class="hero__text-accent">một</span> chạm</span>
+        } @else {
+          <span class="hero__text-heading-line hero__text-heading-line--1">TRẢI NGHIỆM</span>
+          <span class="hero__text-heading-line hero__text-heading-line--2 hero__text-accent">KHÔNG GIỚI HẠN</span>
+        }
       </h2>
       <p class="hero__text-sub">Trải nghiệm vượt trội thực tế ảo</p>
       <span class="hero__text-line"></span>
@@ -141,7 +151,7 @@
     <h2 class="section-title fade-in">SẢN PHẨM NỔI BẬT</h2>
     <div class="featured__grid">
       @for (p of featuredProducts(); track p._id) {
-        <a [routerLink]="['/']" class="featured__card fade-in-left">
+        <a [routerLink]="['/san-pham', p.slug]" class="featured__card fade-in-left">
           <div class="featured__image">
             <img [src]="productImageUrl(p)" [alt]="p.name" />
           </div>
@@ -170,7 +180,7 @@
     <h2 class="section-title fade-in">KHÁM PHÁ THEO DANH MỤC</h2>
     <div class="categories__grid stagger-children">
       @for (cat of apiCategories(); track cat._id) {
-        <a routerLink="/" class="categories__item fade-in">
+        <a [routerLink]="['/san-pham']" [queryParams]="{category: cat.category_id || cat.slug}" class="categories__item fade-in">
           <div class="categories__img-wrapper"><div class="categories__img-placeholder"></div></div>
           <p class="categories__label">{{ cat.name }}</p>
         </a>
@@ -186,11 +196,11 @@
   <div class="container">
     <div class="blog__header fade-in">
       <h2 class="section-title section-title--left">HƯỚNG DẪN &amp; MẸO HAY</h2>
-      <a routerLink="/" class="blog__explore">Khám phá ngay &rarr;</a>
+      <a routerLink="/blog" class="blog__explore">Khám phá ngay &rarr;</a>
     </div>
     <div class="blog__grid stagger-children">
       @for (post of apiBlogs(); track post._id) {
-        <a routerLink="/" class="blog__card fade-in">
+        <a [routerLink]="['/blog', post.slug]" class="blog__card fade-in">
           <div class="blog__card-image"><img [src]="blogCoverUrl(post)" [alt]="post.title" /></div>
           <div class="blog__card-body">
             <span class="blog__card-tag">BLOG</span>

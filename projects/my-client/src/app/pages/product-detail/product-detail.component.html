@@ -1,0 +1,50 @@
+<div class="pd-page">
+  @if (loading()) {
+    <div class="pd-loading">Đang tải...</div>
+  } @else if (error() || !product()) {
+    <div class="pd-error">
+      <p>Không tìm thấy sản phẩm.</p>
+      <a routerLink="/san-pham" class="pd-back">← Quay lại danh sách</a>
+    </div>
+  } @else {
+    @let p = product()!;
+    <a routerLink="/san-pham" class="pd-back pd-back--top">← Danh sách sản phẩm</a>
+    <article class="pd-main">
+      <div class="pd-gallery">
+        <img [src]="mainImage(p)" [alt]="p.name" class="pd-img" />
+      </div>
+      <div class="pd-info">
+        @if (p.category?.name) {
+          <p class="pd-cat">{{ p.category?.name }}</p>
+        }
+        <h1 class="pd-title">{{ p.name }}</h1>
+        <div class="pd-price">
+          @if (hasSale(p)) {
+            <span class="pd-price-old">{{ oldPriceLabel(p) }}</span>
+            <span class="pd-price-current">{{ priceLabel(p) }}</span>
+            <span class="pd-price-badge">Giảm {{ salePercent(p) }}%</span>
+          } @else {
+            <span class="pd-price-current">{{ priceLabel(p) }}</span>
+          }
+        </div>
+        @if (specEntries(p).length) {
+          <table class="pd-specs">
+            <tbody>
+              @for (row of specEntries(p); track row.key) {
+                <tr>
+                  <th class="pd-specs__key">{{ row.key }}</th>
+                  <td class="pd-specs__value" [innerHTML]="row.value"></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        @if (descriptionSafe(p); as safeHtml) {
+          <div class="pd-desc" [innerHTML]="safeHtml"></div>
+        } @else if (p.shortDescription) {
+          <div class="pd-desc">{{ p.shortDescription }}</div>
+        }
+      </div>
+    </article>
+  }
+</div>

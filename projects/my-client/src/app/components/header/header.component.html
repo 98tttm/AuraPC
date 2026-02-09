@@ -1,4 +1,5 @@
 <div class="header-wrapper" [class.header-wrapper--scrolled]="isScrolled()">
+<div class="header-fixed-wrap" [class.header-fixed-wrap--hidden]="!headerVisible()">
 <!-- Thanh xám phía trên: ẩn khi ở đầu trang, chỉ hiện khi cuộn xuống -->
 <div class="top-bar" [class.top-bar--visible]="isScrolled()">
   <div class="top-bar__inner">
@@ -53,12 +54,21 @@
         } @else {
           <ul #navMenuRef class="nav-menu" [class.nav-menu--open]="menuOpen()">
             @for (item of menuItems; track item.id) {
-              <li
-                class="nav-item"
-                (mouseenter)="onNavItemHover($event, item.id)"
-                (mouseleave)="clearNavHover()">
-                <a [routerLink]="item.route" (click)="setActiveMenu(item.id)">{{ item.label }}</a>
-              </li>
+              @if (item.id === 'products') {
+                <li
+                  class="nav-item nav-item--products"
+                  (mouseenter)="openProductsDropdown(); onNavItemHover($event, item.id)"
+                  (mouseleave)="closeProductsDropdown(); clearNavHover()">
+                  <a [routerLink]="item.route" (click)="setActiveMenu(item.id); closeProductsDropdown()">{{ item.label }}</a>
+                </li>
+              } @else {
+                <li
+                  class="nav-item"
+                  (mouseenter)="onNavItemHover($event, item.id)"
+                  (mouseleave)="clearNavHover()">
+                  <a [routerLink]="item.route" (click)="setActiveMenu(item.id)">{{ item.label }}</a>
+                </li>
+              }
             }
             <div
               class="nav-indicator"
@@ -76,11 +86,14 @@
             <path d="M16 16L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </button>
-        <button class="action-btn" (click)="openUser()" aria-label="Tài khoản">
+        <button type="button" class="action-btn action-btn--user" (click)="openUser()" aria-label="Tài khoản">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
             <path d="M4 21c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
+          @if (userDisplayName()) {
+            <span class="action-btn__user-label">{{ userDisplayName() }}</span>
+          }
         </button>
         <button class="cart-btn" (click)="openCart()" aria-label="Giỏ hàng">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -99,49 +112,137 @@
   @if (menuOpen()) {
     <div class="nav-overlay" (click)="closeMenu()" role="button" tabindex="0" aria-label="Đóng menu"></div>
   }
+
+  <!-- Megamenu dropdown: luôn có trong DOM để transition mượt, hiện/ẩn bằng class -->
+  @if (megamenuColumns().length) {
+    <div
+      class="megamenu"
+      [class.megamenu--visible]="productsDropdownOpen()"
+      (mouseenter)="openProductsDropdown()"
+      (mouseleave)="closeProductsDropdown()"
+      role="navigation"
+      aria-label="Danh mục sản phẩm">
+      <div class="megamenu__inner">
+        @for (col of megamenuColumns(); track col.title) {
+          <div class="megamenu__column">
+            <img [src]="col.icon" [alt]="col.title" class="megamenu__icon" />
+            <a
+              [routerLink]="['/san-pham']"
+              [queryParams]="{ category: col.categoryId }"
+              (click)="closeProductsDropdown(); setActiveMenu('products')"
+              class="megamenu__title-link">{{ col.title }}</a>
+            <ul class="megamenu__list">
+              @for (link of col.items; track link.label) {
+                <li>
+                  <a
+                    [routerLink]="link.route"
+                    [queryParams]="link.queryParams ?? null"
+                    (click)="closeProductsDropdown(); setActiveMenu('products')"
+                    class="megamenu__link">{{ link.label }}</a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </header>
+</div>
 </div>
 
 @if (showLoginPopup()) {
-  <div class="login-overlay" (click)="closeLoginPopup()" role="button" tabindex="0" aria-label="Đóng">
-    <div class="login-popup" (click)="$event.stopPropagation()">
+  <div class="login-overlay" [class.login-overlay--closing]="overlayClosing()" (click)="closeLoginPopup()" role="button" tabindex="0" aria-label="Đóng">
+    <div class="login-popup" [class.login-popup--otp]="loginStep() === 'otp'" [class.login-popup--success]="loginSuccess()" (click)="$event.stopPropagation()">
       <button type="button" class="login-popup__close" (click)="closeLoginPopup()" aria-label="Đóng">×</button>
       <img [src]="assets.loginLogo" alt="AuraPC" class="login-popup__logo" />
-      <h2 class="login-popup__title">Đăng nhập</h2>
-      <p class="login-popup__desc">Vui lòng đăng nhập để hưởng những đặc quyền dành cho thành viên.</p>
-      <input
-        type="tel"
-        class="login-popup__input"
-        placeholder="Nhập Số điện thoại"
-        [ngModel]="loginPhone()"
-        (ngModelChange)="loginPhone.set($event)"
-      />
-      <button type="button" class="login-popup__btn" (click)="onLoginContinue()">Tiếp tục</button>
-      <p class="login-popup__or">hoặc đăng nhập bằng</p>
-      <div class="login-popup__social">
-        <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Facebook" (click)="$event.preventDefault(); closeLoginPopup()">
-          <span class="login-popup__social-icon login-popup__social-icon--fb">
-            <img [src]="assets.facebookLogo" alt="Facebook" class="login-popup__social-icon-img" />
-          </span>
-        </a>
-        <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Google" (click)="$event.preventDefault(); closeLoginPopup()">
-          <span class="login-popup__social-icon login-popup__social-icon--google">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+
+      @if (loginStep() === 'phone') {
+        <h2 class="login-popup__title">Đăng nhập</h2>
+        <p class="login-popup__desc">Vui lòng đăng nhập để hưởng những đặc quyền dành cho thành viên.</p>
+        <input
+          type="tel"
+          class="login-popup__input"
+          [class.login-popup__input--error]="phoneError()"
+          placeholder="Nhập Số điện thoại"
+          [ngModel]="loginPhone()"
+          (ngModelChange)="loginPhone.set($event); phoneError.set(null)"
+        />
+        @if (phoneError()) {
+          <p class="login-popup__error" role="alert">
+            <span class="login-popup__error-icon" aria-hidden="true">!</span>
+            {{ phoneError() }}
+          </p>
+        }
+        <button type="button" class="login-popup__btn" (click)="onLoginContinue()">Tiếp tục</button>
+        <p class="login-popup__or">hoặc đăng nhập bằng</p>
+        <div class="login-popup__social">
+          <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Facebook" (click)="$event.preventDefault(); closeLoginPopup()">
+            <span class="login-popup__social-icon login-popup__social-icon--fb">
+              <img [src]="assets.facebookLogo" alt="Facebook" class="login-popup__social-icon-img" />
+            </span>
+          </a>
+          <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Google" (click)="$event.preventDefault(); closeLoginPopup()">
+            <span class="login-popup__social-icon login-popup__social-icon--google">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+            </span>
+          </a>
+          <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Apple" (click)="$event.preventDefault(); closeLoginPopup()">
+            <span class="login-popup__social-icon login-popup__social-icon--apple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+              </svg>
+            </span>
+          </a>
+        </div>
+      } @else {
+        <div class="login-popup__step-content">
+        <h2 class="login-popup__title">Nhập mã xác thực</h2>
+        <p class="login-popup__desc">
+          Mã xác thực được gửi đến số điện thoại {{ loginPhone() }} có hiệu lực trong {{ countdownText() }}
+        </p>
+        <div class="login-popup__change-phone-wrap">
+          <button type="button" class="login-popup__change-phone" (click)="changePhone()">
+            <svg class="login-popup__change-phone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-          </span>
-        </a>
-        <a href="#" class="login-popup__social-link" aria-label="Đăng nhập Apple" (click)="$event.preventDefault(); closeLoginPopup()">
-          <span class="login-popup__social-icon login-popup__social-icon--apple">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-            </svg>
-          </span>
-        </a>
-      </div>
+            Đổi số điện thoại
+          </button>
+        </div>
+        <div class="login-popup__otp-row">
+          @for (i of [0,1,2,3,4,5]; track i) {
+            <input
+              #otpInput
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              class="login-popup__otp-input"
+              [class.login-popup__otp-input--error]="otpError()"
+              [class.login-popup__otp-input--success]="loginSuccess()"
+              [ngModel]="getOtpDigit(i)"
+              (ngModelChange)="setOtpDigit(i, $event)"
+              (keydown)="onOtpKeydown($event, i)"
+            />
+          }
+        </div>
+        @if (otpError()) {
+          <p class="login-popup__error" role="alert">
+            <span class="login-popup__error-icon" aria-hidden="true">!</span>
+            {{ otpError() }}
+          </p>
+        }
+        <button type="button" class="login-popup__btn" (click)="onOtpContinue()">Tiếp tục</button>
+        <button type="button" class="login-popup__resend" (click)="resendOtp()">
+          Gửi lại mã xác thực cho tôi
+        </button>
+        </div>
+      }
     </div>
   </div>
 }

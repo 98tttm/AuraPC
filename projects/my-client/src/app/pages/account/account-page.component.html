@@ -1,0 +1,99 @@
+@if (user(); as u) {
+  <div class="account">
+    <nav class="account__breadcrumb">
+      <a routerLink="/">Trang chủ</a>
+      <span class="account__breadcrumb-sep">/</span>
+      <a routerLink="/tai-khoan">Cá nhân</a>
+      <span class="account__breadcrumb-sep">/</span>
+      <span class="account__breadcrumb-current">Thông tin cá nhân</span>
+    </nav>
+
+    <div class="account__layout">
+      <aside class="account__sidebar">
+        <div class="account__profile-card">
+          <div class="account__avatar-wrap">
+            @if (u.avatar) {
+              <img [src]="u.avatar" alt="" class="account__avatar-img" />
+            } @else {
+              <svg class="account__avatar-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
+              </svg>
+            }
+          </div>
+          <p class="account__profile-phone">{{ displayPhone() }}</p>
+        </div>
+        <ul class="account__nav">
+          <li class="account__nav-item account__nav-item--active">
+            <span class="account__nav-icon account__nav-icon--user"></span>
+            <span>Thông tin cá nhân</span>
+          </li>
+          <li class="account__nav-item">
+            <a routerLink="/" class="account__nav-link">
+              <span class="account__nav-icon account__nav-icon--order"></span>
+              <span>Đơn hàng của tôi</span>
+            </a>
+          </li>
+          <li class="account__nav-item">
+            <a routerLink="/" class="account__nav-link">
+              <span class="account__nav-icon account__nav-icon--address"></span>
+              <span>Quản lý sổ địa chỉ</span>
+            </a>
+          </li>
+          <li class="account__nav-item">
+            <button type="button" class="account__nav-link account__nav-link--logout" (click)="logout()">
+              <span class="account__nav-icon account__nav-icon--logout"></span>
+              <span>Đăng xuất</span>
+            </button>
+          </li>
+        </ul>
+      </aside>
+      <main class="account__main">
+        <div class="account__card">
+          <h1 class="account__title">Thông tin cá nhân</h1>
+          <div class="account__avatar-main">
+            @if (u.avatar) {
+              <img [src]="u.avatar" alt="" class="account__avatar-img" />
+            } @else {
+              <svg class="account__avatar-icon account__avatar-icon--large" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
+              </svg>
+            }
+          </div>
+          <dl class="account__fields">
+            <div class="account__field">
+              <dt>Họ và tên</dt>
+              <dd>{{ displayName() }}</dd>
+            </div>
+            <div class="account__field">
+              <dt>Số điện thoại</dt>
+              <dd>{{ displayPhone() }}</dd>
+            </div>
+            <div class="account__field">
+              <dt>Giới tính</dt>
+              <dd>
+                @if (displayGender(); as gender) {
+                  {{ gender }}
+                } @else {
+                  <span class="account__add-info">Chưa cập nhật</span>
+                }
+              </dd>
+            </div>
+            <div class="account__field">
+              <dt>Ngày sinh</dt>
+              <dd>
+                @if (displayDob(); as dob) {
+                  {{ formatDate(dob) }}
+                } @else {
+                  <a href="#" class="account__add-link" (click)="$event.preventDefault()">Thêm thông tin</a>
+                }
+              </dd>
+            </div>
+          </dl>
+          <button type="button" class="account__edit-btn">Chỉnh sửa thông tin</button>
+        </div>
+      </main>
+    </div>
+  </div>
+}

@@ -1,0 +1,103 @@
+.pd-page {
+  min-height: 100vh;
+  background: var(--bg-primary, #000);
+  padding: 2rem 1rem 3rem;
+}
+
+.pd-loading,
+.pd-error {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.pd-back {
+  display: inline-block;
+  color: var(--accent-orange, #FF6D2D);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-back:hover {
+  text-decoration: underline;
+}
+
+.pd-back--top {
+  margin-bottom: 2rem;
+}
+
+.pd-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .pd-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pd-gallery {
+  background: var(--bg-card, #111);
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+}
+
+.pd-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 1rem;
+}
+
+.pd-cat {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.pd-title {
+  font-family: var(--font-heading, sans-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.pd-price {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pd-price-old {
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.pd-price-current {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-orange, #FF6D2D);
+}
+
+.pd-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.pd-desc ::ng-deep p {
+  margin-bottom: 0.5rem;
+}

@@ -1,0 +1,1039 @@
+# Báo cáo sản phẩm theo danh mục (cấu trúc level)
+
+**Cập nhật:** 2026-02-08 10:44:39
+
+## Tổng quan
+
+| Chỉ số | Giá trị |
+|--------|--------|
+| Danh mục | 1022 |
+| Sản phẩm đã gán | 0 |
+| Sản phẩm chưa gán | 4390 |
+
+## Danh mục và sản phẩm (theo level)
+
+- **Collections Cho Landing Page Uu Dai Nhom Sp 6** `collections-cho-landing-page-uu-dai-nhom-sp-6` (Level 0) — **0** sản phẩm
+- **Tan Nhiet May Tinh** `tan-nhiet-may-tinh` (Level 0) — **0** sản phẩm
+- **Flash Sale Countdown** `flash-sale-countdown` (Level 0) — **0** sản phẩm
+- **Hkc** `hkc` (Level 0) — **0** sản phẩm
+- **Nguon May Tinh Asus** `nguon-may-tinh-asus` (Level 0) — **0** sản phẩm
+- **Workstation Thiet Ke Do Hoa 3D Cad Bim Compositing** `workstation-thiet-ke-do-hoa-3d-cad-bim-compositing` (Level 0) — **0** sản phẩm
+- **Huawei Watch** `huawei-watch` (Level 0) — **0** sản phẩm
+- **O Cung Di Dong Ssd Transcend Esd310** `o-cung-di-dong-ssd-transcend-esd310` (Level 0) — **0** sản phẩm
+- **Ban Phim Dare U** `ban-phim-dare-u` (Level 0) — **0** sản phẩm
+- **May Tinh All In One** `may-tinh-all-in-one` (Level 0) — **0** sản phẩm
+- **Gtx 1660 Super** `gtx-1660-super` (Level 0) — **0** sản phẩm
+- **Tai Nghe Chong On Chinh Hang** `tai-nghe-chong-on-chinh-hang` (Level 0) — **0** sản phẩm
+- **Hdd Camera** `hdd-camera` (Level 0) — **0** sản phẩm
+- **Tai Nghe Logitech** `tai-nghe-logitech` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Logitech G435** `tai-nghe-logitech-g435` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Logitech G Pro X 2 Lightspeed** `tai-nghe-logitech-g-pro-x-2-lightspeed` (Level 1) — **0** sản phẩm
+- **Riser Holder Vga** `riser-holder-vga` (Level 0) — **0** sản phẩm
+- **Flash Sale 3Rd** `flash-sale-3rd` (Level 0) — **0** sản phẩm
+  - **Flash Sale 3Rd Day Tai Nghe** `flash-sale-3rd-day-tai-nghe` (Level 1) — **0** sản phẩm
+  - **Flash Sale 3Rd Day Phu Kien** `flash-sale-3rd-day-phu-kien` (Level 1) — **0** sản phẩm
+  - **Flash Sale 3Rd Day Quat Mini** `flash-sale-3rd-day-quat-mini` (Level 1) — **0** sản phẩm
+  - **Flash Sale 3Rd Day Man Hinh** `flash-sale-3rd-day-man-hinh` (Level 1) — **0** sản phẩm
+- **Pc Gaming Gia Duoi 15 Trieu** `pc-gaming-gia-duoi-15-trieu` (Level 0) — **0** sản phẩm
+- **Mazer** `mazer` (Level 0) — **0** sản phẩm
+- **Pc Gearvn Powered By Asus** `pc-gearvn-powered-by-asus` (Level 0) — **0** sản phẩm
+- **Ghe Msi** `ghe-msi` (Level 0) — **0** sản phẩm
+- **Pc Rtx 40 Seri** `pc-rtx-40-seri` (Level 0) — **0** sản phẩm
+- **Andaseat Spirit King** `andaseat-spirit-king` (Level 0) — **0** sản phẩm
+- **Hdd Nas** `hdd-nas` (Level 0) — **0** sản phẩm
+- **Tai Nghe Gaming E Dra** `tai-nghe-gaming-e-dra` (Level 0) — **0** sản phẩm
+- **Vo Case Custom Water Cooling** `vo-case-custom-water-cooling` (Level 0) — **0** sản phẩm
+- **Cpu Intel Core I7** `cpu-intel-core-i7` (Level 0) — **0** sản phẩm
+- **Gia Do Tai Nghe** `gia-do-tai-nghe` (Level 0) — **0** sản phẩm
+- **Ddr4 32Gb** `ddr4-32gb` (Level 0) — **0** sản phẩm
+- **Hdd Wd** `hdd-wd` (Level 0) — **0** sản phẩm
+- **Case Msi** `case-msi` (Level 0) — **0** sản phẩm
+- **49** `49` (Level 0) — **0** sản phẩm
+- **Nuc13 Cpu Intel Gen 13** `nuc13-cpu-intel-gen-13` (Level 0) — **0** sản phẩm
+- **Tay Cam Dareu** `tay-cam-dareu` (Level 0) — **0** sản phẩm
+- **Leopold Fc650M Series** `leopold-fc650m-series` (Level 0) — **0** sản phẩm
+- **O Cung Di Dong Hdd Box** `o-cung-di-dong-hdd-box` (Level 0) — **0** sản phẩm
+- **Pc Gaming Cao Cap** `pc-gaming-cao-cap` (Level 0) — **0** sản phẩm
+- **3098 Series** `3098-series` (Level 0) — **0** sản phẩm
+- **Micro Razer Seiren Mini** `micro-razer-seiren-mini` (Level 0) — **0** sản phẩm
+- **Rog Rtx 4000 Series** `rog-rtx-4000-series` (Level 0) — **0** sản phẩm
+- **Flash Sale Lot Chuot** `flash-sale-lot-chuot` (Level 0) — **0** sản phẩm
+- **Ban Phim Msi** `ban-phim-msi` (Level 0) — **0** sản phẩm
+- **Camera** `camera` (Level 0) — **0** sản phẩm
+  - **Camera Imou** `camera-imou` (Level 1) — **0** sản phẩm
+  - **Camera Tenda** `camera-tenda` (Level 1) — **0** sản phẩm
+  - **Camera An Ninh** `camera-an-ninh` (Level 1) — **0** sản phẩm
+  - **Camera Trong Nha** `camera-trong-nha` (Level 1) — **0** sản phẩm
+  - **Camera Ngoai Troi** `camera-ngoai-troi` (Level 1) — **0** sản phẩm
+- **E Dra Ek375 Pro** `e-dra-ek375-pro` (Level 0) — **0** sản phẩm
+- **Webcam** `webcam` (Level 0) — **0** sản phẩm
+  - **Webcam 1080P** `webcam-1080p` (Level 1) — **0** sản phẩm
+  - **Webcam 4K** `webcam-4k` (Level 1) — **0** sản phẩm
+  - **Webcam 720P** `webcam-720p` (Level 1) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 2** `collections-cho-landing-page-man-hinh-nhom-sp-2` (Level 0) — **0** sản phẩm
+- **Card Mang Wifi** `card-mang-wifi` (Level 0) — **0** sản phẩm
+- **Vga Rtx 4080** `vga-rtx-4080` (Level 0) — **0** sản phẩm
+  - **Vga Rtx 4080 Super** `vga-rtx-4080-super` (Level 1) — **0** sản phẩm
+- **Ban Nang Ha** `ban-nang-ha` (Level 0) — **0** sản phẩm
+- **Tai Nghe Aoc** `tai-nghe-aoc` (Level 0) — **0** sản phẩm
+- **Ban Dxracer** `ban-dxracer` (Level 0) — **0** sản phẩm
+- **Dxracer Tank Series** `dxracer-tank-series` (Level 0) — **0** sản phẩm
+- **Fan Led Trang Tri** `fan-led-trang-tri` (Level 0) — **0** sản phẩm
+- **Tan Khi Noctua** `tan-khi-noctua` (Level 0) — **0** sản phẩm
+- **Ghe Gaming** `ghe-gaming` (Level 0) — **0** sản phẩm
+  - **Ghe Gaming Asus** `ghe-gaming-asus` (Level 1) — **0** sản phẩm
+  - **Ghe Gaming Cougar Argo Ergonomic** `ghe-gaming-cougar-argo-ergonomic` (Level 1) — **0** sản phẩm
+  - **Ghe Gaming Msi Ch120 Series** `ghe-gaming-msi-ch120-series` (Level 1) — **0** sản phẩm
+  - **Ghe Gaming Razer** `ghe-gaming-razer` (Level 1) — **0** sản phẩm
+  - **Ghe Gaming Tu 5 10 Trieu** `ghe-gaming-tu-5-10-trieu` (Level 1) — **0** sản phẩm
+- **Chuot Asus** `chuot-asus` (Level 0) — **0** sản phẩm
+  - **Chuot Asus Rog Keris Wireless Aimpoint** `chuot-asus-rog-keris-wireless-aimpoint` (Level 1) — **0** sản phẩm
+  - **Chuot Asus Rog Gladius Iii Wireless Aimpoint** `chuot-asus-rog-gladius-iii-wireless-aimpoint` (Level 1) — **0** sản phẩm
+- **Lot Chuot Hyperx** `lot-chuot-hyperx` (Level 0) — **0** sản phẩm
+- **Tc200 Soft Fabric Series** `tc200-soft-fabric-series` (Level 0) — **0** sản phẩm
+- **Chuot Microsoft** `chuot-microsoft` (Level 0) — **0** sản phẩm
+  - **Chuot Microsoft Khong Day** `chuot-microsoft-khong-day` (Level 1) — **0** sản phẩm
+  - **Chuot Microsoft M1850** `chuot-microsoft-m1850` (Level 1) — **0** sản phẩm
+- **Psu Nguon May Tinh** `psu-nguon-may-tinh` (Level 0) — **0** sản phẩm
+- **Sac Du Phong** `sac-du-phong` (Level 0) — **0** sản phẩm
+- **Lot Chuot Cougar** `lot-chuot-cougar` (Level 0) — **0** sản phẩm
+- **Ban Phim Choi Game Razer** `ban-phim-choi-game-razer` (Level 0) — **0** sản phẩm
+- **Ban Phim Ikbc Durgod** `ban-phim-ikbc-durgod` (Level 0) — **0** sản phẩm
+- **Balo Cap Tui Game Thu** `balo-cap-tui-game-thu` (Level 0) — **0** sản phẩm
+- **Case Fan Rgb Tan Nhiet Pc** `case-fan-rgb-tan-nhiet-pc` (Level 0) — **0** sản phẩm
+- **Hyperx Cloud Stinger Core** `hyperx-cloud-stinger-core` (Level 0) — **0** sản phẩm
+- **Chuot Vp Duoi 500 Nghin** `chuot-vp-duoi-500-nghin` (Level 0) — **0** sản phẩm
+- **Tai Nghe 1 Trieu Den 2 Trieu** `tai-nghe-1-trieu-den-2-trieu` (Level 0) — **0** sản phẩm
+- **Tai Nghe Mpow** `tai-nghe-mpow` (Level 0) — **0** sản phẩm
+- **Ram Pc** `ram-pc` (Level 0) — **0** sản phẩm
+  - **Ram Pc Kingston** `ram-pc-kingston` (Level 1) — **0** sản phẩm
+  - **Ram Pc Gskill** `ram-pc-gskill` (Level 1) — **0** sản phẩm
+  - **Ram Pc Ddr5** `ram-pc-ddr5` (Level 1) — **0** sản phẩm
+  - **Ram Pc Corsair** `ram-pc-corsair` (Level 1) — **0** sản phẩm
+- **Ban Phim 2 Den 3 Trieu** `ban-phim-2-den-3-trieu` (Level 0) — **0** sản phẩm
+- **Chuot Dare U** `chuot-dare-u` (Level 0) — **0** sản phẩm
+  - **Chuot Dare U Em908 Rgb** `chuot-dare-u-em908-rgb` (Level 1) — **0** sản phẩm
+- **Rain Design** `rain-design` (Level 0) — **0** sản phẩm
+- **800W 1000W** `800w-1000w` (Level 0) — **0** sản phẩm
+- **Flash Sale D4** `flash-sale-d4` (Level 0) — **0** sản phẩm
+- **Sihoo M18** `sihoo-m18` (Level 0) — **0** sản phẩm
+- **Flash Sale Tai Nghe** `flash-sale-tai-nghe` (Level 0) — **0** sản phẩm
+- **Tai Nghe Gaming Bluetooth** `tai-nghe-gaming-bluetooth` (Level 0) — **0** sản phẩm
+- **Lenovo Thinkbook** `lenovo-thinkbook` (Level 0) — **0** sản phẩm
+- **Den Led Trang Tri** `den-led-trang-tri` (Level 0) — **0** sản phẩm
+- **Tren 32 Curve** `tren-32-curve` (Level 0) — **0** sản phẩm
+- **Flash Sale 1St Day** `flash-sale-1st-day` (Level 0) — **0** sản phẩm
+  - **Flash Sale 1St Day Phu Kien** `flash-sale-1st-day-phu-kien` (Level 1) — **0** sản phẩm
+  - **Flash Sale 1St Day Tai Nghe** `flash-sale-1st-day-tai-nghe` (Level 1) — **0** sản phẩm
+  - **Flash Sale 1St Day Quat Mini** `flash-sale-1st-day-quat-mini` (Level 1) — **0** sản phẩm
+- **Ghe Cho Nguoi Cao Tren 1M7 Nang Tren 80Kg** `ghe-cho-nguoi-cao-tren-1m7-nang-tren-80kg` (Level 0) — **0** sản phẩm
+- **Router Mesh Pack** `router-mesh-pack` (Level 0) — **0** sản phẩm
+- **Router Ax Wifi 6** `router-ax-wifi-6` (Level 0) — **0** sản phẩm
+- **Ban Phim Corsair K68 Series** `ban-phim-corsair-k68-series` (Level 0) — **0** sản phẩm
+- **Vui Tet Cung Pc Gvn Tang Ram Pc 8Gb Tri Gia 890 000** `vui-tet-cung-pc-gvn-tang-ram-pc-8gb-tri-gia-890-000` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 5** `collections-cho-landing-page-uu-dai-nhom-sp-5` (Level 0) — **0** sản phẩm
+- **Flash Sale Laptop** `flash-sale-laptop` (Level 0) — **0** sản phẩm
+- **Qua Tang Laptop Gaming Duoi 30 Trieu** `qua-tang-laptop-gaming-duoi-30-trieu` (Level 0) — **0** sản phẩm
+  - **Qua Tang Laptop Gaming Duoi 30 Trieu 1 Qua Tang** `qua-tang-laptop-gaming-duoi-30-trieu-1-qua-tang` (Level 1) — **0** sản phẩm
+- **Ban Phim Choi Game Corsair** `ban-phim-choi-game-corsair` (Level 0) — **0** sản phẩm
+- **Msi Amd Series** `msi-amd-series` (Level 0) — **0** sản phẩm
+- **Ban Phim Newmen** `ban-phim-newmen` (Level 0) — **0** sản phẩm
+- **Qua Tang Laptop Gaming Tren 30 Trieu** `qua-tang-laptop-gaming-tren-30-trieu` (Level 0) — **0** sản phẩm
+  - **Qua Tang Laptop Gaming Tren 30 Trieu 1** `qua-tang-laptop-gaming-tren-30-trieu-1` (Level 1) — **0** sản phẩm
+- **Tay Cam X Box** `tay-cam-x-box` (Level 0) — **0** sản phẩm
+- **Tomtoc Chinh Hang** `tomtoc-chinh-hang` (Level 0) — **0** sản phẩm
+- **Pc Mien Phi Nang Cap 32Gb Ram** `pc-mien-phi-nang-cap-32gb-ram` (Level 0) — **0** sản phẩm
+- **Flash Sale Ban Ghe** `flash-sale-ban-ghe` (Level 0) — **0** sản phẩm
+- **Soundpeats True Air 2 Series** `soundpeats-true-air-2-series` (Level 0) — **0** sản phẩm
+- **Case Lian Li** `case-lian-li` (Level 0) — **0** sản phẩm
+- **Dxracer Air Series** `dxracer-air-series` (Level 0) — **0** sản phẩm
+- **Vga Rtx 50 Series** `vga-rtx-50-series` (Level 0) — **0** sản phẩm
+- **Day Cap Hdmi** `day-cap-hdmi` (Level 0) — **0** sản phẩm
+- **Case Gigabyte** `case-gigabyte` (Level 0) — **0** sản phẩm
+- **Case Duoi 1 Trieu** `case-duoi-1-trieu` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3080** `vga-rtx-ampere-3080` (Level 0) — **0** sản phẩm
+  - **Vga Rtx Ampere 3080 Ti** `vga-rtx-ampere-3080-ti` (Level 1) — **0** sản phẩm
+  - **Vga Rtx Ampere 3080 12Gb** `vga-rtx-ampere-3080-12gb` (Level 1) — **0** sản phẩm
+- **Chuot Atk** `chuot-atk` (Level 0) — **0** sản phẩm
+- **Microphone** `microphone` (Level 0) — **0** sản phẩm
+  - **Microphone Razer** `microphone-razer` (Level 1) — **0** sản phẩm
+- **Ban Phim Leopold** `ban-phim-leopold` (Level 0) — **0** sản phẩm
+- **Ban Phim Glorious** `ban-phim-glorious` (Level 0) — **0** sản phẩm
+- **Router Doanh Nghiep** `router-doanh-nghiep` (Level 0) — **0** sản phẩm
+- **Tc100 Series** `tc100-series` (Level 0) — **0** sản phẩm
+- **Ram Ddr5 16Gb** `ram-ddr5-16gb` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 12** `collections-cho-landing-page-uu-dai-nhom-sp-12` (Level 0) — **0** sản phẩm
+- **Mainboard Asus** `mainboard-asus` (Level 0) — **0** sản phẩm
+- **Ban Phim Durgod Mk75** `ban-phim-durgod-mk75` (Level 0) — **0** sản phẩm
+- **Coffeelake R Gen9 Lga1151V2** `coffeelake-r-gen9-lga1151v2` (Level 0) — **0** sản phẩm
+- **Pc Streaming** `pc-streaming` (Level 0) — **0** sản phẩm
+- **Tay Cam Sony Playsation** `tay-cam-sony-playsation` (Level 0) — **0** sản phẩm
+- **Combo Dareu** `combo-dareu` (Level 0) — **0** sản phẩm
+- **Gt 710 1030** `gt-710-1030` (Level 0) — **0** sản phẩm
+- **King Series** `king-series` (Level 0) — **0** sản phẩm
+- **Tai Nghe Wireless** `tai-nghe-wireless` (Level 0) — **0** sản phẩm
+- **Ban Phim Corsair K95 Series** `ban-phim-corsair-k95-series` (Level 0) — **0** sản phẩm
+- **Halloween 2024** `halloween-2024` (Level 0) — **0** sản phẩm
+- **Msi Modern 14 Series** `msi-modern-14-series` (Level 0) — **0** sản phẩm
+- **Deal Soc** `deal-soc` (Level 0) — **0** sản phẩm
+- **Do Phan Giai Full Hd 1080P** `do-phan-giai-full-hd-1080p` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3060 12Gb** `vga-rtx-ampere-3060-12gb` (Level 0) — **0** sản phẩm
+- **Main Amd Ryzen A320 Socket Am4** `main-amd-ryzen-a320-socket-am4` (Level 0) — **0** sản phẩm
+- **Akracing** `akracing` (Level 0) — **0** sản phẩm
+- **Acer Rtx 40 Series** `acer-rtx-40-series` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 11** `collections-cho-landing-page-uu-dai-nhom-sp-11` (Level 0) — **0** sản phẩm
+- **Ban Phim Fuhlen** `ban-phim-fuhlen` (Level 0) — **0** sản phẩm
+- **Cpu Intel Core I5** `cpu-intel-core-i5` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 1** `collections-cho-landing-page-uu-dai-nhom-sp-1` (Level 0) — **0** sản phẩm
+- **Ban Phim Hyperx** `ban-phim-hyperx` (Level 0) — **0** sản phẩm
+- **Hdd Enterprise** `hdd-enterprise` (Level 0) — **0** sản phẩm
+- **Case Itx Sfx** `case-itx-sfx` (Level 0) — **0** sản phẩm
+- **Vo Lang** `vo-lang` (Level 0) — **0** sản phẩm
+- **Build Pc Cung Linh Kien Asus Mua Back To School** `build-pc-cung-linh-kien-asus-mua-back-to-school` (Level 0) — **0** sản phẩm
+- **Dareu** `dareu` (Level 0) — **0** sản phẩm
+- **Day Cap Xoan Akko Coiled Cable** `day-cap-xoan-akko-coiled-cable` (Level 0) — **0** sản phẩm
+- **Fan Xigmatek** `fan-xigmatek` (Level 0) — **0** sản phẩm
+- **Tai Nghe Gvn Gaming Festival** `tai-nghe-gvn-gaming-festival` (Level 0) — **0** sản phẩm
+- **Ban Phim May Tinh** `ban-phim-may-tinh` (Level 0) — **0** sản phẩm
+- **Msi Rtx 40 Series** `msi-rtx-40-series` (Level 0) — **0** sản phẩm
+- **Case Asus** `case-asus` (Level 0) — **0** sản phẩm
+- **Ban Phim Asus** `ban-phim-asus` (Level 0) — **0** sản phẩm
+- **Mainboard Intel Z790 Raptor Lake** `mainboard-intel-z790-raptor-lake` (Level 0) — **0** sản phẩm
+- **Ban Phim Bluetooth** `ban-phim-bluetooth` (Level 0) — **0** sản phẩm
+  - **Ban Phim Bluetooth Logitech K380** `ban-phim-bluetooth-logitech-k380` (Level 1) — **0** sản phẩm
+- **Chuot Dareu Em901X Rgb Superlight Wireless** `chuot-dareu-em901x-rgb-superlight-wireless` (Level 0) — **0** sản phẩm
+- **Ghe Gia Tot** `ghe-gia-tot` (Level 0) — **0** sản phẩm
+- **Tai Nghe Gaming In Ear** `tai-nghe-gaming-in-ear` (Level 0) — **0** sản phẩm
+- **Wec502 Series** `wec502-series` (Level 0) — **0** sản phẩm
+- **Gaming Gear Asus** `gaming-gear-asus` (Level 0) — **0** sản phẩm
+- **Ghe Da Pvc** `ghe-da-pvc` (Level 0) — **0** sản phẩm
+- **Tai Nghe Hyperx** `tai-nghe-hyperx` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Hyperx Cloud Ii** `tai-nghe-hyperx-cloud-ii` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Hyperx Cloud Earbuds** `tai-nghe-hyperx-cloud-earbuds` (Level 1) — **0** sản phẩm
+- **Keycap Mclong** `keycap-mclong` (Level 0) — **0** sản phẩm
+- **Ban Phim Wireless** `ban-phim-wireless` (Level 0) — **0** sản phẩm
+- **Chuot Msi** `chuot-msi` (Level 0) — **0** sản phẩm
+- **Lot Chuot Corsair** `lot-chuot-corsair` (Level 0) — **0** sản phẩm
+- **Mainboard Z690** `mainboard-z690` (Level 0) — **0** sản phẩm
+- **Linksys** `linksys` (Level 0) — **0** sản phẩm
+- **Psu Duoi 1 Trieu** `psu-duoi-1-trieu` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 7** `collections-cho-landing-page-uu-dai-nhom-sp-7` (Level 0) — **0** sản phẩm
+- **Chuot Khong Day Rapoo M20 Plus** `chuot-khong-day-rapoo-m20-plus` (Level 0) — **0** sản phẩm
+- **Fan Corsair** `fan-corsair` (Level 0) — **0** sản phẩm
+- **Chuot 500 Nghin Den 1 Trieu** `chuot-500-nghin-den-1-trieu` (Level 0) — **0** sản phẩm
+- **Tay Cam Msi** `tay-cam-msi` (Level 0) — **0** sản phẩm
+- **Case Cougar** `case-cougar` (Level 0) — **0** sản phẩm
+- **Phu Kien** `phu-kien` (Level 0) — **0** sản phẩm
+  - **Phu Kien Glorious** `phu-kien-glorious` (Level 1) — **0** sản phẩm
+  - **Phu Kien May Tinh** `phu-kien-may-tinh` (Level 1) — **0** sản phẩm
+  - **Phu Kien Trang Tri** `phu-kien-trang-tri` (Level 1) — **0** sản phẩm
+  - **Phu Kien Man Hinh** `phu-kien-man-hinh` (Level 1) — **0** sản phẩm
+  - **Phu Kien Elgato** `phu-kien-elgato` (Level 1) — **0** sản phẩm
+  - **Phu Kien Hyperdrive** `phu-kien-hyperdrive` (Level 1) — **0** sản phẩm
+  - **Phu Kien Day Cap Hdmi Dp Lan Usbc** `phu-kien-day-cap-hdmi-dp-lan-usbc` (Level 1) — **0** sản phẩm
+  - **Phu Kien Dien Thoai** `phu-kien-dien-thoai` (Level 1) — **0** sản phẩm
+  - **Phu Kien Hyperx** `phu-kien-hyperx` (Level 1) — **0** sản phẩm
+  - **Phu Kien Apple** `phu-kien-apple` (Level 1) — **0** sản phẩm
+  - **Phu Kien Streaming** `phu-kien-streaming` (Level 1) — **0** sản phẩm
+    - **Phu Kien Streaming Razer** `phu-kien-streaming-razer` (Level 2) — **0** sản phẩm
+- **Tai Nghe 3 Den 4 Trieu** `tai-nghe-3-den-4-trieu` (Level 0) — **0** sản phẩm
+- **Ghe Cooler Master** `ghe-cooler-master` (Level 0) — **0** sản phẩm
+- **Case Nzxt** `case-nzxt` (Level 0) — **0** sản phẩm
+- **400 500W** `400-500w` (Level 0) — **0** sản phẩm
+- **Vo May Tinh Jonsbo** `vo-may-tinh-jonsbo` (Level 0) — **0** sản phẩm
+- **Ghe Choi Game E Dra Hercules Series** `ghe-choi-game-e-dra-hercules-series` (Level 0) — **0** sản phẩm
+- **Tui Chong Soc** `tui-chong-soc` (Level 0) — **0** sản phẩm
+- **Intel Nuc** `intel-nuc` (Level 0) — **0** sản phẩm
+- **Tai Nghe Razer** `tai-nghe-razer` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Razer Barracuda X 2022** `tai-nghe-razer-barracuda-x-2022` (Level 1) — **0** sản phẩm
+- **Case Xigmatek** `case-xigmatek` (Level 0) — **0** sản phẩm
+- **Main Amd Ryzen Trx40 Socket Str4** `main-amd-ryzen-trx40-socket-str4` (Level 0) — **0** sản phẩm
+- **Ban Phim So Glorious Numpad Prebuilt** `ban-phim-so-glorious-numpad-prebuilt` (Level 0) — **0** sản phẩm
+- **Soundmax** `soundmax` (Level 0) — **0** sản phẩm
+- **Window** `window` (Level 0) — **0** sản phẩm
+- **Deal Flash Sale** `deal-flash-sale` (Level 0) — **0** sản phẩm
+- **Cpu Intel 12Th Gen** `cpu-intel-12th-gen` (Level 0) — **0** sản phẩm
+- **O Cung Di Dong 1Tb** `o-cung-di-dong-1tb` (Level 0) — **0** sản phẩm
+- **Tay Cam Logitech** `tay-cam-logitech` (Level 0) — **0** sản phẩm
+- **Akko** `akko` (Level 0) — **0** sản phẩm
+  - **Akko Bluetooth Series** `akko-bluetooth-series` (Level 1) — **0** sản phẩm
+  - **Akko Tokyo World Tour Series** `akko-tokyo-world-tour-series` (Level 1) — **0** sản phẩm
+  - **Akko One Piece Series** `akko-one-piece-series` (Level 1) — **0** sản phẩm
+  - **Akko Oceanstar Series** `akko-oceanstar-series` (Level 1) — **0** sản phẩm
+  - **Akko V2 Rgb Series** `akko-v2-rgb-series` (Level 1) — **0** sản phẩm
+- **Mainboard Intel B660 Alder Lake** `mainboard-intel-b660-alder-lake` (Level 0) — **0** sản phẩm
+- **Chuot Duoi 500 Nghin** `chuot-duoi-500-nghin` (Level 0) — **0** sản phẩm
+- **Case Thung May Tinh** `case-thung-may-tinh` (Level 0) — **0** sản phẩm
+- **Lot Chuot Mong** `lot-chuot-mong` (Level 0) — **0** sản phẩm
+- **Chuot E Dra** `chuot-e-dra` (Level 0) — **0** sản phẩm
+  - **Chuot E Dra Em624 Series** `chuot-e-dra-em624-series` (Level 1) — **0** sản phẩm
+- **Xiaomi** `xiaomi` (Level 0) — **0** sản phẩm
+- **Lot Chuot Kich Thuoc Vua** `lot-chuot-kich-thuoc-vua` (Level 0) — **0** sản phẩm
+- **Nvidia Geforce Rtx** `nvidia-geforce-rtx` (Level 0) — **0** sản phẩm
+- **Tan Nhiet Corsair** `tan-nhiet-corsair` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5050 Series** `vga-rtx-5050-series` (Level 0) — **0** sản phẩm
+- **Ban Phim Rapid Trigger** `ban-phim-rapid-trigger` (Level 0) — **0** sản phẩm
+- **Qua Tang Laptop Duoi 30 Trieu** `qua-tang-laptop-duoi-30-trieu` (Level 0) — **0** sản phẩm
+- **San Pham Doc Quyen** `san-pham-doc-quyen` (Level 0) — **0** sản phẩm
+- **Western Digital 1Tb** `western-digital-1tb` (Level 0) — **0** sản phẩm
+- **Ban Warrior** `ban-warrior` (Level 0) — **0** sản phẩm
+- **Cpu 11Th Gen** `cpu-11th-gen` (Level 0) — **0** sản phẩm
+- **Mainboard Comet Lake Lga 1200** `mainboard-comet-lake-lga-1200` (Level 0) — **0** sản phẩm
+- **Asus** `asus` (Level 0) — **0** sản phẩm
+  - **Asus Rtx 50 Series** `asus-rtx-50-series` (Level 1) — **0** sản phẩm
+- **Chuot Havit** `chuot-havit` (Level 0) — **0** sản phẩm
+- **Mainboard Coffee Lake Lga 1151** `mainboard-coffee-lake-lga-1151` (Level 0) — **0** sản phẩm
+- **Lot Chuot Rapoo** `lot-chuot-rapoo` (Level 0) — **0** sản phẩm
+- **Den Thong Minh Nanoleaf Starter Kit** `den-thong-minh-nanoleaf-starter-kit` (Level 0) — **0** sản phẩm
+- **Linh Kien Phu Kien Laptop** `linh-kien-phu-kien-laptop` (Level 0) — **0** sản phẩm
+- **Corsair** `corsair` (Level 0) — **0** sản phẩm
+  - **Corsair Hs60 Series** `corsair-hs60-series` (Level 1) — **0** sản phẩm
+- **Case In Win** `case-in-win` (Level 0) — **0** sản phẩm
+- **Vga Rtx 4070** `vga-rtx-4070` (Level 0) — **0** sản phẩm
+  - **Vga Rtx 4070 Super** `vga-rtx-4070-super` (Level 1) — **0** sản phẩm
+  - **Vga Rtx 4070 Ti** `vga-rtx-4070-ti` (Level 1) — **0** sản phẩm
+    - **Vga Rtx 4070 Ti Super** `vga-rtx-4070-ti-super` (Level 2) — **0** sản phẩm
+- **Phan Mem** `phan-mem` (Level 0) — **0** sản phẩm
+- **Pc Gaming Amd Ryzen 9** `pc-gaming-amd-ryzen-9` (Level 0) — **0** sản phẩm
+- **Case Coolermaster** `case-coolermaster` (Level 0) — **0** sản phẩm
+- **Balo Asus** `balo-asus` (Level 0) — **0** sản phẩm
+- **Chuot Pulsar Xlite Wireless V2** `chuot-pulsar-xlite-wireless-v2` (Level 0) — **0** sản phẩm
+- **Ban Phim Ajazz** `ban-phim-ajazz` (Level 0) — **0** sản phẩm
+- **Ban Phim Havit** `ban-phim-havit` (Level 0) — **0** sản phẩm
+- **Pc Amd Ryzen 5** `pc-amd-ryzen-5` (Level 0) — **0** sản phẩm
+- **Khuyen Mai Gear Asus** `khuyen-mai-gear-asus` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3050** `vga-rtx-ampere-3050` (Level 0) — **0** sản phẩm
+- **5087 Series** `5087-series` (Level 0) — **0** sản phẩm
+- **Router Pho Thong** `router-pho-thong` (Level 0) — **0** sản phẩm
+- **Chuot Wireless** `chuot-wireless` (Level 0) — **0** sản phẩm
+- **Msi Cyborg Series** `msi-cyborg-series` (Level 0) — **0** sản phẩm
+- **Qua Tang Laptop Van Phong** `qua-tang-laptop-van-phong` (Level 0) — **0** sản phẩm
+  - **Qua Tang Laptop Van Phong Tren 20 Trieu** `qua-tang-laptop-van-phong-tren-20-trieu` (Level 1) — **0** sản phẩm
+  - **Qua Tang Laptop Van Phong Duoi 20 Trieu** `qua-tang-laptop-van-phong-duoi-20-trieu` (Level 1) — **0** sản phẩm
+- **Micro Hyperx** `micro-hyperx` (Level 0) — **0** sản phẩm
+- **Gaming Gear Sales B2S** `gaming-gear-sales-b2s` (Level 0) — **0** sản phẩm
+- **Chuot Khong Day Bluetooth Logitech M240** `chuot-khong-day-bluetooth-logitech-m240` (Level 0) — **0** sản phẩm
+- **Chuot Razer** `chuot-razer` (Level 0) — **0** sản phẩm
+  - **Chuot Razer Orochi V2** `chuot-razer-orochi-v2` (Level 1) — **0** sản phẩm
+    - **Chuot Razer Orochi V2 Wireless** `chuot-razer-orochi-v2-wireless` (Level 2) — **0** sản phẩm
+  - **Chuot Razer Viper V2 Pro** `chuot-razer-viper-v2-pro` (Level 1) — **0** sản phẩm
+  - **Chuot Razer Viper Ultimate** `chuot-razer-viper-ultimate` (Level 1) — **0** sản phẩm
+  - **Chuot Razer Basilisk V3 Pro** `chuot-razer-basilisk-v3-pro` (Level 1) — **0** sản phẩm
+  - **Chuot Razer Deathadder V3 Pro Series** `chuot-razer-deathadder-v3-pro-series` (Level 1) — **0** sản phẩm
+  - **Chuot Razer Deathadder Essential** `chuot-razer-deathadder-essential` (Level 1) — **0** sản phẩm
+- **Router Xuyen Tuong** `router-xuyen-tuong` (Level 0) — **0** sản phẩm
+- **May Choi Game** `may-choi-game` (Level 0) — **0** sản phẩm
+  - **May Choi Game Cam Tay Asus** `may-choi-game-cam-tay-asus` (Level 1) — **0** sản phẩm
+- **Tai Nghe Steelseries** `tai-nghe-steelseries` (Level 0) — **0** sản phẩm
+- **Pc Khuyen Mai Back To School 2025** `pc-khuyen-mai-back-to-school-2025` (Level 0) — **0** sản phẩm
+- **Ban Phim Tu 3 Den 4 Trieu** `ban-phim-tu-3-den-4-trieu` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5090 Series** `vga-rtx-5090-series` (Level 0) — **0** sản phẩm
+- **Flash Sale 1St Man Hinh** `flash-sale-1st-man-hinh` (Level 0) — **0** sản phẩm
+- **Leopold Fc750R Series** `leopold-fc750r-series` (Level 0) — **0** sản phẩm
+- **Day Sleeve Cable** `day-sleeve-cable` (Level 0) — **0** sản phẩm
+- **E Dra Medusa Series** `e-dra-medusa-series` (Level 0) — **0** sản phẩm
+- **Ssd O Cung The Ran** `ssd-o-cung-the-ran` (Level 0) — **0** sản phẩm
+- **Lot Chuot Logitech** `lot-chuot-logitech` (Level 0) — **0** sản phẩm
+- **Ghe Akracing Core Series** `ghe-akracing-core-series` (Level 0) — **0** sản phẩm
+  - **Ghe Akracing Core Series Plus** `ghe-akracing-core-series-plus` (Level 1) — **0** sản phẩm
+- **Chuot Glorious** `chuot-glorious` (Level 0) — **0** sản phẩm
+- **Ssd 240G** `ssd-240g` (Level 0) — **0** sản phẩm
+- **Noble Chair** `noble-chair` (Level 0) — **0** sản phẩm
+  - **Noble Chair Epic Series** `noble-chair-epic-series` (Level 1) — **0** sản phẩm
+  - **Noble Chair Hero Series** `noble-chair-hero-series` (Level 1) — **0** sản phẩm
+  - **Noble Chair Icon Series** `noble-chair-icon-series` (Level 1) — **0** sản phẩm
+- **Ban Phim Steelseries** `ban-phim-steelseries` (Level 0) — **0** sản phẩm
+- **Lot Chuot Akko** `lot-chuot-akko` (Level 0) — **0** sản phẩm
+- **Ghe Cho Nguoi Cao 1M7 Nang Duoi 80Kg** `ghe-cho-nguoi-cao-1m7-nang-duoi-80kg` (Level 0) — **0** sản phẩm
+- **Combo Chuot Lot Chuot Asus Tuf** `combo-chuot-lot-chuot-asus-tuf` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 1** `collections-cho-landing-page-man-hinh-nhom-sp-1` (Level 0) — **0** sản phẩm
+- **Lot Chuot Havit** `lot-chuot-havit` (Level 0) — **0** sản phẩm
+- **Pc Gaming Gia Duoi 30 Trieu** `pc-gaming-gia-duoi-30-trieu` (Level 0) — **0** sản phẩm
+- **Tai Nghe Hp Hyperx Cloud Iii** `tai-nghe-hp-hyperx-cloud-iii` (Level 0) — **0** sản phẩm
+- **Belkin** `belkin` (Level 0) — **0** sản phẩm
+- **Ban Phim Leobog** `ban-phim-leobog` (Level 0) — **0** sản phẩm
+- **Wd Black O Cung Luu Tru Hieu Nang Cao** `wd-black-o-cung-luu-tru-hieu-nang-cao` (Level 0) — **0** sản phẩm
+- **Ssd Pny** `ssd-pny` (Level 0) — **0** sản phẩm
+- **Chuot Zowie** `chuot-zowie` (Level 0) — **0** sản phẩm
+- **Vga Rx 9000 Series** `vga-rx-9000-series` (Level 0) — **0** sản phẩm
+- **Ghe Da Pu** `ghe-da-pu` (Level 0) — **0** sản phẩm
+- **Ram Laptop** `ram-laptop` (Level 0) — **0** sản phẩm
+- **Windows 10 Pro** `windows-10-pro` (Level 0) — **0** sản phẩm
+- **Tai Nghe May Tinh** `tai-nghe-may-tinh` (Level 0) — **0** sản phẩm
+- **Ssd M 2 Pcie Gen 3X2** `ssd-m-2-pcie-gen-3x2` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 9** `collections-cho-landing-page-uu-dai-nhom-sp-9` (Level 0) — **0** sản phẩm
+- **Cougar** `cougar` (Level 0) — **0** sản phẩm
+  - **Cougar Armor Titan Series** `cougar-armor-titan-series` (Level 1) — **0** sản phẩm
+  - **Cougar Chair** `cougar-chair` (Level 1) — **0** sản phẩm
+- **Gigabyte Aero** `gigabyte-aero` (Level 0) — **0** sản phẩm
+- **Ban Phim Corsair K63 Series** `ban-phim-corsair-k63-series` (Level 0) — **0** sản phẩm
+- **Ban Phim Tkl** `ban-phim-tkl` (Level 0) — **0** sản phẩm
+- **Ram Led Rgb** `ram-led-rgb` (Level 0) — **0** sản phẩm
+- **Tc200 Series** `tc200-series` (Level 0) — **0** sản phẩm
+- **Tai Nghe Onikuma** `tai-nghe-onikuma` (Level 0) — **0** sản phẩm
+- **Ssd Samsung** `ssd-samsung` (Level 0) — **0** sản phẩm
+- **Ban Phim Cidoo** `ban-phim-cidoo` (Level 0) — **0** sản phẩm
+- **Flash Sale Pc** `flash-sale-pc` (Level 0) — **0** sản phẩm
+- **Do Phan Giai 2K 1440P** `do-phan-giai-2k-1440p` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3090** `vga-rtx-ampere-3090` (Level 0) — **0** sản phẩm
+  - **Vga Rtx Ampere 3090 Ti** `vga-rtx-ampere-3090-ti` (Level 1) — **0** sản phẩm
+- **Case Tu 1 Trieu Den 2 Trieu** `case-tu-1-trieu-den-2-trieu` (Level 0) — **0** sản phẩm
+- **24 Curve** `24-curve` (Level 0) — **0** sản phẩm
+- **Sony Audio Gearvn** `sony-audio-gearvn` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3060 Ti** `vga-rtx-ampere-3060-ti` (Level 0) — **0** sản phẩm
+- **Mircrophone Thronmax** `mircrophone-thronmax` (Level 0) — **0** sản phẩm
+- **Chuot 2 Den 3 Trieu** `chuot-2-den-3-trieu` (Level 0) — **0** sản phẩm
+- **Macbook** `macbook` (Level 0) — **0** sản phẩm
+  - **Macbook Pro** `macbook-pro` (Level 1) — **0** sản phẩm
+    - **Macbook Pro 13** `macbook-pro-13` (Level 2) — **0** sản phẩm
+    - **Macbook Pro 16 Inch** `macbook-pro-16-inch` (Level 2) — **0** sản phẩm
+    - **Macbook Pro 14** `macbook-pro-14` (Level 2) — **0** sản phẩm
+      - **Macbook Pro 14 M2** `macbook-pro-14-m2` (Level 3) — **0** sản phẩm
+    - **Macbook Pro M2** `macbook-pro-m2` (Level 2) — **0** sản phẩm
+  - **Macbook Air** `macbook-air` (Level 1) — **0** sản phẩm
+    - **Macbook Air M1** `macbook-air-m1` (Level 2) — **0** sản phẩm
+    - **Macbook Air M2** `macbook-air-m2` (Level 2) — **0** sản phẩm
+- **Lot Chuot Steelseries** `lot-chuot-steelseries` (Level 0) — **0** sản phẩm
+- **Ssd 480 512Gb** `ssd-480-512gb` (Level 0) — **0** sản phẩm
+- **Tai Nghe Cooler Master** `tai-nghe-cooler-master` (Level 0) — **0** sản phẩm
+- **Pc Msi Don He** `pc-msi-don-he` (Level 0) — **0** sản phẩm
+- **Ssd Tren 1Tb** `ssd-tren-1tb` (Level 0) — **0** sản phẩm
+- **Radeon Rx** `radeon-rx` (Level 0) — **0** sản phẩm
+- **Ke Tay** `ke-tay` (Level 0) — **0** sản phẩm
+- **Dien Thoai Asus Rog Phone** `dien-thoai-asus-rog-phone` (Level 0) — **0** sản phẩm
+- **Garmin Vietnam** `garmin-vietnam` (Level 0) — **0** sản phẩm
+- **Dxracer King Series** `dxracer-king-series` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 3** `collections-cho-landing-page-uu-dai-nhom-sp-3` (Level 0) — **0** sản phẩm
+- **Tai Nghe Bluetooth Chinh Hang** `tai-nghe-bluetooth-chinh-hang` (Level 0) — **0** sản phẩm
+- **Hang Cu Thanh Ly** `hang-cu-thanh-ly` (Level 0) — **0** sản phẩm
+- **Laptop** `laptop` (Level 0) — **0** sản phẩm
+  - **Laptop Gaming Lenovo** `laptop-gaming-lenovo` (Level 1) — **0** sản phẩm
+    - **Laptop Gaming Lenovo Loq** `laptop-gaming-lenovo-loq` (Level 2) — **0** sản phẩm
+    - **Laptop Gaming Lenovo Rtx 40 Series** `laptop-gaming-lenovo-rtx-40-series` (Level 2) — **0** sản phẩm
+  - **Laptop Gvn Gaming Festival** `laptop-gvn-gaming-festival` (Level 1) — **0** sản phẩm
+  - **Laptop Ai** `laptop-ai` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Gia Duoi 20 Trieu** `laptop-gaming-gia-duoi-20-trieu` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Dell** `laptop-gaming-dell` (Level 1) — **0** sản phẩm
+  - **Laptop Lg** `laptop-lg` (Level 1) — **0** sản phẩm
+    - **Laptop Lg Gram** `laptop-lg-gram` (Level 2) — **0** sản phẩm
+  - **Laptop Cpu Amd Ryzen** `laptop-cpu-amd-ryzen` (Level 1) — **0** sản phẩm
+  - **Laptop Deal Soc** `laptop-deal-soc` (Level 1) — **0** sản phẩm
+  - **Laptop Intel Core I7** `laptop-intel-core-i7` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Rtx 50 Series** `laptop-gaming-rtx-50-series` (Level 1) — **0** sản phẩm
+  - **Laptop Student S Choice** `laptop-student-s-choice` (Level 1) — **0** sản phẩm
+  - **Laptop Doanh Nhan** `laptop-doanh-nhan` (Level 1) — **0** sản phẩm
+  - **Laptop Hoc Tap Va Lam Viec Tren 20 Trieu** `laptop-hoc-tap-va-lam-viec-tren-20-trieu` (Level 1) — **0** sản phẩm
+  - **Laptop Vp Sale B2S** `laptop-vp-sale-b2s` (Level 1) — **0** sản phẩm
+  - **Laptop Nvidia Rtx 3050 3050Ti** `laptop-nvidia-rtx-3050-3050ti` (Level 1) — **0** sản phẩm
+  - **Laptop Nvidia Gtx 1650** `laptop-nvidia-gtx-1650` (Level 1) — **0** sản phẩm
+  - **Laptop Hoc Tap Va Lam Viec Duoi 15Tr** `laptop-hoc-tap-va-lam-viec-duoi-15tr` (Level 1) — **0** sản phẩm
+  - **Laptop Alienware** `laptop-alienware` (Level 1) — **0** sản phẩm
+  - **Laptop Van Phong Ban Chay** `laptop-van-phong-ban-chay` (Level 1) — **0** sản phẩm
+  - **Laptop Hoc Tap Va Lam Viec Tu 15Tr Den 20Tr** `laptop-hoc-tap-va-lam-viec-tu-15tr-den-20tr` (Level 1) — **0** sản phẩm
+  - **Laptop Gigabyte** `laptop-gigabyte` (Level 1) — **0** sản phẩm
+    - **Laptop Gigabyte Rtx 40 Series** `laptop-gigabyte-rtx-40-series` (Level 2) — **0** sản phẩm
+    - **Laptop Gigabyte G Series** `laptop-gigabyte-g-series` (Level 2) — **0** sản phẩm
+    - **Laptop Gigabyte Aorus Series** `laptop-gigabyte-aorus-series` (Level 2) — **0** sản phẩm
+    - **Laptop Gigabyte Rtx 50 Series** `laptop-gigabyte-rtx-50-series` (Level 2) — **0** sản phẩm
+  - **Laptop Acer** `laptop-acer` (Level 1) — **0** sản phẩm
+    - **Laptop Acer Rtx 50 Series** `laptop-acer-rtx-50-series` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Hoc Tap Va Lam Viec** `laptop-acer-hoc-tap-va-lam-viec` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Aspire 5** `laptop-acer-aspire-5` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Aspire Series** `laptop-acer-aspire-series` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Predator Series** `laptop-acer-predator-series` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Aspire 7** `laptop-acer-aspire-7` (Level 2) — **0** sản phẩm
+    - **Laptop Acer Nitro Series** `laptop-acer-nitro-series` (Level 2) — **0** sản phẩm
+  - **Laptop Gaming Hp** `laptop-gaming-hp` (Level 1) — **0** sản phẩm
+  - **Laptop Intel Core I5** `laptop-intel-core-i5` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Gia Tu 20 Den 25 Trieu** `laptop-gaming-gia-tu-20-den-25-trieu` (Level 1) — **0** sản phẩm
+  - **Laptop Ideapad Pro** `laptop-ideapad-pro` (Level 1) — **0** sản phẩm
+  - **Laptop Asus** `laptop-asus` (Level 1) — **0** sản phẩm
+    - **Laptop Asus Vivobook Series** `laptop-asus-vivobook-series` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Oled** `laptop-asus-oled` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Rog Series** `laptop-asus-rog-series` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Zephyrus G14** `laptop-asus-zephyrus-g14` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Tuf Fx506** `laptop-asus-tuf-fx506` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Gaming Zephyrus Series** `laptop-asus-gaming-zephyrus-series` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Expertbook** `laptop-asus-expertbook` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Proart** `laptop-asus-proart` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Vivobook Pro Series** `laptop-asus-vivobook-pro-series` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Zenbook Series** `laptop-asus-zenbook-series` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Hoc Tap Va Lam Viec** `laptop-asus-hoc-tap-va-lam-viec` (Level 2) — **0** sản phẩm
+    - **Laptop Asus Tuf Gaming Series** `laptop-asus-tuf-gaming-series` (Level 2) — **0** sản phẩm
+  - **Laptop Nvidia Rtx 3060** `laptop-nvidia-rtx-3060` (Level 1) — **0** sản phẩm
+  - **Laptop Sale B2S** `laptop-sale-b2s` (Level 1) — **0** sản phẩm
+  - **Laptop Intel Core I3** `laptop-intel-core-i3` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Acer** `laptop-gaming-acer` (Level 1) — **0** sản phẩm
+    - **Laptop Gaming Acer Helios 300** `laptop-gaming-acer-helios-300` (Level 2) — **0** sản phẩm
+  - **Laptop Mong Nhe Cao Cap** `laptop-mong-nhe-cao-cap` (Level 1) — **0** sản phẩm
+  - **Laptop Lenovo** `laptop-lenovo` (Level 1) — **0** sản phẩm
+    - **Laptop Lenovo Legion** `laptop-lenovo-legion` (Level 2) — **0** sản phẩm
+    - **Laptop Lenovo Rtx 50 Series** `laptop-lenovo-rtx-50-series` (Level 2) — **0** sản phẩm
+    - **Laptop Lenovo Yoga Series** `laptop-lenovo-yoga-series` (Level 2) — **0** sản phẩm
+    - **Laptop Lenovo Van Phong Pho Thong** `laptop-lenovo-van-phong-pho-thong` (Level 2) — **0** sản phẩm
+    - **Laptop Lenovo Hoc Tap Va Lam Viec** `laptop-lenovo-hoc-tap-va-lam-viec` (Level 2) — **0** sản phẩm
+  - **Laptop Do Hoa** `laptop-do-hoa` (Level 1) — **0** sản phẩm
+    - **Laptop Do Hoa Ky Thuat** `laptop-do-hoa-ky-thuat` (Level 2) — **0** sản phẩm
+  - **Laptop Gaming Cao Cap Gia Soc** `laptop-gaming-cao-cap-gia-soc` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Asus** `laptop-gaming-asus` (Level 1) — **0** sản phẩm
+    - **Laptop Gaming Asus Rog Strix G** `laptop-gaming-asus-rog-strix-g` (Level 2) — **0** sản phẩm
+  - **Laptop Gaming Msi Sword** `laptop-gaming-msi-sword` (Level 1) — **0** sản phẩm
+  - **Laptop Dell** `laptop-dell` (Level 1) — **0** sản phẩm
+    - **Laptop Dell Vostro Series** `laptop-dell-vostro-series` (Level 2) — **0** sản phẩm
+    - **Laptop Dell Rtx 40 Series** `laptop-dell-rtx-40-series` (Level 2) — **0** sản phẩm
+    - **Laptop Dell Xps Chinh Hang** `laptop-dell-xps-chinh-hang` (Level 2) — **0** sản phẩm
+    - **Laptop Dell Inspiron Series** `laptop-dell-inspiron-series` (Level 2) — **0** sản phẩm
+    - **Laptop Dell Hoc Tap Va Lam Viec** `laptop-dell-hoc-tap-va-lam-viec` (Level 2) — **0** sản phẩm
+    - **Laptop Dell Latitude Series** `laptop-dell-latitude-series` (Level 2) — **0** sản phẩm
+  - **Laptop Gaming Gia Tu 25 Den 35 Trieu** `laptop-gaming-gia-tu-25-den-35-trieu` (Level 1) — **0** sản phẩm
+  - **Laptop Hp** `laptop-hp` (Level 1) — **0** sản phẩm
+    - **Laptop Hp Omen** `laptop-hp-omen` (Level 2) — **0** sản phẩm
+    - **Laptop Hp Pavilion** `laptop-hp-pavilion` (Level 2) — **0** sản phẩm
+    - **Laptop Hp Victus** `laptop-hp-victus` (Level 2) — **0** sản phẩm
+    - **Laptop Hp Envy** `laptop-hp-envy` (Level 2) — **0** sản phẩm
+    - **Laptop Hp Probook Series** `laptop-hp-probook-series` (Level 2) — **0** sản phẩm
+    - **Laptop Hp Rtx 50 Series** `laptop-hp-rtx-50-series` (Level 2) — **0** sản phẩm
+  - **Laptop Msi** `laptop-msi` (Level 1) — **0** sản phẩm
+    - **Laptop Msi Thin** `laptop-msi-thin` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gt Series** `laptop-msi-gt-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Hoc Tap Va Lam Viec** `laptop-msi-hoc-tap-va-lam-viec` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Rtx 50 Series** `laptop-msi-rtx-50-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Creator Series** `laptop-msi-creator-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Ge Series** `laptop-msi-ge-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Sword Katana Series** `laptop-msi-sword-katana-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gaming** `laptop-msi-gaming` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Amd Series** `laptop-msi-amd-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gp Series** `laptop-msi-gp-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gl Series** `laptop-msi-gl-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gs Series** `laptop-msi-gs-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Gf Series** `laptop-msi-gf-series` (Level 2) — **0** sản phẩm
+    - **Laptop Msi Bravo Series** `laptop-msi-bravo-series` (Level 2) — **0** sản phẩm
+  - **Laptop Gaming Gigabyte** `laptop-gaming-gigabyte` (Level 1) — **0** sản phẩm
+  - **Laptop Ideapad Gaming** `laptop-ideapad-gaming` (Level 1) — **0** sản phẩm
+  - **Laptop Hoc Sinh Sinh Vien** `laptop-hoc-sinh-sinh-vien` (Level 1) — **0** sản phẩm
+  - **Laptop Amd Radeon Rx** `laptop-amd-radeon-rx` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Tren 35 Trieu** `laptop-gaming-tren-35-trieu` (Level 1) — **0** sản phẩm
+  - **Laptop Nvidia Rtx Cao Cap** `laptop-nvidia-rtx-cao-cap` (Level 1) — **0** sản phẩm
+  - **Laptop Intel Core Ultra** `laptop-intel-core-ultra` (Level 1) — **0** sản phẩm
+  - **Laptop Gaming Ban Chay** `laptop-gaming-ban-chay` (Level 1) — **0** sản phẩm
+  - **Laptop Rtx 40 Series** `laptop-rtx-40-series` (Level 1) — **0** sản phẩm
+- **Usb Wifi** `usb-wifi` (Level 0) — **0** sản phẩm
+- **Gia Treo Tai Nghe** `gia-treo-tai-nghe` (Level 0) — **0** sản phẩm
+- **Ban Phim Tren 4 Trieu** `ban-phim-tren-4-trieu` (Level 0) — **0** sản phẩm
+- **Ram Pny** `ram-pny` (Level 0) — **0** sản phẩm
+- **Ssd Laptop** `ssd-laptop` (Level 0) — **0** sản phẩm
+- **May Bo Mini** `may-bo-mini` (Level 0) — **0** sản phẩm
+- **Lot Chuot Cung** `lot-chuot-cung` (Level 0) — **0** sản phẩm
+- **Tren 60 Trieu** `tren-60-trieu` (Level 0) — **0** sản phẩm
+- **Day Cap Display Port** `day-cap-display-port` (Level 0) — **0** sản phẩm
+- **2060** `2060` (Level 0) — **0** sản phẩm
+- **Tay Cam Ps4** `tay-cam-ps4` (Level 0) — **0** sản phẩm
+- **Ban Phim Logitech** `ban-phim-logitech` (Level 0) — **0** sản phẩm
+  - **Ban Phim Logitech G512 Gx Rgb** `ban-phim-logitech-g512-gx-rgb` (Level 1) — **0** sản phẩm
+- **Card Do Hoa Asus** `card-do-hoa-asus` (Level 0) — **0** sản phẩm
+- **Tren 1000W** `tren-1000w` (Level 0) — **0** sản phẩm
+- **Imac 24 2021** `imac-24-2021` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 10** `collections-cho-landing-page-uu-dai-nhom-sp-10` (Level 0) — **0** sản phẩm
+- **Tai Nghe True Wireless Soundpeats Chinh Hang Gia Tot** `tai-nghe-true-wireless-soundpeats-chinh-hang-gia-tot` (Level 0) — **0** sản phẩm
+- **Baseus Vn** `baseus-vn` (Level 0) — **0** sản phẩm
+- **Ban Phim Gia Co** `ban-phim-gia-co` (Level 0) — **0** sản phẩm
+- **Tan Nhiet Asus** `tan-nhiet-asus` (Level 0) — **0** sản phẩm
+- **Main Amd Ryzen B550 Socket Am4** `main-amd-ryzen-b550-socket-am4` (Level 0) — **0** sản phẩm
+- **Ban Phim 1 Den 2 Trieu** `ban-phim-1-den-2-trieu` (Level 0) — **0** sản phẩm
+- **Pc Msi Powered By Msi** `pc-msi-powered-by-msi` (Level 0) — **0** sản phẩm
+- **Hdd O Cung Pc** `hdd-o-cung-pc` (Level 0) — **0** sản phẩm
+- **Ddr4 8Gb** `ddr4-8gb` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 7** `collections-cho-landing-page-man-hinh-nhom-sp-7` (Level 0) — **0** sản phẩm
+- **500 600W** `500-600w` (Level 0) — **0** sản phẩm
+- **Chuot Bluetooth** `chuot-bluetooth` (Level 0) — **0** sản phẩm
+- **Ban Phim E Dra** `ban-phim-e-dra` (Level 0) — **0** sản phẩm
+- **1660 6G** `1660-6g` (Level 0) — **0** sản phẩm
+- **Amd Ryzen Threadripper Gen 3** `amd-ryzen-threadripper-gen-3` (Level 0) — **0** sản phẩm
+- **Cpu Bo Vi Xu Ly** `cpu-bo-vi-xu-ly` (Level 0) — **0** sản phẩm
+- **Case Tren 2 Trieu** `case-tren-2-trieu` (Level 0) — **0** sản phẩm
+- **Vga Rtx 4060** `vga-rtx-4060` (Level 0) — **0** sản phẩm
+  - **Vga Rtx 4060 Ti** `vga-rtx-4060-ti` (Level 1) — **0** sản phẩm
+- **Ban Phim Mistel** `ban-phim-mistel` (Level 0) — **0** sản phẩm
+- **Xa Ton** `xa-ton` (Level 0) — **0** sản phẩm
+- **Samsung Watch** `samsung-watch` (Level 0) — **0** sản phẩm
+- **Nguon May Tinh Nzxt** `nguon-may-tinh-nzxt` (Level 0) — **0** sản phẩm
+- **Andaseat Assassin King** `andaseat-assassin-king` (Level 0) — **0** sản phẩm
+- **Vga Intel Arc A380** `vga-intel-arc-a380` (Level 0) — **0** sản phẩm
+- **Lot Chuot Skyloong** `lot-chuot-skyloong` (Level 0) — **0** sản phẩm
+- **Mainboard Amd** `mainboard-amd` (Level 0) — **0** sản phẩm
+  - **Mainboard Amd X670** `mainboard-amd-x670` (Level 1) — **0** sản phẩm
+  - **Mainboard Amd B650** `mainboard-amd-b650` (Level 1) — **0** sản phẩm
+  - **Mainboard Amd X870** `mainboard-amd-x870` (Level 1) — **0** sản phẩm
+  - **Mainboard Amd A520** `mainboard-amd-a520` (Level 1) — **0** sản phẩm
+  - **Mainboard Amd A620** `mainboard-amd-a620` (Level 1) — **0** sản phẩm
+- **Apple** `apple` (Level 0) — **0** sản phẩm
+  - **Apple Magic Keyboard With Numeric Keypad** `apple-magic-keyboard-with-numeric-keypad` (Level 1) — **0** sản phẩm
+  - **Apple Magic Mouse 2** `apple-magic-mouse-2` (Level 1) — **0** sản phẩm
+  - **Apple Watch** `apple-watch` (Level 1) — **0** sản phẩm
+  - **Apple Magic Trackpad 2** `apple-magic-trackpad-2` (Level 1) — **0** sản phẩm
+- **Chuot Khong Day Logitech M350** `chuot-khong-day-logitech-m350` (Level 0) — **0** sản phẩm
+- **Egc209 Series** `egc209-series` (Level 0) — **0** sản phẩm
+- **Ram Ddr5 32Gb** `ram-ddr5-32gb` (Level 0) — **0** sản phẩm
+- **Gigabyte U Series** `gigabyte-u-series` (Level 0) — **0** sản phẩm
+- **Ban Phim Akko** `ban-phim-akko` (Level 0) — **0** sản phẩm
+  - **Ban Phim Akko Bluetooth** `ban-phim-akko-bluetooth` (Level 1) — **0** sản phẩm
+- **5108 Series** `5108-series` (Level 0) — **0** sản phẩm
+- **Hdd 2Tb** `hdd-2tb` (Level 0) — **0** sản phẩm
+- **Chuot Cong Thai Hoc Logitech Lift Vertical Series** `chuot-cong-thai-hoc-logitech-lift-vertical-series` (Level 0) — **0** sản phẩm
+- **Pc Van Phong** `pc-van-phong` (Level 0) — **0** sản phẩm
+- **Cpu Intel Core I3** `cpu-intel-core-i3` (Level 0) — **0** sản phẩm
+- **Cpu Intel 13Th Gen** `cpu-intel-13th-gen` (Level 0) — **0** sản phẩm
+- **Nuc11 Cpu Intel 11St Gen** `nuc11-cpu-intel-11st-gen` (Level 0) — **0** sản phẩm
+- **Logitech** `logitech` (Level 0) — **0** sản phẩm
+  - **Logitech Week** `logitech-week` (Level 1) — **0** sản phẩm
+  - **Logitech G335 Series** `logitech-g335-series` (Level 1) — **0** sản phẩm
+  - **Logitech Christmas** `logitech-christmas` (Level 1) — **0** sản phẩm
+  - **Logitech G Pro** `logitech-g-pro` (Level 1) — **0** sản phẩm
+    - **Logitech G Pro Series** `logitech-g-pro-series` (Level 2) — **0** sản phẩm
+  - **Logitech Mouse** `logitech-mouse` (Level 1) — **0** sản phẩm
+  - **Logitech G733** `logitech-g733` (Level 1) — **0** sản phẩm
+  - **Logitech G512 Series** `logitech-g512-series` (Level 1) — **0** sản phẩm
+  - **Logitech Romer G** `logitech-romer-g` (Level 1) — **0** sản phẩm
+  - **Logitech G Series** `logitech-g-series` (Level 1) — **0** sản phẩm
+- **Case Corsair** `case-corsair` (Level 0) — **0** sản phẩm
+- **Chuot Hyperx** `chuot-hyperx` (Level 0) — **0** sản phẩm
+- **Chuot Gaming Dare U A960 Ultralight** `chuot-gaming-dare-u-a960-ultralight` (Level 0) — **0** sản phẩm
+- **Mac Studio** `mac-studio` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 3** `collections-cho-landing-page-man-hinh-nhom-sp-3` (Level 0) — **0** sản phẩm
+- **Ban Phim Madlions** `ban-phim-madlions` (Level 0) — **0** sản phẩm
+- **Peri Test Google Feed** `peri-test-google-feed` (Level 0) — **0** sản phẩm
+- **Ban May Tinh** `ban-may-tinh` (Level 0) — **0** sản phẩm
+- **Warrior Raider Series** `warrior-raider-series` (Level 0) — **0** sản phẩm
+- **Mainboard Intel B760 Raptor Lake** `mainboard-intel-b760-raptor-lake` (Level 0) — **0** sản phẩm
+- **Ai Pc Gvn** `ai-pc-gvn` (Level 0) — **0** sản phẩm
+- **Usb Card Mang** `usb-card-mang` (Level 0) — **0** sản phẩm
+- **Winner 2025 Pc X Vga** `winner-2025-pc-x-vga` (Level 0) — **0** sản phẩm
+- **Mercusys** `mercusys` (Level 0) — **0** sản phẩm
+- **Lot Chuot Dare U** `lot-chuot-dare-u` (Level 0) — **0** sản phẩm
+- **Ban Phim Duoi 1 Trieu** `ban-phim-duoi-1-trieu` (Level 0) — **0** sản phẩm
+- **Combo Vo Lang Logitech** `combo-vo-lang-logitech` (Level 0) — **0** sản phẩm
+- **Acr Series** `acr-series` (Level 0) — **0** sản phẩm
+- **Cong Chuyen Usb Gia Do** `cong-chuyen-usb-gia-do` (Level 0) — **0** sản phẩm
+- **Anda Seat** `anda-seat` (Level 0) — **0** sản phẩm
+  - **Anda Seat Assassin King V2** `anda-seat-assassin-king-v2` (Level 1) — **0** sản phẩm
+- **Top Pc Ban Chay** `top-pc-ban-chay` (Level 0) — **0** sản phẩm
+- **Loa** `loa` (Level 0) — **0** sản phẩm
+  - **Loa Sony** `loa-sony` (Level 1) — **0** sản phẩm
+  - **Loa Logitech** `loa-logitech` (Level 1) — **0** sản phẩm
+  - **Loa Di Dong Bluetooth Chinh Hang** `loa-di-dong-bluetooth-chinh-hang` (Level 1) — **0** sản phẩm
+  - **Loa Gia Re Duoi 1 Trieu** `loa-gia-re-duoi-1-trieu` (Level 1) — **0** sản phẩm
+  - **Loa Gaming** `loa-gaming` (Level 1) — **0** sản phẩm
+  - **Loa De Ban** `loa-de-ban` (Level 1) — **0** sản phẩm
+  - **Loa Chinh Hang Tu 3 Den 5 Trieu** `loa-chinh-hang-tu-3-den-5-trieu` (Level 1) — **0** sản phẩm
+  - **Loa Thonet Vander Chinh Hang** `loa-thonet-vander-chinh-hang` (Level 1) — **0** sản phẩm
+  - **Loa Jbl** `loa-jbl` (Level 1) — **0** sản phẩm
+  - **Loa Marshall** `loa-marshall` (Level 1) — **0** sản phẩm
+  - **Loa Edifier** `loa-edifier` (Level 1) — **0** sản phẩm
+  - **Loa Razer** `loa-razer` (Level 1) — **0** sản phẩm
+  - **Loa Chinh Hang Tu 1 Den 3 Trieu** `loa-chinh-hang-tu-1-den-3-trieu` (Level 1) — **0** sản phẩm
+  - **Loa Di Dong Sounarc** `loa-di-dong-sounarc` (Level 1) — **0** sản phẩm
+- **Tai Nghe Corsair** `tai-nghe-corsair` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Corsair Hs50 Pro Stereo** `tai-nghe-corsair-hs50-pro-stereo` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Corsair Virtuoso** `tai-nghe-corsair-virtuoso` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Corsair Void Rgb Elite** `tai-nghe-corsair-void-rgb-elite` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Corsair Hs55 Wireless** `tai-nghe-corsair-hs55-wireless` (Level 1) — **0** sản phẩm
+- **Chuot Cooler Master** `chuot-cooler-master` (Level 0) — **0** sản phẩm
+- **Sony Playstation** `sony-playstation` (Level 0) — **0** sản phẩm
+  - **Sony Playstation 5** `sony-playstation-5` (Level 1) — **0** sản phẩm
+- **Chuot Dareu Em901 Rgb Wireless** `chuot-dareu-em901-rgb-wireless` (Level 0) — **0** sản phẩm
+- **Ma Giam Gia Gearvn** `ma-giam-gia-gearvn` (Level 0) — **0** sản phẩm
+- **Vga Amd Radeon Rx 6000 Series** `vga-amd-radeon-rx-6000-series` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 8** `collections-cho-landing-page-uu-dai-nhom-sp-8` (Level 0) — **0** sản phẩm
+- **Chuot Newmen** `chuot-newmen` (Level 0) — **0** sản phẩm
+- **Tai Nghe The Thao Chinh Hang** `tai-nghe-the-thao-chinh-hang` (Level 0) — **0** sản phẩm
+- **Hp Prodesk 400 G6 Mini** `hp-prodesk-400-g6-mini` (Level 0) — **0** sản phẩm
+- **Hdd O Cung Laptop** `hdd-o-cung-laptop` (Level 0) — **0** sản phẩm
+- **Ban Lam Viec** `ban-lam-viec` (Level 0) — **0** sản phẩm
+- **Build Pc Gvn Custom** `build-pc-gvn-custom` (Level 0) — **0** sản phẩm
+- **Mainboard Bo Mach Chu** `mainboard-bo-mach-chu` (Level 0) — **0** sản phẩm
+- **Ban Phim Ducky** `ban-phim-ducky` (Level 0) — **0** sản phẩm
+- **Xa Kho Linh Kien** `xa-kho-linh-kien` (Level 0) — **0** sản phẩm
+- **Ssd Wd** `ssd-wd` (Level 0) — **0** sản phẩm
+- **Leopold Bluetooth Series** `leopold-bluetooth-series` (Level 0) — **0** sản phẩm
+- **Vga Rtx 4090** `vga-rtx-4090` (Level 0) — **0** sản phẩm
+- **Case Deepcool Gamerstorm** `case-deepcool-gamerstorm` (Level 0) — **0** sản phẩm
+- **Gt 710 Gt 1030 Gtx 1050 Ti** `gt-710-gt-1030-gtx-1050-ti` (Level 0) — **0** sản phẩm
+- **Razer** `razer` (Level 0) — **0** sản phẩm
+  - **Razer Phantom White Edition Collection** `razer-phantom-white-edition-collection` (Level 1) — **0** sản phẩm
+  - **Razer Collection Counter Strike 2 Edition** `razer-collection-counter-strike-2-edition` (Level 1) — **0** sản phẩm
+  - **Razer Blackwidow Series** `razer-blackwidow-series` (Level 1) — **0** sản phẩm
+  - **Razer Phantom Collection** `razer-phantom-collection` (Level 1) — **0** sản phẩm
+  - **Razer Minecraft Collection** `razer-minecraft-collection` (Level 1) — **0** sản phẩm
+  - **Razer Iskur** `razer-iskur` (Level 1) — **0** sản phẩm
+  - **Razer Huntsman Series** `razer-huntsman-series` (Level 1) — **0** sản phẩm
+  - **Razer Quartz Pink Collection** `razer-quartz-pink-collection` (Level 1) — **0** sản phẩm
+- **Tai Nghe Duoi 1 Trieu** `tai-nghe-duoi-1-trieu` (Level 0) — **0** sản phẩm
+- **Audio Sony Chinh Hang** `audio-sony-chinh-hang` (Level 0) — **0** sản phẩm
+- **700W 800W** `700w-800w` (Level 0) — **0** sản phẩm
+- **3068 Series** `3068-series` (Level 0) — **0** sản phẩm
+- **Hdd Server Enterprise Camera Nas** `hdd-server-enterprise-camera-nas` (Level 0) — **0** sản phẩm
+- **Mainboard Intel H610 Alder Lake** `mainboard-intel-h610-alder-lake` (Level 0) — **0** sản phẩm
+- **Tay Cam Gia Re Rapoo V600** `tay-cam-gia-re-rapoo-v600` (Level 0) — **0** sản phẩm
+- **Mainboard Mini Itx** `mainboard-mini-itx` (Level 0) — **0** sản phẩm
+- **Mainboard Ryzen X570** `mainboard-ryzen-x570` (Level 0) — **0** sản phẩm
+- **Chuot Corsair** `chuot-corsair` (Level 0) — **0** sản phẩm
+- **3087 Series** `3087-series` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5060 Series** `vga-rtx-5060-series` (Level 0) — **0** sản phẩm
+- **Pc Rtx 5060Ti** `pc-rtx-5060ti` (Level 0) — **0** sản phẩm
+- **Thiet Bi Phat Wifi** `thiet-bi-phat-wifi` (Level 0) — **0** sản phẩm
+- **Mainboard Intel B560 Rocket Lake** `mainboard-intel-b560-rocket-lake` (Level 0) — **0** sản phẩm
+- **Day Cap Mang Lan** `day-cap-mang-lan` (Level 0) — **0** sản phẩm
+- **Ghe Sihoo** `ghe-sihoo` (Level 0) — **0** sản phẩm
+- **Den Thong Minh Nanoleaf Bo Mo Rong** `den-thong-minh-nanoleaf-bo-mo-rong` (Level 0) — **0** sản phẩm
+- **Tai Nghe Over Ear** `tai-nghe-over-ear` (Level 0) — **0** sản phẩm
+- **Mainboard Workstation** `mainboard-workstation` (Level 0) — **0** sản phẩm
+- **Ban Gaming** `ban-gaming` (Level 0) — **0** sản phẩm
+  - **Ban Gaming E Dra** `ban-gaming-e-dra` (Level 1) — **0** sản phẩm
+- **Tai Nghe Hs55** `tai-nghe-hs55` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Hs55 Stereo** `tai-nghe-hs55-stereo` (Level 1) — **0** sản phẩm
+- **Pny** `pny` (Level 0) — **0** sản phẩm
+- **Ghe Cougar Armor K Series** `ghe-cougar-armor-k-series` (Level 0) — **0** sản phẩm
+- **Chuot Akko** `chuot-akko` (Level 0) — **0** sản phẩm
+  - **Chuot Akko Rg325** `chuot-akko-rg325` (Level 1) — **0** sản phẩm
+- **Warrior Wgc206** `warrior-wgc206` (Level 0) — **0** sản phẩm
+- **Tai Nghe Co Day Chinh Hang** `tai-nghe-co-day-chinh-hang` (Level 0) — **0** sản phẩm
+- **Ban Phim Skyloong** `ban-phim-skyloong` (Level 0) — **0** sản phẩm
+- **Dell Gaming G Series** `dell-gaming-g-series` (Level 0) — **0** sản phẩm
+- **Ban Ghe** `ban-ghe` (Level 0) — **0** sản phẩm
+- **Cpu Intel Gen 14Th Core** `cpu-intel-gen-14th-core` (Level 0) — **0** sản phẩm
+- **Gia Treo Laptop** `gia-treo-laptop` (Level 0) — **0** sản phẩm
+- **Combo G Pro** `combo-g-pro` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 2** `collections-cho-landing-page-uu-dai-nhom-sp-2` (Level 0) — **0** sản phẩm
+- **Chuong Trinh Nang Cap Ssd** `chuong-trinh-nang-cap-ssd` (Level 0) — **0** sản phẩm
+- **Fan Rgb Tan Nhiet Pc** `fan-rgb-tan-nhiet-pc` (Level 0) — **0** sản phẩm
+- **Ghe Da That** `ghe-da-that` (Level 0) — **0** sản phẩm
+- **Vga Cho Nguon 650W Tro Len** `vga-cho-nguon-650w-tro-len` (Level 0) — **0** sản phẩm
+- **Lot Chuot Razer** `lot-chuot-razer` (Level 0) — **0** sản phẩm
+- **Chuot 1 Den 2 Trieu** `chuot-1-den-2-trieu` (Level 0) — **0** sản phẩm
+- **Ssd Sata 3** `ssd-sata-3` (Level 0) — **0** sản phẩm
+- **Lot Chuot Co Led** `lot-chuot-co-led` (Level 0) — **0** sản phẩm
+- **Linh Kien May Tinh** `linh-kien-may-tinh` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5070 Ti Series** `vga-rtx-5070-ti-series` (Level 0) — **0** sản phẩm
+- **Mainboard X299X Lga2066** `mainboard-x299x-lga2066` (Level 0) — **0** sản phẩm
+- **Ban Phim Keychron** `ban-phim-keychron` (Level 0) — **0** sản phẩm
+- **Chuot May Tinh** `chuot-may-tinh` (Level 0) — **0** sản phẩm
+- **Mouse Pad** `mouse-pad` (Level 0) — **0** sản phẩm
+- **Ssd 1Tb** `ssd-1tb` (Level 0) — **0** sản phẩm
+- **Windows 10 Home** `windows-10-home` (Level 0) — **0** sản phẩm
+- **32 Curve** `32-curve` (Level 0) — **0** sản phẩm
+- **Day Man Hinh** `day-man-hinh` (Level 0) — **0** sản phẩm
+- **Msi Mainboard** `msi-mainboard` (Level 0) — **0** sản phẩm
+- **Acer Nitro 16 Phoenix** `acer-nitro-16-phoenix` (Level 0) — **0** sản phẩm
+- **Ban Cong Thai Hoc** `ban-cong-thai-hoc` (Level 0) — **0** sản phẩm
+- **Tuf Rtx 40 Series** `tuf-rtx-40-series` (Level 0) — **0** sản phẩm
+- **Ghe Dxracer** `ghe-dxracer` (Level 0) — **0** sản phẩm
+- **Tai Nghe Gaming Zidli** `tai-nghe-gaming-zidli` (Level 0) — **0** sản phẩm
+- **Pc Gaming Gvn Poseidon** `pc-gaming-gvn-poseidon` (Level 0) — **0** sản phẩm
+- **Keycap Dwarf Factory** `keycap-dwarf-factory` (Level 0) — **0** sản phẩm
+- **Balo Tui Chong Soc** `balo-tui-chong-soc` (Level 0) — **0** sản phẩm
+- **Chuot Dareu A950 3 Mode** `chuot-dareu-a950-3-mode` (Level 0) — **0** sản phẩm
+- **Office** `office` (Level 0) — **0** sản phẩm
+  - **Office Home 2024** `office-home-2024` (Level 1) — **0** sản phẩm
+  - **Office 2021** `office-2021` (Level 1) — **0** sản phẩm
+- **Nguon Sfx** `nguon-sfx` (Level 0) — **0** sản phẩm
+- **Lot Chuot Kich Thuoc Nho** `lot-chuot-kich-thuoc-nho` (Level 0) — **0** sản phẩm
+- **Hdd Seagate** `hdd-seagate` (Level 0) — **0** sản phẩm
+- **Flash Sale 2Nd Day** `flash-sale-2nd-day` (Level 0) — **0** sản phẩm
+  - **Flash Sale 2Nd Day Quat Mini** `flash-sale-2nd-day-quat-mini` (Level 1) — **0** sản phẩm
+  - **Flash Sale 2Nd Day Phu Kien** `flash-sale-2nd-day-phu-kien` (Level 1) — **0** sản phẩm
+  - **Flash Sale 2Nd Day Tai Nghe** `flash-sale-2nd-day-tai-nghe` (Level 1) — **0** sản phẩm
+  - **Flash Sale 2Nd Day Man Hinh** `flash-sale-2nd-day-man-hinh` (Level 1) — **0** sản phẩm
+- **Router Asus** `router-asus` (Level 0) — **0** sản phẩm
+- **Chuong Trinh Khuyen Mai** `chuong-trinh-khuyen-mai` (Level 0) — **0** sản phẩm
+- **Quat Jisulife** `quat-jisulife` (Level 0) — **0** sản phẩm
+- **Ssd 120G** `ssd-120g` (Level 0) — **0** sản phẩm
+- **Router Wifi 5** `router-wifi-5` (Level 0) — **0** sản phẩm
+- **Tay Cam Rapoo** `tay-cam-rapoo` (Level 0) — **0** sản phẩm
+- **27 Curve** `27-curve` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5060 Ti Series** `vga-rtx-5060-ti-series` (Level 0) — **0** sản phẩm
+- **Amd Ryzen Threadripper Pro Gen 3** `amd-ryzen-threadripper-pro-gen-3` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 4** `collections-cho-landing-page-man-hinh-nhom-sp-4` (Level 0) — **0** sản phẩm
+- **Vga Amd Radeon Rx 7000 Series** `vga-amd-radeon-rx-7000-series` (Level 0) — **0** sản phẩm
+- **Ram Rgb Ddr4** `ram-rgb-ddr4` (Level 0) — **0** sản phẩm
+- **Nguon Silverstone** `nguon-silverstone` (Level 0) — **0** sản phẩm
+- **Capture Card Avermedia** `capture-card-avermedia` (Level 0) — **0** sản phẩm
+- **Chuong Trinh Uu Dai Nzxt** `chuong-trinh-uu-dai-nzxt` (Level 0) — **0** sản phẩm
+- **Warrior Wec502 Series** `warrior-wec502-series` (Level 0) — **0** sản phẩm
+- **Collections Cho Landing Page Uu Dai Nhom Sp 4** `collections-cho-landing-page-uu-dai-nhom-sp-4` (Level 0) — **0** sản phẩm
+- **Gtx 1660 Ti** `gtx-1660-ti` (Level 0) — **0** sản phẩm
+- **Ban Phim Aula** `ban-phim-aula` (Level 0) — **0** sản phẩm
+- **600 700W** `600-700w` (Level 0) — **0** sản phẩm
+- **Ghe Duoi 5 Trieu** `ghe-duoi-5-trieu` (Level 0) — **0** sản phẩm
+- **Gaming Mouse** `gaming-mouse` (Level 0) — **0** sản phẩm
+- **Acer Swift Series** `acer-swift-series` (Level 0) — **0** sản phẩm
+- **Pc Su Dung Vga** `pc-su-dung-vga` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5070 Series** `vga-rtx-5070-series` (Level 0) — **0** sản phẩm
+- **Den Thong Minh Nano Leaf** `den-thong-minh-nano-leaf` (Level 0) — **0** sản phẩm
+- **Nvidia Quadro** `nvidia-quadro` (Level 0) — **0** sản phẩm
+- **Cpu Intel Celeron Pentium** `cpu-intel-celeron-pentium` (Level 0) — **0** sản phẩm
+- **Mainboard Intel Z890** `mainboard-intel-z890` (Level 0) — **0** sản phẩm
+- **Flash Sale Man Hinh** `flash-sale-man-hinh` (Level 0) — **0** sản phẩm
+  - **Flash Sale Man Hinh Msi** `flash-sale-man-hinh-msi` (Level 1) — **0** sản phẩm
+  - **Flash Sale Man Hinh Asus** `flash-sale-man-hinh-asus` (Level 1) — **0** sản phẩm
+  - **Flash Sale Man Hinh Lg** `flash-sale-man-hinh-lg` (Level 1) — **0** sản phẩm
+  - **Flash Sale Man Hinh Viewsonic** `flash-sale-man-hinh-viewsonic` (Level 1) — **0** sản phẩm
+- **G102 Lightsync** `g102-lightsync` (Level 0) — **0** sản phẩm
+- **Tui Tomtoc** `tui-tomtoc` (Level 0) — **0** sản phẩm
+- **May Chieu** `may-chieu` (Level 0) — **0** sản phẩm
+  - **May Chieu Beecube** `may-chieu-beecube` (Level 1) — **0** sản phẩm
+  - **May Chieu Viewsonic** `may-chieu-viewsonic` (Level 1) — **0** sản phẩm
+  - **May Chieu Asus** `may-chieu-asus` (Level 1) — **0** sản phẩm
+  - **May Chieu Wanbo** `may-chieu-wanbo` (Level 1) — **0** sản phẩm
+- **Man Hinh** `man-hinh` (Level 0) — **0** sản phẩm
+  - **Man Hinh Tu 10 Den 20 Trieu** `man-hinh-tu-10-den-20-trieu` (Level 1) — **0** sản phẩm
+  - **Man Hinh Dahua** `man-hinh-dahua` (Level 1) — **0** sản phẩm
+  - **Man Hinh 75Hz** `man-hinh-75hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh 120Hz** `man-hinh-120hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh Dell** `man-hinh-dell` (Level 1) — **0** sản phẩm
+  - **Man Hinh 144Hz** `man-hinh-144hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh Benq** `man-hinh-benq` (Level 1) — **0** sản phẩm
+  - **Man Hinh Duoi 5 Trieu** `man-hinh-duoi-5-trieu` (Level 1) — **0** sản phẩm
+  - **Man Hinh Gaming** `man-hinh-gaming` (Level 1) — **0** sản phẩm
+    - **Man Hinh Gaming 24** `man-hinh-gaming-24` (Level 2) — **0** sản phẩm
+    - **Man Hinh Gaming 27** `man-hinh-gaming-27` (Level 2) — **0** sản phẩm
+  - **Man Hinh Aoc** `man-hinh-aoc` (Level 1) — **0** sản phẩm
+  - **Man Hinh 34** `man-hinh-34` (Level 1) — **0** sản phẩm
+  - **Man Hinh Di Dong** `man-hinh-di-dong` (Level 1) — **0** sản phẩm
+    - **Man Hinh Di Dong Do Phan Giai Full Hd 1080P** `man-hinh-di-dong-do-phan-giai-full-hd-1080p` (Level 2) — **0** sản phẩm
+    - **Man Hinh Di Dong Do Phan Giai 2K 1440P** `man-hinh-di-dong-do-phan-giai-2k-1440p` (Level 2) — **0** sản phẩm
+    - **Man Hinh Di Dong Co Cam Ung** `man-hinh-di-dong-co-cam-ung` (Level 2) — **0** sản phẩm
+  - **Man Hinh Samsung** `man-hinh-samsung` (Level 1) — **0** sản phẩm
+  - **Man Hinh 60Hz** `man-hinh-60hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh 100Hz** `man-hinh-100hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh Tu 5 Den 10 Trieu** `man-hinh-tu-5-den-10-trieu` (Level 1) — **0** sản phẩm
+  - **Man Hinh 144 240Hz** `man-hinh-144-240hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh Viewsonic** `man-hinh-viewsonic` (Level 1) — **0** sản phẩm
+  - **Man Hinh Oled** `man-hinh-oled` (Level 1) — **0** sản phẩm
+  - **Man Hinh 27 Inch** `man-hinh-27-inch` (Level 1) — **0** sản phẩm
+  - **Man Hinh Asus** `man-hinh-asus` (Level 1) — **0** sản phẩm
+    - **Man Hinh Asus Proart** `man-hinh-asus-proart` (Level 2) — **0** sản phẩm
+  - **Man Hinh 24 Inch** `man-hinh-24-inch` (Level 1) — **0** sản phẩm
+  - **Man Hinh Koorui** `man-hinh-koorui` (Level 1) — **0** sản phẩm
+  - **Man Hinh 29** `man-hinh-29` (Level 1) — **0** sản phẩm
+  - **Man Hinh Msi** `man-hinh-msi` (Level 1) — **0** sản phẩm
+  - **Man Hinh Do Hoa** `man-hinh-do-hoa` (Level 1) — **0** sản phẩm
+    - **Man Hinh Do Hoa 27 Inch** `man-hinh-do-hoa-27-inch` (Level 2) — **0** sản phẩm
+    - **Man Hinh Do Hoa 32 Inch** `man-hinh-do-hoa-32-inch` (Level 2) — **0** sản phẩm
+    - **Man Hinh Do Hoa 24 Inch** `man-hinh-do-hoa-24-inch` (Level 2) — **0** sản phẩm
+  - **Man Hinh 240Hz** `man-hinh-240hz` (Level 1) — **0** sản phẩm
+  - **Man Hinh Co Chuan Vesa Treo Tuong** `man-hinh-co-chuan-vesa-treo-tuong` (Level 1) — **0** sản phẩm
+  - **Man Hinh Philips** `man-hinh-philips` (Level 1) — **0** sản phẩm
+  - **Man Hinh Gigabyte** `man-hinh-gigabyte` (Level 1) — **0** sản phẩm
+  - **Man Hinh May Tinh 6K** `man-hinh-may-tinh-6k` (Level 1) — **0** sản phẩm
+  - **Man Hinh Acer** `man-hinh-acer` (Level 1) — **0** sản phẩm
+  - **Man Hinh Cooler Master** `man-hinh-cooler-master` (Level 1) — **0** sản phẩm
+  - **Man Hinh Gvn Gaming Festival** `man-hinh-gvn-gaming-festival` (Level 1) — **0** sản phẩm
+  - **Man Hinh May Tinh 4K Uhd** `man-hinh-may-tinh-4k-uhd` (Level 1) — **0** sản phẩm
+  - **Man Hinh 25 Inch** `man-hinh-25-inch` (Level 1) — **0** sản phẩm
+  - **Man Hinh E Dra** `man-hinh-e-dra` (Level 1) — **0** sản phẩm
+  - **Man Hinh Tren 30 Trieu** `man-hinh-tren-30-trieu` (Level 1) — **0** sản phẩm
+  - **Man Hinh Vsp** `man-hinh-vsp` (Level 1) — **0** sản phẩm
+  - **Man Hinh 22 Inch** `man-hinh-22-inch` (Level 1) — **0** sản phẩm
+  - **Man Hinh Cong** `man-hinh-cong` (Level 1) — **0** sản phẩm
+  - **Man Hinh 32** `man-hinh-32` (Level 1) — **0** sản phẩm
+  - **Man Hinh Lenovo** `man-hinh-lenovo` (Level 1) — **0** sản phẩm
+  - **Man Hinh Tren 32** `man-hinh-tren-32` (Level 1) — **0** sản phẩm
+  - **Man Hinh Tu 20 Trieu Den 30 Trieu** `man-hinh-tu-20-trieu-den-30-trieu` (Level 1) — **0** sản phẩm
+  - **Man Hinh Lc Power** `man-hinh-lc-power` (Level 1) — **0** sản phẩm
+  - **Man Hinh Alienware** `man-hinh-alienware` (Level 1) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 6** `collections-cho-landing-page-man-hinh-nhom-sp-6` (Level 0) — **0** sản phẩm
+- **Cpu Intel Core I9** `cpu-intel-core-i9` (Level 0) — **0** sản phẩm
+- **Ban Phim Vgn** `ban-phim-vgn` (Level 0) — **0** sản phẩm
+- **Fs Laptop Van Phong** `fs-laptop-van-phong` (Level 0) — **0** sản phẩm
+- **Ghe Cong Thai Hoc** `ghe-cong-thai-hoc` (Level 0) — **0** sản phẩm
+  - **Ghe Cong Thai Hoc Sihoo M57** `ghe-cong-thai-hoc-sihoo-m57` (Level 1) — **0** sản phẩm
+  - **Ghe Cong Thai Hoc E Dra** `ghe-cong-thai-hoc-e-dra` (Level 1) — **0** sản phẩm
+  - **Ghe Cong Thai Hoc Warrior** `ghe-cong-thai-hoc-warrior` (Level 1) — **0** sản phẩm
+- **Tai Nghe Rapoo** `tai-nghe-rapoo` (Level 0) — **0** sản phẩm
+- **Pc Gvn** `pc-gvn` (Level 0) — **0** sản phẩm
+  - **Pc Gvn Duoi 30 Trieu** `pc-gvn-duoi-30-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn R7** `pc-gvn-r7` (Level 1) — **0** sản phẩm
+  - **Pc Gvn I9** `pc-gvn-i9` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Proart** `pc-gvn-proart` (Level 1) — **0** sản phẩm
+  - **Pc Gvn R9** `pc-gvn-r9` (Level 1) — **0** sản phẩm
+  - **Pc Gvn R5** `pc-gvn-r5` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Core Ultra 5** `pc-gvn-core-ultra-5` (Level 1) — **0** sản phẩm
+  - **Pc Gvn R3** `pc-gvn-r3` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Homework** `pc-gvn-homework` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Tu 50 70 Trieu** `pc-gvn-tu-50-70-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Rtx 5070Ti** `pc-gvn-rtx-5070ti` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Tu 100 200 Trieu** `pc-gvn-tu-100-200-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Rtx 5070** `pc-gvn-rtx-5070` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Tren 200 Trieu** `pc-gvn-tren-200-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Athlon** `pc-gvn-athlon` (Level 1) — **0** sản phẩm
+  - **Pc Gvn I7** `pc-gvn-i7` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Rtx 5090** `pc-gvn-rtx-5090` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Duoi 50 Trieu** `pc-gvn-duoi-50-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn I3** `pc-gvn-i3` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Rtx 5080** `pc-gvn-rtx-5080` (Level 1) — **0** sản phẩm
+  - **Pc Gvn I5** `pc-gvn-i5` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Gaming Festival** `pc-gvn-gaming-festival` (Level 1) — **0** sản phẩm
+    - **Pc Gvn Gaming Festival Mua Mot Tang Mot** `pc-gvn-gaming-festival-mua-mot-tang-mot` (Level 2) — **0** sản phẩm
+  - **Pc Gvn Tu 70 100 Trieu** `pc-gvn-tu-70-100-trieu` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Core Ultra 7** `pc-gvn-core-ultra-7` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Rtx 5060** `pc-gvn-rtx-5060` (Level 1) — **0** sản phẩm
+  - **Pc Gvn Ultra 9** `pc-gvn-ultra-9` (Level 1) — **0** sản phẩm
+- **Soundcard** `soundcard` (Level 0) — **0** sản phẩm
+- **Mainboard X299 Lga2066** `mainboard-x299-lga2066` (Level 0) — **0** sản phẩm
+- **Leopold Fc900R Series** `leopold-fc900r-series` (Level 0) — **0** sản phẩm
+- **Monitor Lg** `monitor-lg` (Level 0) — **0** sản phẩm
+- **Tai Nghe 2 Den 3 Trieu** `tai-nghe-2-den-3-trieu` (Level 0) — **0** sản phẩm
+- **Cpu Intel Core X** `cpu-intel-core-x` (Level 0) — **0** sản phẩm
+- **Router Gaming** `router-gaming` (Level 0) — **0** sản phẩm
+- **Nguon Fsp** `nguon-fsp` (Level 0) — **0** sản phẩm
+- **Bo Ve Sinh Laptop Man Hinh** `bo-ve-sinh-laptop-man-hinh` (Level 0) — **0** sản phẩm
+- **Cpu Amd Ryzen** `cpu-amd-ryzen` (Level 0) — **0** sản phẩm
+  - **Cpu Amd Ryzen 7** `cpu-amd-ryzen-7` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen 4000 Series** `cpu-amd-ryzen-4000-series` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen 3** `cpu-amd-ryzen-3` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen Gen5 Am4** `cpu-amd-ryzen-gen5-am4` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen 5** `cpu-amd-ryzen-5` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen 9** `cpu-amd-ryzen-9` (Level 1) — **0** sản phẩm
+  - **Cpu Amd Ryzen 7000 Series** `cpu-amd-ryzen-7000-series` (Level 1) — **0** sản phẩm
+- **3108 Series** `3108-series` (Level 0) — **0** sản phẩm
+- **Ram Ddr4** `ram-ddr4` (Level 0) — **0** sản phẩm
+- **Thiet Bi Am Thanh Apple** `thiet-bi-am-thanh-apple` (Level 0) — **0** sản phẩm
+- **Cpu Intel Xeon E** `cpu-intel-xeon-e` (Level 0) — **0** sản phẩm
+- **Prestige Series** `prestige-series` (Level 0) — **0** sản phẩm
+- **Chuot Cougar** `chuot-cougar` (Level 0) — **0** sản phẩm
+- **Lot Chuot Day** `lot-chuot-day` (Level 0) — **0** sản phẩm
+- **Giai Phap Pc Van Phong** `giai-phap-pc-van-phong` (Level 0) — **0** sản phẩm
+- **Ban Phim Corsair K70 Series** `ban-phim-corsair-k70-series` (Level 0) — **0** sản phẩm
+- **Lot Chuot Kich Thuoc Lon** `lot-chuot-kich-thuoc-lon` (Level 0) — **0** sản phẩm
+- **Chuot Dareu Lm115G** `chuot-dareu-lm115g` (Level 0) — **0** sản phẩm
+- **Tay Cam Vo Lang** `tay-cam-vo-lang` (Level 0) — **0** sản phẩm
+- **Nguon Corsair** `nguon-corsair` (Level 0) — **0** sản phẩm
+- **Ban Phim Machenike** `ban-phim-machenike` (Level 0) — **0** sản phẩm
+- **Dare U** `dare-u` (Level 0) — **0** sản phẩm
+- **Chuot Van Phong** `chuot-van-phong` (Level 0) — **0** sản phẩm
+- **Chuot Rapoo** `chuot-rapoo` (Level 0) — **0** sản phẩm
+  - **Chuot Rapoo M300 Silent Wireless** `chuot-rapoo-m300-silent-wireless` (Level 1) — **0** sản phẩm
+  - **Chuot Rapoo V Series** `chuot-rapoo-v-series` (Level 1) — **0** sản phẩm
+  - **Chuot Rapoo V300W** `chuot-rapoo-v300w` (Level 1) — **0** sản phẩm
+- **Ghe Vai Smooth Fabric** `ghe-vai-smooth-fabric` (Level 0) — **0** sản phẩm
+- **Microlab** `microlab` (Level 0) — **0** sản phẩm
+- **Vga Rtx Ampere 3070** `vga-rtx-ampere-3070` (Level 0) — **0** sản phẩm
+  - **Vga Rtx Ampere 3070 Ti** `vga-rtx-ampere-3070-ti` (Level 1) — **0** sản phẩm
+- **Tai Nghe Tren 4 Trieu** `tai-nghe-tren-4-trieu` (Level 0) — **0** sản phẩm
+- **Case Thermaltake** `case-thermaltake` (Level 0) — **0** sản phẩm
+- **Ghe Warrior** `ghe-warrior` (Level 0) — **0** sản phẩm
+  - **Ghe Warrior Wec506 Series** `ghe-warrior-wec506-series` (Level 1) — **0** sản phẩm
+- **Ugreen** `ugreen` (Level 0) — **0** sản phẩm
+  - **Ugreen Usb C** `ugreen-usb-c` (Level 1) — **0** sản phẩm
+  - **Ugreen Hdd Box** `ugreen-hdd-box` (Level 1) — **0** sản phẩm
+- **Collections Cho Landing Page Man Hinh Nhom Sp 5** `collections-cho-landing-page-man-hinh-nhom-sp-5` (Level 0) — **0** sản phẩm
+- **San Pham Ban Chay** `san-pham-ban-chay` (Level 0) — **0** sản phẩm
+- **Ban Phim Gia Hoi** `ban-phim-gia-hoi` (Level 0) — **0** sản phẩm
+- **Cpu Amd Threadripper** `cpu-amd-threadripper` (Level 0) — **0** sản phẩm
+- **Ban Phim Rapoo** `ban-phim-rapoo` (Level 0) — **0** sản phẩm
+  - **Ban Phim Rapoo V500L Rainbow** `ban-phim-rapoo-v500l-rainbow` (Level 1) — **0** sản phẩm
+- **Chuot Steelseries** `chuot-steelseries` (Level 0) — **0** sản phẩm
+- **Keycaps** `keycaps` (Level 0) — **0** sản phẩm
+- **Nvidia Geforce Quadro Chinh Hang** `nvidia-geforce-quadro-chinh-hang` (Level 0) — **0** sản phẩm
+- **Tay Cam Choi Game** `tay-cam-choi-game` (Level 0) — **0** sản phẩm
+- **Ssd M 2 Pcie Gen 3X4** `ssd-m-2-pcie-gen-3x4` (Level 0) — **0** sản phẩm
+- **Flash Sale Halloween** `flash-sale-halloween` (Level 0) — **0** sản phẩm
+- **Mikit** `mikit` (Level 0) — **0** sản phẩm
+- **Quat Cam Tay Quat Mini** `quat-cam-tay-quat-mini` (Level 0) — **0** sản phẩm
+- **Tp Link** `tp-link` (Level 0) — **0** sản phẩm
+- **Thiet Bi Van Phong** `thiet-bi-van-phong` (Level 0) — **0** sản phẩm
+- **Vga Cho Nguon 500W 650W** `vga-cho-nguon-500w-650w` (Level 0) — **0** sản phẩm
+- **Tai Nghe Edifier** `tai-nghe-edifier` (Level 0) — **0** sản phẩm
+- **Tai Nghe Dare U** `tai-nghe-dare-u` (Level 0) — **0** sản phẩm
+- **Case Be Ca** `case-be-ca` (Level 0) — **0** sản phẩm
+- **Flash Sale Chuot** `flash-sale-chuot` (Level 0) — **0** sản phẩm
+- **Vga Card Man Hinh** `vga-card-man-hinh` (Level 0) — **0** sản phẩm
+- **Flash Sale Ban Phim** `flash-sale-ban-phim` (Level 0) — **0** sản phẩm
+- **Ghe E Dra** `ghe-e-dra` (Level 0) — **0** sản phẩm
+- **Thiet Bi Mang** `thiet-bi-mang` (Level 0) — **0** sản phẩm
+- **Chuot Logitech** `chuot-logitech` (Level 0) — **0** sản phẩm
+  - **Chuot Logitech G502 X Plus Series** `chuot-logitech-g502-x-plus-series` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Pop Series** `chuot-logitech-pop-series` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech G502 X Series** `chuot-logitech-g502-x-series` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Mx Anywhere 3 Series** `chuot-logitech-mx-anywhere-3-series` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech G102 Lightsync Rgb** `chuot-logitech-g102-lightsync-rgb` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Mx Master 3S Series** `chuot-logitech-mx-master-3s-series` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Gaming** `chuot-logitech-gaming` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech G Pro X Superlight Wireless** `chuot-logitech-g-pro-x-superlight-wireless` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Van Phong** `chuot-logitech-van-phong` (Level 1) — **0** sản phẩm
+  - **Chuot Logitech Lift Series** `chuot-logitech-lift-series` (Level 1) — **0** sản phẩm
+- **Ban Phim Co** `ban-phim-co` (Level 0) — **0** sản phẩm
+  - **Ban Phim Co Gx Switch** `ban-phim-co-gx-switch` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Glorious Gmmk 2 65** `ban-phim-co-glorious-gmmk-2-65` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Vortex** `ban-phim-co-vortex` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Glorious Gmmk 2 Black Fullsize 96** `ban-phim-co-glorious-gmmk-2-black-fullsize-96` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Iqunix** `ban-phim-co-iqunix` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Varmilo** `ban-phim-co-varmilo` (Level 1) — **0** sản phẩm
+  - **Ban Phim Co Fl Esports** `ban-phim-co-fl-esports` (Level 1) — **0** sản phẩm
+- **Mua 1 Tang 1** `mua-1-tang-1` (Level 0) — **0** sản phẩm
+- **Flashsale Laptop** `flashsale-laptop` (Level 0) — **0** sản phẩm
+  - **Flashsale Laptop Gaming** `flashsale-laptop-gaming` (Level 1) — **0** sản phẩm
+- **Lenovo Thinkpad** `lenovo-thinkpad` (Level 0) — **0** sản phẩm
+- **Chuot Fuhlen** `chuot-fuhlen` (Level 0) — **0** sản phẩm
+- **3084 Series** `3084-series` (Level 0) — **0** sản phẩm
+- **Gia Treo Man Hinh** `gia-treo-man-hinh` (Level 0) — **0** sản phẩm
+- **Tai Nghe Asus** `tai-nghe-asus` (Level 0) — **0** sản phẩm
+  - **Tai Nghe Asus Rog Cetra True Wireless** `tai-nghe-asus-rog-cetra-true-wireless` (Level 1) — **0** sản phẩm
+  - **Tai Nghe Asus Rog Cetra Ii Core** `tai-nghe-asus-rog-cetra-ii-core` (Level 1) — **0** sản phẩm
+- **Workstation Thiet Ke Do Hoa 2D Photoshop Lightroom Illustrator** `workstation-thiet-ke-do-hoa-2d-photoshop-lightroom-illustrator` (Level 0) — **0** sản phẩm
+- **Ghe Tren 10 Trieu** `ghe-tren-10-trieu` (Level 0) — **0** sản phẩm
+- **Leopold Fc980M Series** `leopold-fc980m-series` (Level 0) — **0** sản phẩm
+- **Ghe Cougar Armor Titan Pro Series** `ghe-cougar-armor-titan-pro-series` (Level 0) — **0** sản phẩm
+- **Chuot Khong Day Logitech M650** `chuot-khong-day-logitech-m650` (Level 0) — **0** sản phẩm
+- **Vga Rtx 5080** `vga-rtx-5080` (Level 0) — **0** sản phẩm
+- **Lot Chuot Asus** `lot-chuot-asus` (Level 0) — **0** sản phẩm
+- **Msi Mag Ch130 Series** `msi-mag-ch130-series` (Level 0) — **0** sản phẩm
+- **Ssd Pcie 4 0** `ssd-pcie-4-0` (Level 0) — **0** sản phẩm
+- **Ddr4 16G** `ddr4-16g` (Level 0) — **0** sản phẩm
+- **Ram Ddr5 64Gb** `ram-ddr5-64gb` (Level 0) — **0** sản phẩm
+- **Chuot Fps** `chuot-fps` (Level 0) — **0** sản phẩm
+- **De Tan Nhiet Laptop** `de-tan-nhiet-laptop` (Level 0) — **0** sản phẩm
+- **Game Ps4 Ban Quyen** `game-ps4-ban-quyen` (Level 0) — **0** sản phẩm
+- **Phim Chuot Apple** `phim-chuot-apple` (Level 0) — **0** sản phẩm
+- **The Nho** `the-nho` (Level 0) — **0** sản phẩm
+  - **The Nho Usb** `the-nho-usb` (Level 1) — **0** sản phẩm
+    - **The Nho Usb Sandisk** `the-nho-usb-sandisk` (Level 2) — **0** sản phẩm
+- **Pc Amd Ryzen 7** `pc-amd-ryzen-7` (Level 0) — **0** sản phẩm
+- **Tan Nhiet Nuoc** `tan-nhiet-nuoc` (Level 0) — **0** sản phẩm
+  - **Tan Nhiet Nuoc 240Mm** `tan-nhiet-nuoc-240mm` (Level 1) — **0** sản phẩm
+  - **Tan Nhiet Nuoc Aio Nzxt** `tan-nhiet-nuoc-aio-nzxt` (Level 1) — **0** sản phẩm
+  - **Tan Nhiet Nuoc 280Mm** `tan-nhiet-nuoc-280mm` (Level 1) — **0** sản phẩm
+  - **Tan Nhiet Nuoc 360Mm** `tan-nhiet-nuoc-360mm` (Level 1) — **0** sản phẩm
+  - **Tan Nhiet Nuoc 120Mm** `tan-nhiet-nuoc-120mm` (Level 1) — **0** sản phẩm
+  - **Tan Nhiet Nuoc 420Mm** `tan-nhiet-nuoc-420mm` (Level 1) — **0** sản phẩm
+- **May Tinh Dong Bo** `may-tinh-dong-bo` (Level 0) — **0** sản phẩm
+- **Kingston Ssd** `kingston-ssd` (Level 0) — **0** sản phẩm
+- **Rog Phone 6 12 256** `rog-phone-6-12-256` (Level 0) — **0** sản phẩm
+- **Xa Kho Phu Kien** `xa-kho-phu-kien` (Level 0) — **0** sản phẩm
+- **Lot Chuot Mem** `lot-chuot-mem` (Level 0) — **0** sản phẩm
+- **Chuot Tren 3 Trieu** `chuot-tren-3-trieu` (Level 0) — **0** sản phẩm
+- **Aimesh Wifi System** `aimesh-wifi-system` (Level 0) — **0** sản phẩm
+- **Flash Sale D5** `flash-sale-d5` (Level 0) — **0** sản phẩm
+- **Gtx 1660 Series Rtx 2060 Series** `gtx-1660-series-rtx-2060-series` (Level 0) — **0** sản phẩm
+- **Mac Mini** `mac-mini` (Level 0) — **0** sản phẩm
+  - **Mac Mini M2** `mac-mini-m2` (Level 1) — **0** sản phẩm
+- **Cpu Intel Core Ultra Series 2** `cpu-intel-core-ultra-series-2` (Level 0) — **0** sản phẩm
+- **Leopold Fc660M Series** `leopold-fc660m-series` (Level 0) — **0** sản phẩm
+- **Dxracer G Series Oh** `dxracer-g-series-oh` (Level 0) — **0** sản phẩm
+- **Mainboard Intel H510** `mainboard-intel-h510` (Level 0) — **0** sản phẩm
+- **Combo Gaming Gear Chun Li** `combo-gaming-gear-chun-li` (Level 0) — **0** sản phẩm
+- **Hdd 6Tb** `hdd-6tb` (Level 0) — **0** sản phẩm
+- **Tan Nhiet Khi** `tan-nhiet-khi` (Level 0) — **0** sản phẩm
+- **Pc75B Series** `pc75b-series` (Level 0) — **0** sản phẩm
+- **Hdd 8Tb** `hdd-8tb` (Level 0) — **0** sản phẩm
+- **Intel Xeon** `intel-xeon` (Level 0) — **0** sản phẩm
+- **Ghe Corsair** `ghe-corsair` (Level 0) — **0** sản phẩm
+  - **Ghe Corsair T3 Rush Series** `ghe-corsair-t3-rush-series` (Level 1) — **0** sản phẩm
+- **Prm Laptop Acer** `prm-laptop-acer` (Level 0) — **0** sản phẩm
+- **Cpu 10Th Gen** `cpu-10th-gen` (Level 0) — **0** sản phẩm
+- **Vga Gtx 1650 4G** `vga-gtx-1650-4g` (Level 0) — **0** sản phẩm
+- **Deal Hot 40 Serie** `deal-hot-40-serie` (Level 0) — **0** sản phẩm
+- **Ban Cth Warrior** `ban-cth-warrior` (Level 0) — **0** sản phẩm
+
+---
+*Tạo bởi `server/scripts/build-strict-category-report.js`.*

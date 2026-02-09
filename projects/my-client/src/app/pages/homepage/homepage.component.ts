@@ -124,9 +124,13 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   activeHotspot = signal<Hotspot | null>(null);
   /** Bật sau khi intro xong một chút để hai khối hero text trượt vào bằng transition (tránh lần 2 ẩn không trượt) */
   heroTextVisible = signal(false);
+  /** 0 = bộ chữ đầu (Khám phá/Cá nhân hóa), 1 = bộ chữ thứ hai (Bước vào/Trải nghiệm) – luân phiên sau ~2s khi gõ xong */
+  heroHeaderSet = signal(0);
   loadProgress = signal(0);
   /** Trên mobile không load 3D model (tránh WASM OOM), chỉ hiện scene nền */
   private isMobile = false;
+  private headerCycleTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private headerCycleIntervalId: ReturnType<typeof setInterval> | null = null;
 
   /* Build hotspots from config */
   hotspots: Hotspot[] = HOTSPOT_CONFIG.map(cfg => ({
@@ -173,7 +177,8 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   productImageUrl(p: Product): string {
     const img = p.images?.[0];
-    return img?.url || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
+    const url = typeof img === 'string' ? img : (img as { url?: string })?.url;
+    return url || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
   }
   productPrice(p: Product): number { return p.salePrice ?? p.price; }
   blogCoverUrl(b: BlogPost): string { return b.coverImage || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png'; }
@@ -495,6 +500,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.heroTextVisible.set(true);
         this.cdr.detectChanges();
+        this.startHeaderCycle();
       }, 450);
     }, exitDelay);
   }
@@ -597,7 +603,25 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     els.forEach(el => this.observer!.observe(el));
   }
 
+  /** Sau khi 2 dòng header gõ xong (~2.1s), đợi 2s rồi đổi sang bộ chữ kia; xong lại đợi 2s rồi đổi lại – lặp mãi */
+  private startHeaderCycle(): void {
+    if (!this.isBrowser) return;
+    const typewriterDuration = 2100; // line1 + line2 ~2.1s
+    const pauseAfterType = 2000;
+    const cycleMs = typewriterDuration + pauseAfterType;
+    this.headerCycleTimeoutId = setTimeout(() => {
+      this.heroHeaderSet.set(1);
+      this.cdr.detectChanges();
+      this.headerCycleIntervalId = setInterval(() => {
+        this.heroHeaderSet.update(v => 1 - v);
+        this.cdr.detectChanges();
+      }, cycleMs);
+    }, cycleMs);
+  }
+
   ngOnDestroy(): void {
+    if (this.headerCycleTimeoutId != null) clearTimeout(this.headerCycleTimeoutId);
+    if (this.headerCycleIntervalId != null) clearInterval(this.headerCycleIntervalId);
     if (this.animationId) cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.onResize);
     this.observer?.disconnect();

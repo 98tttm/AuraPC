@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Product } from './api.service';
+import { Product, productDisplayPrice } from './api.service';
 
 export interface CartItem {
   product: Product;
@@ -14,7 +14,7 @@ export class CartService {
 
   cartCount = computed(() => this.items().reduce((sum, i) => sum + i.qty, 0));
   cartTotal = computed(() =>
-    this.items().reduce((sum, i) => sum + (i.product.salePrice ?? i.product.price) * i.qty, 0)
+    this.items().reduce((sum, i) => sum + productDisplayPrice(i.product) * i.qty, 0)
   );
 
   private loadFromStorage(): CartItem[] {
