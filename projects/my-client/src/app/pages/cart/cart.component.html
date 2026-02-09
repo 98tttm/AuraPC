@@ -1,0 +1,117 @@
+<section class="cart-page">
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1 class="cart-title">GIỎ HÀNG CỦA BẠN</h1>
+            <span class="cart-count">({{ cartCount() }})</span>
+        </div>
+
+        @if (cartItems().length === 0) {
+        <div class="cart-empty">
+            <p>Giỏ hàng của bạn đang trống</p>
+            <a routerLink="/san-pham" class="btn btn--primary">Tiếp tục mua sắm</a>
+        </div>
+        } @else {
+        <div class="cart-layout">
+            <!-- Cart Items List -->
+            <div class="cart-items">
+                <div class="cart-table-header">
+                    <div class="col-prod">Sản phẩm</div>
+                    <div class="col-price">Đơn giá</div>
+                    <div class="col-qty">Số lượng</div>
+                    <div class="col-total">Thành tiền</div>
+                    <div class="col-action"></div>
+                </div>
+
+                @for (item of cartItems(); track item.product._id) {
+                <div class="cart-item">
+                    <div class="cart-item__prod">
+                        <div class="cart-item__img-wrap">
+                            <img [src]="getImage(item.product)" [alt]="item.product.name" />
+                        </div>
+                        <div class="cart-item__info">
+                            <h3 class="cart-item__name">
+                                <a [routerLink]="['/san-pham', item.product._id]">{{ item.product.name }}</a>
+                            </h3>
+                            @if (hasSale(item.product)) {
+                            <span class="cart-item__sale-tag">-{{ salePercent(item.product) }}%</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="cart-item__price">
+                        <span class="price-current">{{ getPrice(item.product) | number:'1.0-0' }}₫</span>
+                        @if (hasSale(item.product)) {
+                        <span class="price-old">{{ item.product.price | number:'1.0-0' }}₫</span>
+                        }
+                    </div>
+
+                    <div class="cart-item__qty">
+                        <div class="qty-control">
+                            <button (click)="decreaseQty(item.product._id!)">−</button>
+                            <input type="number" [value]="item.qty" readonly />
+                            <button (click)="increaseQty(item.product._id!)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="cart-item__total">
+                        {{ getPrice(item.product) * item.qty | number:'1.0-0' }}₫
+                    </div>
+
+                    <div class="cart-item__action">
+                        <button class="btn-remove" (click)="remove(item.product._id!)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Order Summary -->
+            <div class="cart-sidebar">
+                <div class="cart-summary">
+                    <h3 class="summary-title">TÓM TẮT ĐƠN HÀNG</h3>
+
+                    <div class="summary-row">
+                        <span>Tạm tính</span>
+                        <span>{{ cartTotal() | number:'1.0-0' }}₫</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Thành tiền</span>
+                        <span class="summary-total">{{ cartTotal() | number:'1.0-0' }}₫</span>
+                    </div>
+
+                    <div class="summary-note">
+                        (Đã bao gồm VAT nếu có)
+                    </div>
+
+                    <a routerLink="/checkout" class="btn btn--checkout">THANH TOÁN</a>
+
+                    <a routerLink="/san-pham" class="btn btn--continue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Tiếp tục mua hàng
+                    </a>
+
+                    <div class="payment-methods">
+                        <img src="assets/figma/515c49e4ff04f92775dfa684cb71aab58d94394c.png" alt="Momo" />
+                        <img src="assets/figma/2fa2c0072b5eed1fbba69aed2773ab02e7354df4.png" alt="ATM" />
+                        <img src="assets/figma/892e22da16197098391a26772aa96ffd9a832813.png" alt="Visa" />
+                        <img src="assets/figma/d6ae29042e93314bb9c94bd274147d405a51220c.png" alt="Master" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>

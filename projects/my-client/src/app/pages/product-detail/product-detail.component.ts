@@ -17,8 +17,11 @@ export class ProductDetailComponent {
   private sanitizer = inject(DomSanitizer);
 
   product = signal<Product | null>(null);
+  currentImage = signal<string>('');
   loading = signal(true);
   error = signal(false);
+  showFullDesc = signal(false);
+  showSpecsModal = signal(false);
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -30,6 +33,7 @@ export class ProductDetailComponent {
     this.api.getProductBySlug(slug).subscribe({
       next: (p) => {
         this.product.set(p);
+        this.currentImage.set(productMainImage(p));
         this.loading.set(false);
       },
       error: () => {
@@ -41,6 +45,38 @@ export class ProductDetailComponent {
 
   mainImage(p: Product): string {
     return productMainImage(p);
+  }
+
+  /** Danh sách ảnh gallery (bao gồm ảnh chính). */
+  imageList(p: Product): string[] {
+    if (!p.images || !p.images.length) return [];
+    return p.images.map((img) => (typeof img === 'string' ? img : img.url));
+  }
+
+  selectImage(img: string) {
+    this.currentImage.set(img);
+  }
+
+  prevImage() {
+    const p = this.product();
+    if (!p) return;
+    const list = this.imageList(p);
+    if (!list.length) return;
+    const current = this.currentImage();
+    const idx = list.indexOf(current);
+    const prevIdx = (idx - 1 + list.length) % list.length;
+    this.currentImage.set(list[prevIdx]);
+  }
+
+  nextImage() {
+    const p = this.product();
+    if (!p) return;
+    const list = this.imageList(p);
+    if (!list.length) return;
+    const current = this.currentImage();
+    const idx = list.indexOf(current);
+    const nextIdx = (idx + 1) % list.length;
+    this.currentImage.set(list[nextIdx]);
   }
 
   displayPrice(p: Product): number {
@@ -83,5 +119,72 @@ export class ProductDetailComponent {
     return Object.entries(specs)
       .filter(([, v]) => v != null && String(v).trim() !== '')
       .map(([key, value]) => ({ key, value: String(value) }));
+  }
+
+  /** Thông số tóm tắt hiển thị ở phần info (CPU, VGA, RAM, SSD, Màn hình). */
+  shortSpecs(p: Product): { label: string; value: string }[] {
+    const s = (p.specs ?? p.techSpecs ?? {}) as Record<string, string>;
+    const keys = [
+      { label: 'CPU', find: ['CPU', 'Vi xử lý', 'Chipset'] },
+      { label: 'RAM', find: ['RAM', 'Bộ nhớ trong', 'Memory'] },
+      { label: 'Ổ cứng', find: ['Ổ cứng', 'SSD', 'Storage'] },
+      { label: 'VGA', find: ['VGA', 'Card đồ họa', 'GPU'] },
+      { label: 'Màn hình', find: ['Màn hình', 'Display', 'LCD'] },
+    ];
+    const res: { label: string; value: string }[] = [];
+    for (const k of keys) {
+      for (const f of k.find) {
+        // Tìm key (case insensitive)
+        const foundKey = Object.keys(s).find((sk) => sk.toLowerCase() === f.toLowerCase());
+        if (foundKey && s[foundKey]) {
+          res.push({ label: k.label, value: String(s[foundKey]) });
+          break; // Tìm thấy 1 key ưu tiên thì dừng
+        }
+      }
+    }
+    return res;
+  }
+
+  brandName(p: Product): string {
+    if (p.brand) return p.brand;
+    // Extract from name or category
+    if (p.category?.name) {
+      if (p.category.name.toLowerCase().includes('asus')) return 'ASUS';
+      if (p.category.name.toLowerCase().includes('acer')) return 'ACER';
+      if (p.category.name.toLowerCase().includes('msi')) return 'MSI';
+      if (p.category.name.toLowerCase().includes('dell')) return 'DELL';
+      if (p.category.name.toLowerCase().includes('hp')) return 'HP';
+      if (p.category.name.toLowerCase().includes('lenovo')) return 'LENOVO';
+      if (p.category.name.toLowerCase().includes('apple')) return 'APPLE';
+    }
+    const name = p.name.toUpperCase();
+    if (name.startsWith('ASUS')) return 'ASUS';
+    if (name.startsWith('ACER')) return 'ACER';
+    if (name.startsWith('MSI')) return 'MSI';
+    if (name.startsWith('DELL')) return 'DELL';
+    if (name.startsWith('HP')) return 'HP';
+    if (name.startsWith('LENOVO')) return 'LENOVO';
+    if (name.startsWith('MACBOOK') || name.startsWith('APPLE')) return 'APPLE';
+    if (name.startsWith('GIGABYTE')) return 'GIGABYTE';
+    return 'Khác';
+  }
+
+  sku(p: Product): string {
+    return p.product_id ?? p._id?.substring(0, 8).toUpperCase() ?? 'N/A';
+  }
+
+  toggleDesc() {
+    this.showFullDesc.update((v) => !v);
+  }
+
+  toggleSpecsModal() {
+    this.showSpecsModal.update((v) => !v);
+  }
+
+  get visibleSpecEntries(): { key: string; value: string }[] {
+    const p = this.product();
+    if (!p) return [];
+    const all = this.specEntries(p);
+    return all.slice(0, 10); // Show only first 10 rows initially
   }
 }

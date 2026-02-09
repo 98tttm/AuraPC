@@ -93,7 +93,7 @@ import { ApiService, productDisplayPrice, productMainImage } from '../../core/se
     </section>
   `,
   styles: [`
-    .checkout-page { padding: 2rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
+    .checkout-page { padding: 5.5rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
     .checkout-title { font-size: 2rem; margin-bottom: 2rem; color: var(--text-primary, #fff); }
     .checkout-content { display: grid; gap: 2rem; }

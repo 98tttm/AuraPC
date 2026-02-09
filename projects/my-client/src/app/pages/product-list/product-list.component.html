@@ -706,20 +706,41 @@
             <span class="pl-card__discount">Giảm {{ salePercent(p) }}%</span>
             }
           </div>
-          @if (getSpecLines(p).length) {
-          <div class="pl-card__specs">
-            @for (line of getSpecLines(p); track line.label + line.value) {
-            <span class="pl-card__spec">{{ line.value }}</span>
+
+          <!-- Feature Icons Grid or Specs -->
+          @if (getFeatureIcons(p); as feats) {
+          <div class="pl-card__feats">
+            @for (f of feats; track f.label) {
+            <div class="pl-card__feat-item" [title]="f.label + ': ' + f.value">
+              <span class="pl-card__feat-icon" [class]="'icon-' + f.icon"></span>
+              <span class="pl-card__feat-val">{{ f.value }}</span>
+            </div>
             }
           </div>
           }
+
           <h3 class="pl-card__name">{{ p.name }}</h3>
+
+          <!-- Rating -->
+          <div class="pl-card__rating">
+            @let r = getRating(p);
+            <div class="pl-card__stars">
+              @for (s of getStarArray(r.stars); track $index) {
+              <span class="pl-card__star" [class.full]="s===1" [class.half]="s===0.5">★</span>
+              }
+            </div>
+            <span class="pl-card__review-count">({{ r.count }})</span>
+          </div>
+
           <div class="pl-card__price">
             <span class="pl-card__price-current">{{ priceLabel(p) }}</span>
             @if (oldPriceLabel(p)) {
             <span class="pl-card__price-old">{{ oldPriceLabel(p) }}</span>
             }
           </div>
+          <button class="pl-card__btn-buy" (click)="addToCart($event, p)">
+            Chọn mua
+          </button>
         </a>
         }
       </div>

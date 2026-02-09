@@ -32,6 +32,8 @@ export interface Product {
   active?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 /** Lấy URL ảnh chính từ product (hỗ trợ images là string[] hoặc {url}[]). */

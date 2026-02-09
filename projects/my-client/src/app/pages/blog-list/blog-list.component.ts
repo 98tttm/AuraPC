@@ -45,7 +45,7 @@ import { ApiService, BlogPost } from '../../core/services/api.service';
     </section>
   `,
   styles: [`
-    .blog-page { padding: 2rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
+    .blog-page { padding: 5.5rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
     .page-title { font-size: 2rem; margin-bottom: 2rem; color: var(--text-primary, #fff); }
     .loading { text-align: center; padding: 4rem 0; color: var(--text-secondary, #888); }

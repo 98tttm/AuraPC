@@ -40,7 +40,7 @@ import { ApiService, BlogPost } from '../../core/services/api.service';
     </section>
   `,
   styles: [`
-    .blog-detail { padding: 2rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
+    .blog-detail { padding: 5.5rem 0 4rem; min-height: 60vh; background: var(--bg-primary, #0a0a0f); }
     .container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
     .loading { text-align: center; padding: 4rem 0; color: var(--text-secondary, #888); }
     .not-found { text-align: center; padding: 4rem 0; }

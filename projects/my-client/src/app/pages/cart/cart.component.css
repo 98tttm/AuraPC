@@ -1,0 +1,344 @@
+/* Global Cart Page */
+.cart-page {
+    background-color: #000;
+    color: #fff;
+    min-height: 100vh;
+    padding: 2rem 0 4rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.cart-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Header */
+.cart-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.cart-title {
+    font-size: 36px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.cart-count {
+    font-size: 1.25rem;
+    color: #888;
+}
+
+.cart-empty {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.cart-empty-img {
+    max-width: 200px;
+    margin-bottom: 1.5rem;
+}
+
+/* Layout */
+.cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    align-items: start;
+}
+
+/* Cart Items */
+.cart-items {
+    background: transparent;
+}
+
+.cart-table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 50px;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #888;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 50px;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+}
+
+.cart-item__prod {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.cart-item__img-wrap {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.cart-item__img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-item__name {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0 0 0.25rem;
+}
+
+.cart-item__name a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.cart-item__name a:hover {
+    color: #FF6D2D;
+}
+
+.cart-item__sale-tag {
+    display: inline-block;
+    background: #FF6D2D;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.cart-item__price {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-current {
+    color: #fff;
+    font-weight: 500;
+}
+
+.price-old {
+    color: #888;
+    text-decoration: line-through;
+    font-size: 0.9rem;
+}
+
+.qty-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #444;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.qty-control button {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-control button:hover {
+    background: #333;
+}
+
+.qty-control input {
+    width: 40px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    outline: none;
+}
+
+.cart-item__total {
+    color: #FF6D2D;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.btn-remove {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-remove:hover {
+    color: #FF6D2D;
+}
+
+/* Sidebar Summary */
+.cart-sidebar {
+    position: sticky;
+    top: 2rem;
+}
+
+.cart-summary {
+    background: #111;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.summary-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #333;
+    text-transform: uppercase;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #ddd;
+}
+
+.summary-total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FF6D2D;
+}
+
+.summary-note {
+    font-size: 0.9rem;
+    color: #888;
+    text-align: right;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.btn--checkout {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: #003b8e;
+    /* Blue from Figma */
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+}
+
+.btn--checkout:hover {
+    background: #002a66;
+}
+
+.btn--continue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+    text-align: center;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn--continue:hover {
+    border-color: #FF6D2D;
+    color: #FF6D2D;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .cart-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-table-header {
+        display: none;
+        /* Hide header on mobile */
+    }
+
+    .cart-item {
+        grid-template-columns: 80px 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0.5rem 1rem;
+        position: relative;
+        padding: 1rem 0;
+    }
+
+    .cart-item__prod {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .cart-item__img-wrap {
+        width: 60px;
+        height: 60px;
+    }
+
+    .cart-item__price {
+        grid-column: 2;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .cart-item__qty {
+        grid-column: 2;
+        margin-top: 0.5rem;
+    }
+
+    .cart-item__total {
+        position: absolute;
+        bottom: 1rem;
+        right: 0;
+    }
+
+    .cart-item__action {
+        position: absolute;
+        top: 1rem;
+        right: 0;
+    }
+}

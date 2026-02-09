@@ -1,50 +1,190 @@
 <div class="pd-page">
-  @if (loading()) {
-    <div class="pd-loading">Đang tải...</div>
-  } @else if (error() || !product()) {
+  <div class="pd-container">
+    @if (loading()) {
+    <div class="pd-loading">
+      <div class="pd-spinner"></div>
+      <p>Đang tải dữ liệu sản phẩm...</p>
+    </div>
+    } @else if (error() || !product()) {
     <div class="pd-error">
-      <p>Không tìm thấy sản phẩm.</p>
+      <p>Không tìm thấy sản phẩm hoặc có lỗi xảy ra.</p>
       <a routerLink="/san-pham" class="pd-back">← Quay lại danh sách</a>
     </div>
-  } @else {
+    } @else {
     @let p = product()!;
-    <a routerLink="/san-pham" class="pd-back pd-back--top">← Danh sách sản phẩm</a>
-    <article class="pd-main">
-      <div class="pd-gallery">
-        <img [src]="mainImage(p)" [alt]="p.name" class="pd-img" />
-      </div>
-      <div class="pd-info">
-        @if (p.category?.name) {
-          <p class="pd-cat">{{ p.category?.name }}</p>
-        }
-        <h1 class="pd-title">{{ p.name }}</h1>
-        <div class="pd-price">
-          @if (hasSale(p)) {
-            <span class="pd-price-old">{{ oldPriceLabel(p) }}</span>
-            <span class="pd-price-current">{{ priceLabel(p) }}</span>
-            <span class="pd-price-badge">Giảm {{ salePercent(p) }}%</span>
-          } @else {
-            <span class="pd-price-current">{{ priceLabel(p) }}</span>
+    <nav class="pd-breadcrumb">
+      <a routerLink="/">Trang chủ</a>
+      @if (p.category) {
+      <span class="pd-sep">/</span>
+      <a [routerLink]="['/san-pham']" [queryParams]="{category: p.category.slug || p.category.category_id}">{{
+        p.category.name }}</a>
+      } @else {
+      <span class="pd-sep">/</span>
+      <a routerLink="/san-pham">Sản phẩm</a>
+      }
+      <span class="pd-sep">/</span>
+      <span class="pd-crumb-current">{{ p.name }}</span>
+    </nav>
+
+    <!-- Top Section -->
+    <div class="pd-top">
+      <!-- Left: Gallery -->
+      <div class="pd-gallery-section">
+        <div class="pd-main-img-wrap">
+          <img [src]="currentImage()" class="pd-main-img" [alt]="p.name" />
+          @if (imageList(p).length > 1) {
+          <button class="pd-img-nav prev" (click)="prevImage()">❮</button>
+          <button class="pd-img-nav next" (click)="nextImage()">❯</button>
           }
         </div>
-        @if (specEntries(p).length) {
-          <table class="pd-specs">
+        <div class="pd-thumbs">
+          @for (img of imageList(p); track img) {
+          <button class="pd-thumb" [class.active]="currentImage() === img" (click)="selectImage(img)">
+            <img [src]="img" [alt]="p.name" />
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Right: Info -->
+      <div class="pd-info-section">
+        <h1 class="pd-title">{{ p.name }}</h1>
+
+        <div class="pd-meta">
+          <span class="pd-meta-item">Thương hiệu: <strong>{{ brandName(p) }}</strong></span>
+          <span class="pd-meta-sep">|</span>
+          <span class="pd-meta-item">Tình trạng: <span class="pd-stock in-stock">Còn hàng</span></span>
+          <span class="pd-meta-sep">|</span>
+          <span class="pd-meta-item">SKU: {{ sku(p) }}</span>
+        </div>
+
+        <div class="pd-price-box">
+          <div class="pd-price-row">
+            <span class="pd-label">Giá bán:</span>
+            <span class="pd-price-current">{{ priceLabel(p) }}</span>
+            @if (hasSale(p)) {
+            <span class="pd-price-old">{{ oldPriceLabel(p) }}</span>
+            <span class="pd-discount">-{{ salePercent(p) }}%</span>
+            }
+          </div>
+          <div class="pd-vat-note">(Đã bao gồm VAT)</div>
+        </div>
+
+        @if (shortSpecs(p).length) {
+        <div class="pd-short-features">
+          <div class="pd-feature-title">Đặc điểm nổi bật:</div>
+          <ul class="pd-feature-list">
+            @for (s of shortSpecs(p); track s.label) {
+            <li>
+              <span class="pd-check-icon">✔</span>
+              <strong>{{ s.label }}:</strong> {{ s.value }}
+            </li>
+            }
+          </ul>
+        </div>
+        }
+
+        <div class="pd-promo-box">
+          <div class="pd-promo-header">🎁 KHUYẾN MÃI ĐẶC BIỆT</div>
+          <div class="pd-promo-content">
+            <ul>
+              <li>Hỗ trợ trả góp 0% lãi suất qua thẻ tín dụng.</li>
+              <li>Tặng Balo Gaming cao cấp (khi mua Laptop).</li>
+              <li>Miễn phí vệ sinh máy trọn đời.</li>
+              <li>Giảm giá 5% khi mua kèm Gear.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="pd-btn pd-btn-buy">
+            <span class="pd-btn-title">MUA NGAY</span>
+            <span class="pd-btn-desc">Giao hàng tận nơi hoặc nhận tại cửa hàng</span>
+          </button>
+          <button class="pd-btn pd-btn-cart">
+            <span class="pd-btn-title">THÊM VÀO GIỎ</span>
+            <span class="pd-btn-desc">Thêm vào giỏ để chọn tiếp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="pd-content-layout">
+      <!-- Main Content (Left) -->
+      <div class="pd-main-content">
+        <div class="pd-content-block">
+          <h2 class="pd-block-title">Đặc điểm nổi bật</h2>
+          @if (descriptionSafe(p); as safeHtml) {
+          <div class="pd-desc-container" [class.expanded]="showFullDesc()">
+            <div class="pd-html-content" [innerHTML]="safeHtml"></div>
+            @if (!showFullDesc()) {
+            <div class="pd-desc-mask"></div>
+            }
+          </div>
+          <div class="pd-desc-actions">
+            <button class="pd-view-more-btn" (click)="toggleDesc()">
+              {{ showFullDesc() ? 'Thu gọn nội dung' : 'Xem thêm đánh giá' }}
+            </button>
+          </div>
+          } @else {
+          <div class="pd-no-content">
+            <p>Thông tin chi tiết đang được cập nhật.</p>
+            @if (p.shortDescription) {
+            <p>{{ p.shortDescription }}</p>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Sidebar Specs (Right) -->
+      <aside class="pd-sidebar-specs">
+        <div class="pd-specs-box">
+          <h2 class="pd-specs-header">Thông số kỹ thuật</h2>
+          <table class="pd-specs-table">
             <tbody>
-              @for (row of specEntries(p); track row.key) {
-                <tr>
-                  <th class="pd-specs__key">{{ row.key }}</th>
-                  <td class="pd-specs__value" [innerHTML]="row.value"></td>
-                </tr>
+              @for (row of visibleSpecEntries; track row.key; let odd = $odd) {
+              <tr [class.odd]="odd">
+                <th>{{ row.key }}</th>
+                <td>{{ row.value }}</td>
+              </tr>
               }
             </tbody>
           </table>
-        }
-        @if (descriptionSafe(p); as safeHtml) {
-          <div class="pd-desc" [innerHTML]="safeHtml"></div>
-        } @else if (p.shortDescription) {
-          <div class="pd-desc">{{ p.shortDescription }}</div>
-        }
+          <div class="pd-specs-actions">
+            <button class="pd-view-full-specs" (click)="toggleSpecsModal()">
+              ⚙ Chi tiết thông số kỹ thuật
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Specs Modal -->
+    @if (showSpecsModal()) {
+    <div class="pd-modal-overlay" (click)="toggleSpecsModal()">
+      <div class="pd-modal-content" (click)="$event.stopPropagation()">
+        <div class="pd-modal-header">
+          <h3>Thông số kỹ thuật chi tiết</h3>
+          <button class="pd-modal-close" (click)="toggleSpecsModal()">×</button>
+        </div>
+        <div class="pd-modal-body">
+          <h4 class="pd-modal-prod-name">{{ p.name }}</h4>
+          <table class="pd-specs-table pd-table-full">
+            <tbody>
+              @for (row of specEntries(p); track row.key; let odd = $odd) {
+              <tr [class.odd]="odd">
+                <th>{{ row.key }}</th>
+                <td>{{ row.value }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
-    </article>
-  }
+    </div>
+    }
+    }
+  </div>
 </div>

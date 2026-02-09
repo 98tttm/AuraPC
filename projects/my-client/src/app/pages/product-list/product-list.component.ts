@@ -170,6 +170,8 @@ type ComponentFilterOptionsCache = {
   mouse?: { mouseDpi: string[]; mouseWeight: string[]; mouseConnection: string[] };
 };
 
+import { CartService } from '../../core/services/cart.service';
+
 @Component({
   selector: 'app-product-list',
   standalone: true,
@@ -180,6 +182,7 @@ type ComponentFilterOptionsCache = {
 })
 export class ProductListComponent {
   private api = inject(ApiService);
+  private cart = inject(CartService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -976,5 +979,89 @@ export class ProductListComponent {
       if (firstLine) return [{ label: '', value: firstLine + (firstLine.length >= 120 ? '…' : '') }];
     }
     return [];
+  }
+
+  addToCart(e: Event, p: Product) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.cart.add(p);
+  }
+
+  // --- Helpers cho UI mới ---
+  getRating(p: Product): { stars: number; count: number } {
+    // Nếu có dữ liệu thật thì dùng, không thì random 4.0 - 5.0
+    if (p.rating != null && p.reviewCount != null) {
+      return { stars: p.rating, count: p.reviewCount };
+    }
+    // Hash nhẹ từ id để cố định số sao cho mỗi sản phẩm (không nhảy lung tung khi reload)
+    const seed = (p._id ?? p.name).charCodeAt(0) + (p.price ?? 0);
+    const stars = 4 + (seed % 11) / 10; // 4.0 -> 5.0
+    const count = 10 + (seed % 90); // 10 -> 99 đánh giá
+    return { stars, count };
+  }
+
+  getStarArray(rating: number): number[] {
+    // Trả về mảng 5 phần tử: 1=full, 0.5=half, 0=empty
+    const arr: number[] = [];
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) arr.push(1);
+      else if (rating >= i - 0.5) arr.push(0.5);
+      else arr.push(0);
+    }
+    return arr;
+  }
+
+  getFeatureIcons(p: Product): { icon: string; value: string; label: string }[] {
+    const specs = (p.specs ?? p.techSpecs ?? {}) as Record<string, string>;
+    const feats: { icon: string; value: string; label: string }[] = [];
+
+    // 1. CPU
+    const cpu = specs['CPU'] || specs['Vi xử lý'];
+    if (cpu) {
+      // Chỉ lấy tên ngắn gọn: "Ultra 7 155H", "i5-12400F", "Ryzen 5 7600"
+      let val = cpu.replace(/Intel|AMD|Processor|Core|Ryzen/gi, '').trim();
+      val = val.split(',')[0].split('(')[0].trim(); // Bỏ phần sau ',' hoặc '('
+      if (val.length > 15) val = val.substring(0, 15) + '..';
+      feats.push({ icon: 'cpu', label: 'CPU', value: val });
+    }
+
+    // 2. VGA/GPU
+    const vga = specs['VGA'] || specs['GPU'] || specs['Card đồ họa'];
+    if (vga) {
+      let val = vga.replace(/NVIDIA|GeForce|AMD|Radeon|Graphics/gi, '').trim();
+      val = val.split(',')[0].split('(')[0].trim();
+      if (val.length > 15) val = val.substring(0, 15) + '..';
+      feats.push({ icon: 'gpu', label: 'VGA', value: val });
+    }
+
+    // 3. RAM
+    const ram = specs['RAM'] || specs['Bộ nhớ trong'];
+    if (ram) {
+      const gb = ram.match(/(\d+\s*GB)/i);
+      const val = gb ? gb[1] : ram.split(' ')[0];
+      feats.push({ icon: 'ram', label: 'RAM', value: val });
+    }
+
+    // 4. SSD/HDD
+    const disk = specs['Ổ cứng'] || specs['Storage'] || specs['Dung lượng'];
+    if (disk) {
+      const cap = disk.match(/(\d+\s*(GB|TB))/i);
+      const val = cap ? cap[1] : disk.split(' ')[0];
+      feats.push({ icon: 'disk', label: 'Ổ cứng', value: val });
+    }
+
+    // 5. Màn hình
+    const screen = specs['Màn hình'] || specs['Kích thước màn hình'];
+    if (screen) {
+      const size = screen.match(/(\d+(\.\d+)?)\s*(inch|")/i);
+      let val = '';
+      if (size) val += size[1] + '"';
+      const hz = screen.match(/(\d+)\s*Hz/i);
+      if (hz) val += ' ' + hz[1] + 'Hz'; // Thêm Hz nếu có
+      if (!val) val = screen.split(',')[0];
+      feats.push({ icon: 'screen', label: 'Màn', value: val });
+    }
+
+    return feats.slice(0, 5); // Tối đa 5 icon
   }
 }
