@@ -1,0 +1,300 @@
+/* Main Layout */
+:host {
+    display: block;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'Inter', sans-serif;
+    color: #fff;
+}
+
+.builder-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #222;
+    z-index: 10;
+    flex-shrink: 0;
+    padding-bottom: 20px;
+    /* Add bottom padding to create space */
+}
+
+.logo-container {
+    padding: 24px;
+}
+
+.logo {
+    height: 48px;
+    /* Adjust based on logo aspect ratio */
+    width: auto;
+}
+
+.nav-menu {
+    flex: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.nav-item {
+    padding: 16px 32px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    /* Reduced rounding */
+    margin: 0 2px;
+    /* Spacing for rounded look */
+}
+
+.nav-item:hover {
+    color: #fff;
+    background-color: #111;
+}
+
+.nav-item.active {
+    color: #000;
+    /* Black text for white background */
+    background-color: #ffffff;
+    /* White background as requested */
+    border-left: 4px solid #fff;
+    /* Border same as bg or maybe blue? User said "bam vao thanh mau trang". */
+    /* Let's keep a subtle blue indicator or just pure white?
+       "hay cho casi bam vao thanh mau trang nhe" -> Make the clicked one white.
+       Usually implies white background, black text.
+     */
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* Pop out a bit */
+}
+
+.sidebar-footer {
+    padding: 24px;
+    border-top: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+    /* Ensure footer pushes to bottom if not already */
+    padding-bottom: 40px;
+    /* Extra space at bottom as requested */
+}
+
+.sidebar-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 12px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+    /* Reduced rounding */
+}
+
+.sidebar-btn:hover {
+    border-color: #fff;
+}
+
+.sidebar-btn.reset {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    border: none;
+    color: #666;
+}
+
+.sidebar-btn.reset:hover {
+    color: #fff;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    position: relative;
+    background-color: #ffffff;
+    /* White background */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    /* Dark text */
+}
+
+/* Background Pattern (Triangular Mesh) - Adjusted for White BG */
+.bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.05;
+    /* Faint grey */
+    background-image:
+        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(150deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(150deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(60deg, #333 25%, transparent 25.5%, transparent 75%, #333 75%, #333),
+        linear-gradient(60deg, #333 25%, transparent 25.5%, transparent 75%, #333 75%, #333);
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+    pointer-events: none;
+}
+
+/* Gradient Overlay for Fade Effect - Removed or made minimal */
+.bg-overlay {
+    display: none;
+}
+
+
+.content-wrapper {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    max-width: 1000px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -5vh;
+    /* Move up slightly to be more "centered" visualy or "nguyen phan ben phai di chuyen len tren" */
+    /* User said "cho nguyen phan ben phai di chuyen len tren cho o chinh giua man hinh" */
+    /* It is already flex center, but maybe header offset makes it look low. 
+       Let's add negative margin-top to pull it up. */
+}
+
+.brand-logo {
+    height: 240px;
+    /* Increased size significantly */
+    margin-bottom: -60px;
+    /* Adjusted spacing */
+    opacity: 1;
+    /* Ensure full visibility */
+}
+
+.page-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'UTM Nokia', 'Nokia UTM', sans-serif;
+    /* Changed font */
+    color: #000;
+    /* Dark for white bg */
+    /* Remove gradient text for now unless requested */
+}
+
+.sub-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.description {
+    font-size: 1.1rem;
+    color: #bbb;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-image {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 40px;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+    /* Lighter shadow */
+    /* animation removed as requested */
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.cta-button {
+    background-color: #0c1f36;
+    /* Dark Blue/Black Blue like Header */
+    color: #fff;
+    border: none;
+    padding: 16px 48px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 4px;
+    /* Reduced rounding */
+    display: block;
+    /* Ensure visibility */
+}
+
+.cta-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(12, 31, 54, 0.4);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .builder-container {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #222;
+    }
+
+    .nav-menu {
+        display: none;
+        /* Hide nav on mobile welcome for now */
+    }
+
+    .main-content {
+        overflow-y: visible;
+        padding-bottom: 40px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-image {
+        max-width: 100%;
+    }
+}

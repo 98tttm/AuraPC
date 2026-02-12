@@ -185,6 +185,142 @@
       </div>
     </div>
     }
+
+    <!-- Related Products -->
+    <div class="pd-related">
+      <h2 class="pd-section-title">SẢN PHẨM LIÊN QUAN</h2>
+      <div class="pd-related-grid">
+        @for (rp of relatedProducts(); track rp._id) {
+        <a class="pd-related-card" [routerLink]="['/san-pham', rp.slug || rp._id]">
+          <div class="pd-related-img">
+            <img [src]="mainImage(rp)" [alt]="rp.name" />
+          </div>
+          <h3 class="pd-related-name">{{ rp.name }}</h3>
+          <p class="pd-related-price">{{ priceLabel(rp) }}</p>
+        </a>
+        }
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="pd-reviews-section">
+      <h2 class="pd-section-title">Đánh giá sản phẩm <span class="review-count-badge">{{ mockReviews.length }} đánh
+          giá</span></h2>
+
+      <div class="pd-review-summary">
+        <div class="review-score">
+          <span class="score-number">{{ avgRating.toFixed(1) }}</span>
+          <div class="score-stars">
+            @for (star of [1,2,3,4,5]; track star) {
+            <span class="star" [class.filled]="star <= avgRating">★</span>
+            }
+          </div>
+        </div>
+        <div class="review-bars">
+          @for (bar of ratingBars; track bar.star) {
+          <div class="bar-row">
+            <span class="bar-label">{{ bar.star }} ★</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="bar.percent"></div>
+            </div>
+            <span class="bar-count">{{ bar.count }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Review Filter -->
+      <div class="review-filters">
+        <button class="review-filter-btn" [class.active]="reviewFilter === 'all'" (click)="reviewFilter = 'all'">Tất
+          cả</button>
+        <button class="review-filter-btn" [class.active]="reviewFilter === 'newest'"
+          (click)="reviewFilter = 'newest'">Mới nhất</button>
+        <button class="review-filter-btn" [class.active]="reviewFilter === 'photo'" (click)="reviewFilter = 'photo'">Có
+          ảnh</button>
+      </div>
+
+      <!-- Review List -->
+      <div class="review-list">
+        @for (review of mockReviews; track review.id) {
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">{{ review.name.charAt(0) }}</div>
+            <div class="review-meta">
+              <span class="review-name">{{ review.name }}</span>
+              <span class="review-date">{{ review.date }}</span>
+            </div>
+            <div class="review-stars-small">
+              @for (star of [1,2,3,4,5]; track star) {
+              <span class="star-sm" [class.filled]="star <= review.rating">★</span>
+              }
+            </div>
+          </div>
+          <p class="review-text">{{ review.text }}</p>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Q&A Section -->
+    <div class="pd-qa-section">
+      <h2 class="pd-section-title">Đánh giá hỏi đáp <span class="review-count-badge">{{ mockQA.length }} bình
+          luận</span></h2>
+
+      <div class="review-filters">
+        <button class="review-filter-btn" [class.active]="qaFilter === 'all'" (click)="qaFilter = 'all'">Tất cả</button>
+        <button class="review-filter-btn" [class.active]="qaFilter === 'newest'" (click)="qaFilter = 'newest'">Mới
+          nhất</button>
+        <button class="review-filter-btn" [class.active]="qaFilter === 'photo'" (click)="qaFilter = 'photo'">Có
+          ảnh</button>
+      </div>
+
+      <div class="qa-list">
+        @for (qa of mockQA; track qa.id) {
+        <div class="qa-card">
+          <div class="qa-question">
+            <div class="qa-avatar">{{ qa.name.charAt(0) }}</div>
+            <div class="qa-content">
+              <div class="qa-user-info">
+                <span class="qa-name">{{ qa.name }}</span>
+                <span class="qa-date">{{ qa.date }}</span>
+              </div>
+              <p class="qa-text">{{ qa.question }}</p>
+            </div>
+          </div>
+          @if (qa.reply) {
+          <div class="qa-reply">
+            <div class="qa-reply-indicator">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 10h10a5 5 0 0 1 0 10h-2" />
+                <polyline points="7 14 3 10 7 6" />
+              </svg>
+            </div>
+            <div class="qa-reply-content">
+              <span class="qa-reply-author">Admin - Aura PC</span>
+              <p class="qa-reply-text">{{ qa.reply }}</p>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recently Viewed -->
+    <div class="pd-related">
+      <h2 class="pd-section-title">SẢN PHẨM VỪA XEM</h2>
+      <div class="pd-related-grid">
+        @for (rp of relatedProducts(); track rp._id) {
+        <a class="pd-related-card" [routerLink]="['/san-pham', rp.slug || rp._id]">
+          <div class="pd-related-img">
+            <img [src]="mainImage(rp)" [alt]="rp.name" />
+          </div>
+          <h3 class="pd-related-name">{{ rp.name }}</h3>
+          <p class="pd-related-price">{{ priceLabel(rp) }}</p>
+        </a>
+        }
+      </div>
+    </div>
     }
   </div>
 </div>

@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService, Category } from '../../core/services/api.service';
+import { environment } from '../../../environments/environment';
 
 export interface PartnerLink {
   img: string;
@@ -98,6 +99,7 @@ export class HeaderComponent implements OnDestroy {
   readonly menuItems = [
     { id: 'products', label: 'SẢN PHẨM', route: '/san-pham' },
     { id: 'guide', label: 'HƯỚNG DẪN', route: '/' },
+    { id: 'aura-builder', label: 'AURA BUILDER', route: '/aura-builder' },
     { id: 'auralab', label: 'AURALAB', route: '/' },
     { id: 'support', label: 'HỖ TRỢ', route: '/' },
   ];
@@ -448,4 +450,13 @@ export class HeaderComponent implements OnDestroy {
   toggleMenu(): void { this.menuOpen.update(v => !v); }
   closeMenu(): void { this.menuOpen.set(false); }
   openCart(): void { this.menuOpen.set(false); this.router.navigate(['/cart']); }
+
+  readonly currentUser = this.auth.currentUser;
+
+  getAvatarUrl(path: string | undefined | null): string {
+    if (!path) return 'assets/AVT/avtdefaut.png';
+    if (path.startsWith('http')) return path;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}${path}`;
+  }
 }

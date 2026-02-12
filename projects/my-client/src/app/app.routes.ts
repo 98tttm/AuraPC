@@ -31,5 +31,9 @@ export const routes: Routes = [
     path: 'blog/:slug',
     loadComponent: () => import('./pages/blog-detail/blog-detail.component').then((m) => m.BlogDetailComponent),
   },
+  {
+    path: 'aura-builder',
+    loadComponent: () => import('./pages/builder/aura-builder.component').then(m => m.AuraBuilderComponent)
+  },
   { path: '**', redirectTo: '' },
 ];

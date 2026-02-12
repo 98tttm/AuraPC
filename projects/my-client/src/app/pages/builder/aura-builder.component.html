@@ -1,0 +1,45 @@
+<div class="builder-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Logo removed -->
+
+        <ul class="nav-menu">
+            @for (step of steps; track step) {
+            <li class="nav-item" [class.active]="currentStep === step" (click)="setStep(step)">
+                {{ step }}
+            </li>
+            }
+        </ul>
+
+        <div class="sidebar-footer">
+            <!-- Overview button removed -->
+            <button class="sidebar-btn reset">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                </svg>
+                Start Over
+            </button>
+
+            <!-- Language/Location Selectors (placeholder) -->
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="bg-pattern"></div>
+        <!-- Overlay removed -->
+
+        <div class="content-wrapper">
+            <img src="assets/LOGO/LogoBlack.png" alt="AuraPC" class="brand-logo">
+
+            <h1 class="page-title">AURA BUILDER</h1>
+
+            <!-- Subtext removed -->
+
+            <img src="assets/aura-builder/welcome.webp" alt="PC Builder Showcase" class="hero-image">
+
+            <button class="cta-button">PLAN YOUR BUILD</button>
+        </div>
+    </main>
+</div>

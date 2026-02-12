@@ -1,0 +1,159 @@
+<section class="checkout-page">
+    <div class="checkout-container">
+        <!-- Header -->
+        <a routerLink="/cart" class="checkout-back">← QUAY LẠI GIỎ HÀNG</a>
+
+        <div class="checkout-layout">
+            <!-- Left Column -->
+            <div class="checkout-left">
+                <!-- Product List -->
+                <div class="checkout-card">
+                    <h2 class="checkout-section-title">Danh sách sản phẩm</h2>
+                    @for (item of cartItems(); track item.product._id) {
+                    <div class="checkout-product">
+                        <div class="checkout-product__img">
+                            <img [src]="getImage(item.product)" [alt]="item.product.name" />
+                        </div>
+                        <div class="checkout-product__info">
+                            <h3 class="checkout-product__name">{{ item.product.name }}</h3>
+                            <p class="checkout-product__price">{{ getPrice(item.product) | number:'1.0-0' }} đ</p>
+                            <p class="checkout-product__qty">Số lượng: {{ item.qty }}</p>
+                        </div>
+                        <button class="checkout-product__remove" (click)="removeItem(item.product._id!)">Xóa</button>
+                    </div>
+                    <div class="checkout-promo-banner">
+                        <span class="promo-icon">🎁</span>
+                        Giảm ngay 20% áp dụng đến 31/01
+                    </div>
+                    }
+                </div>
+
+                <!-- Buyer Info -->
+                <div class="checkout-card">
+                    <h3 class="form-section-title">Thông tin người đặt</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" [(ngModel)]="fullName" placeholder="Họ và tên người đặt" />
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" [(ngModel)]="phone" placeholder="Số điện thoại" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" [(ngModel)]="email" placeholder="Email (không bắt buộc)" />
+                    </div>
+
+                    <h3 class="form-section-title">Thông tin nhận hàng</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" [(ngModel)]="receiverName" placeholder="Họ và tên người nhận" />
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" [(ngModel)]="receiverPhone" placeholder="Số điện thoại" />
+                        </div>
+                    </div>
+
+                    <h3 class="form-section-title">Địa chỉ</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select [(ngModel)]="city">
+                                <option value="">Chọn Tỉnh/ Thành phố</option>
+                                <option value="hcm">TP. Hồ Chí Minh</option>
+                                <option value="hn">Hà Nội</option>
+                                <option value="dn">Đà Nẵng</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select [(ngModel)]="district">
+                                <option value="">Chọn Quận/ Huyện</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <select [(ngModel)]="ward">
+                            <option value="">Chọn Phường/ Xã</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" [(ngModel)]="address" placeholder="Nhập địa chỉ cụ thể" />
+                    </div>
+                    <div class="form-group">
+                        <textarea [(ngModel)]="note" placeholder="Ghi chú (không bắt buộc)" rows="4"></textarea>
+                    </div>
+
+                    <div class="invoice-toggle">
+                        <span class="invoice-label">Yêu cầu xuất hóa đơn điện tử</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" [(ngModel)]="requestInvoice" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="checkout-card">
+                    <div class="payment-option" (click)="paymentMethod = 'cod'">
+                        <span class="radio" [class.active]="paymentMethod === 'cod'"></span>
+                        <span>Thanh toán tiền mặt khi nhận hàng</span>
+                    </div>
+                    <div class="payment-option" (click)="paymentMethod = 'momo'">
+                        <span class="radio" [class.active]="paymentMethod === 'momo'"></span>
+                        <span>Thanh toán bằng ví MoMo</span>
+                    </div>
+                    <div class="payment-option" (click)="paymentMethod = 'atm'">
+                        <span class="radio" [class.active]="paymentMethod === 'atm'"></span>
+                        <span>Thanh toán bằng thẻ ATM nội địa</span>
+                    </div>
+                    <div class="payment-option" (click)="paymentMethod = 'zalopay'">
+                        <span class="radio" [class.active]="paymentMethod === 'zalopay'"></span>
+                        <span>Thanh toán bằng ví Zalopay</span>
+                    </div>
+                    <div class="payment-option" (click)="paymentMethod = 'napas'">
+                        <span class="radio" [class.active]="paymentMethod === 'napas'"></span>
+                        <span>Thanh toán bằng thẻ NAPAS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (Order Summary) -->
+            <div class="checkout-right">
+                <div class="checkout-summary">
+                    <div class="coupon-input">
+                        <input type="text" [(ngModel)]="couponCode" placeholder="Áp dụng ưu đãi để được giảm giá" />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Tổng tiền</span>
+                        <span class="summary-value">{{ cartTotal() | number:'1.0-0' }} đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Giảm giá trực tiếp</span>
+                        <span class="summary-value">-520.000 đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span class="summary-value summary-free">Miễn phí</span>
+                    </div>
+
+                    <div class="summary-total-row">
+                        <span class="summary-total-label">THÀNH TIỀN</span>
+                        <span class="summary-total-value">{{ cartTotal() | number:'1.0-0' }} đ</span>
+                    </div>
+
+                    <button class="btn-checkout" (click)="submitOrder()" [disabled]="submitting()">
+                        {{ submitting() ? 'Đang xử lý...' : 'HOÀN TẤT' }}
+                    </button>
+
+                    <p class="checkout-terms">
+                        Bằng việc tiến hành đặt mua hàng, bạn đồng ý với
+                        <a href="#">Điều khoản dịch vụ</a> của AURAPC
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="checkout-error">{{ errorMessage() }}</div>
+        }
+    </div>
+</section>

@@ -65,7 +65,7 @@ export class AuthService {
       if (typeof localStorage === 'undefined') return;
       if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
       else localStorage.removeItem(STORAGE_KEY);
-    } catch {}
+    } catch { }
   }
 
   requestOtp(phoneNumber: string): Observable<RequestOtpResponse> {
@@ -86,6 +86,41 @@ export class AuthService {
   setUser(user: User | null): void {
     this.currentUser.set(user);
     this.persistUser(user);
+  }
+
+  updateProfile(profile: Partial<UserProfile>): Observable<{ success: boolean; user: User }> {
+    const user = this.currentUser();
+    if (!user) throw new Error('User not logged in');
+    return this.http.put<{ success: boolean; user: User }>(`${BASE}/profile`, {
+      userId: user._id || user.id,
+      profile,
+    }).pipe(
+      tap((res) => {
+        if (res.success && res.user) {
+          this.setUser(res.user);
+        }
+      })
+    );
+  }
+
+  uploadAvatar(file: File): Observable<{ success: boolean; user: User; avatarUrl: string }> {
+    const user = this.currentUser();
+    if (!user) throw new Error('User not logged in');
+
+    const formData = new FormData();
+    formData.append('userId', user._id || user.id || '');
+    formData.append('avatar', file);
+
+    return this.http.post<{ success: boolean; user: User; avatarUrl: string }>(
+      `${BASE}/avatar`,
+      formData
+    ).pipe(
+      tap((res) => {
+        if (res.success && res.user) {
+          this.setUser(res.user);
+        }
+      })
+    );
   }
 
   logout(): void {

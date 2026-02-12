@@ -22,6 +22,64 @@ export class ProductDetailComponent {
   error = signal(false);
   showFullDesc = signal(false);
   showSpecsModal = signal(false);
+  relatedProducts = signal<Product[]>([]);
+
+  // Review & QA filters
+  reviewFilter = 'all';
+  qaFilter = 'all';
+
+  // Mock reviews data
+  mockReviews = [
+    {
+      id: 1, name: 'Quốc NC', date: '15/01/2026', rating: 5,
+      text: 'Thiết bị rất tốt, chạy mượt các tác vụ từ làm việc đến chơi game. Máy được lắp ráp gọn gàng, hiệu năng cao với hệ thống làm mát hiệu quả. Nhận được hỗ trợ tận tình, 5 sao nhé.'
+    },
+    {
+      id: 2, name: 'An Phạm', date: '12/01/2026', rating: 5,
+      text: 'PC dùng rất mạnh mẽ, chạy mượt đa tác vụ và kể cả đồ chơi game. Máy được lắp rất gọn gàng. Sản phẩm hoàn toàn xứng đáng với giá tiền.'
+    },
+    {
+      id: 3, name: 'Minh Trần', date: '08/01/2026', rating: 4,
+      text: 'Sản phẩm tốt, đóng gói cẩn thận. Giao hàng nhanh, nhân viên tư vấn nhiệt tình. Sẽ ủng hộ shop tiếp!'
+    },
+    {
+      id: 4, name: 'Hùng Lê', date: '03/01/2026', rating: 5,
+      text: 'PC rất ok, cấu hình mạnh, chơi game max setting mượt mà. Bên shop tư vấn rất nhiệt tình. Recommend cho ae game thủ.'
+    },
+  ];
+
+  // Mock Q&A data
+  mockQA = [
+    {
+      id: 1, name: 'Quốc PC', date: '17/01/2026',
+      question: 'Máy có chương trình giảm giá gì thêm k?',
+      reply: 'Hiện sản phẩm đang giảm PC đang có ưu đãi giảm giá 10.000.000đ, và nhiều ưu đãi trang gia từ thương hiệu. Anh vui lòng liên hệ AuraPC để được tư vấn chi tiết ạ.'
+    },
+    {
+      id: 2, name: 'An Thanh Thịnh', date: '14/01/2026',
+      question: 'Hiện tại sản phẩm này bên PC đang có mức giá 50.18.000d, và ngoài ra nhiều ưu đãi gia hàng gì không ạ? Hiện tại em rất quan tâm đến sản phẩm này ạ',
+      reply: 'Hiện tại sản phẩm này còn có chương trình mua kèm phụ kiện giảm thêm 5%. Anh/chị liên hệ hotline để được tư vấn chi tiết nhé.'
+    },
+    {
+      id: 3, name: 'Thanh Phong', date: '10/01/2026',
+      question: 'Máy có chương trình giảm giá gì ạ?',
+      reply: 'Hiện tại, sản phẩm Aura PC đang có mức giảm 10.200.000đ, và khách hàng mua trong tháng này sẽ được tặng thêm bộ phụ kiện gaming cao cấp.'
+    },
+  ];
+
+  // Rating summary computed from mock data
+  get avgRating(): number {
+    const total = this.mockReviews.reduce((sum, r) => sum + r.rating, 0);
+    return this.mockReviews.length ? total / this.mockReviews.length : 0;
+  }
+
+  get ratingBars(): { star: number; count: number; percent: number }[] {
+    const total = this.mockReviews.length || 1;
+    return [5, 4, 3, 2, 1].map(star => {
+      const count = this.mockReviews.filter(r => r.rating === star).length;
+      return { star, count, percent: (count / total) * 100 };
+    });
+  }
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -35,6 +93,17 @@ export class ProductDetailComponent {
         this.product.set(p);
         this.currentImage.set(productMainImage(p));
         this.loading.set(false);
+        // Load related products from same category
+        if (p.category) {
+          const catSlug = p.category.slug || p.category.category_id;
+          this.api.getProducts({ category: catSlug, limit: 4 }).subscribe({
+            next: (res) => {
+              this.relatedProducts.set(
+                res.items.filter(rp => rp._id !== p._id).slice(0, 4)
+              );
+            }
+          });
+        }
       },
       error: () => {
         this.error.set(true);
@@ -134,11 +203,10 @@ export class ProductDetailComponent {
     const res: { label: string; value: string }[] = [];
     for (const k of keys) {
       for (const f of k.find) {
-        // Tìm key (case insensitive)
         const foundKey = Object.keys(s).find((sk) => sk.toLowerCase() === f.toLowerCase());
         if (foundKey && s[foundKey]) {
           res.push({ label: k.label, value: String(s[foundKey]) });
-          break; // Tìm thấy 1 key ưu tiên thì dừng
+          break;
         }
       }
     }
@@ -147,7 +215,6 @@ export class ProductDetailComponent {
 
   brandName(p: Product): string {
     if (p.brand) return p.brand;
-    // Extract from name or category
     if (p.category?.name) {
       if (p.category.name.toLowerCase().includes('asus')) return 'ASUS';
       if (p.category.name.toLowerCase().includes('acer')) return 'ACER';
@@ -185,6 +252,6 @@ export class ProductDetailComponent {
     const p = this.product();
     if (!p) return [];
     const all = this.specEntries(p);
-    return all.slice(0, 10); // Show only first 10 rows initially
+    return all.slice(0, 10);
   }
 }

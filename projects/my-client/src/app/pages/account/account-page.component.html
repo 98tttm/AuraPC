@@ -1,99 +1,219 @@
 @if (user(); as u) {
-  <div class="account">
-    <nav class="account__breadcrumb">
-      <a routerLink="/">Trang chủ</a>
-      <span class="account__breadcrumb-sep">/</span>
-      <a routerLink="/tai-khoan">Cá nhân</a>
-      <span class="account__breadcrumb-sep">/</span>
-      <span class="account__breadcrumb-current">Thông tin cá nhân</span>
-    </nav>
+<div class="account">
+  <nav class="account__breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span class="account__breadcrumb-sep">/</span>
+    <a routerLink="/tai-khoan">Cá nhân</a>
+    <span class="account__breadcrumb-sep">/</span>
+    <span class="account__breadcrumb-current">
+      @switch (activeTab()) {
+      @case ('profile') { Thông tin cá nhân }
+      @case ('orders') { Đơn hàng của tôi }
+      @case ('address') { Sổ địa chỉ }
+      }
+    </span>
+  </nav>
 
-    <div class="account__layout">
-      <aside class="account__sidebar">
-        <div class="account__profile-card">
-          <div class="account__avatar-wrap">
-            @if (u.avatar) {
-              <img [src]="u.avatar" alt="" class="account__avatar-img" />
-            } @else {
-              <svg class="account__avatar-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 21c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
-              </svg>
-            }
-          </div>
-          <p class="account__profile-phone">{{ displayPhone() }}</p>
+  <div class="account__layout">
+    <aside class="account__sidebar">
+      <div class="account__profile-card">
+        <div class="account__avatar-wrap">
+          <img [src]="getAvatarUrl(u.avatar)" alt="" class="account__avatar-img" />
         </div>
-        <ul class="account__nav">
-          <li class="account__nav-item account__nav-item--active">
+        <p class="account__profile-phone">{{ displayPhone() }}</p>
+      </div>
+      <ul class="account__nav">
+        <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'profile'">
+          <button type="button" class="account__nav-link" (click)="switchTab('profile')">
             <span class="account__nav-icon account__nav-icon--user"></span>
             <span>Thông tin cá nhân</span>
-          </li>
-          <li class="account__nav-item">
-            <a routerLink="/" class="account__nav-link">
-              <span class="account__nav-icon account__nav-icon--order"></span>
-              <span>Đơn hàng của tôi</span>
-            </a>
-          </li>
-          <li class="account__nav-item">
-            <a routerLink="/" class="account__nav-link">
-              <span class="account__nav-icon account__nav-icon--address"></span>
-              <span>Quản lý sổ địa chỉ</span>
-            </a>
-          </li>
-          <li class="account__nav-item">
-            <button type="button" class="account__nav-link account__nav-link--logout" (click)="logout()">
-              <span class="account__nav-icon account__nav-icon--logout"></span>
-              <span>Đăng xuất</span>
-            </button>
-          </li>
-        </ul>
-      </aside>
-      <main class="account__main">
-        <div class="account__card">
-          <h1 class="account__title">Thông tin cá nhân</h1>
-          <div class="account__avatar-main">
-            @if (u.avatar) {
-              <img [src]="u.avatar" alt="" class="account__avatar-img" />
-            } @else {
-              <svg class="account__avatar-icon account__avatar-icon--large" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 21c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
+          </button>
+        </li>
+        <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'orders'">
+          <button type="button" class="account__nav-link" (click)="switchTab('orders')">
+            <span class="account__nav-icon account__nav-icon--order"></span>
+            <span>Đơn hàng của tôi</span>
+          </button>
+        </li>
+        <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'address'">
+          <button type="button" class="account__nav-link" (click)="switchTab('address')">
+            <span class="account__nav-icon account__nav-icon--address"></span>
+            <span>Quản lý sổ địa chỉ</span>
+          </button>
+        </li>
+        <li class="account__nav-item">
+          <button type="button" class="account__nav-link account__nav-link--logout" (click)="logout()">
+            <span class="account__nav-icon account__nav-icon--logout"></span>
+            <span>Đăng xuất</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="account__main">
+      <!-- Profile Tab -->
+      @if (activeTab() === 'profile') {
+      <div class="account__card">
+        <h1 class="account__title">Thông tin cá nhân</h1>
+
+        <div class="account__avatar-main">
+          <div class="account__avatar-wrapper">
+            <img [src]="getAvatarUrl(u.avatar)" alt="" class="account__avatar-img" />
+            @if (editMode()) {
+            <label class="account__avatar-upload-btn" title="Đổi ảnh đại diện">
+              <input type="file" hidden (change)="onFileSelected($event)" accept="image/*">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
               </svg>
+            </label>
             }
           </div>
-          <dl class="account__fields">
-            <div class="account__field">
-              <dt>Họ và tên</dt>
-              <dd>{{ displayName() }}</dd>
-            </div>
-            <div class="account__field">
-              <dt>Số điện thoại</dt>
-              <dd>{{ displayPhone() }}</dd>
-            </div>
-            <div class="account__field">
-              <dt>Giới tính</dt>
-              <dd>
-                @if (displayGender(); as gender) {
-                  {{ gender }}
-                } @else {
-                  <span class="account__add-info">Chưa cập nhật</span>
-                }
-              </dd>
-            </div>
-            <div class="account__field">
-              <dt>Ngày sinh</dt>
-              <dd>
-                @if (displayDob(); as dob) {
-                  {{ formatDate(dob) }}
-                } @else {
-                  <a href="#" class="account__add-link" (click)="$event.preventDefault()">Thêm thông tin</a>
-                }
-              </dd>
-            </div>
-          </dl>
-          <button type="button" class="account__edit-btn">Chỉnh sửa thông tin</button>
         </div>
-      </main>
-    </div>
+
+        @if (editMode()) {
+        <!-- Edit Mode -->
+        <div class="account__edit-form">
+          <div class="account__form-group">
+            <label>Họ và tên</label>
+            <input type="text" [(ngModel)]="editName" placeholder="Nhập họ và tên" />
+          </div>
+          <div class="account__form-group">
+            <label>Số điện thoại</label>
+            <input type="text" [value]="displayPhone()" readonly class="input--readonly" />
+          </div>
+          <div class="account__form-group">
+            <label>Giới tính</label>
+            <select [(ngModel)]="editGender">
+              <option value="">Chọn giới tính</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+          <div class="account__form-group">
+            <label>Ngày sinh</label>
+            <input type="date" [(ngModel)]="editDob" />
+          </div>
+          <!-- Removed URL input as requested -->
+          <div class="account__form-actions">
+            <button type="button" class="account__save-btn" (click)="saveProfile()">Lưu thay đổi</button>
+            <button type="button" class="account__cancel-btn" (click)="cancelEdit()">Hủy</button>
+          </div>
+        </div>
+        } @else {
+        <!-- View Mode -->
+        <dl class="account__fields">
+          <div class="account__field">
+            <dt>Họ và tên</dt>
+            <dd>{{ displayName() }}</dd>
+          </div>
+          <div class="account__field">
+            <dt>Số điện thoại</dt>
+            <dd>{{ displayPhone() }}</dd>
+          </div>
+          <div class="account__field">
+            <dt>Giới tính</dt>
+            <dd>
+              @if (displayGender(); as gender) {
+              {{ gender }}
+              } @else {
+              <span class="account__add-info">Chưa cập nhật</span>
+              }
+            </dd>
+          </div>
+          <div class="account__field">
+            <dt>Ngày sinh</dt>
+            <dd>
+              @if (displayDob(); as dob) {
+              {{ formatDate(dob) }}
+              } @else {
+              <a href="#" class="account__add-link" (click)="$event.preventDefault(); startEdit()">Thêm thông tin</a>
+              }
+            </dd>
+          </div>
+        </dl>
+        <button type="button" class="account__edit-btn" (click)="startEdit()">Chỉnh sửa thông tin</button>
+        }
+      </div>
+      }
+
+      <!-- Orders Tab -->
+      @if (activeTab() === 'orders') {
+      <div class="account__card">
+        <h1 class="account__title">Đơn hàng của tôi</h1>
+        @if (mockOrders.length === 0) {
+        <div class="account__empty">
+          <p>Bạn chưa có đơn hàng nào</p>
+          <a routerLink="/san-pham" class="account__shop-link">Mua sắm ngay</a>
+        </div>
+        } @else {
+        <div class="account__orders-list">
+          @for (order of mockOrders; track order.id) {
+          <div class="account__order-card">
+            <div class="order-header">
+              <span class="order-id">{{ order.id }}</span>
+              <span class="order-status" [class]="getStatusClass(order.status)">{{ order.status }}</span>
+            </div>
+            <div class="order-info">
+              <div class="order-detail">
+                <span class="order-label">Ngày đặt:</span>
+                <span>{{ order.date }}</span>
+              </div>
+              <div class="order-detail">
+                <span class="order-label">Số SP:</span>
+                <span>{{ order.items }}</span>
+              </div>
+              <div class="order-detail">
+                <span class="order-label">Tổng tiền:</span>
+                <span class="order-total">{{ formatPrice(order.total) }}</span>
+              </div>
+            </div>
+            <button class="order-detail-btn">Xem chi tiết</button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Address Tab -->
+      @if (activeTab() === 'address') {
+      <div class="account__card">
+        <div class="account__title-row">
+          <h1 class="account__title">Sổ địa chỉ</h1>
+          <button class="account__add-addr-btn">+ Thêm địa chỉ mới</button>
+        </div>
+        @if (mockAddresses.length === 0) {
+        <div class="account__empty">
+          <p>Bạn chưa có địa chỉ nào</p>
+        </div>
+        } @else {
+        <div class="account__address-list">
+          @for (addr of mockAddresses; track addr.id) {
+          <div class="account__address-card" [class.address--default]="addr.isDefault">
+            <div class="address-header">
+              <span class="address-name">{{ addr.name }}</span>
+              @if (addr.isDefault) {
+              <span class="address-default-badge">Mặc định</span>
+              }
+            </div>
+            <p class="address-fullname">{{ addr.fullName }}</p>
+            <p class="address-phone">{{ addr.phone }}</p>
+            <p class="address-text">{{ addr.address }}</p>
+            <div class="address-actions">
+              <button class="address-edit-btn">Sửa</button>
+              @if (!addr.isDefault) {
+              <button class="address-delete-btn">Xóa</button>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </main>
   </div>
+</div>
 }

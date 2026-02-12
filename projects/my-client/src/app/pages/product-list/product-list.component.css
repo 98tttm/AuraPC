@@ -1,7 +1,8 @@
 /* Product list page - layout: để tránh header fixed che breadcrumb & bộ lọc khi cuộn */
 .pl-page {
   min-height: 100vh;
-  background: #fff;
+  background: #E0E0E0;
+  /* Request: Gray background */
   padding: 1rem 0 3rem;
   padding-top: 2rem;
   /* Reduced to tighten spacing */
@@ -495,6 +496,7 @@
   line-height: 1.35;
   padding: 0.5rem 0.75rem 0;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;

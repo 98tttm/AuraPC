@@ -135,11 +135,80 @@ router.post('/verify-otp', async (req, res) => {
       user = await User.findOne({ phoneNumber: stored }).lean();
     }
 
+    // ... (previous code)
     const out = { ...user };
     out.id = out._id.toString();
     res.json({ success: true, user: out });
   } catch (err) {
     console.error('[POST /api/auth/verify-otp]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// === Profile & Avatar ===
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads dir exists
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage: storage });
+
+/** PUT /api/auth/profile - Cß║ญp nhß║ญt th├╢ng tin c├í nh├вn */
+router.put('/profile', async (req, res) => {
+  try {
+    const { userId, profile } = req.body; // profile: { fullName, gender, dateOfBirth }
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+
+    const update = {};
+    if (profile.fullName !== undefined) update['profile.fullName'] = profile.fullName;
+    if (profile.gender !== undefined) update['profile.gender'] = profile.gender;
+    if (profile.dateOfBirth !== undefined) update['profile.dateOfBirth'] = profile.dateOfBirth;
+
+    await User.findByIdAndUpdate(userId, { $set: update });
+    const user = await User.findById(userId).lean();
+
+    // Return updated user
+    const out = { ...user };
+    out.id = out._id.toString();
+    res.json({ success: true, user: out });
+  } catch (err) {
+    console.error('[PUT /api/auth/profile]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** POST /api/auth/avatar - Upload Avatar */
+router.post('/avatar', upload.single('avatar'), async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+
+    // URL file: /uploads/filename
+    const avatarUrl = `/uploads/${req.file.filename}`;
+
+    await User.findByIdAndUpdate(userId, { $set: { avatar: avatarUrl } });
+    const user = await User.findById(userId).lean();
+
+    const out = { ...user };
+    out.id = out._id.toString();
+    res.json({ success: true, user: out, avatarUrl });
+  } catch (err) {
+    console.error('[POST /api/auth/avatar]', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });

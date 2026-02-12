@@ -27,8 +27,12 @@ app.use('/api/products', productRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/admin/categories', adminCategoryRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
+
+// Serve static files (uploads)
+app.use('/uploads', express.static('uploads'));
 
 app.listen(PORT, () => console.log(`Server đang chạy trên cổng ${PORT}`));

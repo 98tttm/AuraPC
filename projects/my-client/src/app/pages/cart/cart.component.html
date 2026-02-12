@@ -2,13 +2,28 @@
     <div class="cart-container">
         <div class="cart-header">
             <h1 class="cart-title">GIỎ HÀNG CỦA BẠN</h1>
+            @if (cartCount() > 0) {
             <span class="cart-count">({{ cartCount() }})</span>
+            }
         </div>
 
         @if (cartItems().length === 0) {
-        <div class="cart-empty">
-            <p>Giỏ hàng của bạn đang trống</p>
-            <a routerLink="/san-pham" class="btn btn--primary">Tiếp tục mua sắm</a>
+        <div class="cart-empty-container">
+            <a routerLink="/san-pham" class="cart-back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Tiếp tục mua sắm
+            </a>
+
+            <div class="cart-empty-content">
+                <img src="https://nhathuoclongchau.com.vn/estore-images/cart/illustration-cart-empty.png"
+                    alt="Empty Cart" class="cart-empty-img">
+                <h3 class="cart-empty-title">Chưa có sản phẩm nào trong giỏ</h3>
+                <p class="cart-empty-subtitle">Cùng khám phá hàng ngàn sản phẩm công nghệ tại AuraPC nhé!</p>
+                <a routerLink="/san-pham" class="btn btn-explore">Khám phá ngay</a>
+            </div>
         </div>
         } @else {
         <div class="cart-layout">
