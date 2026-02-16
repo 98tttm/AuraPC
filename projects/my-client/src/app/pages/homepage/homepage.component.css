@@ -648,13 +648,14 @@
    FEATURED PRODUCTS
    ============================================ */
 .featured {
-  padding: 5rem 0 3rem;
+  padding: 4rem 0 2rem;
 }
 
-.featured__grid {
+.featured__grid,
+.featured__static {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 a.featured__card {
   text-decoration: none;
@@ -663,46 +664,49 @@ a.featured__card {
 
 .featured__card {
   position: relative;
-  border-radius: 0;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
 }
 
 .featured__image {
   width: 100%;
-  height: 500px;
-  background: linear-gradient(135deg, #111, #1a1a2e);
+  height: 0;
+  padding-bottom: 75%;
   position: relative;
   overflow: hidden;
+  background: #111;
 }
 .featured__image img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
-
-.featured__image--alt {
-  background: linear-gradient(135deg, #0a0a1a, #152238);
+.featured__card:hover .featured__image img {
+  transform: scale(1.03);
 }
 
 .featured__info {
-  padding: 2rem 0;
+  padding: 1.5rem 0 0.5rem;
 }
 
 .featured__name {
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
   font-weight: 700;
   letter-spacing: 2px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .featured__desc {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .featured__btn {
@@ -711,8 +715,9 @@ a.featured__card {
   color: #fff;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 1rem;
-  padding: 0.85rem 2.5rem;
+  font-size: 0.85rem;
+  padding: 0.7rem 2rem;
+  border-radius: 4px;
   transition: background 0.3s, transform 0.3s;
 }
 
@@ -721,55 +726,98 @@ a.featured__card {
   transform: translateY(-2px);
 }
 
+.featured__banner {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+}
+.featured__banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.featured__banner:hover img {
+  transform: scale(1.02);
+}
+
 /* ============================================
-   CATEGORIES
+   CATEGORIES  (Corsair-style: image-fill + overlay text)
    ============================================ */
 .categories {
-  padding: 5rem 0;
+  padding: 4rem 0;
 }
 
 .categories__grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .categories__item {
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.categories__item:hover {
-  transform: translateY(-8px);
-}
-
-.categories__img-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1.3;
-  border-radius: 0;
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 1rem;
+  background: #0a0a12;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
-.categories__img-placeholder {
+.categories__img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #1a1a2e, #111);
-  transition: transform 0.5s;
+  object-fit: cover;
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.categories__item:hover .categories__img-placeholder {
-  transform: scale(1.05);
+.categories__item:hover .categories__img {
+  transform: scale(1.06);
+}
+
+.categories__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .categories__label {
   font-family: var(--font-heading);
-  font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+  font-size: clamp(0.92rem, 1.25vw, 1.15rem);
   font-weight: 700;
-  color: var(--text-primary);
-  white-space: pre-line;
-  line-height: 1.4;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  line-height: 1.3;
+}
+
+.categories__arrow {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.categories__item:hover .categories__arrow {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* ============================================
@@ -918,75 +966,86 @@ a.blog__card { text-decoration: none; color: inherit; }
 
 .auralab__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 45% 1fr;
+  gap: 1.5rem;
 }
 
+/* -- Left: AURA LAB main card -- */
 .auralab__main {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(to bottom, rgba(21, 34, 56, 0.2), rgba(43, 68, 110, 0.2));
+  border-radius: 16px;
+  background: linear-gradient(to bottom, rgba(21, 34, 56, 0.3), rgba(43, 68, 110, 0.3));
   display: flex;
   flex-direction: column;
 }
 
 .auralab__image-wrapper {
   flex: 1;
-  min-height: 400px;
+  min-height: 380px;
+  overflow: hidden;
 }
 
-.auralab__image-placeholder {
+.auralab__image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0a0a1a, #152238);
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.auralab__main:hover .auralab__image {
+  transform: scale(1.03);
 }
 
 .auralab__info {
-  padding: 2rem;
+  padding: 1.75rem 2rem 2rem;
 }
 
 .auralab__title {
   font-family: var(--font-heading);
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .auralab__desc {
   color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+  max-width: 480px;
 }
 
-.auralab__btn {
+.auralab__link {
   display: inline-block;
-  background: var(--accent-orange);
-  color: #fff;
+  color: var(--accent-orange);
   font-weight: 700;
-  padding: 0.85rem 2rem;
-  border-radius: 8px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  transition: letter-spacing 0.3s;
 }
 
-.auralab__btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(255, 109, 45, 0.3);
+.auralab__link:hover {
+  letter-spacing: 1.5px;
 }
 
+/* -- Right: side cards -- */
 .auralab__side {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .auralab__deal {
   flex: 1;
   display: flex;
   overflow: hidden;
-  background: linear-gradient(to bottom, rgba(21, 34, 56, 0.2), rgba(66, 91, 134, 0.2));
+  border-radius: 16px;
+  background: linear-gradient(to bottom, rgba(21, 34, 56, 0.3), rgba(66, 91, 134, 0.3));
   transition: transform 0.4s;
   cursor: pointer;
+  min-height: 240px;
 }
 
 .auralab__deal:hover {
@@ -995,40 +1054,57 @@ a.blog__card { text-decoration: none; color: inherit; }
 
 .auralab__deal-content {
   flex: 1;
-  padding: 2rem;
+  padding: 1.75rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
 }
 
 .auralab__deal-badge {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin: 0 0 0.75rem;
+  line-height: 1.3;
 }
 
-.auralab__deal-title {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+.auralab__deal-desc {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
 }
 
-.auralab__deal-btn {
+.auralab__deal-link {
   display: inline-block;
-  background: var(--accent-orange);
-  color: #fff;
-  font-size: 0.85rem;
+  color: var(--accent-orange);
   font-weight: 700;
-  padding: 0.6rem 1.5rem;
-  border-radius: 6px;
-  width: fit-content;
-  transition: transform 0.3s;
+  font-size: 0.88rem;
+  letter-spacing: 0.5px;
+  transition: letter-spacing 0.3s;
 }
 
-.auralab__deal-btn:hover {
-  transform: translateY(-2px);
+.auralab__deal-link:hover {
+  letter-spacing: 1.5px;
+}
+
+.auralab__deal-img {
+  width: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.auralab__deal-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.auralab__deal:hover .auralab__deal-img img {
+  transform: scale(1.05);
 }
 
 /* ============================================
@@ -1121,7 +1197,7 @@ a.blog__card { text-decoration: none; color: inherit; }
    ============================================ */
 @media (max-width: 1200px) {
   .categories__grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
   }
 
@@ -1136,7 +1212,8 @@ a.blog__card { text-decoration: none; color: inherit; }
 }
 
 @media (max-width: 992px) {
-  .featured__grid {
+  .featured__grid,
+  .featured__static {
     grid-template-columns: 1fr;
   }
 
@@ -1168,8 +1245,6 @@ a.blog__card { text-decoration: none; color: inherit; }
   .hero__text-heading { font-size: clamp(1.35rem, 4.5vw, 1.9rem); white-space: normal; }
   .hero__text-sub { font-size: 0.85rem; }
   .hero__hint { bottom: 1.25rem; font-size: 0.75rem; padding: 0 1rem; }
-  /* Touch-friendly hotspot: min 44px tap target */
-  /* Vùng bấm 48x48, tâm vẫn tại (screenX, screenY) */
   .hotspot { width: 48px; height: 48px; margin-left: -24px; margin-top: -24px; }
   .hotspot__dot { width: 18px; height: 18px; }
   .hotspot__ping { width: 48px; height: 48px; }
@@ -1196,6 +1271,16 @@ a.blog__card { text-decoration: none; color: inherit; }
 
   .why-aura__benefits {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .auralab__deal {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .auralab__deal-img {
+    width: 100%;
+    height: 200px;
   }
 
   .footer__grid {

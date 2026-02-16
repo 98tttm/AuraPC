@@ -1,10 +1,9 @@
 import {
   Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, OnInit,
   ChangeDetectionStrategy, ChangeDetectorRef, NgZone,
-  PLATFORM_ID, Inject, signal,
+  PLATFORM_ID, Inject, signal, computed,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { DecimalPipe } from '@angular/common';
+import { isPlatformBrowser, DecimalPipe, UpperCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import * as THREE from 'three';
 import { ApiService, Product, Category, BlogPost } from '../../core/services/api.service';
@@ -85,7 +84,7 @@ interface Hotspot {
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, UpperCasePipe],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -146,10 +145,68 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   featuredProducts = signal<Product[]>([]);
   apiCategories = signal<Category[]>([]);
   apiBlogs = signal<BlogPost[]>([]);
+
+  topCategories = computed(() => {
+    const all = this.apiCategories();
+    const topLevel = all.filter(c => !c.parent_id && (!c.level || c.level === 0));
+    return topLevel.length > 0 ? topLevel.slice(0, 7) : all.slice(0, 7);
+  });
   readonly benefits = [
     { icon: '🚚', title: 'GIAO HÀNG\nNHANH' }, { icon: '⚙️', title: 'CẤU HÌNH\nĐỘC QUYỀN' },
     { icon: '💬', title: 'TƯ VẤN\nTRỰC TIẾP' }, { icon: '🛡️', title: 'BẢO HÀNH\nAN TÂM' },
   ];
+
+  private readonly categoryImages = [
+    'assets/images/cat-vo-may.jpg',
+    'assets/images/cat-may-tinh-game.jpg',
+    'assets/images/cat-ram.jpg',
+    'assets/images/cat-ban-phim.jpg',
+    'assets/images/cat-tai-nghe.jpg',
+    'assets/images/cat-nguon.jpg',
+    'assets/images/cat-tan-nhiet.jpg',
+    'assets/images/cat-chuot.jpg',
+    'assets/images/cat-quat.jpg',
+    'assets/images/cat-ban-ghe.jpg',
+  ];
+  private readonly categoryImageMap: Record<string, string> = {
+    'ban-ghe': 'assets/images/cat-ban-ghe.jpg',
+    'gaming-gear': 'assets/images/cat-chuot.jpg',
+    'laptop': 'assets/cate/laptop.png',
+    'linh-kien': 'assets/cate/vengeance-ram.png',
+    'man-hinh': 'assets/cate/monitor.png',
+    'pc': 'assets/images/cat-vo-may.jpg',
+    'phu-kien': 'assets/images/cat-tai-nghe.jpg',
+    'vo-may': 'assets/images/cat-vo-may.jpg',
+    'case': 'assets/images/cat-vo-may.jpg',
+    'may-tinh-choi-game': 'assets/cate/laptop.png',
+    'bo-nho-ram': 'assets/images/cat-ram.jpg',
+    'ram': 'assets/images/cat-ram.jpg',
+    'ban-phim': 'assets/images/cat-ban-phim.jpg',
+    'tai-nghe': 'assets/images/cat-tai-nghe.jpg',
+    'nguon-may-tinh': 'assets/images/cat-nguon.jpg',
+    'tan-nhiet': 'assets/images/cat-tan-nhiet.jpg',
+    'chuot': 'assets/images/cat-chuot.jpg',
+    'chuot-gaming': 'assets/images/cat-chuot.jpg',
+    'quat-tan-nhiet': 'assets/images/cat-quat.jpg',
+    'ban-ghe-gaming': 'assets/images/cat-ban-ghe.jpg',
+    'mon-hinh': 'assets/cate/monitor.png',
+    'monitor': 'assets/cate/monitor.png',
+    'screen': 'assets/cate/monitor.png',
+  };
+
+  private catImgIndex = 0;
+
+  categoryImage(cat: Category): string {
+    const slug = cat.slug || cat.category_id || '';
+    if (this.categoryImageMap[slug]) return this.categoryImageMap[slug];
+    const name = cat.name?.toLowerCase() || '';
+    for (const [key, val] of Object.entries(this.categoryImageMap)) {
+      if (name.includes(key.replace(/-/g, ' ')) || name.includes(key)) return val;
+    }
+    const img = this.categoryImages[this.catImgIndex % this.categoryImages.length];
+    this.catImgIndex++;
+    return img;
+  }
 
   /** Logo hãng công nghệ trong assets/logotech – ~20 ô (lặp để fill). */
   readonly iconStripLogos = [
@@ -594,13 +651,29 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.setSize(c.clientWidth, c.clientHeight);
   };
 
+  private mutationObs: MutationObserver | null = null;
+  private observedEls = new WeakSet<Element>();
+
   private initScrollAnimations(): void {
-    const els = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in');
     this.observer = new IntersectionObserver(
       (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
     );
-    els.forEach(el => this.observer!.observe(el));
+    this.observeNewFadeElements();
+
+    this.mutationObs = new MutationObserver(() => this.observeNewFadeElements());
+    this.mutationObs.observe(document.body, { childList: true, subtree: true });
+  }
+
+  private observeNewFadeElements(): void {
+    if (!this.observer) return;
+    const els = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in');
+    els.forEach(el => {
+      if (!this.observedEls.has(el)) {
+        this.observedEls.add(el);
+        this.observer!.observe(el);
+      }
+    });
   }
 
   /** Sau khi 2 dòng header gõ xong (~2.1s), đợi 2s rồi đổi sang bộ chữ kia; xong lại đợi 2s rồi đổi lại – lặp mãi */
@@ -625,6 +698,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.animationId) cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.onResize);
     this.observer?.disconnect();
+    this.mutationObs?.disconnect();
     this.renderer?.dispose();
     this.controls?.dispose();
   }

@@ -223,6 +223,24 @@
   min-width: 0;
 }
 
+/* Search header - "Bạn đang tìm: 'keyword'" */
+.pl-search-header {
+  margin-bottom: 1.25rem;
+}
+
+.pl-search-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 0.02em;
+}
+
+.pl-search-header__term {
+  color: var(--accent-orange, #FF6D2D);
+  font-style: italic;
+}
+
 /* Category tags - hàng nút đen */
 .pl-tags {
   display: flex;
@@ -530,25 +548,13 @@
   margin: 0.5rem auto 1rem;
   padding: 0.6rem 0;
   background-color: #333;
-  /* Black like requested */
   color: #fff;
   border: none;
   border-radius: 99px;
-  /* Rounded pill shape */
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
   text-align: center;
-}
-
-.pl-card__btn-buy:hover {
-  background-color: #000;
-  transform: translateY(-1px);
-}
-
-.pl-card__btn-buy:active {
-  transform: translateY(0);
 }
 
 /* Load more */

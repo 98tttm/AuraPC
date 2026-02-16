@@ -1,128 +1,131 @@
 <section class="cart-page">
     <div class="cart-container">
-        <div class="cart-header">
-            <h1 class="cart-title">GIỎ HÀNG CỦA BẠN</h1>
-            @if (cartCount() > 0) {
-            <span class="cart-count">({{ cartCount() }})</span>
-            }
-        </div>
+        <!-- Back link -->
+        <a routerLink="/san-pham" class="cart-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Tiếp tục mua sắm
+        </a>
 
         @if (cartItems().length === 0) {
-        <div class="cart-empty-container">
-            <a routerLink="/san-pham" class="cart-back-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
+        <!-- Empty Cart -->
+        <div class="cart-empty">
+            <div class="cart-empty__inner">
+                <svg class="cart-empty__icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 01-8 0" />
                 </svg>
-                Tiếp tục mua sắm
-            </a>
-
-            <div class="cart-empty-content">
-                <img src="https://nhathuoclongchau.com.vn/estore-images/cart/illustration-cart-empty.png"
-                    alt="Empty Cart" class="cart-empty-img">
-                <h3 class="cart-empty-title">Chưa có sản phẩm nào trong giỏ</h3>
-                <p class="cart-empty-subtitle">Cùng khám phá hàng ngàn sản phẩm công nghệ tại AuraPC nhé!</p>
-                <a routerLink="/san-pham" class="btn btn-explore">Khám phá ngay</a>
+                <h3 class="cart-empty__title">Chưa có sản phẩm nào trong giỏ</h3>
+                <p class="cart-empty__sub">Cùng khám phá hàng ngàn sản phẩm công nghệ tại AuraPC nhé!</p>
+                <a routerLink="/san-pham" class="btn-explore">Khám phá ngay</a>
             </div>
         </div>
         } @else {
         <div class="cart-layout">
-            <!-- Cart Items List -->
-            <div class="cart-items">
-                <div class="cart-table-header">
-                    <div class="col-prod">Sản phẩm</div>
-                    <div class="col-price">Đơn giá</div>
-                    <div class="col-qty">Số lượng</div>
-                    <div class="col-total">Thành tiền</div>
-                    <div class="col-action"></div>
+            <!-- ===== LEFT: Cart Items ===== -->
+            <div class="cart-main">
+                <!-- Select All + Column Headers -->
+                <div class="cart-head">
+                    <label class="ck-wrap cart-head__select">
+                        <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" />
+                        <span class="ck-box"></span>
+                        <span class="ck-label">Chọn tất cả ({{ cartCount() }})</span>
+                    </label>
+                    <div class="cart-head__cols">
+                        <span class="cart-head__col cart-head__col--price">Giá thành</span>
+                        <span class="cart-head__col cart-head__col--qty">Số lượng</span>
+                        <span class="cart-head__col cart-head__col--del"></span>
+                    </div>
                 </div>
 
-                @for (item of cartItems(); track item.product._id) {
-                <div class="cart-item">
-                    <div class="cart-item__prod">
-                        <div class="cart-item__img-wrap">
-                            <img [src]="getImage(item.product)" [alt]="item.product.name" />
-                        </div>
-                        <div class="cart-item__info">
-                            <h3 class="cart-item__name">
-                                <a [routerLink]="['/san-pham', item.product._id]">{{ item.product.name }}</a>
-                            </h3>
-                            @if (hasSale(item.product)) {
-                            <span class="cart-item__sale-tag">-{{ salePercent(item.product) }}%</span>
-                            }
-                        </div>
+                <!-- Items -->
+                @for (item of cartItems(); track productId(item.product)) {
+                <div class="cart-item" [class.cart-item--selected]="isSelected(productId(item.product))">
+                    <label class="ck-wrap cart-item__check">
+                        <input type="checkbox" [checked]="isSelected(productId(item.product))"
+                            (change)="toggleSelection(productId(item.product), $event)" />
+                        <span class="ck-box"></span>
+                    </label>
+
+                    <a [routerLink]="['/san-pham', productSlug(item.product)]" class="cart-item__img">
+                        <img [src]="getImage(item.product)" [alt]="item.product.name" />
+                    </a>
+
+                    <div class="cart-item__info">
+                        <a [routerLink]="['/san-pham', productSlug(item.product)]" class="cart-item__name">
+                            {{ item.product.name }}
+                        </a>
+                        @if (hasSale(item.product)) {
+                        <span class="cart-item__sale">-{{ salePercent(item.product) }}%</span>
+                        }
                     </div>
 
                     <div class="cart-item__price">
-                        <span class="price-current">{{ getPrice(item.product) | number:'1.0-0' }}₫</span>
+                        <span class="cart-item__price-now">{{ priceLabel(item.product) }}</span>
                         @if (hasSale(item.product)) {
-                        <span class="price-old">{{ item.product.price | number:'1.0-0' }}₫</span>
+                        <span class="cart-item__price-old">{{ oldPriceLabel(item.product) }}</span>
                         }
                     </div>
 
                     <div class="cart-item__qty">
-                        <div class="qty-control">
-                            <button (click)="decreaseQty(item.product._id!)">−</button>
-                            <input type="number" [value]="item.qty" readonly />
-                            <button (click)="increaseQty(item.product._id!)">+</button>
-                        </div>
+                        <button class="qty-btn" (click)="decreaseQty(productId(item.product))">−</button>
+                        <span class="qty-val">{{ item.qty }}</span>
+                        <button class="qty-btn" (click)="increaseQty(productId(item.product))">+</button>
                     </div>
 
-                    <div class="cart-item__total">
-                        {{ getPrice(item.product) * item.qty | number:'1.0-0' }}₫
-                    </div>
-
-                    <div class="cart-item__action">
-                        <button class="btn-remove" (click)="remove(item.product._id!)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
+                    <button class="cart-item__del" (click)="remove(productId(item.product))"
+                        title="Xóa sản phẩm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                    </button>
                 </div>
                 }
             </div>
 
-            <!-- Order Summary -->
+            <!-- ===== RIGHT: Order Summary ===== -->
             <div class="cart-sidebar">
-                <div class="cart-summary">
-                    <h3 class="summary-title">TÓM TẮT ĐƠN HÀNG</h3>
-
+                <div class="summary-card">
                     <div class="summary-row">
-                        <span>Tạm tính</span>
-                        <span>{{ cartTotal() | number:'1.0-0' }}₫</span>
+                        <span class="summary-label">Tổng tiền</span>
+                        <span class="summary-val">{{ totalLabel() }}</span>
                     </div>
-
                     <div class="summary-row">
-                        <span>Thành tiền</span>
-                        <span class="summary-total">{{ cartTotal() | number:'1.0-0' }}₫</span>
+                        <span class="summary-label">Giảm giá trực tiếp</span>
+                        <span class="summary-val summary-val--discount">0₫</span>
                     </div>
 
-                    <div class="summary-note">
-                        (Đã bao gồm VAT nếu có)
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-row summary-row--total">
+                        <span class="summary-label">Thành tiền</span>
+                        <span class="summary-val summary-val--total">{{ totalLabel() }}</span>
                     </div>
 
-                    <a routerLink="/checkout" class="btn btn--checkout">THANH TOÁN</a>
+                    <a routerLink="/checkout" class="btn-checkout">Mua hàng</a>
 
-                    <a routerLink="/san-pham" class="btn btn--continue">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                        Tiếp tục mua hàng
-                    </a>
+                    <p class="summary-terms">
+                        Bằng việc tiến hành đặt mua hàng, bạn đồng ý với
+                        <a href="#">Điều khoản dịch vụ</a> của AuraPC
+                    </p>
 
-                    <div class="payment-methods">
-                        <img src="assets/figma/515c49e4ff04f92775dfa684cb71aab58d94394c.png" alt="Momo" />
-                        <img src="assets/figma/2fa2c0072b5eed1fbba69aed2773ab02e7354df4.png" alt="ATM" />
-                        <img src="assets/figma/892e22da16197098391a26772aa96ffd9a832813.png" alt="Visa" />
-                        <img src="assets/figma/d6ae29042e93314bb9c94bd274147d405a51220c.png" alt="Master" />
+                    <div class="summary-payments">
+                        <span class="summary-payments__label">Hỗ trợ thanh toán</span>
+                        <div class="summary-payments__icons">
+                            <img src="assets/figma/515c49e4ff04f92775dfa684cb71aab58d94394c.png" alt="Momo" />
+                            <img src="assets/figma/2fa2c0072b5eed1fbba69aed2773ab02e7354df4.png" alt="ATM" />
+                            <img src="assets/figma/892e22da16197098391a26772aa96ffd9a832813.png" alt="Visa" />
+                            <img src="assets/figma/d6ae29042e93314bb9c94bd274147d405a51220c.png" alt="Master" />
+                        </div>
                     </div>
                 </div>
             </div>

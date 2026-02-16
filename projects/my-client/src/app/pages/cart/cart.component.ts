@@ -1,14 +1,13 @@
 import { Component, inject, signal, computed, effect } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
-import { CartService } from '../../core/services/cart.service';
+import { CartService, CartItem } from '../../core/services/cart.service';
 import { productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })
@@ -64,8 +63,36 @@ export class CartComponent {
     return productMainImage(p);
   }
 
-  getPrice(p: Product) {
+  getPrice(p: Product): number {
     return productDisplayPrice(p);
+  }
+
+  priceLabel(p: Product): string {
+    const price = productDisplayPrice(p);
+    if (!price || price <= 0) return 'Liên hệ';
+    return price.toLocaleString('vi-VN') + '₫';
+  }
+
+  itemTotalLabel(item: CartItem): string {
+    const price = productDisplayPrice(item.product);
+    if (!price || price <= 0) return 'Liên hệ';
+    return (price * item.qty).toLocaleString('vi-VN') + '₫';
+  }
+
+  oldPriceLabel(p: Product): string {
+    const old = p?.old_price ?? p?.price ?? 0;
+    if (old <= 0) return '';
+    return old.toLocaleString('vi-VN') + '₫';
+  }
+
+  totalLabel(): string {
+    const total = this.cartTotal();
+    if (!total || total <= 0) return '0₫';
+    return total.toLocaleString('vi-VN') + '₫';
+  }
+
+  productSlug(p: Product): string {
+    return p?.slug || p?._id || '';
   }
 
   productId(p: Product): string {
@@ -75,12 +102,19 @@ export class CartComponent {
   }
 
   hasSale(p: Product): boolean {
+    const old = p?.old_price;
+    if (old != null && old > 0 && (p?.price ?? 0) < old) return true;
     return !!(p.salePrice && p.salePrice < p.price);
   }
 
   salePercent(p: Product): number {
-    if (!p.salePrice || p.salePrice >= p.price) return 0;
-    return Math.round((1 - p.salePrice / p.price) * 100);
+    const price = p?.price ?? 0;
+    const old = p?.old_price;
+    if (old != null && old > 0 && price < old) {
+      return Math.round((1 - price / old) * 100);
+    }
+    if (!p.salePrice || p.salePrice >= price) return 0;
+    return Math.round((1 - p.salePrice / price) * 100);
   }
 
   increaseQty(productId: string) {

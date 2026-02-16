@@ -30,23 +30,63 @@
 
           <div class="nav-center">
             @if (searchOpen()) {
-            <div class="nav-search">
-              <input type="search" class="nav-search__input" placeholder="Tìm sản phẩm..." [ngModel]="searchQuery()"
-                (ngModelChange)="searchQuery.set($event)" (keydown.enter)="submitSearch()" autofocus />
-              <button type="button" class="nav-search__btn" (click)="submitSearch()" aria-label="Tìm kiếm">
-                <svg class="nav-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                  <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </button>
-              <button type="button" class="nav-search__close" (click)="toggleSearch()" aria-label="Đóng">
-                <svg class="nav-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </button>
+            <div class="nav-search-wrap" #searchWrapRef>
+              <div class="nav-search">
+                <input type="search" class="nav-search__input" placeholder="Tìm sản phẩm..." [ngModel]="searchQuery()"
+                  (ngModelChange)="onSearchInput($event)" (keydown.enter)="submitSearch()" autofocus />
+                <button type="button" class="nav-search__btn" (click)="submitSearch()" aria-label="Tìm kiếm">
+                  <svg class="nav-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                    <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="nav-search__close" (click)="toggleSearch()" aria-label="Đóng">
+                  <svg class="nav-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              @if (searchDropdownVisible()) {
+              <div class="search-dropdown">
+                <!-- Từ khóa gợi ý: Xem tất cả kết quả -->
+                <div class="search-dropdown__keywords">
+                  <a [routerLink]="['/san-pham']" [queryParams]="{search: searchQuery().trim()}" (click)="toggleSearch()"
+                    class="search-dropdown__keyword-link">
+                    <svg class="search-dropdown__keyword-icon" viewBox="0 0 24 24" fill="none">
+                      <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                      <path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Xem tất cả kết quả cho "{{ searchQuery().trim() }}"
+                  </a>
+                </div>
+                @if (searchLoading()) {
+                <div class="search-dropdown__loading">Đang tìm kiếm...</div>
+                } @else if (searchResults().length > 0) {
+                <div class="search-dropdown__divider"></div>
+                <div class="search-dropdown__list">
+                  @for (p of searchResults(); track p._id || p.slug) {
+                  <a [routerLink]="['/san-pham', p.slug]" (click)="toggleSearch()" class="search-dropdown__item">
+                    <img [src]="getProductImageUrl(p)" [alt]="p.name" class="search-dropdown__img" />
+                    <div class="search-dropdown__info">
+                      <span class="search-dropdown__name">{{ p.name }}</span>
+                      <span class="search-dropdown__price">{{ productPrice(p) | number:'1.0-0' }}₫</span>
+                    </div>
+                  </a>
+                  }
+                </div>
+                } @else {
+                <div class="search-dropdown__empty">
+                  <p class="search-dropdown__not-found">Không tìm thấy sản phẩm</p>
+                  <p class="search-dropdown__hint">Thử tìm kiếm với từ khóa khác hoặc
+                    <a [routerLink]="['/san-pham']" (click)="toggleSearch()" class="search-dropdown__link">xem toàn bộ sản phẩm</a>.
+                  </p>
+                </div>
+                }
+              </div>
+              }
             </div>
             } @else {
             <ul #navMenuRef class="nav-menu" [class.nav-menu--open]="menuOpen()">

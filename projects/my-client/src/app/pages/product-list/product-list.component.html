@@ -663,6 +663,11 @@
     </aside>
 
     <main class="pl-main">
+      @if (searchTerm().trim()) {
+      <div class="pl-search-header">
+        <h2 class="pl-search-header__title">Bạn đang tìm: <span class="pl-search-header__term">"{{ searchTerm() }}"</span></h2>
+      </div>
+      }
       <!-- Category tags -->
       <div class="pl-tags">
         @for (tag of categoryTags(); track tag.id) {

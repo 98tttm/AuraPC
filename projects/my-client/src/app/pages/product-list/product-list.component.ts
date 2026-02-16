@@ -984,6 +984,42 @@ export class ProductListComponent {
   addToCart(e: Event, p: Product) {
     e.preventDefault();
     e.stopPropagation();
+
+    const btn = e.currentTarget as HTMLElement;
+    const card = btn.closest('.pl-card');
+    const img = card?.querySelector('.pl-card__img') as HTMLImageElement | null;
+    const cartBtn = document.querySelector('.cart-btn') as HTMLElement | null;
+
+    if (img && cartBtn) {
+      const imgRect = img.getBoundingClientRect();
+      const cartRect = cartBtn.getBoundingClientRect();
+
+      const clone = img.cloneNode(true) as HTMLElement;
+      clone.className = 'fly-to-cart-clone';
+      clone.style.left = imgRect.left + 'px';
+      clone.style.top = imgRect.top + 'px';
+      clone.style.width = imgRect.width + 'px';
+      clone.style.height = imgRect.height + 'px';
+      document.body.appendChild(clone);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          clone.style.left = (cartRect.left + cartRect.width / 2 - 20) + 'px';
+          clone.style.top = (cartRect.top + cartRect.height / 2 - 20) + 'px';
+          clone.style.width = '40px';
+          clone.style.height = '40px';
+          clone.style.opacity = '0.2';
+          clone.style.borderRadius = '50%';
+        });
+      });
+
+      setTimeout(() => {
+        clone.remove();
+        cartBtn.classList.add('cart-bump');
+        setTimeout(() => cartBtn.classList.remove('cart-bump'), 500);
+      }, 750);
+    }
+
     this.cart.add(p);
   }
 

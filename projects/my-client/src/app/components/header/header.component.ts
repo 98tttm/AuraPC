@@ -2,12 +2,14 @@ import {
   Component, ChangeDetectionStrategy, signal, computed, inject, OnDestroy, ViewChildren, QueryList,
   HostListener, Inject, PLATFORM_ID, ElementRef, ViewChild,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, of, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, tap, catchError } from 'rxjs/operators';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
-import { ApiService, Category } from '../../core/services/api.service';
+import { ApiService, Category, Product, productMainImage } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
 
 export interface PartnerLink {
@@ -27,13 +29,14 @@ export interface MegamenuColumn {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, DecimalPipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnDestroy {
   @ViewChild('navMenuRef') navMenuRef!: ElementRef<HTMLUListElement>;
+  @ViewChild('searchWrapRef') searchWrapRef!: ElementRef<HTMLElement>;
   @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   activeMenu = signal<string>('products');
@@ -43,6 +46,9 @@ export class HeaderComponent implements OnDestroy {
   menuOpen = signal<boolean>(false);
   searchOpen = signal<boolean>(false);
   searchQuery = signal<string>('');
+  searchResults = signal<Product[]>([]);
+  searchLoading = signal<boolean>(false);
+  searchDropdownVisible = signal<boolean>(false);
   showLoginPopup = signal<boolean>(false);
   loginPhone = signal<string>('');
   /** Bước đăng nhập: phone | otp */
@@ -85,6 +91,8 @@ export class HeaderComponent implements OnDestroy {
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
+  private searchSubject = new Subject<string>();
+  private searchSub: Subscription | null = null;
   private isBrowser = false;
   private lastScrollY = 0;
   private readonly HEADER_HIDE_THRESHOLD = 120;
@@ -129,6 +137,39 @@ export class HeaderComponent implements OnDestroy {
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.buildMegamenu();
+    this.setupSearch();
+  }
+
+  private setupSearch(): void {
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(280),
+      distinctUntilChanged(),
+      switchMap((q) => {
+        const trimmed = (q || '').trim();
+        if (!trimmed || trimmed.length < 1) {
+          this.searchResults.set([]);
+          this.searchLoading.set(false);
+          this.searchDropdownVisible.set(false);
+          return of([]);
+        }
+        this.searchDropdownVisible.set(true);
+        this.searchLoading.set(true);
+        return this.api.getProducts({ search: trimmed, limit: 8 }).pipe(
+          map((res) => res?.items ?? []),
+          tap(() => this.searchLoading.set(false)),
+          catchError(() => {
+            this.searchResults.set([]);
+            this.searchLoading.set(false);
+            return of([]);
+          }),
+        );
+      }),
+    ).subscribe({
+      next: (items) => {
+        this.searchResults.set(Array.isArray(items) ? items : []);
+        this.searchDropdownVisible.set((this.searchQuery().trim().length || 0) > 0);
+      },
+    });
   }
 
   /** Fallback megamenu khi chưa load được categories từ API. */
@@ -226,6 +267,13 @@ export class HeaderComponent implements OnDestroy {
     this.closeProductsTimer = setTimeout(() => this.productsDropdownOpen.set(false), 120);
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (this.searchWrapRef?.nativeElement && !this.searchWrapRef.nativeElement.contains(e.target as Node)) {
+      this.closeSearchDropdown();
+    }
+  }
+
   @HostListener('window:scroll')
   onScroll(): void {
     if (!this.isBrowser) return;
@@ -269,13 +317,37 @@ export class HeaderComponent implements OnDestroy {
 
   toggleSearch(): void {
     this.searchOpen.update(v => !v);
-    if (!this.searchOpen()) this.searchQuery.set('');
+    if (!this.searchOpen()) {
+      this.searchQuery.set('');
+      this.searchDropdownVisible.set(false);
+    }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery.set(value);
+    this.searchSubject.next(value);
   }
 
   submitSearch(): void {
     const q = this.searchQuery().trim();
     if (q) this.router.navigate(['/san-pham'], { queryParams: { search: q } });
     this.toggleSearch();
+  }
+
+  getProductImageUrl(p: Product): string {
+    const url = productMainImage(p);
+    if (!url) return 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
+    if (url.startsWith('http')) return url;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
+
+  productPrice(p: Product): number {
+    return p.salePrice ?? p.price ?? 0;
+  }
+
+  closeSearchDropdown(): void {
+    this.searchDropdownVisible.set(false);
   }
 
   openUser(): void {
@@ -445,6 +517,7 @@ export class HeaderComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopCountdown();
+    this.searchSub?.unsubscribe();
   }
 
   toggleMenu(): void { this.menuOpen.update(v => !v); }

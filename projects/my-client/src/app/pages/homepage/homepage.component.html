@@ -148,25 +148,30 @@
      ============================================ -->
 <section class="featured">
   <div class="container">
-    <h2 class="section-title fade-in">SẢN PHẨM NỔI BẬT</h2>
-    <div class="featured__grid">
-      @for (p of featuredProducts(); track p._id) {
-        <a [routerLink]="['/san-pham', p.slug]" class="featured__card fade-in-left">
-          <div class="featured__image">
-            <img [src]="productImageUrl(p)" [alt]="p.name" />
-          </div>
-          <div class="featured__info">
-            <h2 class="featured__name">{{ p.name }}</h2>
-            <p class="featured__desc">{{ p.shortDescription || (productPrice(p) | number:'1.0-0') + '₫' }}</p>
-            <span class="featured__btn">MUA NGAY</span>
-          </div>
-        </a>
-      }
-    </div>
-    @if (featuredProducts().length === 0 && !introComplete()) {
+    @if (featuredProducts().length > 0) {
+      <h2 class="section-title fade-in">SẢN PHẨM NỔI BẬT</h2>
       <div class="featured__grid">
-        <div class="featured__card fade-in-left"><div class="featured__image"></div><div class="featured__info"><h2 class="featured__name">—</h2><p class="featured__desc">Đang tải...</p></div></div>
-        <div class="featured__card fade-in-right"><div class="featured__image featured__image--alt"></div><div class="featured__info"><h2 class="featured__name">—</h2><p class="featured__desc">Đang tải...</p></div></div>
+        @for (p of featuredProducts(); track p._id) {
+          <a [routerLink]="['/san-pham', p.slug]" class="featured__card fade-in-left">
+            <div class="featured__image">
+              <img [src]="productImageUrl(p)" [alt]="p.name" />
+            </div>
+            <div class="featured__info">
+              <h2 class="featured__name">{{ p.name }}</h2>
+              <p class="featured__desc">{{ p.shortDescription || (productPrice(p) | number:'1.0-0') + '₫' }}</p>
+              <span class="featured__btn">MUA NGAY</span>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="featured__static">
+        <a routerLink="/san-pham" class="featured__banner fade-in-left">
+          <img src="assets/images/feat-sabre.jpg" alt="SABRE v2 PRO CF" />
+        </a>
+        <a routerLink="/san-pham" class="featured__banner fade-in-right">
+          <img src="assets/images/feat-vengeance.jpg" alt="VENGEANCE a7500" />
+        </a>
       </div>
     }
   </div>
@@ -178,20 +183,58 @@
 <section class="categories">
   <div class="container">
     <h2 class="section-title fade-in">KHÁM PHÁ THEO DANH MỤC</h2>
-    <div class="categories__grid stagger-children">
-      @for (cat of apiCategories(); track cat._id) {
-        <a [routerLink]="['/san-pham']" [queryParams]="{category: cat.category_id || cat.slug}" class="categories__item fade-in">
-          <div class="categories__img-wrapper"><div class="categories__img-placeholder"></div></div>
-          <p class="categories__label">{{ cat.name }}</p>
+
+    @if (topCategories().length > 0) {
+      <div class="categories__grid stagger-children">
+        @for (cat of topCategories(); track cat._id) {
+          <a [routerLink]="['/san-pham']" [queryParams]="{category: cat.category_id || cat.slug}" class="categories__item fade-in">
+            <img [src]="categoryImage(cat)" [alt]="cat.name" class="categories__img" loading="lazy" />
+            <div class="categories__overlay">
+              <span class="categories__label">// {{ cat.name | uppercase }}</span>
+              <span class="categories__arrow">&rarr;</span>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="categories__grid stagger-children">
+        <a routerLink="/san-pham" [queryParams]="{category: 'vo-may'}" class="categories__item fade-in">
+          <img src="assets/images/cat-vo-may.jpg" alt="Vỏ máy" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// VỎ MÁY</span><span class="categories__arrow">&rarr;</span></div>
         </a>
-      }
-    </div>
+        <a routerLink="/san-pham" [queryParams]="{category: 'may-tinh-choi-game'}" class="categories__item fade-in">
+          <img src="assets/cate/laptop.png" alt="Máy tính chơi game" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// MÁY TÍNH CHƠI GAME</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+        <a routerLink="/san-pham" [queryParams]="{category: 'bo-nho-ram'}" class="categories__item fade-in">
+          <img src="assets/images/cat-ram.jpg" alt="Bộ nhớ RAM" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// BỘ NHỚ RAM</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+        <a routerLink="/san-pham" [queryParams]="{category: 'ban-phim'}" class="categories__item fade-in">
+          <img src="assets/images/cat-ban-phim.jpg" alt="Bàn phím" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// BÀN PHÍM</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+        <a routerLink="/san-pham" [queryParams]="{category: 'tai-nghe'}" class="categories__item fade-in">
+          <img src="assets/images/cat-tai-nghe.jpg" alt="Tai nghe" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// TAI NGHE</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+        <a routerLink="/san-pham" [queryParams]="{category: 'nguon-may-tinh'}" class="categories__item fade-in">
+          <img src="assets/images/cat-nguon.jpg" alt="Nguồn máy tính" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// NGUỒN MÁY TÍNH</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+        <a routerLink="/san-pham" [queryParams]="{category: 'tan-nhiet'}" class="categories__item fade-in">
+          <img src="assets/images/cat-tan-nhiet.jpg" alt="Tản nhiệt" class="categories__img" loading="lazy" />
+          <div class="categories__overlay"><span class="categories__label">// TẢN NHIỆT</span><span class="categories__arrow">&rarr;</span></div>
+        </a>
+      </div>
+    }
   </div>
 </section>
 
 <!-- ============================================
      SECTION 5: BLOG / GUIDES
      ============================================ -->
+@if (apiBlogs().length > 0) {
 <section class="blog">
   <div class="container">
     <div class="blog__header fade-in">
@@ -211,6 +254,7 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============================================
      SECTION 6: WHY AURA PC
@@ -240,25 +284,39 @@
 <section class="auralab">
   <div class="container">
     <div class="auralab__grid">
+      <!-- Left: AURA LAB large card -->
       <div class="auralab__main fade-in-left">
-        <div class="auralab__image-wrapper"><div class="auralab__image-placeholder"></div></div>
+        <div class="auralab__image-wrapper">
+          <img src="assets/images/auralab-keyboard.jpg" alt="Aura Lab" class="auralab__image" loading="lazy" />
+        </div>
         <div class="auralab__info">
           <h2 class="auralab__title">AURA LAB</h2>
-          <p class="auralab__desc">Tự tay lắp ráp máy tính trong không gian 3D.</p>
-          <a href="#" class="auralab__btn">BẮT ĐẦU LẮP RÁP</a>
+          <p class="auralab__desc">Tự do tuỳ chỉnh từ hiệu năng, linh kiện đến phong cách RGB và thẩm mỹ tổng thể.</p>
+          <a routerLink="/aura-lab" class="auralab__link">BẮT ĐẦU TUỲ CHỈNH &gt;</a>
         </div>
       </div>
+
+      <!-- Right: 2 stacked cards -->
       <div class="auralab__side">
         <div class="auralab__deal fade-in-right">
           <div class="auralab__deal-content">
-            <span class="auralab__deal-badge">AURA PC BUILDER</span>
-            <a href="#" class="auralab__deal-btn">XÂY DỰNG NGAY</a>
+            <h3 class="auralab__deal-badge">AURA PC BUILDER</h3>
+            <p class="auralab__deal-desc">Tự do tuỳ chỉnh từ hiệu năng, linh kiện đến phong cách RGB và thẩm mỹ tổng thể.</p>
+            <a routerLink="/aura-builder" class="auralab__deal-link">MUA NGAY &gt;</a>
+          </div>
+          <div class="auralab__deal-img">
+            <img src="assets/images/aura-builder.jpg" alt="Aura PC Builder" loading="lazy" />
           </div>
         </div>
+
         <div class="auralab__deal fade-in-right">
           <div class="auralab__deal-content">
-            <h3 class="auralab__deal-title">ƯU ĐÃI ĐẶC BIỆT</h3>
-            <a href="#" class="auralab__deal-btn">XEM NGAY</a>
+            <h3 class="auralab__deal-badge">ƯU ĐÃI ĐẶC BIỆT</h3>
+            <p class="auralab__deal-desc">Khám phá những deal tốt nhất trong tuần dành cho các cấu hình và linh kiện cao cấp của AURA PC.</p>
+            <a routerLink="/san-pham" class="auralab__deal-link">MUA NGAY &gt;</a>
+          </div>
+          <div class="auralab__deal-img">
+            <img src="assets/images/aura-deals.jpg" alt="Ưu đãi đặc biệt" loading="lazy" />
           </div>
         </div>
       </div>
