@@ -286,4 +286,46 @@ export class ApiService {
   getOrder(orderNumber: string): Observable<unknown> {
     return this.http.get(`${BASE}/orders/${encodeURIComponent(orderNumber)}`);
   }
+
+  /** Builder PC - lấy cấu hình theo id (ObjectId) hoặc shareId */
+  getBuilder(id: string): Observable<{
+    _id: string;
+    shareId?: string;
+    components: Record<string, { product?: string; name?: string; slug?: string; price?: number; images?: unknown; specs?: Record<string, string> }>;
+    createdAt?: string;
+    updatedAt?: string;
+  }> {
+    return this.http.get<{
+      _id: string;
+      shareId?: string;
+      components: Record<string, { product?: string; name?: string; slug?: string; price?: number; images?: unknown; specs?: Record<string, string> }>;
+      createdAt?: string;
+      updatedAt?: string;
+    }>(`${BASE}/builders/${encodeURIComponent(id)}`);
+  }
+
+  /** Tạo builder mới */
+  createBuilder(components?: Record<string, unknown>): Observable<{ _id: string; shareId: string }> {
+    return this.http.post<{ _id: string; shareId: string }>(`${BASE}/builders`, { components: components || {} });
+  }
+
+  /** Cập nhật 1 component trong builder */
+  updateBuilderComponent(
+    id: string,
+    step: string,
+    product: { _id?: string; name: string; slug: string; price: number; images?: unknown; specs?: Record<string, string>; techSpecs?: unknown }
+  ): Observable<{ _id: string; shareId: string; components?: Record<string, unknown> }> {
+    return this.http.put<{ _id: string; shareId: string; components?: Record<string, unknown> }>(
+      `${BASE}/builders/${encodeURIComponent(id)}`,
+      { step, product }
+    );
+  }
+
+  /** Gửi PDF cấu hình qua email */
+  emailBuilderPdf(id: string, email: string): Observable<{ success: boolean; message?: string }> {
+    return this.http.post<{ success: boolean; message?: string }>(
+      `${BASE}/builders/${encodeURIComponent(id)}/email-pdf`,
+      { email }
+    );
+  }
 }

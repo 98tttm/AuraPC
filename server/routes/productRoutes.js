@@ -180,12 +180,19 @@ router.get('/', async (req, res) => {
         .map((s) => s.trim())
         .filter((s) => !!s);
     }
+    // Hãng sản xuất: tìm theo brand HOẶC tên sản phẩm chứa tên hãng (ASUS, GIGABYTE, MSI)
     const brandList = toArray(brand);
     if (brandList.length) {
       filter.$and.push({
-        $or: brandList.map((b) => ({
-          brand: new RegExp('^' + String(b).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i'),
-        })),
+        $or: brandList.flatMap((b) => {
+          const esc = String(b).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const re = new RegExp(esc, 'i');
+          return [
+            { brand: re },
+            { name: re },
+            { shortDescription: re },
+          ];
+        }),
       });
     }
     if (minPrice != null && minPrice !== '') {
@@ -412,25 +419,39 @@ router.get('/', async (req, res) => {
       });
     }
     // VGA: series (RTX 4060, RX 7800...) và VRAM
+    // Rút gọn để match linh hoạt: "NVIDIA GeForce RTX 5060 (Blackwell)" -> dùng cả full string và "RTX 5060"
     if (vgaSeries && String(vgaSeries).trim()) {
-      const val = esc(vgaSeries);
-      filter.$and.push({
-        $or: [
-          { 'specs.Graphics Processing': new RegExp(val, 'i') },
-          { 'specs.Chipset': new RegExp(val, 'i') },
-          { 'techSpecs.Graphics Processing': new RegExp(val, 'i') },
-          { 'techSpecs.Chipset': new RegExp(val, 'i') },
-        ],
-      });
+      const raw = String(vgaSeries).trim();
+      const val = esc(raw);
+      const coreMatch = raw.match(/(?:RTX|GTX|RX)\s*\d{3,5}(?:\s*XT)?/i);
+      const searchTerms = [val];
+      if (coreMatch && coreMatch[0] !== raw) searchTerms.push(esc(coreMatch[0]));
+      const specKeys = ['Graphics Processing', 'Chipset', 'Card đồ họa', 'GPU', 'VGA'];
+      const orConditions = [];
+      for (const term of searchTerms) {
+        for (const key of specKeys) {
+          orConditions.push({ [`specs.${key}`]: new RegExp(term, 'i') });
+          orConditions.push({ [`techSpecs.${key}`]: new RegExp(term, 'i') });
+        }
+      }
+      filter.$and.push({ $or: orConditions });
     }
     if (vram && String(vram).trim()) {
-      const val = esc(vram);
-      filter.$and.push({
-        $or: [
-          { 'specs.Memory Size': new RegExp(val, 'i') },
-          { 'techSpecs.Memory Size': new RegExp(val, 'i') },
-        ],
-      });
+      const raw = String(vram).trim();
+      const val = esc(raw);
+      // Hỗ trợ "8GB" và "8 GB": dùng pattern \d+\s*GB để match linh hoạt
+      const flexMatch = raw.match(/^(\d+)\s*GB$/i);
+      const flexPattern = flexMatch ? flexMatch[1] + '\\s*GB' : val;
+      const patterns = flexMatch ? [val, flexPattern] : [val];
+      const orConditions = [];
+      const vramKeys = ['Memory Size', 'VRAM', 'Dung lượng bộ nhớ', 'Bộ nhớ'];
+      for (const p of patterns) {
+        for (const key of vramKeys) {
+          orConditions.push({ [`specs.${key}`]: new RegExp(p, 'i') });
+          orConditions.push({ [`techSpecs.${key}`]: new RegExp(p, 'i') });
+        }
+      }
+      filter.$and.push({ $or: orConditions });
     }
     // Bàn phím: switch, layout, kết nối
     if (kbSwitch && String(kbSwitch).trim()) {
@@ -710,7 +731,7 @@ router.get('/filter-options', async (req, res) => {
       // VGA
       const vgaSeriesVal = getSpec(p, ['Graphics Processing', 'Chipset', 'Card đồ họa', 'GPU', 'VGA']);
       if (vgaSeriesVal) specValues.vgaSeries.add(vgaSeriesVal);
-      const vramVal = getSpec(p, ['Memory Size', 'VRAM', 'Dung lượng bộ nhớ']);
+      const vramVal = getSpec(p, ['Memory Size', 'VRAM', 'Dung lượng bộ nhớ', 'Bộ nhớ']);
       if (vramVal) specValues.vram.add(vramVal);
 
       // Keyboard

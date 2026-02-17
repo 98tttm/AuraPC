@@ -1,11 +1,11 @@
 /* Main Layout */
 :host {
     display: block;
-    height: 100vh;
-    width: 100vw;
+    height: calc(100vh - 72px);
+    min-height: 400px;
+    width: 100%;
     overflow: hidden;
     font-family: 'Segoe UI', 'Inter', sans-serif;
-    color: #fff;
 }
 
 .builder-container {
@@ -14,287 +14,966 @@
     width: 100%;
 }
 
-/* Sidebar */
+/* Sidebar - không vàng, chỉ viền, căn giữa */
 .sidebar {
-    width: 280px;
-    background-color: #000;
+    width: 260px;
+    background-color: #0c0c0e;
     display: flex;
     flex-direction: column;
+    align-items: center;
     border-right: 1px solid #222;
     z-index: 10;
     flex-shrink: 0;
-    padding-bottom: 20px;
-    /* Add bottom padding to create space */
-}
-
-.logo-container {
-    padding: 24px;
-}
-
-.logo {
-    height: 48px;
-    /* Adjust based on logo aspect ratio */
-    width: auto;
 }
 
 .nav-menu {
     flex: 1;
     list-style: none;
-    padding: 0;
+    padding: 0 12px;
     margin: 0;
     overflow-y: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .nav-item {
-    padding: 16px 32px;
-    font-size: 0.9rem;
+    position: relative;
+    padding: 14px 20px;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #888;
-    cursor: pointer;
-    transition: all 0.2s;
+    color: #aaa;
+    transition: color 0.2s, border-color 0.2s;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-radius: 4px;
-    /* Reduced rounding */
-    margin: 0 2px;
-    /* Spacing for rounded look */
+    border-radius: 0;
+    margin: 2px 0;
+    border: 2px solid transparent;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.nav-item:hover {
+.nav-item--no-click {
+    cursor: default;
+}
+
+.nav-item--clickable {
+    cursor: pointer;
+}
+
+.nav-item--clickable:hover {
     color: #fff;
-    background-color: #111;
 }
 
 .nav-item.active {
-    color: #000;
-    /* Black text for white background */
-    background-color: #ffffff;
-    /* White background as requested */
-    border-left: 4px solid #fff;
-    /* Border same as bg or maybe blue? User said "bam vao thanh mau trang". */
-    /* Let's keep a subtle blue indicator or just pure white?
-       "hay cho casi bam vao thanh mau trang nhe" -> Make the clicked one white.
-       Usually implies white background, black text.
-     */
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    /* Pop out a bit */
+    color: #fff;
+    border-color: transparent;
+}
+
+/* Hai thanh dọc trắng hai bên - di chuyển theo bước đang chọn */
+.nav-item.active::before,
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 70%;
+    background: #fff;
+    transition: opacity 0.2s;
+}
+
+.nav-item.active::before {
+    left: 0;
+}
+
+.nav-item.active::after {
+    right: 0;
+}
+
+/* Bước đã chọn sản phẩm - chữ trắng sáng hơn các ô chưa chọn */
+.nav-item.completed {
+    color: #e5e5e5;
 }
 
 .sidebar-footer {
-    padding: 24px;
+    padding: 20px 24px;
     border-top: 1px solid #222;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
     margin-top: auto;
-    /* Ensure footer pushes to bottom if not already */
-    padding-bottom: 40px;
-    /* Extra space at bottom as requested */
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .sidebar-btn {
     background: transparent;
-    border: 1px solid #444;
-    color: #fff;
-    padding: 12px;
+    border: none;
+    color: #888;
+    padding: 10px 0;
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 1px;
     cursor: pointer;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 4px;
-    /* Reduced rounding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .sidebar-btn:hover {
-    border-color: #fff;
-}
-
-.sidebar-btn.reset {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: center;
-    border: none;
-    color: #666;
-}
-
-.sidebar-btn.reset:hover {
     color: #fff;
 }
 
-/* Main Content */
+/* Main Content - Welcome screen */
 .main-content {
     flex: 1;
     position: relative;
     background-color: #ffffff;
-    /* White background */
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #000;
-    /* Dark text */
 }
 
-/* Background Pattern (Triangular Mesh) - Adjusted for White BG */
+.main-content--builder {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
 .bg-pattern {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    opacity: 0.05;
-    /* Faint grey */
+    opacity: 0.1;
     background-image:
-        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
-        linear-gradient(150deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
-        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
-        linear-gradient(150deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
-        linear-gradient(60deg, #333 25%, transparent 25.5%, transparent 75%, #333 75%, #333),
-        linear-gradient(60deg, #333 25%, transparent 25.5%, transparent 75%, #333 75%, #333);
+        linear-gradient(30deg, #999 12%, transparent 12.5%, transparent 87%, #999 87.5%, #999),
+        linear-gradient(150deg, #999 12%, transparent 12.5%, transparent 87%, #999 87.5%, #999);
     background-size: 80px 140px;
-    background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
     pointer-events: none;
 }
 
-/* Gradient Overlay for Fade Effect - Removed or made minimal */
-.bg-overlay {
-    display: none;
-}
-
-
-.content-wrapper {
+.content-wrapper--welcome {
     position: relative;
     z-index: 5;
     text-align: center;
-    max-width: 1000px;
+    max-width: 900px;
     padding: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: -5vh;
-    /* Move up slightly to be more "centered" visualy or "nguyen phan ben phai di chuyen len tren" */
-    /* User said "cho nguyen phan ben phai di chuyen len tren cho o chinh giua man hinh" */
-    /* It is already flex center, but maybe header offset makes it look low. 
-       Let's add negative margin-top to pull it up. */
-}
-
-.brand-logo {
-    height: 240px;
-    /* Increased size significantly */
-    margin-bottom: -60px;
-    /* Adjusted spacing */
-    opacity: 1;
-    /* Ensure full visibility */
 }
 
 .page-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 800;
-    margin: 0 0 16px;
+    margin: 0 0 12px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-family: 'UTM Nokia', 'Nokia UTM', sans-serif;
-    /* Changed font */
     color: #000;
-    /* Dark for white bg */
-    /* Remove gradient text for now unless requested */
 }
 
-.sub-title {
-    font-size: 1.5rem;
+.tagline {
+    margin: 0;
+    font-size: 1rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
+    color: #000;
 }
 
-.description {
-    font-size: 1.1rem;
-    color: #bbb;
-    margin-bottom: 40px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.tagline--primary { margin-bottom: 4px; }
+.tagline--secondary { margin-bottom: 32px; opacity: 0.9; }
+
+.hero-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-image-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .hero-image {
-    max-width: 80%;
+    max-width: 90%;
     height: auto;
-    margin-bottom: 40px;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
-    /* Lighter shadow */
-    /* animation removed as requested */
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-
-    100% {
-        transform: translateY(0px);
-    }
 }
 
 .cta-button {
-    background-color: #0c1f36;
-    /* Dark Blue/Black Blue like Header */
+    background-color: #000;
     color: #fff;
-    border: none;
-    padding: 16px 48px;
+    border: 2px solid #000;
+    padding: 18px 56px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    border-radius: 4px;
+    margin-top: -20px;
+    position: relative;
+    z-index: 2;
+}
+
+.cta-button:hover {
+    border-color: #333;
+}
+
+/* Builder mode */
+.builder-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 24px 32px;
+    background: #f8f9fa;
+    overflow: hidden;
+}
+
+.builder-main--overview {
+    padding: 0;
+}
+
+.builder-header {
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.builder-step-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111;
+}
+
+.builder-toolbar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.builder-search {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+}
+
+.builder-search__input {
+    width: 100%;
+    padding: 12px 44px 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.builder-search__icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: #888;
+}
+
+.builder-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.builder-filter-group {
+    display: inline-flex;
+}
+
+.builder-filter__select {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 180px;
+    max-width: 220px;
+    cursor: pointer;
+    color: #333;
+    background-color: #fff;
+}
+
+.builder-filter__select option {
+    color: #333;
+}
+
+.builder-filter__select:focus {
+    outline: none;
+    border-color: #333;
+}
+
+.builder-filter__clear {
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid #999;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #555;
+}
+
+.builder-filter__clear:hover {
+    color: #000;
+    border-color: #000;
+}
+
+.builder-body {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    min-height: 0;
+}
+
+.builder-grid-wrap {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.builder-loading,
+.builder-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: #666;
+}
+
+.builder-loading__spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #eee;
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.builder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.builder-card {
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.builder-card:hover {
+    border-color: #888;
+}
+
+.builder-card--selected {
+    border-color: #333;
+}
+
+.builder-card__img-wrap {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.builder-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.builder-card__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: #111;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.builder-card__price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e53935;
+    margin: 0;
+}
+
+.builder-detail-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: #1a1a1e;
+    border-radius: 8px;
+    color: #fff;
+    overflow-y: auto;
+}
+
+.builder-detail-panel__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #333;
+}
+
+.builder-detail-panel__header h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.builder-detail-panel__body {
+    padding: 20px;
+}
+
+.builder-detail-panel__hint {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.builder-detail-panel__selected {
+    text-align: center;
+}
+
+.builder-detail-panel__img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    margin-bottom: 12px;
+}
+
+.builder-detail-panel__selected h4 {
+    font-size: 1rem;
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.builder-detail-panel__price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e53935;
+    margin: 0;
+}
+
+.builder-detail-panel__placeholder {
+    text-align: center;
+    padding: 40px 16px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.builder-footer {
+    padding: 16px 0 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.builder-next-btn {
+    background: #000;
+    color: #fff;
+    border: 2px solid #000;
+    padding: 14px 48px;
     font-size: 1rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
     border-radius: 4px;
-    /* Reduced rounding */
-    display: block;
-    /* Ensure visibility */
 }
 
-.cta-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(12, 31, 54, 0.4);
+.builder-next-btn:hover:not(:disabled) {
+    border-color: #333;
 }
 
-/* Mobile Responsiveness */
+.builder-next-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.builder-filter-label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.builder-actions {
+    margin-top: 8px;
+}
+
+.builder-action-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 2px solid #333;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.builder-action-btn:hover {
+    background: #333;
+    color: #fff;
+}
+
+.builder-specs {
+    margin-top: 16px;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.builder-specs h5 {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+}
+
+.builder-specs p {
+    margin: 4px 0;
+    color: #ccc;
+}
+
+/* Overview page - Corsair style */
+.overview-corsair {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+}
+
+.overview-corsair__header {
+    background: #000;
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.overview-corsair__header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.overview-corsair__share {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.overview-corsair__share:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.overview-corsair__body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 280px;
+    gap: 0;
+    overflow: hidden;
+}
+
+.overview-corsair__col {
+    padding: 24px;
+    overflow-y: auto;
+    border-right: 1px solid #e0e0e0;
+}
+
+.overview-corsair__col:last-child {
+    border-right: none;
+}
+
+.overview-corsair__col--right {
+    background: #f5f5f5;
+}
+
+.overview-corsair__col-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 20px;
+    letter-spacing: 1px;
+}
+
+/* Cột trái - Lựa chọn linh kiện */
+.overview-corsair__core-item {
+    margin-bottom: 20px;
+}
+
+.overview-corsair__core-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overview-corsair__core-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111;
+    margin: 4px 0 6px;
+    line-height: 1.3;
+}
+
+.overview-corsair__link {
+    font-size: 0.85rem;
+    color: #000;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.overview-corsair__link:hover {
+    color: #333;
+}
+
+/* Cột giữa - Xem trước đơn hàng */
+.overview-corsair__order-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.overview-corsair__order-item:last-of-type {
+    border-bottom: none;
+}
+
+.overview-corsair__order-img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    background: #f9f9f9;
+    flex-shrink: 0;
+}
+
+.overview-corsair__order-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.overview-corsair__order-label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.overview-corsair__order-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+    margin: 2px 0 4px;
+    line-height: 1.3;
+}
+
+.overview-corsair__order-price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111;
+}
+
+/* Footer cố định phía dưới - không cuộn theo danh sách */
+.overview-corsair__footer {
+    flex-shrink: 0;
+    padding: 20px 24px;
+    background: #fff;
+    border-top: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.overview-corsair__total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+}
+
+.overview-corsair__total-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111;
+}
+
+.overview-corsair__total-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111;
+}
+
+.overview-corsair__actions {
+    display: flex;
+    gap: 12px;
+}
+
+.overview-corsair__btn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.overview-corsair__btn--outline {
+    background: #fff;
+    border: 2px solid #000;
+    color: #000;
+}
+
+.overview-corsair__btn--outline:hover {
+    background: #f5f5f5;
+}
+
+.overview-corsair__btn--primary {
+    background: #000;
+    border: 2px solid #000;
+    color: #fff;
+}
+
+.overview-corsair__btn--primary:hover {
+    background: #333;
+    border-color: #333;
+}
+
+/* Cột phải - Cam kết */
+.overview-corsair__guarantee-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.overview-corsair__guarantee-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.5;
+}
+
+.overview-corsair__guarantee-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    background: #333;
+    border-radius: 50%;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
     .builder-container {
         flex-direction: column;
-        overflow-y: auto;
     }
 
     .sidebar {
         width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #222;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
     }
 
     .nav-menu {
         display: none;
-        /* Hide nav on mobile welcome for now */
     }
 
-    .main-content {
-        overflow-y: visible;
-        padding-bottom: 40px;
+    .main-content--builder .builder-body {
+        flex-direction: column;
     }
 
-    .page-title {
-        font-size: 2.5rem;
+    .builder-detail-panel {
+        width: 100%;
     }
 
-    .hero-image {
-        max-width: 100%;
+    .builder-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .overview-corsair__body {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-corsair__col {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+}
+
+@media (max-width: 1024px) {
+    .overview-corsair__body {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .overview-corsair__col--right {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Save modal - nền trắng, nút đen */
+.save-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.save-modal {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 28px;
+    max-width: 420px;
+    width: 100%;
+    color: #111;
+}
+
+.save-modal__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+    color: #111;
+}
+
+.save-modal__desc {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+.save-modal__form {
+    margin-bottom: 20px;
+}
+
+.save-modal__input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: #111;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.save-modal__input::placeholder {
+    color: #999;
+}
+
+.save-modal__input:focus {
+    outline: none;
+    border-color: #000;
+}
+
+.save-modal__error {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+    color: #e53935;
+}
+
+.save-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.save-modal__btn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.save-modal__btn--outline {
+    background: transparent;
+    border: 2px solid #000;
+    color: #000;
+}
+
+.save-modal__btn--outline:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.save-modal__btn--primary {
+    background: #000;
+    border: 2px solid #000;
+    color: #fff;
+}
+
+.save-modal__btn--primary:hover:not(:disabled) {
+    background: #222;
+    border-color: #222;
+}
+
+.save-modal__btn--primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: #111;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    z-index: 10000;
+    animation: toastIn 0.3s ease;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
 }

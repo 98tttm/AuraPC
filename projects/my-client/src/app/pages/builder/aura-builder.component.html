@@ -1,45 +1,256 @@
 <div class="builder-container">
-    <!-- Sidebar -->
     <aside class="sidebar">
-        <!-- Logo removed -->
-
         <ul class="nav-menu">
+            <li class="nav-item nav-item--clickable" [class.active]="isOverview()"
+                (click)="goOverview()">Aura Builder</li>
             @for (step of steps; track step) {
-            <li class="nav-item" [class.active]="currentStep === step" (click)="setStep(step)">
-                {{ step }}
+            <li class="nav-item"
+                [class.nav-item--clickable]="isBuilderMode()"
+                [class.nav-item--no-click]="!isBuilderMode()"
+                [class.active]="isStepCurrent(step)"
+                [class.completed]="isBuilderMode() && isStepCompleted(step) && !isStepCurrent(step)"
+                (click)="isBuilderMode() && goToStep(step)">
+                {{ getStepLabel(step) }}
             </li>
+            }
+            @if (isBuilderMode() && isAllStepsCompleted()) {
+            <li class="nav-item nav-item--clickable"
+                [class.active]="currentStep() === 'OVERVIEW'"
+                (click)="goToStep('OVERVIEW')">Tổng quan</li>
             }
         </ul>
 
         <div class="sidebar-footer">
-            <!-- Overview button removed -->
-            <button class="sidebar-btn reset">
+            @if (isBuilderMode()) {
+            <button class="sidebar-btn reset" (click)="goToStep('OVERVIEW')">
+                Tổng quan
+            </button>
+            } @else {
+            <button class="sidebar-btn reset" (click)="startOver()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
                 </svg>
-                Start Over
+                Bắt đầu lại
             </button>
-
-            <!-- Language/Location Selectors (placeholder) -->
+            }
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" [class.main-content--builder]="isBuilderMode()">
+        @if (!isBuilderMode()) {
         <div class="bg-pattern"></div>
-        <!-- Overlay removed -->
-
-        <div class="content-wrapper">
-            <img src="assets/LOGO/LogoBlack.png" alt="AuraPC" class="brand-logo">
-
+        <div class="content-wrapper content-wrapper--welcome">
             <h1 class="page-title">AURA BUILDER</h1>
-
-            <!-- Subtext removed -->
-
-            <img src="assets/aura-builder/welcome.webp" alt="PC Builder Showcase" class="hero-image">
-
-            <button class="cta-button">PLAN YOUR BUILD</button>
+            <p class="tagline tagline--primary">Nhận gợi ý tương thích</p>
+            <p class="tagline tagline--secondary">Chọn linh kiện AuraPC lý tưởng cho bạn</p>
+            <div class="hero-section">
+                <div class="hero-image-wrap">
+                    <img src="assets/aura-builder/welcome.webp" alt="PC Builder" class="hero-image">
+                    <button class="cta-button" (click)="planYourBuild()">LÊN KẾ HOẠCH BUILD</button>
+                </div>
+            </div>
         </div>
+        } @else {
+        <div class="builder-main" [class.builder-main--overview]="currentStep() === 'OVERVIEW'">
+            @if (currentStep() === 'OVERVIEW') {
+            <div class="overview-corsair">
+                <div class="overview-corsair__header">
+                    <span class="overview-corsair__header-title">TỔNG QUAN</span>
+                    @if (builderShareId()) {
+                    <button type="button" class="overview-corsair__share" (click)="copyShareLink()">Chia sẻ link</button>
+                    }
+                </div>
+
+                <div class="overview-corsair__body">
+                    <div class="overview-corsair__col overview-corsair__col--left">
+                        <h3 class="overview-corsair__col-title">LỰA CHỌN LINH KIỆN</h3>
+                        @for (item of overviewCoreComponents(); track item.step) {
+                        <div class="overview-corsair__core-item">
+                            <span class="overview-corsair__core-label">{{ getStepLabel(item.step) }}</span>
+                            <p class="overview-corsair__core-name">{{ item.data?.name }}</p>
+                            <a class="overview-corsair__link" (click)="goToStep(item.step)">Sửa</a>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="overview-corsair__col overview-corsair__col--center">
+                        <h3 class="overview-corsair__col-title">XEM TRƯỚC ĐƠN HÀNG</h3>
+                        @for (item of overviewOrderPreview(); track item.step) {
+                        <div class="overview-corsair__order-item">
+                            <img [src]="getComponentImage(item.data)" [alt]="item.data?.name" class="overview-corsair__order-img" />
+                            <div class="overview-corsair__order-info">
+                                <span class="overview-corsair__order-label">{{ getStepLabel(item.step) }}</span>
+                                <p class="overview-corsair__order-name">{{ item.data?.name }}</p>
+                                <a class="overview-corsair__link" (click)="goToStep(item.step)">Sửa</a>
+                            </div>
+                            <span class="overview-corsair__order-price">{{ formatPriceNumber(item.data?.price ?? 0) }}</span>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="overview-corsair__col overview-corsair__col--right">
+                        <h3 class="overview-corsair__col-title">CAM KẾT CỦA CHÚNG TÔI</h3>
+                        <ul class="overview-corsair__guarantee-list">
+                            <li>Đảm bảo tương thích linh kiện</li>
+                            <li>Giao hàng nhanh</li>
+                            <li>Đổi trả dễ dàng</li>
+                            <li>Bảo hành chính hãng</li>
+                            <li>Hỗ trợ kỹ thuật tận tâm</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="overview-corsair__footer">
+                    <div class="overview-corsair__total-row">
+                        <span class="overview-corsair__total-label">TỔNG CỘNG</span>
+                        <span class="overview-corsair__total-value">{{ formatPriceNumber(overviewTotal()) }}</span>
+                    </div>
+                    <div class="overview-corsair__actions">
+                        <button type="button" class="overview-corsair__btn overview-corsair__btn--outline" (click)="onSaveConfiguration()">Lưu cấu hình</button>
+                        <button type="button" class="overview-corsair__btn overview-corsair__btn--primary">Thêm vào giỏ</button>
+                    </div>
+                </div>
+            </div>
+            } @else {
+            <div class="builder-header">
+                <h2 class="builder-step-title">{{ getStepTitle(currentStep()) }}</h2>
+            </div>
+
+            <div class="builder-toolbar">
+                <div class="builder-search">
+                    <input type="search" class="builder-search__input"
+                        [placeholder]="'Tìm ' + total() + ' ' + getStepTitle(currentStep()).toLowerCase()"
+                        [ngModel]="searchTerm()" (ngModelChange)="onSearch($event)" />
+                    <svg class="builder-search__icon" viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                        <path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="builder-filters">
+                    <span class="builder-filter-label">Lọc theo:</span>
+                    <div class="builder-filter-group">
+                        <select class="builder-filter__select" [ngModel]="selectedBrand() ?? ''"
+                            (ngModelChange)="onBrandChange($event)" [title]="'Hãng sản xuất'">
+                            <option value="">Hãng sản xuất</option>
+                            @for (b of brands(); track b) {
+                            <option [value]="b">{{ b }}</option>
+                            }
+                        </select>
+                    </div>
+                    @for (f of stepFilters(); track f.param) {
+                        <div class="builder-filter-group">
+                            <select class="builder-filter__select" [ngModel]="(getSelectedFilter(f.param) ?? '')"
+                                (ngModelChange)="onFilterChange(f.param, $event)" [title]="f.label">
+                                <option value="">{{ getFilterPlaceholder(f.param) }}</option>
+                                @for (opt of getFilterOptionsFor(f.param); track opt) {
+                                <option [value]="opt">{{ opt }}</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    @if (hasFilters()) {
+                    <button type="button" class="builder-filter__clear" (click)="clearFilters()">Xóa bộ lọc</button>
+                    }
+                </div>
+            </div>
+
+            <div class="builder-body">
+                <div class="builder-grid-wrap">
+                    @if (loading()) {
+                    <div class="builder-loading">
+                        <div class="builder-loading__spinner"></div>
+                        <p>Đang tải sản phẩm...</p>
+                    </div>
+                    } @else if (products().length === 0) {
+                    <div class="builder-empty">
+                        <p>Không tìm thấy sản phẩm phù hợp.</p>
+                    </div>
+                    } @else {
+                    <div class="builder-grid">
+                        @for (p of products(); track p._id || p.slug) {
+                        <div class="builder-card" [class.builder-card--selected]="selectedProduct()?._id === p._id"
+                            (click)="selectProduct(p)">
+                            <div class="builder-card__img-wrap">
+                                <img [src]="getProductImage(p)" [alt]="p.name" class="builder-card__img" />
+                            </div>
+                            <h3 class="builder-card__name">{{ p.name }}</h3>
+                            <p class="builder-card__price">{{ formatPrice(p) }}</p>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <aside class="builder-detail-panel">
+                    <div class="builder-detail-panel__header">
+                        <h3>CHỌN {{ getStepTitle(currentStep()).toUpperCase() }}</h3>
+                    </div>
+                    <div class="builder-detail-panel__body">
+                        <p class="builder-detail-panel__hint">
+                            Chọn {{ getStepTitle(currentStep()).toLowerCase() }} phù hợp để xây dựng cấu hình PC.
+                        </p>
+                        @if (selectedProduct(); as sp) {
+                        <div class="builder-detail-panel__selected">
+                            <img [src]="getProductImage(sp)" [alt]="sp.name" class="builder-detail-panel__img" />
+                            <h4>{{ sp.name }}</h4>
+                            <p class="builder-detail-panel__price">{{ formatPrice(sp) }}</p>
+                            @if (getSpecLines(sp).length) {
+                            <div class="builder-specs">
+                                <h5>THÔNG SỐ</h5>
+                                @for (line of getSpecLines(sp); track line.label) {
+                                <p><strong>{{ line.label }}:</strong> {{ line.value }}</p>
+                                }
+                            </div>
+                            }
+                        </div>
+                        } @else {
+                        <div class="builder-detail-panel__placeholder">
+                            <p>Nhấn vào sản phẩm để xem chi tiết</p>
+                        </div>
+                        }
+                    </div>
+                </aside>
+            </div>
+
+            <div class="builder-footer">
+                <button type="button" class="builder-next-btn"
+                    [disabled]="!canGoNext() || nextLoading()" (click)="goNext()">
+                    {{ nextLoading() ? 'Đang lưu...' : 'TIẾP THEO' }}
+                </button>
+            </div>
+            }
+        </div>
+        }
     </main>
 </div>
+
+@if (showSaveModal()) {
+<div class="save-modal-overlay" (click)="closeSaveModal()">
+    <div class="save-modal" (click)="$event.stopPropagation()">
+        <h3 class="save-modal__title">Nhận thông tin cấu hình qua Email</h3>
+        <p class="save-modal__desc">Nhập email để nhận file PDF thông tin cấu hình PC của bạn.</p>
+        <div class="save-modal__form">
+            <input type="email" class="save-modal__input" placeholder="Email nhận thông tin cấu hình"
+                [ngModel]="saveModalEmail()" (ngModelChange)="saveModalEmail.set($event)"
+                (keydown.enter)="sendConfigEmail()" />
+            @if (saveModalError()) {
+            <p class="save-modal__error">{{ saveModalError() }}</p>
+            }
+        </div>
+        <div class="save-modal__actions">
+            <button type="button" class="save-modal__btn save-modal__btn--outline" (click)="closeSaveModal()">
+                Hủy
+            </button>
+            <button type="button" class="save-modal__btn save-modal__btn--primary"
+                [disabled]="saveModalLoading()" (click)="sendConfigEmail()">
+                {{ saveModalLoading() ? 'Đang gửi...' : 'Gửi cấu hình' }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+@if (toastMessage()) {
+<div class="toast">{{ toastMessage() }}</div>
+}

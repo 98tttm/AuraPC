@@ -11,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminProductRoutes = require('./routes/admin/productRoutes');
 const adminCategoryRoutes = require('./routes/admin/categoryRoutes');
 const adminBlogRoutes = require('./routes/admin/blogRoutes');
+const builderRoutes = require('./routes/builderRoutes');
 
 connectDB();
 
@@ -31,6 +32,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/admin/categories', adminCategoryRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
+app.use('/api/builders', builderRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));

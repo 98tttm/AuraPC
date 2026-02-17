@@ -33,7 +33,11 @@ export const routes: Routes = [
   },
   {
     path: 'aura-builder',
-    loadComponent: () => import('./pages/builder/aura-builder.component').then(m => m.AuraBuilderComponent)
+    loadComponent: () => import('./pages/builder/aura-builder.component').then(m => m.AuraBuilderComponent),
+  },
+  {
+    path: 'aura-builder/:id',
+    loadComponent: () => import('./pages/builder/aura-builder.component').then(m => m.AuraBuilderComponent),
   },
   { path: '**', redirectTo: '' },
 ];
