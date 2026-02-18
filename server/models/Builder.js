@@ -24,5 +24,6 @@ builderSchema.pre('save', async function () {
 });
 
 builderSchema.index({ user: 1 });
+builderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 604800 }); // 7 days TTL
 
 module.exports = mongoose.model('Builder', builderSchema);

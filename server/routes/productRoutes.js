@@ -539,16 +539,264 @@ router.get('/', async (req, res) => {
   }
 });
 
+/* ───────────────────────────────────────────────────────────────
+ *  Normalizer helpers for filter-options
+ * ─────────────────────────────────────────────────────────────── */
+
+/** Known PC-component brands extracted from product names. */
+const KNOWN_BRANDS = [
+  'ASUS', 'GIGABYTE', 'MSI', 'CORSAIR', 'NZXT', 'DEEPCOOL', 'COOLER MASTER',
+  'THERMALTAKE', 'LIAN LI', 'BE QUIET', 'NOCTUA', 'ARCTIC', 'RAZER',
+  'LOGITECH', 'KINGSTON', 'SAMSUNG', 'WESTERN DIGITAL', 'WD', 'SEAGATE',
+  'CRUCIAL', 'G.SKILL', 'TEAMGROUP', 'TEAM', 'GEIL', 'PATRIOT',
+  'SAPPHIRE', 'POWERCOLOR', 'XFX', 'ZOTAC', 'INNO3D', 'COLORFUL',
+  'GALAX', 'PNY', 'EVGA', 'PALIT', 'SEASONIC', 'FSP', 'XIGMATEK',
+  'SEGOTEP', 'SILVERSTONE', 'COUGAR', 'HYTE', 'PHANTEKS',
+  'INTEL', 'AMD', 'AKKO', 'KEYCHRON', 'MONSGEEK', 'DUCKY',
+  'STEELSERIES', 'HYPERX', 'HP', 'DELL', 'LENOVO', 'ACER', 'LG',
+  'VIEWSONIC', 'AOC', 'BENQ', 'ADATA',
+];
+
+/** Extract brand from product name by matching known brands. */
+function extractBrandFromName(name) {
+  if (!name) return null;
+  const upper = name.toUpperCase();
+  for (const b of KNOWN_BRANDS) {
+    // Match brand at start, or after common prefixes like "VGA ", "Card ", etc.
+    if (upper.startsWith(b + ' ') || upper.startsWith(b + '-') ||
+      upper.includes(' ' + b + ' ') || upper.includes('/' + b + ' ') ||
+      upper.startsWith('VGA ' + b) || upper.startsWith('CPU ' + b) ||
+      upper.startsWith('RAM ' + b) || upper.startsWith('SSD ' + b) ||
+      upper.startsWith('PSU ' + b) || upper.startsWith('CARD ') && upper.includes(b)) {
+      return KNOWN_BRANDS.find(kb => kb === b); // preserves original casing
+    }
+  }
+  return null;
+}
+
+/** Extract GPU chip name from verbose spec string. e.g. "NVIDIA GeForce RTX 5060 (Blackwell)" → "GeForce RTX 5060" */
+function normalizeGpuChip(val) {
+  if (!val) return null;
+  // Match RTX/GTX/RX series with optional Ti/XT/SUPER/OC suffix
+  const m = val.match(/(?:GeForce\s+)?((?:RTX|GTX)\s*\d{3,5}(?:\s*(?:Ti|SUPER))?)/i);
+  if (m) return 'GeForce ' + m[1].replace(/\s+/g, ' ').trim();
+  const amd = val.match(/((?:Radeon\s+)?RX\s*\d{3,5}(?:\s*XT)?)/i);
+  if (amd) return amd[1].replace(/\s+/g, ' ').trim();
+  return null;
+}
+
+/** Extract VRAM amount. "8GB GDDR6" → "8GB", "12 GB GDDR7" → "12GB" */
+function normalizeVram(val) {
+  if (!val) return null;
+  const m = val.match(/(\d+)\s*GB/i);
+  return m ? m[1] + 'GB' : null;
+}
+
+/** Extract CPU socket. "AMD Socket AM5 for..." → "AM5", "LGA1700 socket..." → "LGA1700" */
+function normalizeSocket(val) {
+  if (!val) return null;
+  const m = val.match(/(AM[45]|LGA\s*1[78]\d{2}|FCLGA\s*1[78]\d{2}|sTR5)/i);
+  if (m) {
+    const s = m[1].replace(/\s+/g, '').toUpperCase();
+    // Normalize FCLGA → LGA
+    return s.replace(/^FCLGA/, 'LGA');
+  }
+  return null;
+}
+
+/** Extract short CPU series. "Intel Core i5-14400F ..." → "Core i5-14400F" */
+function normalizeCpuSeries(val) {
+  if (!val) return null;
+  // Intel Core Ultra
+  let m = val.match(/(Core\s+Ultra\s+\d+\s+\d+\w*)/i);
+  if (m) return m[1].replace(/\s+/g, ' ').trim();
+  // Intel Core i3/i5/i7/i9
+  m = val.match(/(Core\s+i[3579]-?\d{4,5}\w*)/i);
+  if (m) return m[1].replace(/\s+/g, ' ').trim();
+  // AMD Ryzen AI
+  m = val.match(/(Ryzen\s+AI\s+\d+\s+\d+\w*)/i);
+  if (m) return m[1].replace(/\s+/g, ' ').trim();
+  // AMD Ryzen 5/7/9
+  m = val.match(/(Ryzen\s+[3579]\s+\d{3,5}\w*)/i);
+  if (m) return m[1].replace(/\s+/g, ' ').trim();
+  // AMD Athlon
+  m = val.match(/(Athlon\s*\w*)/i);
+  if (m) return m[1].trim();
+  return null;
+}
+
+/** Extract chipset. "Intel® B760 Express Chipset" → "B760", "AMD B650" → "B650" */
+function normalizeChipset(val) {
+  if (!val) return null;
+  const m = val.match(/\b([ABHXZ]\d{3,4}[EM]?)\b/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/** Normalize RAM type. "DDR5 SoDIMM" → "DDR5", "4 x DDR4..." → "DDR4" */
+function normalizeRamType(val) {
+  if (!val) return null;
+  const m = val.match(/(DDR[45])/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/** Normalize capacity for RAM/SSD. "16GB (2x8GB)" → "16GB", "1TB" → "1TB" */
+function normalizeCapacity(val) {
+  if (!val) return null;
+  // Try TB first
+  const tb = val.match(/(\d+)\s*TB/i);
+  if (tb) return tb[1] + 'TB';
+  // Then GB
+  const gb = val.match(/(\d+)\s*GB/i);
+  if (gb) {
+    const num = parseInt(gb[1], 10);
+    // Filter out unreasonable values for RAM (stick: 4-128GB) and SSD (64GB-8TB)
+    if (num >= 4 && num <= 8192) return num + 'GB';
+  }
+  return null;
+}
+
+/** Normalize RAM bus speed. "5600 MHz" → "5600MHz", "4800 MT/s" → "4800MHz" */
+function normalizeRamBus(val) {
+  if (!val) return null;
+  const m = val.match(/(\d{4,5})\s*(?:MHz|MT\/s|Mhz)/i);
+  return m ? m[1] + 'MHz' : null;
+}
+
+/** Normalize SSD interface. "PCIe Gen 5.0 x4, NVMe 2.0" → "PCIe 5.0 NVMe" */
+function normalizeSsdInterface(val) {
+  if (!val) return null;
+  if (/SATA/i.test(val)) return 'SATA III';
+  const pcie = val.match(/PCIe?\s*(?:Gen\s*)?(\d)\.?\d?/i);
+  if (pcie) {
+    const hasNvme = /NVMe/i.test(val);
+    return `PCIe ${pcie[1]}.0${hasNvme ? ' NVMe' : ''}`;
+  }
+  if (/NVMe/i.test(val)) return 'NVMe';
+  return null;
+}
+
+/** Normalize SSD form factor. */
+function normalizeSsdForm(val) {
+  if (!val) return null;
+  if (/M\.?2\s*2280/i.test(val) || /M\.?2/i.test(val)) return 'M.2';
+  if (/2\.5/i.test(val)) return '2.5"';
+  if (/3\.5/i.test(val)) return '3.5"';
+  return null;
+}
+
+/** Normalize keyboard layout. Extract % or key count. */
+function normalizeKbLayout(val) {
+  if (!val) return null;
+  // Percentage layouts
+  if (/\b60\s*%/i.test(val)) return '60%';
+  if (/\b65\s*%/i.test(val)) return '65%';
+  if (/\b75\s*%/i.test(val)) return '75%';
+  if (/\bTKL|80\s*%|87\s*phím|tenkeyless/i.test(val)) return 'TKL (80%)';
+  if (/\b96\s*%|96\s*phím|97\s*phím|98\s*phím/i.test(val)) return '96%';
+  if (/full\s*size|100\s*%|104\s*phím|108\s*phím/i.test(val)) return 'Full-size';
+  return null;
+}
+
+/** Normalize connection type. */
+function normalizeConnection(val) {
+  if (!val) return null;
+  const results = [];
+  if (/có dây|wired|USB(?:\s+Type)?(?:-[AC])?\s*(?:có dây)?/i.test(val) && !/không dây|wireless/i.test(val)) results.push('Có dây');
+  if (/2\.4\s*G(?:Hz)?|wireless|không dây/i.test(val)) results.push('Wireless 2.4GHz');
+  if (/bluetooth/i.test(val)) results.push('Bluetooth');
+  if (/LIGHTSPEED|HyperSpeed|SpeedNova/i.test(val)) results.push('Wireless 2.4GHz');
+  if (results.length === 0 && /USB/i.test(val)) results.push('Có dây');
+  return results.length > 0 ? results : null;
+}
+
+/** Normalize mouse DPI. Extract max DPI number. */
+function normalizeMouseDpi(val) {
+  if (!val) return null;
+  const nums = val.match(/(\d[\d,]*)\s*(?:DPI|dpi)/g);
+  if (nums && nums.length > 0) {
+    // Get the largest DPI value
+    const values = nums.map(n => parseInt(n.replace(/[^\d]/g, ''), 10)).filter(n => n > 100);
+    if (values.length > 0) {
+      const max = Math.max(...values);
+      return max.toLocaleString('en-US') + ' DPI';
+    }
+  }
+  // Try plain number
+  const m = val.match(/(\d[\d,]+)/);
+  if (m) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (n >= 400 && n <= 50000) return n.toLocaleString('en-US') + ' DPI';
+  }
+  return null;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ *  Per-category filter extraction config
+ *  Only extract filters RELEVANT to each category.
+ * ─────────────────────────────────────────────────────────────── */
+
+/**
+ * Define which filters to extract per category slug.
+ * Key = builder step category slug.
+ * Value = array of { target, keys, normalize } objects.
+ */
+const CATEGORY_FILTER_MAP = {
+  'vga': [
+    { target: 'vgaSeries', keys: ['Graphics Processing', 'Chipset', 'Card đồ họa', 'GPU', 'VGA'], normalize: normalizeGpuChip },
+    { target: 'vram', keys: ['Memory Size', 'VRAM', 'Dung lượng bộ nhớ', 'Bộ nhớ'], normalize: normalizeVram },
+  ],
+  'cpu': [
+    { target: 'cpuSeries', keys: ['Dòng CPU', 'CPU', 'Tên gọi', 'Model'], normalize: normalizeCpuSeries },
+    { target: 'cpuSocket', keys: ['Socket', 'Kiến trúc'], normalize: normalizeSocket },
+  ],
+  'mainboard': [
+    { target: 'mbSocket', keys: ['Socket', 'CPU', 'PROCESSOR'], normalize: normalizeSocket },
+    { target: 'mbChipset', keys: ['CHIPSET', 'Chipset'], normalize: normalizeChipset },
+    { target: 'mbRamType', keys: ['Chuẩn Ram', 'Chuẩn RAM', 'MEMORY', 'Hỗ trợ Ram'], normalize: normalizeRamType },
+  ],
+  'ram': [
+    { target: 'ramType', keys: ['Chuẩn Ram', 'Chuẩn RAM', 'Loại'], normalize: normalizeRamType },
+    { target: 'ramCapacity', keys: ['Dung lượng'], normalize: normalizeCapacity },
+    { target: 'ramBus', keys: ['Bus hỗ trợ', 'Tốc độ SPD', 'Tốc độ', 'Bus'], normalize: normalizeRamBus },
+  ],
+  'ssd': [
+    { target: 'ssdCapacity', keys: ['Dung lượng'], normalize: normalizeCapacity },
+    { target: 'ssdInterface', keys: ['Chuẩn giao tiếp', 'Giao tiếp', 'Giao tiếp SSD'], normalize: normalizeSsdInterface },
+    { target: 'ssdForm', keys: ['Kích thước / Loại:', 'Phân loại', 'Form'], normalize: normalizeSsdForm },
+  ],
+  'ban-phim-may-tinh': [
+    { target: 'kbSwitch', keys: ['Kiểu Switch', 'Switch'], normalize: null /* keep raw — switch names are already clean */ },
+    { target: 'kbLayout', keys: ['Kích thước/Layout', 'Layout', 'Kích thước'], normalize: normalizeKbLayout },
+    { target: 'kbConnection', keys: ['Phương thức kết nối', 'Kết nối'], normalize: normalizeConnection },
+  ],
+  'chuot-may-tinh': [
+    { target: 'mouseDpi', keys: ['DPI', 'Độ nhạy (DPI)'], normalize: normalizeMouseDpi },
+    { target: 'mouseConnection', keys: ['Chuẩn kết nối', 'Kết nối'], normalize: normalizeConnection },
+  ],
+  'man-hinh': [
+    {
+      target: 'screenInch', keys: ['Màn hình', 'Kích thước màn hình', 'Kích thước'], normalize: (val) => {
+        const m = val.match(/(\d+\.?\d*)\s*(?:"|'|\s*inch)/i);
+        if (m) { const n = parseFloat(m[1]); if (n >= 13 && n <= 55) return n + '"'; }
+        // Try just a number at the start
+        const m2 = val.match(/^(\d+\.?\d*)/);
+        if (m2) { const n = parseFloat(m2[1]); if (n >= 13 && n <= 55) return n + '"'; }
+        return null;
+      }
+    },
+  ],
+};
+
 /**
  * GET /api/products/filter-options
- * Lấy tất cả các giá trị distinct cho bộ lọc từ TOÀN BỘ sản phẩm trong category.
- * Sử dụng MongoDB aggregation để tránh giới hạn 200 sản phẩm khi extract ở client.
+ * Returns clean, normalized filter values per-category.
+ * Uses per-category configs to only extract relevant filters.
  */
 router.get('/filter-options', async (req, res) => {
   try {
     const { category } = req.query;
 
-    // Build filter giống như GET /api/products
+    // Build filter giống GET /api/products
     const filter = { $and: [{ $or: [{ active: true }, { active: { $exists: false } }] }] };
 
     if (category) {
@@ -563,236 +811,105 @@ router.get('/filter-options', async (req, res) => {
       }
     }
 
-    // Aggregation pipeline để lấy distinct values
-    const products = await Product.find(filter).select('brand specs techSpecs').lean();
+    const products = await Product.find(filter).select('brand name specs techSpecs').lean();
 
-    // Extract unique values
-    const brands = new Set();
-    const specValues = {
-      // Laptop filters
-      cpu: new Set(),
-      gpu: new Set(),
-      ram: new Set(),
-      storage: new Set(),
-      screenInch: new Set(),
-      // CPU (Linh Kiện)
-      cpuSeries: new Set(),
-      cpuSocket: new Set(),
-      cpuCores: new Set(),
-      // Mainboard
-      mbSocket: new Set(),
-      mbRamType: new Set(),
-      mbChipset: new Set(),
-      // RAM (Linh Kiện)
-      ramType: new Set(),
-      ramCapacity: new Set(),
-      ramBus: new Set(),
-      // SSD
-      ssdCapacity: new Set(),
-      ssdInterface: new Set(),
-      ssdForm: new Set(),
-      // VGA
-      vgaSeries: new Set(),
-      vram: new Set(),
-      // Keyboard
-      kbSwitch: new Set(),
-      kbLayout: new Set(),
-      kbConnection: new Set(),
-      // Mouse
-      mouseDpi: new Set(),
-      mouseWeight: new Set(),
-      mouseConnection: new Set(),
-    };
+    // ── Extract brands from product names (since brand field is often empty) ──
+    const brandSet = new Set();
+    for (const p of products) {
+      // Try the brand field first
+      const b = (p.brand || '').trim();
+      if (b) brandSet.add(b);
+      // Also try extracting from product name
+      const fromName = extractBrandFromName(p.name);
+      if (fromName) brandSet.add(fromName);
+    }
 
-    // Helper để extract giá trị từ specs
+    // ── Extract spec filters using per-category config ──
+    const specSets = {};
+
+    // Helper to read a spec value from a product
     const getSpec = (p, keys) => {
-      const spec = p.specs || p.techSpecs || {};
-      for (const k of keys) {
-        const v = spec[k];
-        if (v != null && String(v).trim()) return String(v).trim();
+      for (const src of [p.specs, p.techSpecs]) {
+        if (!src) continue;
+        for (const k of keys) {
+          const v = src[k];
+          if (v != null && String(v).trim()) return String(v).trim();
+        }
       }
       return null;
     };
 
-    // Helper để extract CPU labels (Intel, AMD Ryzen, AMD)
-    const extractCpuLabels = (s) => {
-      const out = [];
-      if (/Intel/i.test(s)) out.push('Intel');
-      if (/AMD\s*Ryzen/i.test(s)) out.push('AMD Ryzen');
-      else if (/AMD/i.test(s)) out.push('AMD');
-      return out;
-    };
+    // Determine which filter config to use
+    const catSlug = category ? String(category).trim() : null;
+    const filterConfigs = catSlug ? (CATEGORY_FILTER_MAP[catSlug] || []) : [];
 
-    // Helper để extract GPU labels
-    const extractGpuLabels = (s) => {
-      const out = [];
-      if (/NVIDIA|GeForce|RTX|GTX/i.test(s)) out.push('NVIDIA');
-      if (/AMD|Radeon/i.test(s)) out.push('AMD');
-      if (/Intel.*(?:Arc|Iris|UHD|HD Graphics)/i.test(s)) out.push('Intel');
-      return out;
-    };
-
-    // Helper để extract screen sizes
-    const extractScreenInches = (s) => {
-      const out = [];
-      const re = /(\d+\.?\d*)\s*("|'|\s*inch)/gi;
-      let m;
-      while ((m = re.exec(s)) !== null) {
-        const num = parseFloat(m[1]);
-        if (num >= 10 && num <= 32) out.push(m[1]);
-      }
-      return [...new Set(out)];
-    };
-
-    // Helper để extract RAM GB
-    const extractRamLabels = (s) => {
-      const m = s.match(/(\d+)\s*GB/i);
-      return m ? [m[1] + 'GB'] : [];
-    };
-
-    // Helper để extract storage
-    const extractStorageLabels = (s) => {
-      const out = [];
-      const gb = s.match(/(\d+)\s*GB/i);
-      if (gb) out.push(gb[1] + 'GB');
-      const tb = s.match(/(\d+)\s*TB/i);
-      if (tb) out.push(tb[1] + 'TB');
-      return out;
-    };
-
-    for (const p of products) {
-      // Brand
-      if (p.brand && String(p.brand).trim()) {
-        brands.add(String(p.brand).trim());
-      }
-
-      // Laptop: CPU
-      const cpuVal = getSpec(p, ['CPU']);
-      if (cpuVal) {
-        extractCpuLabels(cpuVal).forEach(v => specValues.cpu.add(v));
-      }
-
-      // Laptop: GPU
-      const gpuVal = getSpec(p, ['Card đồ họa', 'GPU', 'VGA']);
-      if (gpuVal) {
-        extractGpuLabels(gpuVal).forEach(v => specValues.gpu.add(v));
-      }
-
-      // Laptop: RAM
-      const ramVal = getSpec(p, ['RAM']);
-      if (ramVal) {
-        extractRamLabels(ramVal).forEach(v => specValues.ram.add(v));
-      }
-
-      // Laptop: Storage
-      const storageVal = getSpec(p, ['Ổ cứng', 'Ổ cứng', 'SSD']);
-      if (storageVal) {
-        extractStorageLabels(storageVal).forEach(v => specValues.storage.add(v));
-      }
-
-      // Laptop: Screen
-      const screenVal = getSpec(p, ['Màn hình', 'Kích thước màn hình']);
-      if (screenVal) {
-        extractScreenInches(screenVal).forEach(v => specValues.screenInch.add(v));
-      }
-
-      // CPU (Component): Series, Socket, Cores
-      const cpuSeriesVal = getSpec(p, ['Dòng CPU', 'CPU', 'Tên gọi', 'Model']);
-      if (cpuSeriesVal) specValues.cpuSeries.add(cpuSeriesVal);
-      const cpuSocketVal = getSpec(p, ['Socket', 'Kiến trúc']);
-      if (cpuSocketVal) specValues.cpuSocket.add(cpuSocketVal);
-      const cpuCoresVal = getSpec(p, ['Số nhân', 'Số nhân (Cores)', 'Số nhân xử lý']);
-      if (cpuCoresVal) specValues.cpuCores.add(cpuCoresVal);
-
-      // Mainboard
-      const mbSocketVal = getSpec(p, ['Socket', 'CPU', 'PROCESSOR']);
-      if (mbSocketVal) specValues.mbSocket.add(mbSocketVal);
-      const mbRamTypeVal = getSpec(p, ['Chuẩn Ram', 'Chuẩn RAM', 'MEMORY', 'Hỗ trợ Ram']);
-      if (mbRamTypeVal) specValues.mbRamType.add(mbRamTypeVal);
-      const mbChipsetVal = getSpec(p, ['CHIPSET', 'Chipset']);
-      if (mbChipsetVal) specValues.mbChipset.add(mbChipsetVal);
-
-      // RAM (Component)
-      const ramTypeVal = getSpec(p, ['Chuẩn Ram', 'Chuẩn RAM', 'Loại']);
-      if (ramTypeVal) specValues.ramType.add(ramTypeVal);
-      const ramCapacityVal = getSpec(p, ['Dung lượng']);
-      if (ramCapacityVal) specValues.ramCapacity.add(ramCapacityVal);
-      const ramBusVal = getSpec(p, ['Bus hỗ trợ', 'Tốc độ SPD', 'Tốc độ', 'Bus']);
-      if (ramBusVal) specValues.ramBus.add(ramBusVal);
-
-      // SSD
-      const ssdCapacityVal = getSpec(p, ['Dung lượng']);
-      if (ssdCapacityVal) specValues.ssdCapacity.add(ssdCapacityVal);
-      const ssdInterfaceVal = getSpec(p, ['Chuẩn giao tiếp', 'Giao tiếp', 'Giao tiếp SSD']);
-      if (ssdInterfaceVal) specValues.ssdInterface.add(ssdInterfaceVal);
-      const ssdFormVal = getSpec(p, ['Kích thước / Loại:', 'Phân loại', 'Form']);
-      if (ssdFormVal) specValues.ssdForm.add(ssdFormVal);
-
-      // VGA
-      const vgaSeriesVal = getSpec(p, ['Graphics Processing', 'Chipset', 'Card đồ họa', 'GPU', 'VGA']);
-      if (vgaSeriesVal) specValues.vgaSeries.add(vgaSeriesVal);
-      const vramVal = getSpec(p, ['Memory Size', 'VRAM', 'Dung lượng bộ nhớ', 'Bộ nhớ']);
-      if (vramVal) specValues.vram.add(vramVal);
-
-      // Keyboard
-      const kbSwitchVal = getSpec(p, ['Kiểu Switch', 'Switch']);
-      if (kbSwitchVal) specValues.kbSwitch.add(kbSwitchVal);
-      const kbLayoutVal = getSpec(p, ['Kích thước/Layout', 'Layout', 'Kích thước']);
-      if (kbLayoutVal) specValues.kbLayout.add(kbLayoutVal);
-      const kbConnectionVal = getSpec(p, ['Phương thức kết nối', 'Kết nối']);
-      if (kbConnectionVal) specValues.kbConnection.add(kbConnectionVal);
-
-      // Mouse
-      const mouseDpiVal = getSpec(p, ['DPI', 'Độ nhạy (DPI)']);
-      if (mouseDpiVal) specValues.mouseDpi.add(mouseDpiVal);
-      const mouseWeightVal = getSpec(p, ['Trọng lượng']);
-      if (mouseWeightVal) specValues.mouseWeight.add(mouseWeightVal);
-      const mouseConnectionVal = getSpec(p, ['Chuẩn kết nối', 'Kết nối']);
-      if (mouseConnectionVal) specValues.mouseConnection.add(mouseConnectionVal);
+    // Initialize sets for each target
+    for (const cfg of filterConfigs) {
+      if (!specSets[cfg.target]) specSets[cfg.target] = new Set();
     }
 
-    // Helper để sort numeric strings đúng cách
+    for (const p of products) {
+      for (const cfg of filterConfigs) {
+        const raw = getSpec(p, cfg.keys);
+        if (!raw) continue;
+
+        if (cfg.normalize) {
+          const normalized = cfg.normalize(raw);
+          if (normalized) {
+            // normalizeConnection returns an array
+            if (Array.isArray(normalized)) {
+              normalized.forEach(v => specSets[cfg.target].add(v));
+            } else {
+              specSets[cfg.target].add(normalized);
+            }
+          }
+        } else {
+          // No normalizer — keep raw value (for things like switch names)
+          specSets[cfg.target].add(raw);
+        }
+      }
+    }
+
+    // ── Build result ──
     const numericSort = (a, b) => {
-      const numA = parseFloat(a);
-      const numB = parseFloat(b);
+      const numA = parseFloat(a.replace(/[^\d.]/g, ''));
+      const numB = parseFloat(b.replace(/[^\d.]/g, ''));
       if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
       return a.localeCompare(b, undefined, { numeric: true });
     };
 
-    // Convert Sets to sorted Arrays
-    const result = {
-      brands: Array.from(brands).sort(),
-      specs: {
-        cpu: Array.from(specValues.cpu).sort(),
-        gpu: Array.from(specValues.gpu).sort(),
-        ram: Array.from(specValues.ram).sort(numericSort),
-        storage: Array.from(specValues.storage).sort(numericSort),
-        screenInch: Array.from(specValues.screenInch).sort(numericSort),
-        cpuSeries: Array.from(specValues.cpuSeries).sort(),
-        cpuSocket: Array.from(specValues.cpuSocket).sort(),
-        cpuCores: Array.from(specValues.cpuCores).sort(numericSort),
-        mbSocket: Array.from(specValues.mbSocket).sort(),
-        mbRamType: Array.from(specValues.mbRamType).sort(),
-        mbChipset: Array.from(specValues.mbChipset).sort(),
-        ramType: Array.from(specValues.ramType).sort(),
-        ramCapacity: Array.from(specValues.ramCapacity).sort(numericSort),
-        ramBus: Array.from(specValues.ramBus).sort(numericSort),
-        ssdCapacity: Array.from(specValues.ssdCapacity).sort(numericSort),
-        ssdInterface: Array.from(specValues.ssdInterface).sort(),
-        ssdForm: Array.from(specValues.ssdForm).sort(),
-        vgaSeries: Array.from(specValues.vgaSeries).sort(),
-        vram: Array.from(specValues.vram).sort(numericSort),
-        kbSwitch: Array.from(specValues.kbSwitch).sort(),
-        kbLayout: Array.from(specValues.kbLayout).sort(),
-        kbConnection: Array.from(specValues.kbConnection).sort(),
-        mouseDpi: Array.from(specValues.mouseDpi).sort(numericSort),
-        mouseWeight: Array.from(specValues.mouseWeight).sort(numericSort),
-        mouseConnection: Array.from(specValues.mouseConnection).sort(),
-      },
-      total: products.length,
-    };
+    const NUMERIC_FIELDS = new Set([
+      'vram', 'ramCapacity', 'ssdCapacity', 'ramBus', 'screenInch', 'mouseDpi',
+    ]);
 
-    res.json(result);
+    const specs = {};
+    // Always include all possible spec keys (even if empty) so frontend doesn't break
+    const ALL_SPEC_KEYS = [
+      'cpu', 'gpu', 'ram', 'storage', 'screenInch',
+      'cpuSeries', 'cpuSocket', 'cpuCores',
+      'mbSocket', 'mbRamType', 'mbChipset',
+      'ramType', 'ramCapacity', 'ramBus',
+      'ssdCapacity', 'ssdInterface', 'ssdForm',
+      'vgaSeries', 'vram',
+      'kbSwitch', 'kbLayout', 'kbConnection',
+      'mouseDpi', 'mouseWeight', 'mouseConnection',
+    ];
+
+    for (const key of ALL_SPEC_KEYS) {
+      const set = specSets[key];
+      if (!set || set.size === 0) {
+        specs[key] = [];
+      } else {
+        const arr = Array.from(set);
+        specs[key] = NUMERIC_FIELDS.has(key) ? arr.sort(numericSort) : arr.sort();
+      }
+    }
+
+    res.json({
+      brands: Array.from(brandSet).sort(),
+      specs,
+      total: products.length,
+    });
   } catch (err) {
     console.error('[GET /api/products/filter-options]', err);
     res.status(500).json({ error: err.message });

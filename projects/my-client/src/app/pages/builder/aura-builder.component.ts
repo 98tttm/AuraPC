@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Product, FilterOptionsResponse, productMainImage } from '../../core/services/api.service';
+import { CartService } from '../../core/services/cart.service';
 
 const STEP_TO_CATEGORY: Record<string, string> = {
     'GPU': 'vga', 'CPU': 'cpu', 'MB': 'mainboard', 'CASE': 'case-may-tinh',
@@ -70,6 +71,7 @@ export class AuraBuilderComponent {
     private api = inject(ApiService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private cart = inject(CartService);
 
     readonly steps = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
 
@@ -174,6 +176,24 @@ export class AuraBuilderComponent {
     /** Tất cả bước đã chọn xong - hiện trang Overview */
     isAllStepsCompleted = () => this.steps.every((s) => !!(this.savedConfig()[s] as { product?: string } | undefined)?.product);
 
+    /** Bước có thể truy cập: chỉ bước đã hoàn thành hoặc bước tiếp theo chưa hoàn thành đầu tiên */
+    isStepAccessible = (step: string): boolean => {
+        if (!this.isBuilderMode()) return false;
+        const idx = this.steps.indexOf(step);
+        if (idx < 0) return false;
+        // Completed steps are always accessible (allows going back to modify)
+        if (this.isStepCompleted(step)) return true;
+        // The first incomplete step is accessible
+        const firstIncompleteIdx = this.steps.findIndex((s) => !this.isStepCompleted(s));
+        return idx === firstIncompleteIdx;
+    };
+
+    /** Bước bị khóa (chưa hoàn thành bước trước đó) */
+    isStepLocked = (step: string): boolean => {
+        if (!this.isBuilderMode()) return true;
+        return !this.isStepAccessible(step);
+    };
+
     /** Chuyển đến bước (click sidebar khi ở builder mode) */
     goToStep(step: string) {
         if (!this.isBuilderMode()) return;
@@ -182,6 +202,8 @@ export class AuraBuilderComponent {
             return;
         }
         if (!this.steps.includes(step)) return;
+        // Enforce step locking: chỉ cho phép bước đã hoàn thành hoặc bước tiếp theo
+        if (!this.isStepAccessible(step)) return;
         this.currentStep.set(step);
         this.selectedProduct.set(null);
         this.clearFilters();
@@ -260,6 +282,8 @@ export class AuraBuilderComponent {
         this.builderShareId.set(null);
         this.savedConfig.set({});
         this.router.navigate(['/aura-builder']);
+        // Automatically create a new builder
+        this.planYourBuild();
     }
 
     planYourBuild() {
@@ -577,5 +601,33 @@ export class AuraBuilderComponent {
             }
         }
         return out.slice(0, 6);
+    }
+
+    /** Add all overview components to cart */
+    addAllToCart() {
+        const components = this.overviewComponents();
+        if (!components.length) {
+            this.showToast('Chưa có linh kiện nào được chọn.');
+            return;
+        }
+        let addedCount = 0;
+        for (const item of components) {
+            const data = item.data as { product?: string; name?: string; slug?: string; price?: number; images?: unknown[]; _id?: string } | undefined;
+            if (data?.product) {
+                const product: Product = {
+                    _id: data.product,
+                    product_id: data.product,
+                    name: data.name ?? '',
+                    slug: data.slug ?? '',
+                    price: data.price ?? 0,
+                    images: data.images ?? [],
+                } as Product;
+                this.cart.add(product);
+                addedCount++;
+            }
+        }
+        if (addedCount > 0) {
+            this.showToast(`Đã thêm ${addedCount} linh kiện vào giỏ hàng!`);
+        }
     }
 }

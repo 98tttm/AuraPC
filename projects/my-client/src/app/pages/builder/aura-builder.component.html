@@ -1,29 +1,31 @@
 <div class="builder-container">
     <aside class="sidebar">
         <ul class="nav-menu">
-            <li class="nav-item nav-item--clickable" [class.active]="isOverview()"
-                (click)="goOverview()">Aura Builder</li>
+            <li class="nav-item nav-item--clickable" [class.active]="isOverview()" (click)="goOverview()">Aura Builder
+            </li>
             @for (step of steps; track step) {
-            <li class="nav-item"
-                [class.nav-item--clickable]="isBuilderMode()"
-                [class.nav-item--no-click]="!isBuilderMode()"
-                [class.active]="isStepCurrent(step)"
+            <li class="nav-item" [class.nav-item--clickable]="isBuilderMode() && isStepAccessible(step)"
+                [class.nav-item--locked]="isBuilderMode() && isStepLocked(step)"
+                [class.nav-item--no-click]="!isBuilderMode()" [class.active]="isStepCurrent(step)"
                 [class.completed]="isBuilderMode() && isStepCompleted(step) && !isStepCurrent(step)"
-                (click)="isBuilderMode() && goToStep(step)">
+                (click)="isBuilderMode() && isStepAccessible(step) && goToStep(step)">
                 {{ getStepLabel(step) }}
             </li>
             }
-            @if (isBuilderMode() && isAllStepsCompleted()) {
-            <li class="nav-item nav-item--clickable"
-                [class.active]="currentStep() === 'OVERVIEW'"
+            @if (isBuilderMode()) {
+            <li class="nav-item nav-item--clickable" [class.active]="currentStep() === 'OVERVIEW'"
                 (click)="goToStep('OVERVIEW')">Tổng quan</li>
             }
         </ul>
 
         <div class="sidebar-footer">
             @if (isBuilderMode()) {
-            <button class="sidebar-btn reset" (click)="goToStep('OVERVIEW')">
-                Tổng quan
+            <button class="sidebar-btn reset" (click)="startOver()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                </svg>
+                Bắt đầu lại
             </button>
             } @else {
             <button class="sidebar-btn reset" (click)="startOver()">
@@ -40,7 +42,7 @@
     <main class="main-content" [class.main-content--builder]="isBuilderMode()">
         @if (!isBuilderMode()) {
         <div class="bg-pattern"></div>
-        <div class="content-wrapper content-wrapper--welcome">
+        <div class="content-wrapper--welcome">
             <h1 class="page-title">AURA BUILDER</h1>
             <p class="tagline tagline--primary">Nhận gợi ý tương thích</p>
             <p class="tagline tagline--secondary">Chọn linh kiện AuraPC lý tưởng cho bạn</p>
@@ -58,7 +60,8 @@
                 <div class="overview-corsair__header">
                     <span class="overview-corsair__header-title">TỔNG QUAN</span>
                     @if (builderShareId()) {
-                    <button type="button" class="overview-corsair__share" (click)="copyShareLink()">Chia sẻ link</button>
+                    <button type="button" class="overview-corsair__share" (click)="copyShareLink()">Chia sẻ
+                        link</button>
                     }
                 </div>
 
@@ -78,13 +81,15 @@
                         <h3 class="overview-corsair__col-title">XEM TRƯỚC ĐƠN HÀNG</h3>
                         @for (item of overviewOrderPreview(); track item.step) {
                         <div class="overview-corsair__order-item">
-                            <img [src]="getComponentImage(item.data)" [alt]="item.data?.name" class="overview-corsair__order-img" />
+                            <img [src]="getComponentImage(item.data)" [alt]="item.data?.name"
+                                class="overview-corsair__order-img" />
                             <div class="overview-corsair__order-info">
                                 <span class="overview-corsair__order-label">{{ getStepLabel(item.step) }}</span>
                                 <p class="overview-corsair__order-name">{{ item.data?.name }}</p>
                                 <a class="overview-corsair__link" (click)="goToStep(item.step)">Sửa</a>
                             </div>
-                            <span class="overview-corsair__order-price">{{ formatPriceNumber(item.data?.price ?? 0) }}</span>
+                            <span class="overview-corsair__order-price">{{ formatPriceNumber(item.data?.price ?? 0)
+                                }}</span>
                         </div>
                         }
                     </div>
@@ -107,8 +112,10 @@
                         <span class="overview-corsair__total-value">{{ formatPriceNumber(overviewTotal()) }}</span>
                     </div>
                     <div class="overview-corsair__actions">
-                        <button type="button" class="overview-corsair__btn overview-corsair__btn--outline" (click)="onSaveConfiguration()">Lưu cấu hình</button>
-                        <button type="button" class="overview-corsair__btn overview-corsair__btn--primary">Thêm vào giỏ</button>
+                        <button type="button" class="overview-corsair__btn overview-corsair__btn--outline"
+                            (click)="onSaveConfiguration()">Lưu cấu hình</button>
+                        <button type="button" class="overview-corsair__btn overview-corsair__btn--primary"
+                            (click)="addAllToCart()">Thêm vào giỏ</button>
                     </div>
                 </div>
             </div>
@@ -139,15 +146,15 @@
                         </select>
                     </div>
                     @for (f of stepFilters(); track f.param) {
-                        <div class="builder-filter-group">
-                            <select class="builder-filter__select" [ngModel]="(getSelectedFilter(f.param) ?? '')"
-                                (ngModelChange)="onFilterChange(f.param, $event)" [title]="f.label">
-                                <option value="">{{ getFilterPlaceholder(f.param) }}</option>
-                                @for (opt of getFilterOptionsFor(f.param); track opt) {
-                                <option [value]="opt">{{ opt }}</option>
-                                }
-                            </select>
-                        </div>
+                    <div class="builder-filter-group">
+                        <select class="builder-filter__select" [ngModel]="(getSelectedFilter(f.param) ?? '')"
+                            (ngModelChange)="onFilterChange(f.param, $event)" [title]="f.label">
+                            <option value="">{{ getFilterPlaceholder(f.param) }}</option>
+                            @for (opt of getFilterOptionsFor(f.param); track opt) {
+                            <option [value]="opt">{{ opt }}</option>
+                            }
+                        </select>
+                    </div>
                     }
                     @if (hasFilters()) {
                     <button type="button" class="builder-filter__clear" (click)="clearFilters()">Xóa bộ lọc</button>
@@ -159,6 +166,7 @@
                 <div class="builder-grid-wrap">
                     @if (loading()) {
                     <div class="builder-loading">
+                        <img src="assets/LOGO/LogoBlack.png" alt="AuraPC" class="builder-loading__logo" />
                         <div class="builder-loading__spinner"></div>
                         <p>Đang tải sản phẩm...</p>
                     </div>
@@ -214,10 +222,16 @@
             </div>
 
             <div class="builder-footer">
-                <button type="button" class="builder-next-btn"
-                    [disabled]="!canGoNext() || nextLoading()" (click)="goNext()">
-                    {{ nextLoading() ? 'Đang lưu...' : 'TIẾP THEO' }}
-                </button>
+                <div class="builder-footer__inner">
+                    @if (!canGoNext() && !nextLoading()) {
+                    <span class="builder-footer__hint">Chọn một sản phẩm để tiếp tục</span>
+                    }
+                    <button type="button" class="builder-next-btn" [disabled]="!canGoNext() || nextLoading()"
+                        [title]="canGoNext() ? 'Tiếp tục bước tiếp theo' : 'Chọn một sản phẩm để tiếp tục'"
+                        (click)="goNext()">
+                        {{ nextLoading() ? 'Đang lưu...' : 'TIẾP THEO' }}
+                    </button>
+                </div>
             </div>
             }
         </div>
@@ -242,8 +256,8 @@
             <button type="button" class="save-modal__btn save-modal__btn--outline" (click)="closeSaveModal()">
                 Hủy
             </button>
-            <button type="button" class="save-modal__btn save-modal__btn--primary"
-                [disabled]="saveModalLoading()" (click)="sendConfigEmail()">
+            <button type="button" class="save-modal__btn save-modal__btn--primary" [disabled]="saveModalLoading()"
+                (click)="sendConfigEmail()">
                 {{ saveModalLoading() ? 'Đang gửi...' : 'Gửi cấu hình' }}
             </button>
         </div>
