@@ -547,7 +547,7 @@
   width: calc(100% - 1.5rem);
   margin: 0.5rem auto 1rem;
   padding: 0.6rem 0;
-  background-color: #333;
+  background-color: #FF6D2D;
   color: #fff;
   border: none;
   border-radius: 99px;
@@ -555,6 +555,17 @@
   font-size: 0.95rem;
   cursor: pointer;
   text-align: center;
+  transition: background .2s, transform .15s, box-shadow .2s;
+}
+
+.pl-card__btn-buy:hover {
+  background-color: #e05a1f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 109, 45, .3);
+}
+
+.pl-card__btn-buy:active {
+  transform: scale(.97);
 }
 
 /* Load more */

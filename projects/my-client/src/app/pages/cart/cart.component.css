@@ -73,19 +73,20 @@
 .btn-explore {
   display: inline-block;
   padding: 12px 36px;
-  background: #0c1f36;
+  background: #FF6D2D;
   color: #fff;
   text-decoration: none;
   border-radius: 99px;
   font-weight: 600;
   font-size: 0.95rem;
   margin-top: 0.5rem;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .btn-explore:hover {
-  background: #1a4690;
+  background: #e05a1f;
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 109, 45, .3);
 }
 
 /* ---------- Layout ---------- */
