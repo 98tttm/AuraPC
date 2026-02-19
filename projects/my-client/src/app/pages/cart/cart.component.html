@@ -29,7 +29,7 @@
         <div class="cart-layout">
             <!-- ===== LEFT: Cart Items ===== -->
             <div class="cart-main">
-                <!-- Select All + Column Headers -->
+                <!-- Select All + Delete Selected + Column Headers -->
                 <div class="cart-head">
                     <label class="ck-wrap cart-head__select">
                         <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" />
@@ -39,7 +39,21 @@
                     <div class="cart-head__cols">
                         <span class="cart-head__col cart-head__col--price">Giá thành</span>
                         <span class="cart-head__col cart-head__col--qty">Số lượng</span>
-                        <span class="cart-head__col cart-head__col--del"></span>
+                        <span class="cart-head__col cart-head__col--del">
+                            @if (selectedCount() > 0) {
+                            <button class="cart-head__delete-btn" (click)="requestDeleteSelected()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                </svg>
+                                Xóa sản phẩm
+                            </button>
+                            }
+                        </span>
                     </div>
                 </div>
 
@@ -78,11 +92,9 @@
                         <button class="qty-btn" (click)="increaseQty(productId(item.product))">+</button>
                     </div>
 
-                    <button class="cart-item__del" (click)="remove(productId(item.product))"
-                        title="Xóa sản phẩm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
+                    <button class="cart-item__del" (click)="remove(productId(item.product))" title="Xóa sản phẩm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
                             </path>
@@ -132,4 +144,28 @@
         </div>
         }
     </div>
+
+    <!-- Delete Confirmation Popup -->
+    @if (showDeletePopup()) {
+    <div class="delete-popup-overlay" (click)="cancelDelete()">
+        <div class="delete-popup" (click)="$event.stopPropagation()">
+            <div class="delete-popup__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="#e53935" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h3 class="delete-popup__title">Xác nhận xóa</h3>
+            <p class="delete-popup__msg">
+                Bạn có chắc muốn xóa <strong>{{ deleteTargetName() }}</strong> khỏi giỏ hàng?
+            </p>
+            <div class="delete-popup__actions">
+                <button class="delete-popup__btn delete-popup__btn--cancel" (click)="cancelDelete()">Hủy</button>
+                <button class="delete-popup__btn delete-popup__btn--confirm" (click)="confirmDelete()">Xóa</button>
+            </div>
+        </div>
+    </div>
+    }
 </section>

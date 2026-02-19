@@ -765,6 +765,12 @@
     color: var(--text-muted);
 }
 
+.builder-loading__logo {
+    max-width: 48px;
+    height: auto;
+    opacity: .6;
+}
+
 .builder-loading__spinner {
     width: 36px;
     height: 36px;
