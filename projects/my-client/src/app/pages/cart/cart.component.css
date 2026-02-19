@@ -533,6 +533,38 @@
   padding: 1.5rem;
 }
 
+/* Coupon button */
+.coupon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: border-color .15s ease, background .15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.coupon-btn:hover {
+  border-color: #FF6D2D;
+  background: #fffaf7;
+}
+
+.coupon-btn__text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.coupon-btn svg {
+  color: #999;
+  flex-shrink: 0;
+}
+
 /* Summary rows */
 .summary-row {
   display: flex;
@@ -601,6 +633,12 @@
 .btn-checkout:hover {
   background: #1a3a5c;
   transform: translateY(-1px);
+}
+
+.btn-checkout:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Terms */

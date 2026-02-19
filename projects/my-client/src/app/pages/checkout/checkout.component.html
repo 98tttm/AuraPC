@@ -1,87 +1,124 @@
 <section class="checkout-page">
     <div class="checkout-container">
-        <!-- Header -->
-        <a routerLink="/cart" class="checkout-back">← QUAY LẠI GIỎ HÀNG</a>
+        <!-- Back -->
+        <a routerLink="/cart" class="checkout-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Quay lại giỏ hàng
+        </a>
 
+        @if (cartItems().length === 0) {
+        <div class="checkout-empty">
+            <p>Giỏ hàng trống. <a routerLink="/san-pham">Tiếp tục mua sắm</a></p>
+        </div>
+        } @else {
         <div class="checkout-layout">
-            <!-- Left Column -->
+            <!-- ===== LEFT COLUMN ===== -->
             <div class="checkout-left">
-                <!-- Product List -->
+
+                <!-- Product Summary -->
                 <div class="checkout-card">
                     <h2 class="checkout-section-title">Danh sách sản phẩm</h2>
+                    <div class="checkout-shipping-banner">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="#FF6D2D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="3" width="15" height="13"></rect>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                        </svg>
+                        <span>Miễn phí vận chuyển đối với đơn hàng trên 500.000₫</span>
+                    </div>
                     @for (item of cartItems(); track item.product._id) {
                     <div class="checkout-product">
-                        <div class="checkout-product__img">
-                            <img [src]="getImage(item.product)" [alt]="item.product.name" />
-                        </div>
+                        <img class="checkout-product__img" [src]="getImage(item.product)" [alt]="item.product.name" />
                         <div class="checkout-product__info">
                             <h3 class="checkout-product__name">{{ item.product.name }}</h3>
-                            <p class="checkout-product__price">{{ getPrice(item.product) | number:'1.0-0' }} đ</p>
-                            <p class="checkout-product__qty">Số lượng: {{ item.qty }}</p>
+                            <span class="checkout-product__price">{{ priceLabel(item.product) }}</span>
                         </div>
-                        <button class="checkout-product__remove" (click)="removeItem(item.product._id!)">Xóa</button>
-                    </div>
-                    <div class="checkout-promo-banner">
-                        <span class="promo-icon">🎁</span>
-                        Giảm ngay 20% áp dụng đến 31/01
+                        <span class="checkout-product__qty">x{{ item.qty }}</span>
                     </div>
                     }
                 </div>
 
                 <!-- Buyer Info -->
                 <div class="checkout-card">
-                    <h3 class="form-section-title">Thông tin người đặt</h3>
+                    <h3 class="checkout-section-title">Thông tin người đặt</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <input type="text" [(ngModel)]="fullName" placeholder="Họ và tên người đặt" />
+                            <label class="form-label">Họ và tên <span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="fullName" placeholder="Nhập họ và tên" />
                         </div>
                         <div class="form-group">
-                            <input type="tel" [(ngModel)]="phone" placeholder="Số điện thoại" />
+                            <label class="form-label">Số điện thoại <span class="required">*</span></label>
+                            <input type="tel" [(ngModel)]="phone" placeholder="Nhập số điện thoại" />
                         </div>
                     </div>
                     <div class="form-group">
-                        <input type="email" [(ngModel)]="email" placeholder="Email (không bắt buộc)" />
+                        <label class="form-label">Email (không bắt buộc)</label>
+                        <input type="email" [(ngModel)]="email" placeholder="Nhập email" />
                     </div>
+                </div>
 
-                    <h3 class="form-section-title">Thông tin nhận hàng</h3>
+                <!-- Receiver Info -->
+                <div class="checkout-card">
+                    <h3 class="checkout-section-title">Thông tin nhận hàng</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <input type="text" [(ngModel)]="receiverName" placeholder="Họ và tên người nhận" />
+                            <label class="form-label">Họ và tên người nhận</label>
+                            <input type="text" [(ngModel)]="receiverName"
+                                placeholder="Mặc định theo thông tin người đặt" />
                         </div>
                         <div class="form-group">
-                            <input type="tel" [(ngModel)]="receiverPhone" placeholder="Số điện thoại" />
+                            <label class="form-label">Số điện thoại người nhận</label>
+                            <input type="tel" [(ngModel)]="receiverPhone" placeholder="Mặc định theo người đặt" />
                         </div>
                     </div>
+                </div>
 
-                    <h3 class="form-section-title">Địa chỉ</h3>
+                <!-- Address -->
+                <div class="checkout-card">
+                    <h3 class="checkout-section-title">Địa chỉ nhận hàng</h3>
                     <div class="form-row">
                         <div class="form-group">
+                            <label class="form-label">Tỉnh / Thành phố</label>
                             <select [(ngModel)]="city">
-                                <option value="">Chọn Tỉnh/ Thành phố</option>
+                                <option value="">Chọn Tỉnh / Thành phố</option>
                                 <option value="hcm">TP. Hồ Chí Minh</option>
                                 <option value="hn">Hà Nội</option>
                                 <option value="dn">Đà Nẵng</option>
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Quận / Huyện</label>
                             <select [(ngModel)]="district">
-                                <option value="">Chọn Quận/ Huyện</option>
+                                <option value="">Chọn Quận / Huyện</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Phường / Xã</label>
                         <select [(ngModel)]="ward">
-                            <option value="">Chọn Phường/ Xã</option>
+                            <option value="">Chọn Phường / Xã</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <input type="text" [(ngModel)]="address" placeholder="Nhập địa chỉ cụ thể" />
+                        <label class="form-label">Địa chỉ cụ thể <span class="required">*</span></label>
+                        <input type="text" [(ngModel)]="address" placeholder="Số nhà, tên đường..." />
                     </div>
+                </div>
+
+                <!-- Note -->
+                <div class="checkout-card">
+                    <h3 class="checkout-section-title">Ghi chú</h3>
                     <div class="form-group">
-                        <textarea [(ngModel)]="note" placeholder="Ghi chú (không bắt buộc)" rows="4"></textarea>
+                        <textarea [(ngModel)]="note" placeholder="Ví dụ: Hãy gọi cho tôi 15 phút trước khi giao"
+                            rows="3"></textarea>
                     </div>
 
-                    <div class="invoice-toggle">
+                    <div class="invoice-row">
                         <span class="invoice-label">Yêu cầu xuất hóa đơn điện tử</span>
                         <label class="toggle-switch">
                             <input type="checkbox" [(ngModel)]="requestInvoice" />
@@ -90,70 +127,104 @@
                     </div>
                 </div>
 
-                <!-- Payment Methods -->
+                <!-- Payment Method -->
                 <div class="checkout-card">
-                    <div class="payment-option" (click)="paymentMethod = 'cod'">
-                        <span class="radio" [class.active]="paymentMethod === 'cod'"></span>
+                    <h3 class="checkout-section-title">Chọn phương thức thanh toán</h3>
+
+                    <label class="payment-option" [class.payment-option--active]="paymentMethod === 'cod'"
+                        (click)="paymentMethod = 'cod'">
+                        <span class="payment-radio" [class.active]="paymentMethod === 'cod'"></span>
+                        <span class="payment-icon">💵</span>
                         <span>Thanh toán tiền mặt khi nhận hàng</span>
-                    </div>
-                    <div class="payment-option" (click)="paymentMethod = 'momo'">
-                        <span class="radio" [class.active]="paymentMethod === 'momo'"></span>
+                    </label>
+
+                    <label class="payment-option" [class.payment-option--active]="paymentMethod === 'qr'"
+                        (click)="paymentMethod = 'qr'">
+                        <span class="payment-radio" [class.active]="paymentMethod === 'qr'"></span>
+                        <span class="payment-icon">📱</span>
+                        <span>Thanh toán bằng chuyển khoản (QR Code)</span>
+                    </label>
+
+                    <label class="payment-option" [class.payment-option--active]="paymentMethod === 'momo'"
+                        (click)="paymentMethod = 'momo'">
+                        <span class="payment-radio" [class.active]="paymentMethod === 'momo'"></span>
+                        <img src="assets/figma/515c49e4ff04f92775dfa684cb71aab58d94394c.png" alt="MoMo"
+                            class="payment-logo" />
                         <span>Thanh toán bằng ví MoMo</span>
-                    </div>
-                    <div class="payment-option" (click)="paymentMethod = 'atm'">
-                        <span class="radio" [class.active]="paymentMethod === 'atm'"></span>
-                        <span>Thanh toán bằng thẻ ATM nội địa</span>
-                    </div>
-                    <div class="payment-option" (click)="paymentMethod = 'zalopay'">
-                        <span class="radio" [class.active]="paymentMethod === 'zalopay'"></span>
-                        <span>Thanh toán bằng ví Zalopay</span>
-                    </div>
-                    <div class="payment-option" (click)="paymentMethod = 'napas'">
-                        <span class="radio" [class.active]="paymentMethod === 'napas'"></span>
-                        <span>Thanh toán bằng thẻ NAPAS</span>
-                    </div>
+                    </label>
+
+                    <label class="payment-option" [class.payment-option--active]="paymentMethod === 'zalopay'"
+                        (click)="paymentMethod = 'zalopay'">
+                        <span class="payment-radio" [class.active]="paymentMethod === 'zalopay'"></span>
+                        <span class="payment-icon">💳</span>
+                        <span>Thanh toán bằng ví ZaloPay</span>
+                    </label>
+
+                    <label class="payment-option" [class.payment-option--active]="paymentMethod === 'atm'"
+                        (click)="paymentMethod = 'atm'">
+                        <span class="payment-radio" [class.active]="paymentMethod === 'atm'"></span>
+                        <img src="assets/figma/2fa2c0072b5eed1fbba69aed2773ab02e7354df4.png" alt="ATM"
+                            class="payment-logo" />
+                        <span>Thanh toán bằng thẻ ATM nội địa, NAPAS</span>
+                    </label>
                 </div>
             </div>
 
-            <!-- Right Column (Order Summary) -->
+            <!-- ===== RIGHT COLUMN: Order Summary ===== -->
             <div class="checkout-right">
                 <div class="checkout-summary">
-                    <div class="coupon-input">
-                        <input type="text" [(ngModel)]="couponCode" placeholder="Áp dụng ưu đãi để được giảm giá" />
-                    </div>
+                    <!-- Coupon -->
+                    <button class="coupon-btn">
+                        <span class="coupon-btn__text">Áp dụng ưu đãi để được giảm giá</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
 
                     <div class="summary-row">
-                        <span>Tổng tiền</span>
-                        <span class="summary-value">{{ cartTotal() | number:'1.0-0' }} đ</span>
+                        <span class="summary-label">Tổng tiền</span>
+                        <span class="summary-val">{{ formatPrice(originalTotal()) }}</span>
                     </div>
                     <div class="summary-row">
-                        <span>Giảm giá trực tiếp</span>
-                        <span class="summary-value">-520.000 đ</span>
+                        <span class="summary-label">Giảm giá trực tiếp</span>
+                        <span class="summary-val summary-val--discount">{{ directDiscountLabel() }}</span>
                     </div>
                     <div class="summary-row">
-                        <span>Phí vận chuyển</span>
-                        <span class="summary-value summary-free">Miễn phí</span>
+                        <span class="summary-label">Phí vận chuyển</span>
+                        <span class="summary-val summary-val--free">Miễn phí</span>
                     </div>
 
-                    <div class="summary-total-row">
-                        <span class="summary-total-label">THÀNH TIỀN</span>
-                        <span class="summary-total-value">{{ cartTotal() | number:'1.0-0' }} đ</span>
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-row summary-row--total">
+                        <span class="summary-label">Thành tiền</span>
+                        <span class="summary-val summary-val--total">{{ formatPrice(selectedTotal()) }}</span>
                     </div>
 
-                    <button class="btn-checkout" (click)="submitOrder()" [disabled]="submitting()">
-                        {{ submitting() ? 'Đang xử lý...' : 'HOÀN TẤT' }}
+                    <button class="btn-submit" (click)="submitOrder()" [disabled]="submitting()">
+                        {{ submitting() ? 'Đang xử lý...' : 'Hoàn tất' }}
                     </button>
 
                     <p class="checkout-terms">
                         Bằng việc tiến hành đặt mua hàng, bạn đồng ý với
-                        <a href="#">Điều khoản dịch vụ</a> của AURAPC
+                        <a href="#">Điều khoản dịch vụ</a> của AuraPC
                     </p>
                 </div>
             </div>
         </div>
 
         @if (errorMessage()) {
-        <div class="checkout-error">{{ errorMessage() }}</div>
+        <div class="checkout-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ errorMessage() }}
+        </div>
+        }
         }
     </div>
 </section>

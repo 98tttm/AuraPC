@@ -15,6 +15,9 @@ export class CartComponent {
   private cart = inject(CartService);
   private router = inject(Router);
 
+  /** Flag: has the initial auto-select already happened? */
+  private hasInitialized = false;
+
   // Track selected product IDs
   selectedMethod = signal<Set<string>>(new Set());
 
@@ -23,13 +26,11 @@ export class CartComponent {
   deleteMode = signal<'single' | 'selected'>('single');
   deleteTargetId = signal<string>('');
 
+  // Coupon input
+  couponCode = signal('');
+
   // Computed cart items directly from service
-  cartParams = this.cart.getItems;
-
-  cartItems = computed(() => {
-    return this.cart.getItems();
-  });
-
+  cartItems = computed(() => this.cart.getItems());
   cartCount = this.cart.cartCount;
   cartTotal = this.cart.cartTotal;
 
@@ -45,10 +46,45 @@ export class CartComponent {
     }, 0);
   });
 
-  // Count of selected items
-  selectedCount = computed(() => {
-    return this.selectedMethod().size;
+  /**
+   * "Giảm giá trực tiếp" = sum of (old_price - display_price) * qty
+   * for every SELECTED item that has a sale/old_price.
+   * Does NOT include voucher discounts.
+   */
+  directDiscount = computed(() => {
+    const selected = this.selectedMethod();
+    return this.cartItems().reduce((total, item) => {
+      const id = this.productId(item.product);
+      if (!id || !selected.has(id)) return total;
+
+      const p = item.product;
+      const displayPrice = productDisplayPrice(p);
+      const oldPrice = p?.old_price ?? 0;
+
+      if (oldPrice > 0 && displayPrice < oldPrice) {
+        return total + ((oldPrice - displayPrice) * item.qty);
+      }
+      return total;
+    }, 0);
   });
+
+  /** Original total before discounts (uses old_price where applicable) */
+  originalTotal = computed(() => {
+    const selected = this.selectedMethod();
+    return this.cartItems().reduce((total, item) => {
+      const id = this.productId(item.product);
+      if (!id || !selected.has(id)) return total;
+
+      const p = item.product;
+      const oldPrice = p?.old_price ?? 0;
+      const displayPrice = productDisplayPrice(p);
+      const price = (oldPrice > 0 && oldPrice > displayPrice) ? oldPrice : displayPrice;
+      return total + (price * item.qty);
+    }, 0);
+  });
+
+  // Count of selected items
+  selectedCount = computed(() => this.selectedMethod().size);
 
   // Master checkbox state
   isAllSelected = computed(() => {
@@ -63,19 +99,17 @@ export class CartComponent {
   selectAllModel = false;
 
   constructor() {
-    // Auto-select all items when cart loads
+    // Auto-select all items ONLY on first load
     effect(() => {
       const items = this.cartItems();
-      if (items.length > 0) {
+      if (items.length > 0 && !this.hasInitialized) {
+        this.hasInitialized = true;
         const newSet = new Set<string>();
         items.forEach((item) => {
           const id = this.productId(item.product);
           if (id) newSet.add(id);
         });
-        // Only set if current selection is empty (initial load)
-        if (this.selectedMethod().size === 0) {
-          this.selectedMethod.set(newSet);
-        }
+        this.selectedMethod.set(newSet);
       }
     });
 
@@ -106,15 +140,35 @@ export class CartComponent {
   }
 
   oldPriceLabel(p: Product): string {
-    const old = p?.old_price ?? p?.price ?? 0;
+    const old = p?.old_price ?? 0;
     if (old <= 0) return '';
     return old.toLocaleString('vi-VN') + '₫';
   }
 
+  /** Format the selected total */
   totalLabel(): string {
     const total = this.selectedTotal();
     if (!total || total <= 0) return '0₫';
     return total.toLocaleString('vi-VN') + '₫';
+  }
+
+  /** Format original total (before sale discounts) */
+  originalTotalLabel(): string {
+    const total = this.originalTotal();
+    if (!total || total <= 0) return '0₫';
+    return total.toLocaleString('vi-VN') + '₫';
+  }
+
+  /** Format direct discount */
+  directDiscountLabel(): string {
+    const d = this.directDiscount();
+    if (!d || d <= 0) return '0₫';
+    return '-' + d.toLocaleString('vi-VN') + '₫';
+  }
+
+  /** Final total = selectedTotal (already discounted display prices) */
+  finalTotalLabel(): string {
+    return this.totalLabel();
   }
 
   productSlug(p: Product): string {
@@ -160,7 +214,6 @@ export class CartComponent {
 
   // ---- Delete with confirmation popup ----
 
-  /** Show popup to confirm deleting a single product */
   requestDeleteSingle(productId: string) {
     if (!productId) return;
     this.deleteMode.set('single');
@@ -168,7 +221,6 @@ export class CartComponent {
     this.showDeletePopup.set(true);
   }
 
-  /** Show popup to confirm deleting all selected products */
   requestDeleteSelected() {
     if (this.selectedCount() === 0) return;
     this.deleteMode.set('selected');
@@ -176,7 +228,6 @@ export class CartComponent {
     this.showDeletePopup.set(true);
   }
 
-  /** Confirm the delete action */
   confirmDelete() {
     if (this.deleteMode() === 'single') {
       const id = this.deleteTargetId();
@@ -185,22 +236,18 @@ export class CartComponent {
         this.removeSelection(id);
       }
     } else {
-      // Delete all selected
-      const selected = new Set(this.selectedMethod());
-      selected.forEach((id) => {
-        this.cart.remove(id);
-      });
+      // Delete all selected — snapshot the IDs first, then clear selection, then remove
+      const toDelete = Array.from(this.selectedMethod());
       this.selectedMethod.set(new Set());
+      toDelete.forEach(id => this.cart.remove(id));
     }
     this.showDeletePopup.set(false);
   }
 
-  /** Cancel the delete */
   cancelDelete() {
     this.showDeletePopup.set(false);
   }
 
-  /** Get the name of the product being deleted (for popup message) */
   deleteTargetName(): string {
     if (this.deleteMode() === 'selected') {
       return `${this.selectedCount()} sản phẩm đã chọn`;
@@ -215,7 +262,14 @@ export class CartComponent {
     this.requestDeleteSingle(productId);
   }
 
-  // Selection Logic
+  // ---- Checkout navigation ----
+  goToCheckout() {
+    if (this.selectedTotal() <= 0) return;
+    this.router.navigate(['/checkout']);
+  }
+
+  // ---- Selection Logic ----
+
   isSelected(productId: string): boolean {
     if (!productId) return false;
     return this.selectedMethod().has(productId);
@@ -238,13 +292,11 @@ export class CartComponent {
     const newSet = new Set<string>();
 
     if (!currentAll) {
-      // Select all
       this.cartItems().forEach((item) => {
         const id = this.productId(item.product);
         if (id) newSet.add(id);
       });
     }
-    // If was all selected, we clear the set (unselect all)
 
     this.selectedMethod.set(newSet);
   }
