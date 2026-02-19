@@ -240,7 +240,7 @@ export class CartService {
 
   /**
    * Remove multiple products at once.
-   * Avoids race conditions by doing a single sync instead of N parallel DELETEs.
+   * Uses a dedicated server endpoint to avoid race conditions.
    */
   removeMultiple(productIds: string[]): void {
     if (!productIds.length) return;
@@ -255,10 +255,19 @@ export class CartService {
     );
     this.save();
 
-    // Logged-in: re-sync the updated local state to the server in one call
+    // Logged-in: call server bulk remove endpoint
     const userId = this.userId;
     if (userId) {
-      this.syncWithServer(userId);
+      this.http
+        .post<CartApiResponse>(`${this.apiUrl}/remove-multiple`, { userId, productIds })
+        .subscribe({
+          next: (res) => {
+            if (res?.success) this.applyServerItems(res.items);
+          },
+          error: (err) => {
+            console.error('Remove-multiple cart api error', err);
+          },
+        });
     }
   }
 

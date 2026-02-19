@@ -208,4 +208,45 @@ router.delete('/remove', async (req, res) => {
   }
 });
 
+// Remove multiple products at once (batch delete)
+router.post('/remove-multiple', async (req, res) => {
+  try {
+    const { userId, productIds } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'Missing productIds array' });
+    }
+
+    const cart = await Cart.findOne({ user: userId });
+    if (!cart) {
+      return res.json({ success: true, removedCount: 0, items: [] });
+    }
+
+    // Resolve all product IDs (some may be product_id strings, some may be ObjectIds)
+    const targetIds = new Set();
+    for (const rawId of productIds) {
+      const id = String(rawId || '').trim();
+      if (!id) continue;
+      targetIds.add(id);
+      const resolved = await resolveProductObjectId(id);
+      if (resolved) targetIds.add(resolved);
+    }
+
+    const beforeCount = cart.items.length;
+    cart.items = cart.items.filter((i) => !targetIds.has(normalizeId(i.product)));
+    normalizeCartItems(cart);
+
+    const afterCount = cart.items.length;
+    if (afterCount !== beforeCount || cart.isModified('items')) {
+      await cart.save();
+    }
+
+    const populatedItems = await getPopulatedItems(userId);
+    res.json({ success: true, removedCount: beforeCount - afterCount, items: populatedItems });
+  } catch (err) {
+    console.error('[POST /api/cart/remove-multiple]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
