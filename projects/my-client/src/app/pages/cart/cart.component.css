@@ -142,33 +142,37 @@
   min-width: 44px;
 }
 
-/* Delete selected button in header */
+/* Delete selected button in header (icon-only) */
 .cart-head__delete-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   background: none;
   border: 1px solid #e0e0e0;
   color: #e53935;
-  font-size: 0.78rem;
-  font-weight: 600;
   cursor: pointer;
-  padding: 5px 12px;
+  padding: 6px;
   border-radius: 8px;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
-  font-family: 'Inter', sans-serif;
-  white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease;
+  line-height: 1;
 }
 
-.cart-head__delete-btn:hover {
+.cart-head__delete-btn:hover:not(:disabled) {
   background: #fef2f2;
   border-color: #e53935;
   color: #c62828;
 }
 
-.cart-head__delete-btn:active {
+.cart-head__delete-btn:active:not(:disabled) {
   background: #ffebee;
   transform: scale(.97);
+}
+
+.cart-head__delete-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  color: #bbb;
+  border-color: #eee;
 }
 
 /* ---------- Delete Confirmation Popup ---------- */

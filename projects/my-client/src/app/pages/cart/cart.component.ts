@@ -236,10 +236,10 @@ export class CartComponent {
         this.removeSelection(id);
       }
     } else {
-      // Delete all selected — snapshot the IDs first, then clear selection, then remove
+      // Batch delete all selected at once (avoids async race conditions)
       const toDelete = Array.from(this.selectedMethod());
       this.selectedMethod.set(new Set());
-      toDelete.forEach(id => this.cart.remove(id));
+      this.cart.removeMultiple(toDelete);
     }
     this.showDeletePopup.set(false);
   }

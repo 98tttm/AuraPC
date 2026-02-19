@@ -85,11 +85,11 @@ export class CartService {
   private applyServerItems(items: CartApiItem[] | undefined): void {
     const normalized: CartItem[] = Array.isArray(items)
       ? items.reduce<CartItem[]>((acc, i) => {
-          const product = this.normalizeProduct(i?.product);
-          const qty = Number(i?.quantity) || 0;
-          if (product && qty > 0) acc.push({ product, qty });
-          return acc;
-        }, [])
+        const product = this.normalizeProduct(i?.product);
+        const qty = Number(i?.quantity) || 0;
+        if (product && qty > 0) acc.push({ product, qty });
+        return acc;
+      }, [])
       : [];
     this.items.set(normalized);
     this.save();
@@ -236,6 +236,30 @@ export class CartService {
 
     this.items.set(this.items().filter((i) => this.productIdOf(i.product) !== normalizedProductId));
     this.save();
+  }
+
+  /**
+   * Remove multiple products at once.
+   * Avoids race conditions by doing a single sync instead of N parallel DELETEs.
+   */
+  removeMultiple(productIds: string[]): void {
+    if (!productIds.length) return;
+    const idsToRemove = new Set(productIds.map(id => String(id)));
+
+    // Immediately remove from local state
+    this.items.set(
+      this.items().filter((i) => {
+        const pid = this.productIdOf(i.product);
+        return !!pid && !idsToRemove.has(pid);
+      })
+    );
+    this.save();
+
+    // Logged-in: re-sync the updated local state to the server in one call
+    const userId = this.userId;
+    if (userId) {
+      this.syncWithServer(userId);
+    }
   }
 
   clear(): void {
