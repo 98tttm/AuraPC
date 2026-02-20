@@ -1,8 +1,25 @@
 const mongoose = require('mongoose');
 
 /**
+ * Address sub-schema: each user can have multiple addresses.
+ */
+const addressSchema = new mongoose.Schema(
+  {
+    label: { type: String, default: 'Nhà riêng' },       // e.g. "Nhà riêng", "Công ty"
+    fullName: { type: String, required: true },
+    phone: { type: String, required: true },
+    city: { type: String, default: '' },                   // Tỉnh / Thành phố
+    district: { type: String, default: '' },               // Quận / Huyện
+    ward: { type: String, default: '' },                   // Phường / Xã
+    address: { type: String, default: '' },                // Số nhà, tên đường
+    isDefault: { type: Boolean, default: false },
+  },
+  { _id: true, timestamps: false }
+);
+
+/**
  * User: đăng nhập bằng SĐT + OTP.
- * Các trường optional (email, username, profile, address, avatar) để trống lúc tạo, cập nhật sau.
+ * Các trường optional (email, username, profile, avatar) để trống lúc tạo, cập nhật sau.
  */
 const userSchema = new mongoose.Schema(
   {
@@ -14,11 +31,7 @@ const userSchema = new mongoose.Schema(
       dateOfBirth: { type: Date, default: null },
       gender: { type: String, default: '' },
     },
-    address: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-      // Có thể mở rộng: street, ward, district, city, country, postalCode, ...
-    },
+    addresses: { type: [addressSchema], default: [] },
     avatar: { type: String, default: '' },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },

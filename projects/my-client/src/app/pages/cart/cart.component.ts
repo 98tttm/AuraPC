@@ -232,14 +232,29 @@ export class CartComponent {
     if (this.deleteMode() === 'single') {
       const id = this.deleteTargetId();
       if (id) {
-        this.cart.remove(id);
-        this.removeSelection(id);
+        const itemEl = document.getElementById('cart-item-' + id);
+        if (itemEl) {
+          itemEl.classList.add('is-deleting');
+          setTimeout(() => {
+            this.cart.remove(id);
+            this.removeSelection(id);
+          }, 300);
+        } else {
+          this.cart.remove(id);
+          this.removeSelection(id);
+        }
       }
     } else {
-      // Batch delete all selected at once (avoids async race conditions)
+      // Batch delete all selected at once with animation
       const toDelete = Array.from(this.selectedMethod());
-      this.selectedMethod.set(new Set());
-      this.cart.removeMultiple(toDelete);
+      toDelete.forEach(id => {
+        const itemEl = document.getElementById('cart-item-' + id);
+        if (itemEl) itemEl.classList.add('is-deleting');
+      });
+      setTimeout(() => {
+        this.selectedMethod.set(new Set());
+        this.cart.removeMultiple(toDelete);
+      }, 300);
     }
     this.showDeletePopup.set(false);
   }

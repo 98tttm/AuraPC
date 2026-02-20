@@ -995,29 +995,43 @@ export class ProductListComponent {
       const cartRect = cartBtn.getBoundingClientRect();
 
       const clone = img.cloneNode(true) as HTMLElement;
-      clone.className = 'fly-to-cart-clone';
-      clone.style.left = imgRect.left + 'px';
-      clone.style.top = imgRect.top + 'px';
-      clone.style.width = imgRect.width + 'px';
-      clone.style.height = imgRect.height + 'px';
+      clone.classList.add('fly-to-cart-clone');
+
+      // Khởi tạo vị trí bắt đầu theo ảnh gốc
+      clone.style.left = `${imgRect.left}px`;
+      clone.style.top = `${imgRect.top}px`;
+      clone.style.width = `${imgRect.width}px`;
+      clone.style.height = `${imgRect.height}px`;
+
       document.body.appendChild(clone);
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          clone.style.left = (cartRect.left + cartRect.width / 2 - 20) + 'px';
-          clone.style.top = (cartRect.top + cartRect.height / 2 - 20) + 'px';
-          clone.style.width = '40px';
-          clone.style.height = '40px';
-          clone.style.opacity = '0.2';
-          clone.style.borderRadius = '50%';
-        });
-      });
+      // Force layout recalculation: Đảm bảo trình duyệt render trạng thái ban đầu để transition hdn hoạt động 
+      // Việc đọc offsetWidth bắt buộc browser flush layout
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      clone.offsetWidth;
 
+      // Điểm đến (Cart Icon Header)
+      const targetWidth = 30;
+      const targetHeight = 30;
+      const targetX = cartRect.left + cartRect.width / 2 - targetWidth / 2;
+      const targetY = cartRect.top + cartRect.height / 2 - targetHeight / 2;
+
+      // Kích hoạt transition bằng cách đổi style inline
+      clone.style.left = `${targetX}px`;
+      clone.style.top = `${targetY}px`;
+      clone.style.width = `${targetWidth}px`;
+      clone.style.height = `${targetHeight}px`;
+      clone.style.opacity = '0.4';
+      clone.style.borderRadius = '50%';
+
+      // Dọn dẹp DOM khi xong transition
       setTimeout(() => {
         clone.remove();
+        cartBtn.classList.remove('cart-bump');
+        // Force reflow nhẹ để class animation áp dụng lại
+        void cartBtn.offsetWidth;
         cartBtn.classList.add('cart-bump');
-        setTimeout(() => cartBtn.classList.remove('cart-bump'), 500);
-      }, 750);
+      }, 700); // 700ms khớp thông số transition css
     }
 
     this.cart.add(p);

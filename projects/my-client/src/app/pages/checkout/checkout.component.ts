@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
 import { ApiService, productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AddressService, Address } from '../../core/services/address.service';
 
 @Component({
   selector: 'app-checkout',
@@ -11,10 +13,15 @@ import { ApiService, productDisplayPrice, productMainImage, Product } from '../.
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnInit {
   private cart = inject(CartService);
   private api = inject(ApiService);
   private router = inject(Router);
+  private auth = inject(AuthService);
+  readonly addressService = inject(AddressService);
+
+  // Auth state
+  isLoggedIn = computed(() => !!this.auth.currentUser());
 
   // Form fields
   fullName = '';
@@ -30,6 +37,9 @@ export class CheckoutComponent {
   couponCode = '';
   paymentMethod = 'cod';
   requestInvoice = false;
+
+  // Selected saved address ID
+  selectedAddressId = '';
 
   submitting = signal(false);
   errorMessage = signal<string | null>(null);
@@ -68,6 +78,60 @@ export class CheckoutComponent {
       return total + (productDisplayPrice(item.product) * item.qty);
     }, 0);
   });
+
+  ngOnInit(): void {
+    const user = this.auth.currentUser();
+    if (user) {
+      // Auto-fill buyer info from profile
+      this.fullName = user.profile?.fullName || '';
+      this.phone = this.formatPhoneDisplay(user.phoneNumber);
+      this.email = user.email || '';
+
+      // Load saved addresses
+      this.addressService.load();
+
+      // Wait a tick for addresses to load, then select default
+      setTimeout(() => {
+        const defaultAddr = this.addressService.getDefault();
+        if (defaultAddr) {
+          this.applyAddress(defaultAddr);
+          this.selectedAddressId = defaultAddr._id;
+        }
+      }, 500);
+    }
+  }
+
+  private formatPhoneDisplay(phone: string): string {
+    if (!phone) return '';
+    const d = phone.replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('84')) return '0' + d.slice(2);
+    return phone;
+  }
+
+  /** Apply a saved address to the form */
+  applyAddress(addr: Address) {
+    this.receiverName = addr.fullName;
+    this.receiverPhone = addr.phone;
+    this.address = addr.address;
+    this.city = addr.city;
+    this.district = addr.district;
+    this.ward = addr.ward;
+  }
+
+  onAddressSelect() {
+    const addr = this.addressService.addresses().find(a => a._id === this.selectedAddressId);
+    if (addr) {
+      this.applyAddress(addr);
+    } else {
+      // "New address" selected — clear fields
+      this.receiverName = '';
+      this.receiverPhone = '';
+      this.address = '';
+      this.city = '';
+      this.district = '';
+      this.ward = '';
+    }
+  }
 
   getImage(p: Product) { return productMainImage(p); }
   getPrice(p: Product) { return productDisplayPrice(p); }

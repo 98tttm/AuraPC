@@ -23,7 +23,7 @@ export interface MegamenuColumn {
   title: string;
   /** Slug/category_id danh mục → /san-pham?category=slug */
   categoryId: string;
-  items: { label: string; route: string; queryParams?: Record<string, string> }[];
+  items: { label: string; route: string; queryParams?: Record<string, string | null | undefined> }[];
 }
 
 @Component({
@@ -49,6 +49,16 @@ export class HeaderComponent implements OnDestroy {
   searchResults = signal<Product[]>([]);
   searchLoading = signal<boolean>(false);
   searchDropdownVisible = signal<boolean>(false);
+
+  // Lấy ảnh chính cho giỏ hàng
+  getMainImage(p: Product): string {
+    return productMainImage(p);
+  }
+
+  // Dropdowns
+  userDropdownOpen = signal<boolean>(false);
+  cartDropdownOpen = signal<boolean>(false);
+
   showLoginPopup = signal<boolean>(false);
   loginPhone = signal<string>('');
   /** Bước đăng nhập: phone | otp */
@@ -93,6 +103,7 @@ export class HeaderComponent implements OnDestroy {
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private searchSubject = new Subject<string>();
   private searchSub: Subscription | null = null;
+  private loginPopupSub: Subscription | null = null;
   private isBrowser = false;
   private lastScrollY = 0;
   private readonly HEADER_HIDE_THRESHOLD = 120;
@@ -133,11 +144,22 @@ export class HeaderComponent implements OnDestroy {
   ];
 
   cartCount = this.cart.cartCount;
+  cartItems = computed(() => this.cart.getItems());
+
+  private userDropdownTimer: ReturnType<typeof setTimeout> | null = null;
+  private cartDropdownTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.buildMegamenu();
     this.setupSearch();
+    this.setupLoginPopupTrigger();
+  }
+
+  private setupLoginPopupTrigger(): void {
+    this.loginPopupSub = this.auth.showLoginPopup$.subscribe(() => {
+      this.showLoginPopup.set(true);
+    });
   }
 
   private setupSearch(): void {
@@ -265,6 +287,33 @@ export class HeaderComponent implements OnDestroy {
 
   closeProductsDropdown(): void {
     this.closeProductsTimer = setTimeout(() => this.productsDropdownOpen.set(false), 120);
+  }
+
+  // --- User Dropdown ---
+  openUserDropdown() {
+    if (this.userDropdownTimer) clearTimeout(this.userDropdownTimer);
+    this.userDropdownOpen.set(true);
+  }
+  closeUserDropdown() {
+    this.userDropdownTimer = setTimeout(() => {
+      this.userDropdownOpen.set(false);
+    }, 200);
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.userDropdownOpen.set(false);
+  }
+
+  // --- Cart Dropdown ---
+  openCartDropdown() {
+    if (this.cartDropdownTimer) clearTimeout(this.cartDropdownTimer);
+    this.cartDropdownOpen.set(true);
+  }
+  closeCartDropdown() {
+    this.cartDropdownTimer = setTimeout(() => {
+      this.cartDropdownOpen.set(false);
+    }, 200);
   }
 
   @HostListener('document:click', ['$event'])
@@ -518,6 +567,7 @@ export class HeaderComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.stopCountdown();
     this.searchSub?.unsubscribe();
+    this.loginPopupSub?.unsubscribe();
   }
 
   toggleMenu(): void { this.menuOpen.update(v => !v); }

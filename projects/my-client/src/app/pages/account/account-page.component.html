@@ -182,35 +182,145 @@
       <div class="account__card">
         <div class="account__title-row">
           <h1 class="account__title">Sổ địa chỉ</h1>
-          <button class="account__add-addr-btn">+ Thêm địa chỉ mới</button>
+          <button class="account__add-addr-btn" (click)="openAddAddress()">+ Thêm địa chỉ mới</button>
         </div>
-        @if (mockAddresses.length === 0) {
+        @if (addressService.addresses().length === 0) {
         <div class="account__empty">
           <p>Bạn chưa có địa chỉ nào</p>
         </div>
         } @else {
         <div class="account__address-list">
-          @for (addr of mockAddresses; track addr.id) {
-          <div class="account__address-card" [class.address--default]="addr.isDefault">
-            <div class="address-header">
-              <span class="address-name">{{ addr.name }}</span>
-              @if (addr.isDefault) {
-              <span class="address-default-badge">Mặc định</span>
-              }
+          @for (addr of addressService.addresses(); track addr._id) {
+          <div class="account__address-card" id="addr-card-{{addr._id}}">
+
+            <div class="address-main">
+              <div class="address-header">
+                <span class="address-name">{{ addr.fullName }}</span>
+                <span class="address-separator">|</span>
+                <span class="address-phone">{{ addr.phone }}</span>
+              </div>
+              <p class="address-text">{{ addr.address ? addr.address + ', ' : '' }}{{ addr.ward ? addr.ward : '' }}{{
+                addr.district ? ', ' + addr.district : '' }}{{ addr.city ? ', ' + addr.city : '' }}</p>
+
+              <div class="address-badges">
+                @if (addr.isDefault) {
+                <span class="address-default-badge">Mặc định</span>
+                }
+                @if (addr.label) {
+                <span class="address-label-badge">
+                  <span class="address-label-icon"></span> {{ addr.label }}
+                </span>
+                }
+              </div>
             </div>
-            <p class="address-fullname">{{ addr.fullName }}</p>
-            <p class="address-phone">{{ addr.phone }}</p>
-            <p class="address-text">{{ addr.address }}</p>
+
             <div class="address-actions">
-              <button class="address-edit-btn">Sửa</button>
-              @if (!addr.isDefault) {
-              <button class="address-delete-btn">Xóa</button>
-              }
+              <button class="address-edit-btn" (click)="openEditAddress(addr)">Sửa</button>
+              <span class="address-actions-sep">|</span>
+              <button class="address-delete-btn" (click)="deleteAddress(addr._id)">Xóa</button>
             </div>
+
           </div>
           }
         </div>
         }
+      </div>
+      }
+
+      <!-- Address Modal -->
+      @if (showAddressModal()) {
+      <div class="modal-overlay" (click)="closeAddressModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">{{ addressModalMode() === 'add' ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ' }}</h2>
+            <button class="modal-close" (click)="closeAddressModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="account__form-group">
+              <label>Loại địa chỉ</label>
+              <select [(ngModel)]="addrLabel">
+                <option value="Nhà riêng">Nhà riêng</option>
+                <option value="Công ty">Công ty</option>
+                <option value="Khác">Khác</option>
+              </select>
+            </div>
+            <div class="account__form-row">
+              <div class="account__form-group">
+                <label>Họ và tên <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="addrFullName" placeholder="Nhập họ tên người nhận" />
+              </div>
+              <div class="account__form-group">
+                <label>Số điện thoại <span class="required">*</span></label>
+                <input type="tel" [(ngModel)]="addrPhone" placeholder="Nhập số điện thoại" />
+              </div>
+            </div>
+            <div class="account__form-group">
+              <label>Tỉnh / Thành phố</label>
+              <select [(ngModel)]="addrCity" (change)="onProvinceChange()">
+                <option value="">Chọn Tỉnh / Thành phố</option>
+                @for (p of addressService.provinces(); track p.code) {
+                <option [value]="p.name">{{ p.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="account__form-row">
+              <div class="account__form-group">
+                <label>Quận / Huyện</label>
+                <select [(ngModel)]="addrDistrict" (change)="onDistrictChange()" [disabled]="!addrCity">
+                  <option value="">Chọn Quận / Huyện</option>
+                  @for (d of districts(); track d.code) {
+                  <option [value]="d.name">{{ d.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="account__form-group">
+                <label>Phường / Xã</label>
+                <select [(ngModel)]="addrWard" [disabled]="!addrDistrict">
+                  <option value="">Chọn Phường / Xã</option>
+                  @for (w of wards(); track w.code) {
+                  <option [value]="w.name">{{ w.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="account__form-group">
+              <label>Địa chỉ cụ thể</label>
+              <input type="text" [(ngModel)]="addrAddress" placeholder="Số nhà, tên đường..." />
+            </div>
+            <div class="modal-settings-row">
+              <span class="modal-settings-label">Đặt làm địa chỉ mặc định</span>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="addrIsDefault" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            @if (addressModalMode() === 'edit') {
+            <div class="modal-delete-row">
+              <button class="account__delete-modal-btn" (click)="deleteAddress(editingAddressId)">Xóa địa chỉ</button>
+            </div>
+            }
+            <button class="account__save-btn" (click)="saveAddress()">
+              {{ addressModalMode() === 'add' ? 'Thêm' : 'Cập nhật' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+      <!-- Delete Confirmation Popup -->
+      @if (showDeleteModal()) {
+      <div class="delete-popup-overlay" (click)="cancelDeleteAddress()">
+        <div class="delete-popup" (click)="$event.stopPropagation()">
+          <h3 class="delete-popup__title">Xác nhận xóa</h3>
+          <p class="delete-popup__msg">
+            Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ không?
+          </p>
+          <div class="delete-popup__actions">
+            <button class="delete-popup__btn delete-popup__btn--cancel" (click)="cancelDeleteAddress()">Hủy</button>
+            <button class="delete-popup__btn delete-popup__btn--confirm" (click)="confirmDeleteAddress()">Xóa</button>
+          </div>
+        </div>
       </div>
       }
     </main>

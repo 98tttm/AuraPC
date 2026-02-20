@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, Subject } from 'rxjs';
 
 const BASE = `${environment.apiUrl}/auth`;
 const STORAGE_KEY = 'aurapc_user';
@@ -47,6 +47,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   readonly currentUser = signal<User | null>(null);
+  readonly showLoginPopup$ = new Subject<void>();
 
   constructor() {
     try {

@@ -369,6 +369,19 @@
   border-bottom: none;
 }
 
+.cart-item.is-deleting {
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  margin-top: -105px;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .cart-item--selected {
   background: #fff8f5;
 }

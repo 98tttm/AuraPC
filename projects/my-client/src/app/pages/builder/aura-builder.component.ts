@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Product, FilterOptionsResponse, productMainImage } from '../../core/services/api.service';
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 
 const STEP_TO_CATEGORY: Record<string, string> = {
     'GPU': 'vga', 'CPU': 'cpu', 'MB': 'mainboard', 'CASE': 'case-may-tinh',
@@ -72,6 +73,7 @@ export class AuraBuilderComponent {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private cart = inject(CartService);
+    private auth = inject(AuthService);
 
     readonly steps = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
 
@@ -287,6 +289,11 @@ export class AuraBuilderComponent {
     }
 
     planYourBuild() {
+        if (!this.auth.currentUser()) {
+            this.auth.showLoginPopup$.next();
+            return;
+        }
+
         this.selectedProduct.set(null);
         this.api.createBuilder().subscribe({
             next: (res) => {

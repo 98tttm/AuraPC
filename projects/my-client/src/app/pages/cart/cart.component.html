@@ -56,7 +56,8 @@
 
                 <!-- Items -->
                 @for (item of cartItems(); track productId(item.product)) {
-                <div class="cart-item" [class.cart-item--selected]="isSelected(productId(item.product))">
+                <div class="cart-item" id="cart-item-{{productId(item.product)}}"
+                    [class.cart-item--selected]="isSelected(productId(item.product))">
                     <label class="ck-wrap cart-item__check">
                         <input type="checkbox" [checked]="isSelected(productId(item.product))"
                             (change)="toggleSelection(productId(item.product), $event)" />
@@ -156,14 +157,6 @@
     @if (showDeletePopup()) {
     <div class="delete-popup-overlay" (click)="cancelDelete()">
         <div class="delete-popup" (click)="$event.stopPropagation()">
-            <div class="delete-popup__icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-                    stroke="#e53935" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-            </div>
             <h3 class="delete-popup__title">Xác nhận xóa</h3>
             <p class="delete-popup__msg">
                 Bạn có chắc muốn xóa <strong>{{ deleteTargetName() }}</strong> khỏi giỏ hàng?

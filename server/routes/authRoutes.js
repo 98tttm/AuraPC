@@ -213,4 +213,138 @@ router.post('/avatar', upload.single('avatar'), async (req, res) => {
   }
 });
 
+// ===================== ADDRESS BOOK =====================
+
+/** GET /api/auth/addresses/:userId — list all addresses */
+router.get('/addresses/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, addresses: user.addresses || [] });
+  } catch (err) {
+    console.error('[GET /api/auth/addresses]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** POST /api/auth/addresses — add new address */
+router.post('/addresses', async (req, res) => {
+  try {
+    const { userId, label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    if (!fullName || !phone) return res.status(400).json({ success: false, message: 'fullName and phone are required' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // If setting as default, clear other defaults
+    if (isDefault) {
+      user.addresses.forEach(a => { a.isDefault = false; });
+    }
+    // If first address, auto-set as default
+    const setDefault = isDefault || user.addresses.length === 0;
+
+    user.addresses.push({
+      label: label || 'Nhà riêng',
+      fullName, phone,
+      city: city || '', district: district || '', ward: ward || '',
+      address: address || '',
+      isDefault: setDefault,
+    });
+
+    await user.save();
+    const updated = await User.findById(userId).lean();
+    res.json({ success: true, addresses: updated.addresses });
+  } catch (err) {
+    console.error('[POST /api/auth/addresses]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** PUT /api/auth/addresses/:addressId — update address */
+router.put('/addresses/:addressId', async (req, res) => {
+  try {
+    const { userId, label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const addr = user.addresses.id(req.params.addressId);
+    if (!addr) return res.status(404).json({ success: false, message: 'Address not found' });
+
+    if (label !== undefined) addr.label = label;
+    if (fullName !== undefined) addr.fullName = fullName;
+    if (phone !== undefined) addr.phone = phone;
+    if (city !== undefined) addr.city = city;
+    if (district !== undefined) addr.district = district;
+    if (ward !== undefined) addr.ward = ward;
+    if (address !== undefined) addr.address = address;
+    if (isDefault) {
+      user.addresses.forEach(a => { a.isDefault = false; });
+      addr.isDefault = true;
+    }
+
+    await user.save();
+    const updated = await User.findById(userId).lean();
+    res.json({ success: true, addresses: updated.addresses });
+  } catch (err) {
+    console.error('[PUT /api/auth/addresses]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** DELETE /api/auth/addresses/:addressId — delete address */
+router.delete('/addresses/:addressId', async (req, res) => {
+  try {
+    const { userId } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const addr = user.addresses.id(req.params.addressId);
+    if (!addr) return res.status(404).json({ success: false, message: 'Address not found' });
+
+    const wasDefault = addr.isDefault;
+    user.addresses.pull(req.params.addressId);
+
+    // If we deleted the default, set the first remaining as default
+    if (wasDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+    const updated = await User.findById(userId).lean();
+    res.json({ success: true, addresses: updated.addresses });
+  } catch (err) {
+    console.error('[DELETE /api/auth/addresses]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** PUT /api/auth/addresses/:addressId/default — set as default */
+router.put('/addresses/:addressId/default', async (req, res) => {
+  try {
+    const { userId } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const addr = user.addresses.id(req.params.addressId);
+    if (!addr) return res.status(404).json({ success: false, message: 'Address not found' });
+
+    user.addresses.forEach(a => { a.isDefault = false; });
+    addr.isDefault = true;
+
+    await user.save();
+    const updated = await User.findById(userId).lean();
+    res.json({ success: true, addresses: updated.addresses });
+  } catch (err) {
+    console.error('[PUT /api/auth/addresses/default]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

@@ -183,25 +183,23 @@ router.delete('/remove', async (req, res) => {
     if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
     if (!productId) return res.status(400).json({ success: false, message: 'Missing productId' });
 
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart) {
-      return res.json({ success: true, removedCount: 0, items: [] });
-    }
-
     const resolvedProductId = await resolveProductObjectId(productId);
-    const targetIds = new Set([productId, ...(resolvedProductId ? [resolvedProductId] : [])]);
+    const targetIds = [productId, ...(resolvedProductId ? [resolvedProductId] : [])];
 
-    const beforeCount = cart.items.length;
-    cart.items = cart.items.filter((i) => !targetIds.has(normalizeId(i.product)));
-    normalizeCartItems(cart);
+    // Use atomic $pull to avoid VersionError
+    const pullConditions = targetIds.map(id => {
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        return { 'items.product': new mongoose.Types.ObjectId(id) };
+      }
+      return { 'items.product': id };
+    });
 
-    const afterCount = cart.items.length;
-    if (afterCount !== beforeCount || cart.isModified('items')) {
-      await cart.save();
+    for (const cond of pullConditions) {
+      await Cart.updateOne({ user: userId }, { $pull: { items: { product: cond['items.product'] } } });
     }
 
     const populatedItems = await getPopulatedItems(userId);
-    res.json({ success: true, removedCount: beforeCount - afterCount, items: populatedItems });
+    res.json({ success: true, items: populatedItems });
   } catch (err) {
     console.error('[DELETE /api/cart/remove]', err);
     res.status(500).json({ success: false, message: err.message });

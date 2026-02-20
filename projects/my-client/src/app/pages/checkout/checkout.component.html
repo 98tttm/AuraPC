@@ -65,6 +65,17 @@
                 <!-- Receiver Info -->
                 <div class="checkout-card">
                     <h3 class="checkout-section-title">Thông tin nhận hàng</h3>
+                    @if (isLoggedIn() && addressService.addresses().length > 0) {
+                    <div class="form-group">
+                        <label class="form-label">Chọn địa chỉ đã lưu</label>
+                        <select [(ngModel)]="selectedAddressId" (ngModelChange)="onAddressSelect()">
+                            @for (addr of addressService.addresses(); track addr._id) {
+                            <option [value]="addr._id">{{ addr.label }} — {{ addr.fullName }}, {{ addr.phone }}</option>
+                            }
+                            <option value="">Nhập địa chỉ mới</option>
+                        </select>
+                    </div>
+                    }
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Họ và tên người nhận</label>
