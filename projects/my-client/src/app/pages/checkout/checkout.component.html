@@ -9,6 +9,10 @@
             Quay lại giỏ hàng
         </a>
 
+        @if (cartItems().length > 0) {
+        <app-checkout-stepper [step]="2"></app-checkout-stepper>
+        }
+
         @if (cartItems().length === 0) {
         <div class="checkout-empty">
             <p>Giỏ hàng trống. <a routerLink="/san-pham">Tiếp tục mua sắm</a></p>
@@ -62,36 +66,49 @@
                     </div>
                 </div>
 
-                <!-- Receiver Info -->
+                <!-- Address / Receiver section -->
                 <div class="checkout-card">
-                    <h3 class="checkout-section-title">Thông tin nhận hàng</h3>
-                    @if (isLoggedIn() && addressService.addresses().length > 0) {
-                    <div class="form-group">
-                        <label class="form-label">Chọn địa chỉ đã lưu</label>
-                        <select [(ngModel)]="selectedAddressId" (ngModelChange)="onAddressSelect()">
-                            @for (addr of addressService.addresses(); track addr._id) {
-                            <option [value]="addr._id">{{ addr.label }} — {{ addr.fullName }}, {{ addr.phone }}</option>
-                            }
-                            <option value="">Nhập địa chỉ mới</option>
-                        </select>
+                    <div class="checkout-card-header">
+                        <h3 class="checkout-section-title">Địa chỉ nhận hàng</h3>
+                        @if (isLoggedIn() && addressService.addresses().length > 0) {
+                        <button class="btn-change-address" (click)="openAddressModal()">Thay đổi</button>
+                        }
+                    </div>
+
+                    @if (isLoggedIn()) {
+                    <!-- Logged-in User Address Card -->
+                    @if (addressService.addresses().length === 0) {
+                    <div class="empty-address">
+                        <p>Bạn chưa có địa chỉ nhận hàng nào.</p>
+                        <button class="btn-add-address-empty" (click)="switchToAddMode(); showAddressModal.set(true)">
+                            Thêm địa chỉ mới
+                        </button>
+                    </div>
+                    } @else {
+                    @if (selectedAddressId) {
+                    <div class="selected-address-card">
+                        <div class="selected-address__header">
+                            <span class="selected-address__name">{{ receiverName }}</span>
+                            <span class="selected-address__separator">|</span>
+                            <span class="selected-address__phone">{{ receiverPhone }}</span>
+                        </div>
+                        <div class="selected-address__detail">
+                            {{ address }}<br>
+                            {{ ward }}, {{ district }}, {{ city }}
+                        </div>
+                        @if (isAddressDefault(selectedAddressId)) {
+                        <span class="badge-default">Mặc định</span>
+                        }
+                    </div>
+                    } @else {
+                    <div class="empty-address">
+                        <p>Vui lòng chọn một địa chỉ nhận hàng.</p>
+                        <button class="btn-change-address" (click)="openAddressModal()">Chọn địa chỉ</button>
                     </div>
                     }
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Họ và tên người nhận</label>
-                            <input type="text" [(ngModel)]="receiverName"
-                                placeholder="Mặc định theo thông tin người đặt" />
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Số điện thoại người nhận</label>
-                            <input type="tel" [(ngModel)]="receiverPhone" placeholder="Mặc định theo người đặt" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Address -->
-                <div class="checkout-card">
-                    <h3 class="checkout-section-title">Địa chỉ nhận hàng</h3>
+                    }
+                    } @else {
+                    <!-- Guest Form -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Tỉnh / Thành phố</label>
@@ -119,6 +136,18 @@
                         <label class="form-label">Địa chỉ cụ thể <span class="required">*</span></label>
                         <input type="text" [(ngModel)]="address" placeholder="Số nhà, tên đường..." />
                     </div>
+                    <div class="form-row" style="margin-top: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">Họ và tên người nhận</label>
+                            <input type="text" [(ngModel)]="receiverName"
+                                placeholder="Mặc định theo thông tin người đặt" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại người nhận</label>
+                            <input type="tel" [(ngModel)]="receiverPhone" placeholder="Mặc định theo người đặt" />
+                        </div>
+                    </div>
+                    }
                 </div>
 
                 <!-- Note -->
@@ -136,6 +165,27 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+
+                    @if (requestInvoice) {
+                    <div class="invoice-form" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #eee;">
+                        <div class="form-row" style="margin-bottom: 1rem;">
+                            <label class="payment-option" [class.payment-option--active]="invoiceType === 'personal'"
+                                (click)="invoiceType = 'personal'">
+                                <span class="payment-radio" [class.active]="invoiceType === 'personal'"></span>
+                                <span>Cá nhân</span>
+                            </label>
+                            <label class="payment-option" [class.payment-option--active]="invoiceType === 'company'"
+                                (click)="invoiceType = 'company'">
+                                <span class="payment-radio" [class.active]="invoiceType === 'company'"></span>
+                                <span>Công ty</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email nhận hóa đơn <span class="required">*</span></label>
+                            <input type="email" [(ngModel)]="invoiceEmail" placeholder="Nhập email xuất hóa đơn" />
+                        </div>
+                    </div>
+                    }
                 </div>
 
                 <!-- Payment Method -->
@@ -213,6 +263,12 @@
                         <span class="summary-val summary-val--total">{{ formatPrice(selectedTotal()) }}</span>
                     </div>
 
+                    @if (errorMessage()) {
+                    <div class="checkout-submit-error">
+                        {{ errorMessage() }}
+                    </div>
+                    }
+
                     <button class="btn-submit" (click)="submitOrder()" [disabled]="submitting()">
                         {{ submitting() ? 'Đang xử lý...' : 'Hoàn tất' }}
                     </button>
@@ -225,15 +281,148 @@
             </div>
         </div>
 
-        @if (errorMessage()) {
-        <div class="checkout-error">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            {{ errorMessage() }}
+        <!-- ====== ADDRESS SLIDING MODAL ====== -->
+        @if (showAddressModal()) {
+        <div class="chk-modal-overlay" (click)="closeAddressModal()">
+            <div class="chk-modal-container" (click)="$event.stopPropagation()">
+                <div class="chk-modal-header">
+                    <h3 class="chk-modal-title">
+                        {{ addressModalMode() === 'select' ? 'Chọn địa chỉ nhận hàng' : 'Thêm địa chỉ mới' }}
+                    </h3>
+                    <button class="chk-modal-close" (click)="closeAddressModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <!-- Back button for Add mode -->
+                    @if (addressModalMode() === 'add') {
+                    <button class="chk-modal-back" (click)="switchToSelectMode()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    }
+                </div>
+
+                <div class="chk-modal-body">
+                    <div class="chk-modal-slider" [class.show-add]="addressModalMode() === 'add'">
+                        <!-- Pane 1: Selection List -->
+                        <div class="chk-modal-pane pane-select">
+                            <div class="chk-address-list">
+                                @for (addr of addressService.addresses(); track addr._id) {
+                                <label class="chk-address-item" [class.active]="tempSelectedAddressId === addr._id">
+                                    <div class="chk-address-radio">
+                                        <input type="radio" name="tempAddr" [value]="addr._id"
+                                            [(ngModel)]="tempSelectedAddressId" />
+                                        <span class="custom-radio"></span>
+                                    </div>
+                                    <div class="chk-address-info">
+                                        <div class="chk-address-name">{{ addr.fullName }} - {{ addr.phone }}</div>
+                                        <div class="chk-address-detail">{{ addr.address }}</div>
+                                        <div class="chk-address-ward">{{ addr.ward }}, {{ addr.district }}, {{ addr.city
+                                            }}</div>
+                                        <div class="chk-address-tags">
+                                            <span class="chk-badge">{{ addr.label }}</span>
+                                            @if (addr.isDefault) {
+                                            <span class="chk-badge chk-badge--default">Mặc định</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </label>
+                                }
+                            </div>
+                            <div class="chk-modal-footer">
+                                @if (modalError() && addressModalMode() === 'select') {
+                                <div class="checkout-submit-error" style="margin-top: 0; margin-bottom: 8px;">
+                                    {{ modalError() }}
+                                </div>
+                                }
+                                <button class="btn-chk-confirm" (click)="confirmTempAddress()">Xác nhận</button>
+                                <button class="btn-chk-add-new" (click)="switchToAddMode()">Thêm địa chỉ mới</button>
+                            </div>
+                        </div>
+
+                        <!-- Pane 2: Add Form -->
+                        <div class="chk-modal-pane pane-add">
+                            <div class="chk-add-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Họ tên người nhận <span
+                                                class="required">*</span></label>
+                                        <input type="text" [(ngModel)]="addrFullName" placeholder="Họ và tên" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Số điện thoại <span class="required">*</span></label>
+                                        <input type="tel" [(ngModel)]="addrPhone" placeholder="Số điện thoại" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tỉnh / Thành phố <span class="required">*</span></label>
+                                    <select [(ngModel)]="addrCity" (change)="onProvinceChange()">
+                                        <option value="">Chọn Tỉnh / Thành phố</option>
+                                        @for (p of addressService.provinces(); track p.code) {
+                                        <option [value]="p.name">{{ p.name }}</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Quận / Huyện <span class="required">*</span></label>
+                                        <select [(ngModel)]="addrDistrict" (change)="onDistrictChange()"
+                                            [disabled]="!addrCity">
+                                            <option value="">Chọn Quận / Huyện</option>
+                                            @for (d of districts(); track d.code) {
+                                            <option [value]="d.name">{{ d.name }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Phường / Xã <span class="required">*</span></label>
+                                        <select [(ngModel)]="addrWard" [disabled]="!addrDistrict">
+                                            <option value="">Chọn Phường / Xã</option>
+                                            @for (w of wards(); track w.code) {
+                                            <option [value]="w.name">{{ w.name }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Địa chỉ cụ thể <span class="required">*</span></label>
+                                    <input type="text" [(ngModel)]="addrAddress" placeholder="Số nhà, tên đường..." />
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Loại địa chỉ</label>
+                                        <select [(ngModel)]="addrLabel">
+                                            <option value="Nhà riêng">Nhà riêng</option>
+                                            <option value="Văn phòng">Văn phòng</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="invoice-row" style="margin-top: 12px; margin-bottom: 0;">
+                                    <span class="invoice-label">Đặt làm địa chỉ mặc định</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" [(ngModel)]="addrIsDefault" />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                @if (modalError() && addressModalMode() === 'add') {
+                                <div class="checkout-submit-error" style="margin-top: 12px; margin-bottom: 0;">
+                                    {{ modalError() }}
+                                </div>
+                                }
+                            </div>
+                            <div class="chk-modal-footer">
+                                <button class="btn-chk-confirm" style="width: 100%;" (click)="saveNewAddress()">Hoàn
+                                    thành</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         }
         }

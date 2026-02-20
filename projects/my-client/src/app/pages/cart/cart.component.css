@@ -92,7 +92,7 @@
 /* ---------- Layout ---------- */
 .cart-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 360px;
   gap: 1.25rem;
   align-items: start;
 }
@@ -634,7 +634,7 @@
   display: block;
   width: 100%;
   padding: 14px;
-  background: #0c1f36;
+  background: #1a1a1a;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -649,7 +649,7 @@
 }
 
 .btn-checkout:hover {
-  background: #1a3a5c;
+  background: #000;
   transform: translateY(-1px);
 }
 

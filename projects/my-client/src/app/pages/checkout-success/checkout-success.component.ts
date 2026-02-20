@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
+import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
 
 @Component({
-    selector: 'app-checkout-success',
-    standalone: true,
-    imports: [RouterLink],
-    template: `
+  selector: 'app-checkout-success',
+  standalone: true,
+  imports: [RouterLink, CheckoutStepperComponent],
+  template: `
     <section class="success-page">
       <div class="container">
+        <app-checkout-stepper [step]="4"></app-checkout-stepper>
         <div class="success-card">
           <div class="success-icon">✓</div>
           <h1>Đặt hàng thành công!</h1>
@@ -24,7 +26,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .success-page { padding: 4rem 0; min-height: 60vh; background: var(--bg-primary, #0a0a0f); display: flex; align-items: center; }
     .container { max-width: 600px; margin: 0 auto; padding: 0 1rem; }
     .success-card { background: var(--bg-secondary, #1a1a25); border-radius: 12px; padding: 3rem 2rem; text-align: center; }
@@ -43,9 +45,9 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
   `]
 })
 export class CheckoutSuccessComponent {
-    orderNumber: string | null = null;
+  orderNumber: string | null = null;
 
-    constructor(private route: ActivatedRoute) {
-        this.orderNumber = this.route.snapshot.queryParamMap.get('order');
-    }
+  constructor(private route: ActivatedRoute) {
+    this.orderNumber = this.route.snapshot.queryParamMap.get('order');
+  }
 }

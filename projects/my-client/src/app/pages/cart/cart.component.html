@@ -9,6 +9,10 @@
             Tiếp tục mua sắm
         </a>
 
+        @if (cartItems().length > 0) {
+        <app-checkout-stepper [step]="1"></app-checkout-stepper>
+        }
+
         @if (cartItems().length === 0) {
         <div class="cart-empty">
             <div class="cart-empty__inner">

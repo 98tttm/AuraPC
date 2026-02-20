@@ -307,13 +307,21 @@ export class HeaderComponent implements OnDestroy {
 
   // --- Cart Dropdown ---
   openCartDropdown() {
+    const url = this.router.url;
+    if (url.includes('/cart')) return;
+
     if (this.cartDropdownTimer) clearTimeout(this.cartDropdownTimer);
     this.cartDropdownOpen.set(true);
   }
   closeCartDropdown() {
     this.cartDropdownTimer = setTimeout(() => {
       this.cartDropdownOpen.set(false);
-    }, 200);
+    }, 300); // 300ms for easier hover
+  }
+
+  removeFromCart(productId?: string): void {
+    if (!productId) return;
+    this.cart.remove(productId);
   }
 
   @HostListener('document:click', ['$event'])

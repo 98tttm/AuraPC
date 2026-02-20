@@ -1,0 +1,92 @@
+.stepper-wrapper {
+    background-color: #fff;
+    padding: 1.5rem 0;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+}
+
+.stepper-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    width: 140px;
+}
+
+.step-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid #777;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.step-label {
+    font-size: 0.95rem;
+    color: #555;
+    text-align: center;
+    line-height: 1.4;
+    font-weight: 400;
+    transition: color 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+}
+
+.step-line {
+    flex: 1;
+    height: 0;
+    border-top: 1px dashed #aaa;
+    margin: 22px 5px 0 5px;
+}
+
+/* Active State */
+.step.active .step-icon {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #fff;
+}
+
+.step.active .step-label {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    .step {
+        width: 80px;
+    }
+
+    .step-label {
+        font-size: 0.8rem;
+    }
+
+    .stepper-container {
+        padding: 0 10px;
+    }
+
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 6px;
+    }
+
+    .step-line {
+        margin-top: 18px;
+    }
+}

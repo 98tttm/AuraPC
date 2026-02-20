@@ -3,11 +3,12 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../core/services/cart.service';
 import { productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
+import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CheckoutStepperComponent],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })
