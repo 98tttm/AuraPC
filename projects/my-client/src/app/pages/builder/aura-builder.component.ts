@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Product, FilterOptionsResponse, productMainImage } from '../../core/services/api.service';
@@ -74,6 +75,7 @@ export class AuraBuilderComponent {
     private router = inject(Router);
     private cart = inject(CartService);
     private auth = inject(AuthService);
+    private http = inject(HttpClient);
 
     readonly steps = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
 
@@ -460,7 +462,74 @@ export class AuraBuilderComponent {
         const shareId = this.builderShareId();
         if (!shareId) return;
         const url = window.location.origin + '/aura-builder/' + shareId;
-        navigator.clipboard.writeText(url);
+        navigator.clipboard.writeText(url).then(() => {
+            this.showToast('Đã sao chép liên kết chia sẻ!');
+        });
+    }
+
+    // ==========================================
+    // AURAVISUAL N8N INTEGRATION
+    // ==========================================
+    showVisualModal = signal(false);
+    visualLoading = signal(false);
+    visualImageUrl = signal<string | null>(null);
+    visualError = signal<string | null>(null);
+
+    triggerAuraVisual() {
+        const components = this.overviewComponents();
+        if (!components.length) {
+            this.showToast('Vui lòng chọn ít nhất một linh kiện để sử dụng AuraVisual.');
+            return;
+        }
+
+        const payload = {
+            components: components.map((c) => ({
+                type: c.step,
+                name: c.data?.name || 'Unknown',
+                image: this.getComponentImage(c.data), // Thêm ảnh vào payload cho AI Nano Banana
+            })),
+        };
+
+        this.showVisualModal.set(true);
+        this.visualLoading.set(true);
+        this.visualError.set(null);
+        this.visualImageUrl.set(null);
+
+        console.log('[AuraVisual] Step-by-step raw config:', this.savedConfig());
+        console.log('[AuraVisual] Processed overview components:', components);
+        console.log('[AuraVisual] Final payload to n8n Webhook:', payload);
+
+
+        // Gọi tới n8n webhook thực tế
+        this.http.post<any>('https://thinhn8n.io.vn/webhook/auravisual-trigger', payload).subscribe({
+            next: (res) => {
+                console.log('[AuraVisual] Response from n8n:', res);
+                if (res && res.imageUrl) {
+                    this.visualImageUrl.set(res.imageUrl);
+                } else if (res && typeof res === 'string') {
+                    // Trong trường hợp n8n trả về plain text là URL
+                    if (res.startsWith('http')) {
+                        this.visualImageUrl.set(res);
+                    } else {
+                        this.visualError.set('AuraVisual trả về định dạng không hợp lệ.');
+                    }
+                } else {
+                    this.visualError.set('AuraVisual không trả về hình ảnh.');
+                }
+                this.visualLoading.set(false);
+            },
+            error: (err) => {
+                console.error('[AuraVisual] Error from n8n:', err);
+                // Dùng Mockup ảnh đã gen local để DEMO cho người dùng nếu API n8n bị lỗi (do thiếu API Key)
+                this.showToast('Demo Mode: Chưa kích hoạt Replicate Token trong n8n. Hiển thị ảnh Demo AI.');
+                this.visualImageUrl.set('assets/mock_auravisual.png');
+                this.visualLoading.set(false);
+            }
+        });
+    }
+
+    closeVisualModal() {
+        this.showVisualModal.set(false);
     }
 
     onSaveConfiguration() {

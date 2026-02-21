@@ -114,6 +114,8 @@
                     <div class="overview-corsair__actions">
                         <button type="button" class="overview-corsair__btn overview-corsair__btn--outline"
                             (click)="onSaveConfiguration()">Lưu cấu hình</button>
+                        <button type="button" class="overview-corsair__btn overview-corsair__btn--visual"
+                            (click)="triggerAuraVisual()">AuraVisual</button>
                         <button type="button" class="overview-corsair__btn overview-corsair__btn--primary"
                             (click)="addAllToCart()">Thêm vào giỏ</button>
                     </div>
@@ -267,4 +269,47 @@
 
 @if (toastMessage()) {
 <div class="toast">{{ toastMessage() }}</div>
+}
+
+@if (showVisualModal()) {
+<div class="visual-modal-overlay" (click)="closeVisualModal()">
+    <div class="visual-modal" (click)="$event.stopPropagation()">
+        <button class="visual-modal__close" (click)="closeVisualModal()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <div class="visual-modal__content">
+            @if (visualLoading()) {
+            <div class="visual-loading">
+                <div class="visual-loading__scanner"></div>
+                <p class="visual-loading__text">A.I. đang tưởng tượng bộ PC của bạn...</p>
+                <p class="visual-loading__subtext">Dữ liệu linh kiện đang được gửi đến n8n workflow.</p>
+            </div>
+            } @else if (visualError()) {
+            <div class="visual-error">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p class="visual-error__text">{{ visualError() }}</p>
+            </div>
+            } @else if (visualImageUrl()) {
+            <div class="visual-result">
+                <img [src]="visualImageUrl()" alt="AuraVisual Rendering" class="visual-result__img" />
+                <div class="visual-result__actions">
+                    <a [href]="visualImageUrl()" download="AuraVisual_PC_Setup.png"
+                        class="visual-btn visual-btn--download">
+                        Lưu ảnh PC
+                    </a>
+                    <button class="visual-btn visual-btn--outline" (click)="closeVisualModal()">Đóng</button>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
 }

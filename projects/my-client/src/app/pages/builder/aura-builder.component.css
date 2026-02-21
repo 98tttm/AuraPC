@@ -1058,19 +1058,37 @@
 }
 
 .overview-corsair__btn--primary {
-    background: #FF6D2D;
+    background: #111;
     border: none;
     color: #fff;
     box-shadow: 0 1px 0 rgba(0, 0, 0, .08), inset 0 -1px 0 rgba(0, 0, 0, .2);
 }
 
 .overview-corsair__btn--primary:hover {
-    background: #e65c20;
+    background: #333;
     box-shadow: 0 2px 6px rgba(0, 0, 0, .15), inset 0 -1px 0 rgba(0, 0, 0, .2);
 }
 
 .overview-corsair__btn--primary:active {
-    background: #d35400;
+    background: #000;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2);
+    transform: scale(.98);
+}
+
+.overview-corsair__btn--visual {
+    background: linear-gradient(135deg, #FF6D2D, #1a56db);
+    border: none;
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .08), inset 0 -1px 0 rgba(0, 0, 0, .2);
+}
+
+.overview-corsair__btn--visual:hover {
+    background: linear-gradient(135deg, #e65c20, #1545ad);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .15), inset 0 -1px 0 rgba(0, 0, 0, .2);
+}
+
+.overview-corsair__btn--visual:active {
+    background: linear-gradient(135deg, #d35400, #0f3480);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2);
     transform: scale(.98);
 }
@@ -1208,6 +1226,169 @@
     opacity: .35;
     cursor: not-allowed;
     box-shadow: none;
+}
+
+/* ============================================================
+   VISUAL MODAL (AuraVisual)
+   ============================================================ */
+.visual-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn .2s ease;
+}
+
+.visual-modal {
+    background: #111;
+    border: 1px solid #333;
+    width: 800px;
+    max-width: 95vw;
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .4);
+    position: relative;
+    overflow: hidden;
+    animation: modalSlideIn .3s ease;
+}
+
+.visual-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, .1);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s;
+    z-index: 10;
+}
+
+.visual-modal__close:hover {
+    background: rgba(255, 255, 255, .2);
+}
+
+.visual-modal__content {
+    padding: 40px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading State */
+.visual-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.visual-loading__scanner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(255, 255, 255, .1);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+}
+
+.visual-loading__text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px;
+    background: linear-gradient(135deg, #FF6D2D, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.visual-loading__subtext {
+    font-size: .9rem;
+    color: #888;
+    margin: 0;
+}
+
+/* Error State */
+.visual-error {
+    text-align: center;
+    color: #e53935;
+}
+
+.visual-error svg {
+    margin-bottom: 16px;
+}
+
+.visual-error__text {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Result State */
+.visual-result {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn .4s ease;
+}
+
+.visual-result__img {
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .5);
+    margin-bottom: 24px;
+}
+
+.visual-result__actions {
+    display: flex;
+    gap: 16px;
+}
+
+.visual-btn {
+    padding: 10px 24px;
+    font-size: .9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .2s ease;
+    border: none;
+    font-family: var(--font-main);
+}
+
+.visual-btn--download {
+    background: #fff;
+    color: #000;
+}
+
+.visual-btn--download:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+.visual-btn--outline {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .2);
+}
+
+.visual-btn--outline:hover {
+    background: rgba(255, 255, 255, .1);
 }
 
 /* ============================================================
