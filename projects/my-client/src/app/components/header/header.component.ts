@@ -300,9 +300,21 @@ export class HeaderComponent implements OnDestroy {
     }, 200);
   }
 
-  logout(): void {
-    this.auth.logout();
+  // --- Logout Modal ---
+  showLogoutModal = signal<boolean>(false);
+
+  openLogoutModal(): void {
     this.userDropdownOpen.set(false);
+    this.showLogoutModal.set(true);
+  }
+
+  closeLogoutModal(): void {
+    this.showLogoutModal.set(false);
+  }
+
+  confirmLogout(): void {
+    this.auth.logout();
+    this.showLogoutModal.set(false);
   }
 
   // --- Cart Dropdown ---
@@ -316,7 +328,7 @@ export class HeaderComponent implements OnDestroy {
   closeCartDropdown() {
     this.cartDropdownTimer = setTimeout(() => {
       this.cartDropdownOpen.set(false);
-    }, 300); // 300ms for easier hover
+    }, 200);
   }
 
   removeFromCart(productId?: string): void {
