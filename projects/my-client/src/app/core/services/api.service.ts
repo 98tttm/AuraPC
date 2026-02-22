@@ -321,6 +321,14 @@ export class ApiService {
     );
   }
 
+  /** Lưụ lại ảnh AuraVisual cho builder */
+  updateBuilderAuraVisual(id: string, imageUrl: string): Observable<{ success: boolean; auraVisualImage: string }> {
+    return this.http.put<{ success: boolean; auraVisualImage: string }>(
+      `${BASE}/builders/${encodeURIComponent(id)}/auravisual`,
+      { imageUrl }
+    );
+  }
+
   /** Gửi PDF cấu hình qua email */
   emailBuilderPdf(id: string, email: string): Observable<{ success: boolean; message?: string }> {
     return this.http.post<{ success: boolean; message?: string }>(

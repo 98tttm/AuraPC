@@ -92,6 +92,30 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+/** Lưu kết quả hình ảnh AuraVisual vào builder */
+router.put('/:id/auravisual', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { imageUrl } = req.body;
+
+    const isObjectId = /^[a-f\d]{24}$/i.test(id);
+    const query = isObjectId ? { _id: id } : { shareId: id };
+    const builder = await Builder.findOne(query);
+
+    if (!builder) return res.status(404).json({ error: 'Cấu hình không tồn tại' });
+
+    builder.auraVisualImage = imageUrl;
+    await builder.save();
+
+    console.log(`[Builder] Đã lưu ảnh AuraVisual vào builder ${builder._id}`);
+    res.json({ success: true, auraVisualImage: builder.auraVisualImage });
+  } catch (err) {
+    console.error('[Builder] Lỗi lưu AuraVisual:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 /** Gửi PDF cấu hình qua email */
 router.post('/:id/email-pdf', async (req, res) => {
   try {

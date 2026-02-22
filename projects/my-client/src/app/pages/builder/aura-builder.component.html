@@ -15,6 +15,10 @@
             @if (isBuilderMode()) {
             <li class="nav-item nav-item--clickable" [class.active]="currentStep() === 'OVERVIEW'"
                 (click)="goToStep('OVERVIEW')">Tổng quan</li>
+            @if (visualImageUrl()) {
+            <li class="nav-item nav-item--clickable nav-item--auravisual"
+                [class.active]="currentStep() === 'AURAVISUAL'" (click)="goToStep('AURAVISUAL')">AuraVisual</li>
+            }
             }
         </ul>
 
@@ -54,7 +58,8 @@
             </div>
         </div>
         } @else {
-        <div class="builder-main" [class.builder-main--overview]="currentStep() === 'OVERVIEW'">
+        <div class="builder-main" [class.builder-main--overview]="currentStep() === 'OVERVIEW'"
+            [class.builder-main--visual]="currentStep() === 'AURAVISUAL'">
             @if (currentStep() === 'OVERVIEW') {
             <div class="overview-corsair">
                 <div class="overview-corsair__header">
@@ -118,6 +123,128 @@
                             (click)="triggerAuraVisual()">AuraVisual</button>
                         <button type="button" class="overview-corsair__btn overview-corsair__btn--primary"
                             (click)="addAllToCart()">Thêm vào giỏ</button>
+                    </div>
+                </div>
+            </div>
+            } @else if (currentStep() === 'AURAVISUAL') {
+            <div class="av-workflow">
+                <video autoplay loop muted playsinline class="av-bg-video">
+                    <source src="assets/video/universe.mp4" type="video/mp4" />
+                </video>
+                <div class="av-overlay"></div>
+
+                <div class="av-content">
+                    <div class="av-header">
+                        <h2>AURAVISUAL WORKFLOW</h2>
+                        <p>Hệ thống AI xử lý siêu phẩm của bạn</p>
+                    </div>
+
+                    <div class="av-grid">
+                        <!-- Column 1: Input -->
+                        <div class="av-col av-input">
+                            <h3 class="av-col-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                    </path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg> LINH KIỆN</h3>
+                            <div class="av-input-list">
+                                @for (item of overviewComponents(); track item.step) {
+                                <div class="av-input-item">
+                                    <div class="av-input-icon">
+                                        <img [src]="getComponentImage(item.data)" [alt]="item.data?.name" />
+                                    </div>
+                                    <div class="av-input-info">
+                                        <span class="av-badge">{{ getStepLabel(item.step) }}</span>
+                                        <p class="av-name">{{ item.data?.name }}</p>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="av-arrow">
+                            <span class="av-flow-line"></span>
+                            <span class="av-flow-head"></span>
+                        </div>
+
+                        <!-- Column 2: Processing -->
+                        <div class="av-col av-processing">
+                            <h3 class="av-col-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                    </path>
+                                </svg> XỬ LÝ N8N</h3>
+                            <div class="av-process-nodes">
+                                <div class="av-node">
+                                    <div class="av-node-icon"><img src="assets/LOGO/LogoBlack.png" alt="AuraPC"
+                                            style="width:24px;" /></div>
+                                    <div class="av-node-text">
+                                        <h4>Webhook Sync</h4>
+                                        <p>Đồng bộ Payload Data</p>
+                                    </div>
+                                </div>
+                                <div class="av-node-line"></div>
+                                <div class="av-node">
+                                    <div class="av-node-icon ai-glow"><svg width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 16v-4"></path>
+                                            <path d="M12 8h.01"></path>
+                                        </svg></div>
+                                    <div class="av-node-text">
+                                        <h4>Replicate Model</h4>
+                                        <p>Generative Engine</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="av-arrow">
+                            <span class="av-flow-line"></span>
+                            <span class="av-flow-head"></span>
+                        </div>
+
+                        <!-- Column 3: Output -->
+                        <div class="av-col av-output">
+                            <h3 class="av-col-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg> KẾT QUẢ AI</h3>
+                            <div class="av-result-card">
+                                @if (visualLoading()) {
+                                <div class="av-loading-state">
+                                    <div class="av-spinner"></div>
+                                    <p class="av-status-title">A.I. đang rendering...</p>
+                                    <p class="av-status-desc">Hệ thống đang xử lý prompt và xuất hình ảnh</p>
+                                </div>
+                                } @else if (visualError()) {
+                                <div class="av-error-state">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e53935"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p class="av-status-title">Lỗi tạo ảnh</p>
+                                    <p class="av-status-desc">{{ visualError() }}</p>
+                                </div>
+                                } @else if (visualImageUrl()) {
+                                <img [src]="visualImageUrl()" alt="AuraVisual Rendering" class="av-result-img" />
+                                <div class="av-actions">
+                                    <a [href]="visualImageUrl()" download="AuraVisual_PC.png" class="av-btn-primary">Tải
+                                        Ảnh
+                                        8K HD</a>
+                                </div>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -269,47 +396,4 @@
 
 @if (toastMessage()) {
 <div class="toast">{{ toastMessage() }}</div>
-}
-
-@if (showVisualModal()) {
-<div class="visual-modal-overlay" (click)="closeVisualModal()">
-    <div class="visual-modal" (click)="$event.stopPropagation()">
-        <button class="visual-modal__close" (click)="closeVisualModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-
-        <div class="visual-modal__content">
-            @if (visualLoading()) {
-            <div class="visual-loading">
-                <div class="visual-loading__scanner"></div>
-                <p class="visual-loading__text">A.I. đang tưởng tượng bộ PC của bạn...</p>
-                <p class="visual-loading__subtext">Dữ liệu linh kiện đang được gửi đến n8n workflow.</p>
-            </div>
-            } @else if (visualError()) {
-            <div class="visual-error">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <p class="visual-error__text">{{ visualError() }}</p>
-            </div>
-            } @else if (visualImageUrl()) {
-            <div class="visual-result">
-                <img [src]="visualImageUrl()" alt="AuraVisual Rendering" class="visual-result__img" />
-                <div class="visual-result__actions">
-                    <a [href]="visualImageUrl()" download="AuraVisual_PC_Setup.png"
-                        class="visual-btn visual-btn--download">
-                        Lưu ảnh PC
-                    </a>
-                    <button class="visual-btn visual-btn--outline" (click)="closeVisualModal()">Đóng</button>
-                </div>
-            </div>
-            }
-        </div>
-    </div>
-</div>
 }

@@ -1,0 +1,149 @@
+{
+    "name": "AuraVisual - PC Setup Generator (Nano Banana PRO)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "auravisual-trigger",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "e44c2174-8451-40be-afa4-28b3e83b8fc7",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ],
+            "webhookId": "auravisual-trigger"
+        },
+        {
+            "parameters": {
+                "jsCode": "const comps = $input.item.json.body.components || [];\n\nconst getComp = (type, fallback) => {\n  const c = comps.find(c => c.type === type);\n  return c && c.name && c.name !== 'Unknown' ? c.name : fallback;\n};\n\n// Brand new strictly-enforced prompt for Nano Banana Pro\nlet prompt = \"Masterpiece 8k photography, hyper-realistic gaming room setup, Unreal Engine 5 render style. \";\n\n// Enforce Case and Internals\nprompt += \"The centerpiece is a high-end PC inside a [\" + getComp('CASE', 'premium glass ATX case') + \"]. \";\nprompt += \"Clearly visible inside the PC is a [\" + getComp('VGA', 'massive RTX graphics card') + \"] and a glowing [\" + getComp('COOLING', 'AIO liquid cooler') + \"]. \" ;\n\n// Enforce Peripherals on Desk\nprompt += \"Sitting on the sleek black wooden desk is a clear, large [\" + getComp('MONITOR', 'curved gaming monitor') + \"]. \";\nprompt += \"In front of the monitor is a [\" + getComp('KEYBOARD', 'RGB mechanical keyboard') + \"] and a [\" + getComp('MOUSE', 'wireless gaming mouse') + \"]. \";\nprompt += \"Resting on a stand nearby is a [\" + getComp('HEADSET', 'premium gaming headset') + \"]. \";\n\nprompt += \"All components must be clearly visible and accurately represented. Cinematic studio lighting, dark neon aesthetic, breathtaking raytracing.\";\n\n// Re-add image to image logic if available\nconst validImages = comps.map(c => c.image).filter(img => img && typeof img === 'string' && img.startsWith('http'));\n\nconst inputObj = {\n  prompt: prompt,\n  aspect_ratio: '16:9',\n  output_format: 'png',\n  seed: Math.floor(Math.random() * 2147483647)\n};\n\nif (validImages.length > 0) inputObj.image = validImages[0];\n\n$input.item.json.replicatePayloadJSON = JSON.stringify({ input: inputObj });\nreturn $input.item;"
+            },
+            "id": "code-node-id",
+            "name": "Build Prompt",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                420,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.replicate.com/v1/models/google/nano-banana-pro/predictions",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Token YOUR_REPLICATE_API_TOKEN_HERE"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "wait=60"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ $json.replicatePayloadJSON }}",
+                "options": {}
+            },
+            "id": "2db4f9e1-2508-4122-861f-dbe329c32274",
+            "name": "Replicate HTTP",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                640,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "let out = $input.item.json.output;\nlet finalUrl = null;\n\nif (out) {\n  if (Array.isArray(out) && out.length > 0) {\n    finalUrl = out[0];\n  } else if (typeof out === 'string') {\n    finalUrl = out;\n  } else {\n    try { finalUrl = JSON.stringify(out); } catch(e) {}\n  }\n}\n\n$input.item.json.finalResult = { imageUrl: finalUrl };\nreturn $input.item;"
+            },
+            "id": "format-response-id",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                860,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify($json.finalResult) }}",
+                "options": {}
+            },
+            "id": "e4c7d03a-3134-448f-aa6a-f32a4e2ef5b6",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1060,
+                300
+            ]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Build Prompt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Prompt": {
+            "main": [
+                [
+                    {
+                        "node": "Replicate HTTP",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Replicate HTTP": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Output": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

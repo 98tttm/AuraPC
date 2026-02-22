@@ -201,8 +201,8 @@ export class AuraBuilderComponent {
     /** Chuyển đến bước (click sidebar khi ở builder mode) */
     goToStep(step: string) {
         if (!this.isBuilderMode()) return;
-        if (step === 'OVERVIEW') {
-            this.currentStep.set('OVERVIEW');
+        if (step === 'OVERVIEW' || step === 'AURAVISUAL') {
+            this.currentStep.set(step);
             return;
         }
         if (!this.steps.includes(step)) return;
@@ -250,6 +250,9 @@ export class AuraBuilderComponent {
                         this.builderId.set(b._id);
                         this.builderShareId.set(b.shareId ?? null);
                         this.savedConfig.set(b.components || {});
+                        if ((b as any).auraVisualImage) {
+                            this.visualImageUrl.set((b as any).auraVisualImage);
+                        }
                         this.isBuilderMode.set(true);
                         const firstEmpty = this.steps.find((s) => !(b.components || {})[s]);
                         if (firstEmpty) {
@@ -490,7 +493,8 @@ export class AuraBuilderComponent {
             })),
         };
 
-        this.showVisualModal.set(true);
+        // Chuyển trang ngay lập tức
+        this.currentStep.set('AURAVISUAL');
         this.visualLoading.set(true);
         this.visualError.set(null);
         this.visualImageUrl.set(null);
@@ -501,15 +505,17 @@ export class AuraBuilderComponent {
 
 
         // Gọi tới n8n webhook thực tế
-        this.http.post<any>('https://thinhn8n.io.vn/webhook/auravisual-trigger', payload).subscribe({
+        this.http.post<any>('http://localhost:5678/webhook/auravisual-trigger', payload).subscribe({
             next: (res) => {
                 console.log('[AuraVisual] Response from n8n:', res);
                 if (res && res.imageUrl) {
                     this.visualImageUrl.set(res.imageUrl);
+                    this.saveVisualImageToDb(res.imageUrl);
                 } else if (res && typeof res === 'string') {
                     // Trong trường hợp n8n trả về plain text là URL
                     if (res.startsWith('http')) {
                         this.visualImageUrl.set(res);
+                        this.saveVisualImageToDb(res);
                     } else {
                         this.visualError.set('AuraVisual trả về định dạng không hợp lệ.');
                     }
@@ -526,6 +532,16 @@ export class AuraBuilderComponent {
                 this.visualLoading.set(false);
             }
         });
+    }
+
+    private saveVisualImageToDb(imageUrl: string) {
+        const id = this.builderId() || this.builderShareId();
+        if (id) {
+            this.api.updateBuilderAuraVisual(id, imageUrl).subscribe({
+                next: () => console.log('[AuraVisual] Đã lưu ảnh vào database thành công.'),
+                error: (err) => console.error('[AuraVisual] Lỗi lưu ảnh vào database:', err)
+            });
+        }
     }
 
     closeVisualModal() {
@@ -589,6 +605,7 @@ export class AuraBuilderComponent {
             KEYBOARD: 'Bàn phím',
             MOUSE: 'Chuột',
             HEADSET: 'Tai nghe',
+            AURAVISUAL: 'AuraVisual',
         };
         return map[step] ?? step;
     }
@@ -609,6 +626,7 @@ export class AuraBuilderComponent {
             MOUSE: 'Chuột',
             HEADSET: 'Tai nghe',
             'OVERVIEW': 'Tổng quan',
+            'AURAVISUAL': 'AuraVisual Workflow',
         };
     }
 

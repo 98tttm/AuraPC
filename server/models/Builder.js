@@ -13,6 +13,7 @@ const builderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    auraVisualImage: { type: String, default: null },
   },
   { timestamps: true }
 );
