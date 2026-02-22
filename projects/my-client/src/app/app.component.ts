@@ -3,15 +3,17 @@ import { RouterOutlet, Router } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { ToastComponent } from './components/toast/toast.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: { '[class.route-aura-builder]': 'hideFooter()' },
   template: `
+    <app-toast></app-toast>
     <app-header></app-header>
     <main>
       <router-outlet></router-outlet>
@@ -40,5 +42,5 @@ export class AppComponent {
     { initialValue: false }
   );
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 }

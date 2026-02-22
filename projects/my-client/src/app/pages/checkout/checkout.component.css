@@ -317,6 +317,24 @@
     flex-shrink: 0;
 }
 
+.payment-icon--svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: currentColor;
+}
+
+.payment-icon--svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.payment-icon--black {
+    color: #1a1a1a;
+}
+
 .payment-logo {
     width: 28px;
     height: 28px;
@@ -894,4 +912,103 @@
         width: 44px;
         height: 44px;
     }
+}
+
+/* ---------- COD OTP Popup ---------- */
+.chk-otp-overlay {
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.chk-otp-popup {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.chk-otp-popup__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #666;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.chk-otp-popup__close:hover {
+    color: #1a1a1a;
+}
+
+.chk-otp-popup__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.chk-otp-popup__desc {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.chk-otp-popup__row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.chk-otp-popup__input {
+    width: 44px;
+    height: 48px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.chk-otp-popup__input--error {
+    border-color: #d32f2f;
+}
+
+.chk-otp-popup__error {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: #d32f2f;
+}
+
+.chk-otp-popup__btn {
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.chk-otp-popup__resend {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    color: #FF6D2D;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.chk-otp-popup__resend:hover {
+    text-decoration: underline;
 }

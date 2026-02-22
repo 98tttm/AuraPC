@@ -195,14 +195,18 @@
                     <label class="payment-option" [class.payment-option--active]="paymentMethod === 'cod'"
                         (click)="paymentMethod = 'cod'">
                         <span class="payment-radio" [class.active]="paymentMethod === 'cod'"></span>
-                        <span class="payment-icon">💵</span>
+                        <span class="payment-icon payment-icon--svg payment-icon--black" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.379 4h-7.258c-.395 0-.736 0-1.017.023-.297.024-.592.078-.875.222-.424.216-.768.56-.984.984-.144.283-.198.578-.222.875-.023.28-.023.622-.023 1.017v3.008c0 .395 0 .736.023 1.017.024.297.078.592.222.875.216.424.56.768.984.984.283.144.578.198.875.222.121.01.254.016.397.019.001.243.006.46.022.65.024.297.078.592.222.875.216.424.56.768.984.984.283.144.578.198.875.222.28.023.622.023 1.017.023h7.258c.395 0 .736 0 1.017-.023.297-.024.592-.078.875-.222.424-.216.768-.56.984-.984.144-.283.198-.578.222-.875.023-.28.023-.622.023-1.017v-3.008c0-.395 0-.736-.023-1.017-.024-.297-.078-.592-.222-.875-.216-.424-.56-.768-.983-.984-.284-.144-.58-.198-.876-.222-.121-.01-.254-.016-.397-.019-.001-.243-.006-.46-.022-.65-.024-.297-.078-.592-.222-.875-.216-.424-.56-.768-.984-.984-.283-.144-.578-.198-.875-.222-.28-.023-.622-.023-1.017-.023Zm-8.153 7.732c.08.007.17.01.274.013v-1.874c0-.395 0-.736.023-1.017.024-.297.078-.592.222-.875.216-.424.56-.768.984-.984.283-.144.578-.198.875-.222.28-.023.622-.023 1.017-.023h6.378c-.001-.219-.006-.386-.017-.524-.017-.204-.045-.28-.064-.316-.072-.142-.186-.256-.327-.328-.038-.02-.113-.047-.317-.064-.212-.017-.492-.018-.924-.018h-7.2c-.432 0-.712 0-.924.018-.204.017-.28.045-.316.064-.142.072-.256.186-.328.328-.02.037-.047.112-.064.316-.017.212-.018.492-.018.924v2.95c0 .432 0 .712.018.924.017.204.045.28.064.317.072.14.186.255.328.327.037.02.112.047.316.064Zm5.904 2.03c-.37-.537-.63-1.334-.63-2.262 0-.928.26-1.725.63-2.262.372-.541.785-.738 1.12-.738.335 0 .748.197 1.12.738.37.537.63 1.334.63 2.262 0 .928-.26 1.725-.63 2.262-.372.541-.785.738-1.12.738-.335 0-.748-.197-1.12-.738Z"/></svg>
+                        </span>
                         <span>Thanh toán tiền mặt khi nhận hàng</span>
                     </label>
 
                     <label class="payment-option" [class.payment-option--active]="paymentMethod === 'qr'"
                         (click)="paymentMethod = 'qr'">
                         <span class="payment-radio" [class.active]="paymentMethod === 'qr'"></span>
-                        <span class="payment-icon">📱</span>
+                        <span class="payment-icon payment-icon--svg payment-icon--black" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 6.25a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-.5Z"/><path fill-rule="evenodd" d="M3.5 5.25c0-.966.784-1.75 1.75-1.75h2.5c.966 0 1.75.784 1.75 1.75v2.5a1.75 1.75 0 0 1-1.75 1.75h-2.5a1.75 1.75 0 0 1-1.75-1.75v-2.5Zm1.75-.25a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h2.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25h-2.5Z"/><path d="M6.25 12.75a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 .5.5h.5a.5.5 0 0 0 .5-.5v-.5a.5.5 0 0 0-.5-.5h-.5Z"/><path fill-rule="evenodd" d="M3.5 12.25c0-.966.784-1.75 1.75-1.75h2.5c.966 0 1.75.784 1.75 1.75v2.5a1.75 1.75 0 0 1-1.75 1.75h-2.5a1.75 1.75 0 0 1-1.75-1.75v-2.5Zm1.75-.25a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h2.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25h-2.5Z"/><path d="M12.75 6.25a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-.5Z"/><path fill-rule="evenodd" d="M12.25 3.5a1.75 1.75 0 0 0-1.75 1.75v2.5c0 .966.784 1.75 1.75 1.75h2.5a1.75 1.75 0 0 0 1.75-1.75v-2.5a1.75 1.75 0 0 0-1.75-1.75h-2.5Zm-.25 1.75a.25.25 0 0 1 .25-.25h2.5a.25.25 0 0 1 .25.25v2.5a.25.25 0 0 1-.25.25h-2.5a.25.25 0 0 1-.25-.25v-2.5Z"/><path d="M11 10.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/><path d="M10.5 15a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Z"/><path d="M15 10.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/><path d="M14.5 15a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Z"/><path d="M13 12.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/></svg>
+                        </span>
                         <span>Thanh toán bằng chuyển khoản (QR Code)</span>
                     </label>
 
@@ -217,7 +221,7 @@
                     <label class="payment-option" [class.payment-option--active]="paymentMethod === 'zalopay'"
                         (click)="paymentMethod = 'zalopay'">
                         <span class="payment-radio" [class.active]="paymentMethod === 'zalopay'"></span>
-                        <span class="payment-icon">💳</span>
+                        <img src="assets/LOGO/zalopay.png" alt="ZaloPay" class="payment-logo" />
                         <span>Thanh toán bằng ví ZaloPay</span>
                     </label>
 
@@ -270,7 +274,7 @@
                     }
 
                     <button class="btn-submit" (click)="submitOrder()" [disabled]="submitting()">
-                        {{ submitting() ? 'Đang xử lý...' : 'Hoàn tất' }}
+                        {{ submitting() ? 'Đang xử lý...' : 'Thanh toán' }}
                     </button>
 
                     <p class="checkout-terms">
@@ -425,6 +429,35 @@
             </div>
         </div>
         }
+        }
+
+        <!-- COD: Popup xác nhận OTP -->
+        @if (showCodOtpPopup()) {
+        <div class="chk-modal-overlay chk-otp-overlay" (click)="closeCodOtpPopup()">
+            <div class="chk-otp-popup" (click)="$event.stopPropagation()">
+                <button type="button" class="chk-otp-popup__close" (click)="closeCodOtpPopup()" aria-label="Đóng">×</button>
+                <h3 class="chk-otp-popup__title">Xác nhận mã OTP</h3>
+                <p class="chk-otp-popup__desc">
+                    Mã xác thực đã gửi đến số {{ codOtpPhone }}. Có hiệu lực trong {{ codCountdownText() }}
+                </p>
+                <div class="chk-otp-popup__row">
+                    @for (i of [0,1,2,3,4,5]; track i) {
+                    <input #codOtpInput type="text" inputmode="numeric" maxlength="1" class="chk-otp-popup__input"
+                        [class.chk-otp-popup__input--error]="codOtpError()"
+                        [ngModel]="getCodOtpDigit(i)" (ngModelChange)="setCodOtpDigit(i, $event)"
+                        (keydown)="onCodOtpKeydown($event, i)" />
+                    }
+                </div>
+                @if (codOtpError()) {
+                <p class="chk-otp-popup__error" role="alert">{{ codOtpError() }}</p>
+                }
+                <button type="button" class="btn-submit chk-otp-popup__btn" (click)="onCodOtpSubmit()"
+                    [disabled]="submitting()">
+                    {{ submitting() ? 'Đang xử lý...' : 'Xác nhận' }}
+                </button>
+                <button type="button" class="chk-otp-popup__resend" (click)="resendCodOtp()">Gửi lại mã</button>
+            </div>
+        </div>
         }
     </div>
 </section>

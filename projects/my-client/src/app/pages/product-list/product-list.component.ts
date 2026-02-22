@@ -988,6 +988,13 @@ export class ProductListComponent {
     const btn = e.currentTarget as HTMLElement;
     const card = btn.closest('.pl-card');
     const img = card?.querySelector('.pl-card__img') as HTMLImageElement | null;
+
+    // Force header visible so cart button bounding rect is correct
+    const headerFixedWrap = document.querySelector('.header-fixed-wrap');
+    if (headerFixedWrap) {
+      headerFixedWrap.classList.remove('header-fixed-wrap--hidden');
+    }
+
     const cartBtn = document.querySelector('.cart-btn') as HTMLElement | null;
 
     if (img && cartBtn) {

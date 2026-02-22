@@ -9,6 +9,7 @@ import { Subject, of, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, map, tap, catchError } from 'rxjs/operators';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { ApiService, Category, Product, productMainImage } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
 
@@ -99,11 +100,13 @@ export class HeaderComponent implements OnDestroy {
   private cart = inject(CartService);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
   private api = inject(ApiService);
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private searchSubject = new Subject<string>();
   private searchSub: Subscription | null = null;
   private loginPopupSub: Subscription | null = null;
+  private cartAddSub: Subscription | null = null;
   private isBrowser = false;
   private lastScrollY = 0;
   private readonly HEADER_HIDE_THRESHOLD = 120;
@@ -154,6 +157,18 @@ export class HeaderComponent implements OnDestroy {
     this.buildMegamenu();
     this.setupSearch();
     this.setupLoginPopupTrigger();
+    this.setupCartAddListener();
+  }
+
+  private setupCartAddListener(): void {
+    this.cartAddSub = this.cart.itemAdded$.subscribe(() => {
+      this.headerVisible.set(true);
+      if (this.cartDropdownTimer) clearTimeout(this.cartDropdownTimer);
+      this.cartDropdownOpen.set(true);
+      this.cartDropdownTimer = setTimeout(() => {
+        this.cartDropdownOpen.set(false);
+      }, 3000);
+    });
   }
 
   private setupLoginPopupTrigger(): void {
@@ -497,7 +512,7 @@ export class HeaderComponent implements OnDestroy {
     this.auth.requestOtp(phone).subscribe({
       next: (res) => {
         if (res.devOtp) {
-          console.log('[AuraPC] Mã OTP (chỉ dev):', res.devOtp);
+          this.toast.showOtp(res.devOtp);
         }
         this.loginStep.set('otp');
         this.otpError.set(null);
@@ -520,7 +535,7 @@ export class HeaderComponent implements OnDestroy {
     this.auth.requestOtp(phone).subscribe({
       next: (res) => {
         if (res.devOtp) {
-          console.log('[AuraPC] Mã OTP (chỉ dev):', res.devOtp);
+          this.toast.showOtp(res.devOtp);
         }
         const expiresAt = Date.now() + 5 * 60 * 1000;
         this.otpExpiresAt.set(expiresAt);
@@ -588,6 +603,7 @@ export class HeaderComponent implements OnDestroy {
     this.stopCountdown();
     this.searchSub?.unsubscribe();
     this.loginPopupSub?.unsubscribe();
+    this.cartAddSub?.unsubscribe();
   }
 
   toggleMenu(): void { this.menuOpen.update(v => !v); }

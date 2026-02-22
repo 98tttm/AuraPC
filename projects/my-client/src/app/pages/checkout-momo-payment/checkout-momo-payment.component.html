@@ -1,0 +1,67 @@
+<section class="wallet-page wallet-page--momo">
+  <div class="wallet-container">
+    <a routerLink="/checkout" class="wallet-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Quay lại thanh toán
+    </a>
+    <app-checkout-stepper [step]="3"></app-checkout-stepper>
+
+    <div class="wallet-layout">
+      <div class="wallet-left">
+        <div class="wallet-card">
+          <div class="wallet-brand">
+            <img src="assets/figma/515c49e4ff04f92775dfa684cb71aab58d94394c.png" alt="MoMo" class="wallet-brand__logo" width="80" height="80" />
+            <h2 class="wallet-section-title">Thanh toán bằng ví MoMo</h2>
+          </div>
+          <p class="wallet-hint">Mở app MoMo, quét mã QR bên dưới để thanh toán</p>
+
+          <div class="wallet-amount-block">
+            <span class="wallet-amount-label">Số tiền thanh toán</span>
+            <span class="wallet-amount-value">{{ formatPrice(amount) }}</span>
+          </div>
+
+          @if (orderNumber) {
+          <div class="wallet-order-block">
+            <span class="wallet-order-label">Mã đơn hàng</span>
+            <span class="wallet-order-value">{{ orderNumber }}</span>
+          </div>
+          } @else {
+          <p class="wallet-order-note">Sau khi bấm xác nhận bên dưới, mã đơn hàng sẽ hiển thị ở trang kết quả.</p>
+          }
+
+          <div class="wallet-qr-wrap">
+            <div class="wallet-qr-inner">
+              <img src="assets/QR/qrbank.png" alt="Mã QR MoMo" class="wallet-qr-img" width="280" height="280" />
+              <span class="wallet-scan-line" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <p class="wallet-content-label">Nội dung thanh toán (ghi đúng để đối soát)</p>
+          <div class="wallet-content-box">{{ qrContent() }}</div>
+        </div>
+      </div>
+
+      <div class="wallet-right">
+        <div class="wallet-summary">
+          <button type="button" class="wallet-summary__coupon" disabled>
+            <span class="wallet-summary__coupon-text">Áp dụng ưu đãi để được giảm giá</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <div class="summary-row"><span class="summary-label">Tổng tiền</span><span class="summary-val">{{ formatPrice(originalTotal) }}</span></div>
+          <div class="summary-row"><span class="summary-label">Giảm giá trực tiếp</span><span class="summary-val summary-val--discount">{{ directDiscountLabel() }}</span></div>
+          <div class="summary-row"><span class="summary-label">Phí vận chuyển</span><span class="summary-val summary-val--free">Miễn phí</span></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row summary-row--total">
+            <span class="summary-label">Thành tiền</span>
+            <span class="summary-val summary-val--total summary-val--momo">{{ formatPrice(amount) }}</span>
+          </div>
+          @if (confirmError) { <p class="wallet-confirm-error" role="alert">{{ confirmError }}</p> }
+          <button type="button" class="wallet-summary__btn wallet-summary__btn--momo" (click)="onConfirmTransfer()" [disabled]="confirmSubmitting">
+            {{ confirmSubmitting ? 'Đang tạo đơn...' : 'Tôi đã thanh toán qua MoMo' }}
+          </button>
+          <p class="wallet-terms">Bằng việc bấm xác nhận, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> của AuraPC.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -27,21 +27,21 @@ import { CheckoutStepperComponent } from '../../components/checkout-stepper/chec
     </section>
   `,
   styles: [`
-    .success-page { padding: 4rem 0; min-height: 60vh; background: var(--bg-primary, #0a0a0f); display: flex; align-items: center; }
-    .container { max-width: 600px; margin: 0 auto; padding: 0 1rem; }
-    .success-card { background: var(--bg-secondary, #1a1a25); border-radius: 12px; padding: 3rem 2rem; text-align: center; }
+    .success-page { padding: 4rem 0; min-height: 60vh; background: #f0f0f0; display: flex; align-items: center; font-family: 'Inter', sans-serif; }
+    .container { max-width: 600px; margin: 0 auto; padding: 0 1.25rem; }
+    .success-card { background: #fff; border-radius: 12px; padding: 3rem 2rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
     .success-icon { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #fff; }
-    h1 { font-size: 1.75rem; color: var(--text-primary, #fff); margin-bottom: 0.5rem; }
-    p { color: var(--text-secondary, #aaa); margin-bottom: 0.5rem; }
-    .order-number { margin: 1.5rem 0; font-size: 1.1rem; color: var(--text-primary, #fff); }
-    .order-number strong { color: var(--accent, #a855f7); }
-    .success-note { font-size: 0.9rem; margin-top: 1rem; }
+    .success-card h1 { font-size: 1.75rem; color: #1a1a1a; margin-bottom: 0.5rem; }
+    .success-card p { color: #333; margin-bottom: 0.5rem; }
+    .order-number { margin: 1.5rem 0; font-size: 1.1rem; color: #1a1a1a; }
+    .order-number strong { color: #FF6D2D; }
+    .success-note { font-size: 0.9rem; margin-top: 1rem; color: #666; }
     .success-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
-    .btn { display: inline-block; padding: 0.875rem 1.5rem; border-radius: 6px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .btn--primary { background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; }
-    .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4); }
-    .btn--outline { background: transparent; border: 1px solid var(--border, #333); color: var(--text-primary, #fff); }
-    .btn--outline:hover { border-color: var(--accent, #a855f7); color: var(--accent, #a855f7); }
+    .btn { display: inline-block; padding: 0.875rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .btn--primary { background: #1a1a1a; color: #fff; }
+    .btn--primary:hover { background: #333; transform: translateY(-1px); }
+    .btn--outline { background: #fff; border: 1px solid #d9d9d9; color: #1a1a1a; }
+    .btn--outline:hover { border-color: #FF6D2D; color: #FF6D2D; }
   `]
 })
 export class CheckoutSuccessComponent {

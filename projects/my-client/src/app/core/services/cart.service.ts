@@ -1,8 +1,9 @@
-﻿import { Injectable, signal, computed, inject, effect } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Product, productDisplayPrice } from './api.service';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
+import { Subject } from 'rxjs';
 
 export interface CartItem {
   product: Product;
@@ -28,6 +29,8 @@ export class CartService {
   private auth = inject(AuthService);
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/cart`;
+
+  itemAdded$ = new Subject<Product>();
 
   cartCount = computed(() => this.items().reduce((sum, i) => sum + i.qty, 0));
   cartTotal = computed(() =>
@@ -189,6 +192,7 @@ export class CartService {
     // Logged-in: write directly to DB, then sync UI from API response.
     if (userId) {
       this.addToServer(productId, qty);
+      this.itemAdded$.next(normalizedProduct);
       return;
     }
 
@@ -199,6 +203,7 @@ export class CartService {
 
     this.items.set(list);
     this.save();
+    this.itemAdded$.next(normalizedProduct);
   }
 
   setQty(productId: string, qty: number): void {
@@ -271,9 +276,34 @@ export class CartService {
     }
   }
 
+  /**
+   * Clear cart. For logged-in users: xóa trên server trước, rồi mới cập nhật state từ response.
+   * Tránh race: nếu set [] trước rồi mới gọi API, effect/fetch có thể load lại giỏ cũ trước khi API xong.
+   */
   clear(): void {
-    this.items.set([]);
-    this.save();
+    const userId = this.userId;
+    const currentItems = this.items();
+    const productIds = currentItems
+      .map((i) => this.productIdOf(i.product))
+      .filter((id): id is string => !!id);
+
+    if (userId && productIds.length > 0) {
+      this.http
+        .post<CartApiResponse>(`${this.apiUrl}/remove-multiple`, { userId, productIds })
+        .subscribe({
+          next: (res) => {
+            if (res?.success) this.applyServerItems(res.items);
+          },
+          error: (err) => {
+            console.error('Clear cart (remove-multiple) api error', err);
+            this.items.set([]);
+            this.save();
+          },
+        });
+    } else {
+      this.items.set([]);
+      this.save();
+    }
   }
 }
 
