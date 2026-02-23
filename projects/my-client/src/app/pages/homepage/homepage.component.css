@@ -261,111 +261,116 @@
   transform: translateY(-50%) translateX(0);
 }
 
-/* ===== Product Info Panel ===== */
+/* ===== Product Info Panel (AuraBuilder/Shopify style: tối giản) ===== */
 .info-panel {
   position: absolute;
   z-index: 20;
   top: 50%;
   right: 5%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 2.5rem;
-  max-width: 400px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.1rem 1.35rem;
+  max-width: 300px;
   width: 90%;
-  animation: panelSlideIn 0.6s ease forwards;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  animation: panelSlideIn 0.4s ease forwards;
 }
 
 @keyframes panelSlideIn {
-  from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+  from { opacity: 0; transform: translateY(-50%) translateX(24px); }
   to { opacity: 1; transform: translateY(-50%) translateX(0); }
 }
 
 .info-panel__close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  color: var(--text-muted);
+  top: 0.75rem;
+  right: 0.75rem;
+  color: #888;
   padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
 .info-panel__close:hover {
-  color: #fff;
+  color: #333;
 }
 
-.info-panel__title {
-  font-family: var(--font-heading);
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: var(--accent-orange);
+.info-panel__img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #f7f8f9;
+  border-radius: 4px;
+  margin-bottom: 0.65rem;
+  padding: 8px;
 }
 
-.info-panel__desc {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
+.info-panel__name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
 }
 
 .info-panel__specs {
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding: 0;
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+  line-height: 1.5;
 }
 
 .info-panel__specs li {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 2px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-panel__specs li:last-child {
+  border-bottom: none;
 }
 
 .info-panel__btn {
-  display: inline-block;
-  background: var(--accent-orange);
+  display: block;
+  text-align: center;
+  background: #1a1a1a;
   color: #fff;
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s;
 }
 
 .info-panel__btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 109, 45, 0.3);
+  background: #333;
 }
 
 .info-panel__actions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .info-panel__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.85rem;
   background: none;
   border: none;
   cursor: pointer;
+  font-size: 0.75rem;
+  color: #6c757d;
   padding: 0.25rem 0;
+  text-align: left;
   transition: color 0.2s;
 }
 
 .info-panel__back:hover {
-  color: #fff;
+  color: #212529;
 }
 
 /* UTM Nokia: khai báo tại component để build resolve đúng đường dẫn */

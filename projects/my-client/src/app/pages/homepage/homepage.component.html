@@ -70,29 +70,30 @@
     }
   }
 
-  <!-- Product Info Panel -->
+  <!-- Product Info Panel (AuraBuilder-style: image, name nhỏ, tech specs) -->
   @if (activeHotspot(); as hs) {
     <div class="info-panel">
-      <button class="info-panel__close" (click)="onZoomOut()" aria-label="Quay lại">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <button class="info-panel__close" (click)="onZoomOut()" aria-label="Đóng">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
-      <h3 class="info-panel__title">{{ hs.label }}</h3>
-      <p class="info-panel__desc">{{ hs.description }}</p>
+      @if (activeHotspotProduct()) {
+        <img [src]="productImageUrl(activeHotspotProduct()!)" [alt]="activeHotspotProduct()!.name" class="info-panel__img" />
+      }
+      <p class="info-panel__name">{{ activeHotspotProduct() ? activeHotspotProduct()!.name : hs.label }}</p>
       <ul class="info-panel__specs">
-        @for (spec of hs.specs; track spec) {
+        @for (spec of (activeHotspotProduct() ? getProductSpecs(activeHotspotProduct()!) : hs.specs); track spec) {
           <li>{{ spec }}</li>
         }
       </ul>
       <div class="info-panel__actions">
-        <a routerLink="/" class="info-panel__btn">Xem sản phẩm</a>
-        <button class="info-panel__back" (click)="onZoomOut()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Quay lại tổng quan
-        </button>
+        @if (hs.productSlug || activeHotspotProduct()?.slug) {
+          <a [routerLink]="['/san-pham', hs.productSlug || activeHotspotProduct()!.slug]" class="info-panel__btn">Xem sản phẩm</a>
+        } @else {
+          <a routerLink="/" class="info-panel__btn">Xem sản phẩm</a>
+        }
+        <button class="info-panel__back" (click)="onZoomOut()">← Quay lại tổng quan</button>
       </div>
     </div>
   }

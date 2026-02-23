@@ -34,6 +34,7 @@ const HOTSPOT_CONFIG = [
     specs: ['Mid-Tower ATX', 'Kính cường lực', 'Tản nước 360mm', 'RGB Sync'],
     relativePos: { x: 0.45, y: 0.7, z: 0.05 },
     cameraOffset: { x: 2.0, y: 0.3, z: 2.5 },
+    productSlug: 'pc-ai-dong-bo-gigabyte-ai-top-100-z890',
   },
   {
     id: 'monitor', label: 'Dual Monitor',
@@ -41,6 +42,7 @@ const HOTSPOT_CONFIG = [
     specs: ['2x 27" QHD', '165Hz / 1ms', 'IPS Panel', 'HDR400'],
     relativePos: { x: 0.3, y: 0.76, z: 0.40 },
     cameraOffset: { x: 2.5, y: 0.5, z: 0.7 },
+    productSlug: 'man-hinh-gaming-gigabyte-gs25f14',
   },
   {
     id: 'keyboard', label: 'Bàn phím cơ',
@@ -48,6 +50,7 @@ const HOTSPOT_CONFIG = [
     specs: ['Cherry MX Red', 'RGB Per-Key', 'TKL Layout', 'USB-C'],
     relativePos: { x: 0.40, y: 0.60, z: 0.50 },
     cameraOffset: { x: 2, y: 1.0, z: -0.5 },
+    productSlug: 'ban-phim-co-veekos-shine60-sp-white-multi-mode',
   },
   {
     id: 'chair', label: 'Gaming Chair',
@@ -55,6 +58,7 @@ const HOTSPOT_CONFIG = [
     specs: ['Tựa tay 4D', 'Memory Foam', 'Khung thép', 'Ngả 180°'],
     relativePos: { x: 0.65, y: 0.50, z: 0.65 },
     cameraOffset: { x: 2.50, y: 1.0, z: -4.0 },
+    productSlug: 'ghe-gaming-razer-enki-full-black-rz38-03720300-r3u1',
   },
   {
     id: 'mouse', label: 'Gaming Mouse',
@@ -62,6 +66,7 @@ const HOTSPOT_CONFIG = [
     specs: ['58g Siêu nhẹ', '25,600 DPI', 'Switch quang học', 'Wireless'],
     relativePos: { x: 0.40, y: 0.60, z: 0.25 },
     cameraOffset: { x: 0.80, y: 1.0, z: -0.5 },
+    productSlug: 'chuot-razer-basilisk-v3-pro-35k-phantom-green-edition',
   },
   {
     id: 'headset', label: 'Headset',
@@ -69,6 +74,7 @@ const HOTSPOT_CONFIG = [
     specs: ['7.1 Surround', 'Driver 50mm', 'Micro ClearCast', 'Wireless'],
     relativePos: { x: 0.40, y: 0.6, z: 0.85 },
     cameraOffset: { x: 0.80, y: 1.0, z: -0.5 },
+    productSlug: 'tai-nghe-hyperx-cloud-mix-2-wireless',
   },
 ];
 
@@ -79,6 +85,7 @@ interface Hotspot {
   cameraOffset: THREE.Vector3;
   worldPos: THREE.Vector3; cameraPos: THREE.Vector3; lookAt: THREE.Vector3;
   screenX: number; screenY: number; visible: boolean;
+  productSlug?: string;
 }
 
 @Component({
@@ -121,6 +128,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   modelLoaded = signal(false);
   introComplete = signal(false);
   activeHotspot = signal<Hotspot | null>(null);
+  activeHotspotProduct = signal<Product | null>(null);
   /** Bật sau khi intro xong một chút để hai khối hero text trượt vào bằng transition (tránh lần 2 ẩn không trượt) */
   heroTextVisible = signal(false);
   /** 0 = bộ chữ đầu (Khám phá/Cá nhân hóa), 1 = bộ chữ thứ hai (Bước vào/Trải nghiệm) – luân phiên sau ~2s khi gõ xong */
@@ -231,6 +239,13 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     { src: 'assets/logotech/msi.png', alt: 'MSI' },
     { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer' },
   ];
+
+  /** Chuyển product.specs (Record) thành mảng string để hiển thị trong info panel (tối đa 4) */
+  getProductSpecs(p: Product): string[] {
+    const s = p?.specs;
+    if (!s || typeof s !== 'object') return [];
+    return Object.entries(s).slice(0, 4).map(([k, v]) => (v ? `${k}: ${v}` : k)).filter(Boolean);
+  }
 
   productImageUrl(p: Product): string {
     const img = p.images?.[0];
@@ -618,6 +633,13 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   onHotspotClick(hs: Hotspot): void {
     this.controls.autoRotate = false;
     this.activeHotspot.set(hs);
+    this.activeHotspotProduct.set(null);
+    if (hs.productSlug) {
+      this.api.getProductBySlug(hs.productSlug).subscribe({
+        next: (p) => this.activeHotspotProduct.set(p),
+        error: () => {},
+      });
+    }
     this.animStartPos.copy(this.camera.position);
     this.animEndPos.copy(hs.cameraPos);
     this.animStartTarget.copy(this.controls.target);
@@ -630,6 +652,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onZoomOut(): void {
     this.activeHotspot.set(null);
+    this.activeHotspotProduct.set(null);
     this.animStartPos.copy(this.camera.position);
     this.animEndPos.copy(this.defaultCameraPos);
     this.animStartTarget.copy(this.controls.target);
