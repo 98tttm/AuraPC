@@ -57,10 +57,9 @@ router.post('/request-otp', (req, res) => {
     otpStore.set(stored, { code, expiresAt: Date.now() + OTP_TTL_MS });
     console.log('[AuraPC Auth] OTP cho', stored, ':', code, '(hiệu lực 5 phút)');
     const payload = { success: true, message: 'Mã OTP đã được gửi.' };
-    // Trả OTP trong response khi: dev hoặc bật ENABLE_DEV_OTP_IN_RESPONSE (cho demo trên Vercel)
-    const allowOtpInResponse = process.env.NODE_ENV !== 'production' ||
-      (process.env.ENABLE_DEV_OTP_IN_RESPONSE === 'true' || process.env.ENABLE_DEV_OTP_IN_RESPONSE === '1');
-    if (allowOtpInResponse) payload.devOtp = code;
+    // Mặc định trả devOtp (demo, chưa có SMS). Ẩn khi đặt ENABLE_DEV_OTP_IN_RESPONSE=false
+    const hideOtpInResponse = process.env.ENABLE_DEV_OTP_IN_RESPONSE === 'false';
+    if (!hideOtpInResponse) payload.devOtp = code;
     res.json(payload);
   } catch (err) {
     console.error('[POST /api/auth/request-otp]', err);

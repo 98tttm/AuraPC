@@ -336,6 +336,11 @@
       <p class="login-popup__desc">
         Mã xác thực được gửi đến số điện thoại {{ loginPhone() }} có hiệu lực trong {{ countdownText() }}
       </p>
+      @if (displayedOtp()) {
+      <p class="login-popup__otp-display" role="status">
+        Mã OTP của bạn: <strong>{{ displayedOtp() }}</strong>
+      </p>
+      }
       <div class="login-popup__change-phone-wrap">
         <button type="button" class="login-popup__change-phone" (click)="changePhone()">
           <svg class="login-popup__change-phone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
