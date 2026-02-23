@@ -583,7 +583,10 @@ export class AuraBuilderComponent {
             },
             error: (err) => {
                 this.saveModalLoading.set(false);
-                const msg = err?.error?.error ?? err?.message ?? 'Không gửi được email. Kiểm tra cấu hình server (EMAIL_USER, EMAIL_PASS).';
+                let msg = err?.error?.error ?? err?.message ?? 'Không gửi được email.';
+                if (err?.status === 503 && msg.includes('Chưa cấu hình email')) {
+                    msg = 'Chưa cấu hình email trên server. Trên Render: Environment → thêm EMAIL_USER và EMAIL_PASS (App Password Gmail) → Redeploy.';
+                }
                 this.saveModalError.set(msg);
             },
         });

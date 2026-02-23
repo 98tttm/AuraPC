@@ -129,10 +129,12 @@ export class HeaderComponent implements OnDestroy {
   /** Megamenu: 7 cột – Laptop, PC, Màn hình, Linh Kiện, Gaming Gear, Phụ kiện, Bàn - Ghế. */
   readonly megamenuIcons = {
     laptop: 'assets/logotech/laptop.png',
-    pcComponents: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316771/akamai/icons/png/nav_components_icon.png',
+    pc: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316771/akamai/icons/png/nav_components_icon.png',
+    monitor: 'assets/logotech/monitori.png',
+    linhKien: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1753310150/akamai/icons/nav_aiworkstation_icon.svg',
     gamingGear: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316972/akamai/icons/png/nav_peripherals_icon.png',
-    gamingFurniture: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316771/akamai/icons/png/nav_gamingdesk_icon.png',
     shop: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316772/akamai/icons/png/nav_shoppingcart_icon.png',
+    gamingFurniture: 'https://assets.corsair.com/image/upload/f_auto,q_85,w_200,h_200/v1716316771/akamai/icons/png/nav_gamingdesk_icon.png',
   };
 
   megamenuColumns = signal<MegamenuColumn[]>([]);
@@ -213,6 +215,20 @@ export class HeaderComponent implements OnDestroy {
   private static readonly FALLBACK_TITLES = ['Laptop', 'PC', 'Màn hình', 'Linh Kiện', 'Gaming Gear', 'Phụ Kiện', 'Bàn - Ghế'];
   private static readonly FALLBACK_SLUGS = ['laptop', 'pc', 'man-hinh', 'linh-kien', 'gaming-gear', 'phu-kien', 'ban-ghe'];
 
+  /** Gán icon theo tên/slug danh mục (API có thể trả thứ tự khác nên không dùng index). */
+  private getIconForCategory(name: string, slugOrId: string): string {
+    const n = (name ?? '').toLowerCase();
+    const s = (slugOrId ?? '').toLowerCase();
+    if (s.includes('laptop') || n.includes('laptop')) return this.megamenuIcons.laptop;
+    if (s.includes('ban-ghe') || s.includes('bàn') || n.includes('bàn') || n.includes('ghế') || n.includes('ghe')) return this.megamenuIcons.gamingFurniture;
+    if (s.includes('gaming-gear') || n.includes('gaming gear')) return this.megamenuIcons.gamingGear;
+    if (s.includes('phu-kien') || n.includes('phụ kiện') || n.includes('phu kien')) return this.megamenuIcons.shop;
+    if (s.includes('man-hinh') || n.includes('màn hình') || n.includes('man hinh')) return this.megamenuIcons.monitor;
+    if (s.includes('linh-kien') || n.includes('linh kiện') || n.includes('linh kien')) return this.megamenuIcons.linhKien;
+    if (s === 'pc' || n === 'pc') return this.megamenuIcons.pc;
+    return this.megamenuIcons.laptop;
+  }
+
   private buildMegamenuFromCategories(categories: Category[]): void {
     const roots = categories
       .filter((c) => c.level === 1 || c.parent_id == null || c.parent_id === '')
@@ -227,16 +243,7 @@ export class HeaderComponent implements OnDestroy {
         byParent.set(pid, arr);
       }
     });
-    const icons = [
-      this.megamenuIcons.laptop,
-      this.megamenuIcons.laptop,
-      this.megamenuIcons.gamingFurniture,
-      this.megamenuIcons.pcComponents,
-      this.megamenuIcons.gamingGear,
-      this.megamenuIcons.shop,
-      this.megamenuIcons.gamingFurniture,
-    ];
-    const columns: MegamenuColumn[] = roots.map((cat, i) => {
+    const columns: MegamenuColumn[] = roots.map((cat) => {
       const c = cat as Category;
       const id = c.category_id ?? c.slug ?? String(c._id ?? '');
       const children = byParent.get(id) ?? [];
@@ -252,7 +259,7 @@ export class HeaderComponent implements OnDestroy {
           };
         });
       return {
-        icon: icons[i] ?? this.megamenuIcons.gamingFurniture,
+        icon: this.getIconForCategory(cat.name ?? '', id),
         title: cat.name,
         categoryId: id,
         items,
@@ -262,16 +269,17 @@ export class HeaderComponent implements OnDestroy {
   }
 
   private buildMegamenuFallback(): void {
+    const icons = [
+      this.megamenuIcons.laptop,       // Laptop
+      this.megamenuIcons.pc,           // PC
+      this.megamenuIcons.monitor,       // Màn hình
+      this.megamenuIcons.linhKien,     // Linh Kiện
+      this.megamenuIcons.gamingGear,   // Gaming Gear
+      this.megamenuIcons.shop,         // Phụ kiện
+      this.megamenuIcons.gamingFurniture, // Bàn - Ghế
+    ];
     const columns: MegamenuColumn[] = HeaderComponent.FALLBACK_TITLES.map((title, i) => ({
-      icon: [
-        this.megamenuIcons.laptop,
-        this.megamenuIcons.laptop,
-        this.megamenuIcons.gamingFurniture,
-        this.megamenuIcons.pcComponents,
-        this.megamenuIcons.gamingGear,
-        this.megamenuIcons.shop,
-        this.megamenuIcons.gamingFurniture,
-      ][i],
+      icon: icons[i],
       title,
       categoryId: HeaderComponent.FALLBACK_SLUGS[i],
       items: [],

@@ -250,7 +250,10 @@
         <div class="megamenu__inner">
           @for (col of megamenuColumns(); track col.title) {
           <div class="megamenu__column">
-            <img [src]="col.icon" [alt]="col.title" class="megamenu__icon" />
+            <a [routerLink]="['/san-pham']" [queryParams]="{ category: col.categoryId }"
+              (click)="closeProductsDropdown(); setActiveMenu('products')" class="megamenu__icon-link">
+              <img [src]="col.icon" [alt]="col.title" class="megamenu__icon" />
+            </a>
             <a [routerLink]="['/san-pham']" [queryParams]="{ category: col.categoryId }"
               (click)="closeProductsDropdown(); setActiveMenu('products')" class="megamenu__title-link">{{ col.title
               }}</a>

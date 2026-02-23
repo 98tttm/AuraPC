@@ -157,6 +157,16 @@
   gap: 12px;
 }
 
+.megamenu__icon-link {
+  display: block;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.megamenu__icon-link:hover .megamenu__icon {
+  opacity: 1;
+}
+
 .megamenu__icon {
   width: 48px;
   height: 48px;
@@ -168,6 +178,13 @@
 .megamenu__icon[src*=".svg"],
 .megamenu__icon[src*="laptop"] {
   filter: none;
+}
+
+/* Logo Laptop và Màn hình to hơn một chút */
+.megamenu__icon[src*="logotech/laptop"],
+.megamenu__icon[src*="logotech/monitori"] {
+  width: 58px;
+  height: 58px;
 }
 
 .megamenu__title {
