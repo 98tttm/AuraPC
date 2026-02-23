@@ -376,7 +376,6 @@
     <div class="save-modal" (click)="$event.stopPropagation()">
         <h3 class="save-modal__title">Nhận thông tin cấu hình qua Email</h3>
         <p class="save-modal__desc">Nhập email để nhận file PDF thông tin cấu hình PC của bạn.</p>
-        <p class="save-modal__hint">Nếu gửi lỗi: bấm <strong>Kiểm tra kết nối</strong> trước, đợi tối đa ~1 phút rồi gửi lại.</p>
         <div class="save-modal__form">
             <input type="email" class="save-modal__input" placeholder="Email nhận thông tin cấu hình"
                 [ngModel]="saveModalEmail()" (ngModelChange)="saveModalEmail.set($event)"
@@ -384,10 +383,6 @@
             @if (saveModalError()) {
             <p class="save-modal__error">{{ saveModalError() }}</p>
             }
-            <button type="button" class="save-modal__link" [disabled]="saveModalChecking()"
-                (click)="checkBackendConnection()">
-                {{ saveModalChecking() ? 'Đang kiểm tra... (đợi tối đa ~1 phút)' : 'Kiểm tra kết nối' }}
-            </button>
         </div>
         <div class="save-modal__actions">
             <button type="button" class="save-modal__btn save-modal__btn--outline" (click)="closeSaveModal()">

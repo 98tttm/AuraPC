@@ -97,7 +97,6 @@ export class AuraBuilderComponent {
     showSaveModal = signal(false);
     saveModalEmail = signal('');
     saveModalLoading = signal(false);
-    saveModalChecking = signal(false);
     saveModalError = signal<string | null>(null);
     toastMessage = signal<string | null>(null);
 
@@ -559,26 +558,6 @@ export class AuraBuilderComponent {
         if (this.isDeployedEnv()) this.api.pingBackend(15000).subscribe({ error: () => {} });
     }
 
-    checkBackendConnection() {
-        this.saveModalError.set(null);
-        this.saveModalChecking.set(true);
-        this.api.pingBackend(65000).subscribe({
-            next: () => {
-                this.saveModalChecking.set(false);
-                this.showToast('Backend sẵn sàng. Bạn có thể bấm Gửi cấu hình.');
-            },
-            error: (err) => {
-                this.saveModalChecking.set(false);
-                const isTimeout = err?.name === 'TimeoutError' || (typeof err?.message === 'string' && err.message.toLowerCase().includes('timeout'));
-                const host = environment.apiUrl.replace(/^https?:\/\//, '').replace(/\/api.*$/, '');
-                const msg = isTimeout
-                    ? `Backend không phản hồi sau 65 giây (${host}). Render free tier có thể đang tắt - thử bấm lại "Kiểm tra kết nối" và đợi thêm.`
-                    : `Không kết nối được ${host}. Kiểm tra Render Dashboard xem service có đang chạy không.`;
-                this.saveModalError.set(msg);
-            },
-        });
-    }
-
     private isDeployedEnv(): boolean {
         return (typeof window !== 'undefined' && !/^https?:\/\/localhost(\d*)/.test(window.location.origin));
     }
@@ -616,10 +595,7 @@ export class AuraBuilderComponent {
                     msg = 'Chưa cấu hình email trên server. Trên Render: Environment → thêm EMAIL_USER và EMAIL_PASS (App Password Gmail) → Redeploy.';
                 } else if (err?.status === 0 || err?.name === 'TimeoutError' || (typeof msg === 'string' && msg.toLowerCase().includes('timeout'))) {
                     const host = environment.apiUrl.replace(/^https?:\/\//, '').replace(/\/api.*$/, '');
-                    const isTimeout = err?.name === 'TimeoutError' || (typeof msg === 'string' && msg.toLowerCase().includes('timeout'));
-                    msg = isTimeout
-                        ? `Backend phản hồi quá chậm (timeout 70s, đang gọi: ${host}). Hãy bấm "Kiểm tra kết nối" trong modal này, đợi tối đa ~1 phút, khi thấy "Backend sẵn sàng" thì bấm Gửi cấu hình.`
-                        : `Không kết nối được server (đang gọi: ${host}). Nếu localhost: chạy cd server → npm start. Nếu Vercel: bấm "Kiểm tra kết nối" trước.`;
+                    msg = `Không kết nối được server (đang gọi: ${host}). Nếu localhost: chạy cd server → npm start.`;
                 }
                 this.saveModalError.set(msg);
             },
