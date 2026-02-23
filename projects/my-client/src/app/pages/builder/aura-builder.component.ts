@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Product, FilterOptionsResponse, productMainImage } from '../../core/services/api.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 const STEP_TO_CATEGORY: Record<string, string> = {
     'GPU': 'vga', 'CPU': 'cpu', 'MB': 'mainboard', 'CASE': 'case-may-tinh',
@@ -587,7 +588,8 @@ export class AuraBuilderComponent {
                 if (err?.status === 503 && msg.includes('Chưa cấu hình email')) {
                     msg = 'Chưa cấu hình email trên server. Trên Render: Environment → thêm EMAIL_USER và EMAIL_PASS (App Password Gmail) → Redeploy.';
                 } else if (err?.status === 0 || err?.name === 'TimeoutError' || (typeof msg === 'string' && msg.toLowerCase().includes('timeout'))) {
-                    msg = 'Không kết nối được server. Nếu chạy local: mở terminal, cd server, chạy npm start rồi thử lại.';
+                    const host = environment.apiUrl.replace(/^https?:\/\//, '').replace(/\/api.*$/, '');
+                    msg = `Không kết nối được server (đang gọi: ${host}). Nếu bạn mở localhost thì cần chạy server (cd server → npm start). Nếu bạn mở trang deploy (Vercel) thì kiểm tra backend Render đã bật chưa.`;
                 }
                 this.saveModalError.set(msg);
             },
