@@ -554,6 +554,12 @@ export class AuraBuilderComponent {
         this.saveModalEmail.set('');
         this.saveModalError.set(null);
         this.showSaveModal.set(true);
+        // Đánh thức backend Render (free tier) ngay khi mở modal để khi bấm Gửi đã sẵn sàng
+        if (this.isDeployedEnv()) this.api.pingBackend().subscribe({ error: () => {} });
+    }
+
+    private isDeployedEnv(): boolean {
+        return (typeof window !== 'undefined' && !/^https?:\/\/localhost(\d*)/.test(window.location.origin));
     }
 
     closeSaveModal() {

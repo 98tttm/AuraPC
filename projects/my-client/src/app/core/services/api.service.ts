@@ -330,6 +330,12 @@ export class ApiService {
     );
   }
 
+  /** Ping backend gốc để đánh thức Render (free tier cold start) */
+  pingBackend(): Observable<unknown> {
+    const root = BASE.replace(/\/api\/?$/, '');
+    return this.http.get(root + '/', { responseType: 'text' }).pipe(timeout(15000));
+  }
+
   /** Gửi PDF cấu hình qua email (timeout 70s cho Render free tier cold start) */
   emailBuilderPdf(id: string, email: string): Observable<{ success: boolean; message?: string }> {
     return this.http.post<{ success: boolean; message?: string }>(
