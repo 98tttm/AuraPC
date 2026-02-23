@@ -1139,7 +1139,14 @@
 .save-modal__desc {
     font-size: .84rem;
     color: var(--text-muted);
-    margin: 0 0 18px;
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.save-modal__hint {
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin: 0 0 14px;
     line-height: 1.4;
 }
 
@@ -1166,6 +1173,26 @@
     color: #e53935;
     font-size: .78rem;
     margin: 8px 0 0;
+}
+
+.save-modal__link {
+    display: block;
+    margin-top: 10px;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: .8rem;
+    color: var(--accent, #0066cc);
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+}
+.save-modal__link:hover:not(:disabled) {
+    color: #0052a3;
+}
+.save-modal__link:disabled {
+    cursor: wait;
+    opacity: .9;
 }
 
 .save-modal__actions {
