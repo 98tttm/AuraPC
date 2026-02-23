@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true, strict: false }
 );
 
-userSchema.index({ phoneNumber: 1 });
+/* phoneNumber đã có index từ unique: true, không khai báo thêm tránh duplicate */
 userSchema.index({ email: 1 });
 
 module.exports = mongoose.model('User', userSchema);

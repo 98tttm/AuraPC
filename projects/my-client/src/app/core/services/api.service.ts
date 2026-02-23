@@ -330,11 +330,11 @@ export class ApiService {
     );
   }
 
-  /** Gửi PDF cấu hình qua email (timeout 30s) */
+  /** Gửi PDF cấu hình qua email (timeout 70s cho Render free tier cold start) */
   emailBuilderPdf(id: string, email: string): Observable<{ success: boolean; message?: string }> {
     return this.http.post<{ success: boolean; message?: string }>(
       `${BASE}/builders/${encodeURIComponent(id)}/email-pdf`,
       { email }
-    ).pipe(timeout(30000));
+    ).pipe(timeout(70000));
   }
 }
