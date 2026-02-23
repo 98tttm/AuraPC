@@ -117,28 +117,28 @@
   <div class="icon-strip__row icon-strip__row--1" aria-hidden="true">
     <div class="icon-strip__track">
       @for (logo of iconStripLogos; track 'a'+$index) {
-        <div class="icon-strip__item">
+        <a [routerLink]="['/san-pham']" [queryParams]="{brand: logo.brand}" queryParamsHandling="merge" class="icon-strip__item icon-strip__item--link">
           <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
-        </div>
+        </a>
       }
       @for (logo of iconStripLogos; track 'b'+$index) {
-        <div class="icon-strip__item">
+        <a [routerLink]="['/san-pham']" [queryParams]="{brand: logo.brand}" queryParamsHandling="merge" class="icon-strip__item icon-strip__item--link">
           <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
-        </div>
+        </a>
       }
     </div>
   </div>
   <div class="icon-strip__row icon-strip__row--2" aria-hidden="true">
     <div class="icon-strip__track icon-strip__track--reverse">
       @for (logo of iconStripLogos; track 'c'+$index) {
-        <div class="icon-strip__item">
+        <a [routerLink]="['/san-pham']" [queryParams]="{brand: logo.brand}" queryParamsHandling="merge" class="icon-strip__item icon-strip__item--link">
           <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
-        </div>
+        </a>
       }
       @for (logo of iconStripLogos; track 'd'+$index) {
-        <div class="icon-strip__item">
+        <a [routerLink]="['/san-pham']" [queryParams]="{brand: logo.brand}" queryParamsHandling="merge" class="icon-strip__item icon-strip__item--link">
           <img [src]="logo.src" [alt]="logo.alt" class="icon-strip__logo" loading="lazy" />
-        </div>
+        </a>
       }
     </div>
   </div>

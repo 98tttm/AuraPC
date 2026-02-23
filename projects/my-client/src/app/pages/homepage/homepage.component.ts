@@ -216,28 +216,28 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     return img;
   }
 
-  /** Logo hãng công nghệ trong assets/logotech – ~20 ô (lặp để fill). */
+  /** Logo hãng công nghệ – click vào chuyển sang danh sách sản phẩm theo thương hiệu. */
   readonly iconStripLogos = [
-    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD' },
-    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS' },
-    { src: 'assets/logotech/asus-rog-1-logo.svg', alt: 'ASUS ROG' },
-    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair' },
-    { src: 'assets/logotech/Deepcool-logo-black.png', alt: 'Deepcool' },
-    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel' },
-    { src: 'assets/logotech/Kingston-logo.png', alt: 'Kingston' },
-    { src: 'assets/logotech/lenovo-logo.png', alt: 'Lenovo' },
-    { src: 'assets/logotech/logo-edra.png', alt: 'Edra' },
-    { src: 'assets/logotech/logo-acer-inkythuatso-2-01-27-15-49-45.jpg', alt: 'Acer' },
-    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA' },
-    { src: 'assets/logotech/msi.png', alt: 'MSI' },
-    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer' },
-    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD' },
-    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS' },
-    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair' },
-    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel' },
-    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA' },
-    { src: 'assets/logotech/msi.png', alt: 'MSI' },
-    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer' },
+    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD', brand: 'AMD' },
+    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS', brand: 'ASUS' },
+    { src: 'assets/logotech/asus-rog-1-logo.svg', alt: 'ASUS ROG', brand: 'ASUS' },
+    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair', brand: 'CORSAIR' },
+    { src: 'assets/logotech/Deepcool-logo-black.png', alt: 'Deepcool', brand: 'DEEPCOOL' },
+    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel', brand: 'INTEL' },
+    { src: 'assets/logotech/Kingston-logo.png', alt: 'Kingston', brand: 'KINGSTON' },
+    { src: 'assets/logotech/lenovo-logo.png', alt: 'Lenovo', brand: 'LENOVO' },
+    { src: 'assets/logotech/logo-edra.png', alt: 'Edra', brand: 'EDRA' },
+    { src: 'assets/logotech/logo-acer-inkythuatso-2-01-27-15-49-45.jpg', alt: 'Acer', brand: 'ACER' },
+    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA', brand: 'NVIDIA' },
+    { src: 'assets/logotech/msi.png', alt: 'MSI', brand: 'MSI' },
+    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer', brand: 'RAZER' },
+    { src: 'assets/logotech/amd-logo-1.svg', alt: 'AMD', brand: 'AMD' },
+    { src: 'assets/logotech/asus_882744.png', alt: 'ASUS', brand: 'ASUS' },
+    { src: 'assets/logotech/CORSAIRLogo2020_stack_K.png', alt: 'Corsair', brand: 'CORSAIR' },
+    { src: 'assets/logotech/Intel_logo_(2006-2020).svg', alt: 'Intel', brand: 'INTEL' },
+    { src: 'assets/logotech/Nvidia_logo.svg.png', alt: 'NVIDIA', brand: 'NVIDIA' },
+    { src: 'assets/logotech/msi.png', alt: 'MSI', brand: 'MSI' },
+    { src: 'assets/logotech/Razer_snake_logo.png', alt: 'Razer', brand: 'RAZER' },
   ];
 
   /** Chuyển product.specs (Record) thành mảng string để hiển thị trong info panel (tối đa 4) */

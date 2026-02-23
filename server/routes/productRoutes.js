@@ -543,36 +543,7 @@ router.get('/', async (req, res) => {
  *  Normalizer helpers for filter-options
  * ─────────────────────────────────────────────────────────────── */
 
-/** Known PC-component brands extracted from product names. */
-const KNOWN_BRANDS = [
-  'ASUS', 'GIGABYTE', 'MSI', 'CORSAIR', 'NZXT', 'DEEPCOOL', 'COOLER MASTER',
-  'THERMALTAKE', 'LIAN LI', 'BE QUIET', 'NOCTUA', 'ARCTIC', 'RAZER',
-  'LOGITECH', 'KINGSTON', 'SAMSUNG', 'WESTERN DIGITAL', 'WD', 'SEAGATE',
-  'CRUCIAL', 'G.SKILL', 'TEAMGROUP', 'TEAM', 'GEIL', 'PATRIOT',
-  'SAPPHIRE', 'POWERCOLOR', 'XFX', 'ZOTAC', 'INNO3D', 'COLORFUL',
-  'GALAX', 'PNY', 'EVGA', 'PALIT', 'SEASONIC', 'FSP', 'XIGMATEK',
-  'SEGOTEP', 'SILVERSTONE', 'COUGAR', 'HYTE', 'PHANTEKS',
-  'INTEL', 'AMD', 'AKKO', 'KEYCHRON', 'MONSGEEK', 'DUCKY',
-  'STEELSERIES', 'HYPERX', 'HP', 'DELL', 'LENOVO', 'ACER', 'LG',
-  'VIEWSONIC', 'AOC', 'BENQ', 'ADATA',
-];
-
-/** Extract brand from product name by matching known brands. */
-function extractBrandFromName(name) {
-  if (!name) return null;
-  const upper = name.toUpperCase();
-  for (const b of KNOWN_BRANDS) {
-    // Match brand at start, or after common prefixes like "VGA ", "Card ", etc.
-    if (upper.startsWith(b + ' ') || upper.startsWith(b + '-') ||
-      upper.includes(' ' + b + ' ') || upper.includes('/' + b + ' ') ||
-      upper.startsWith('VGA ' + b) || upper.startsWith('CPU ' + b) ||
-      upper.startsWith('RAM ' + b) || upper.startsWith('SSD ' + b) ||
-      upper.startsWith('PSU ' + b) || upper.startsWith('CARD ') && upper.includes(b)) {
-      return KNOWN_BRANDS.find(kb => kb === b); // preserves original casing
-    }
-  }
-  return null;
-}
+const { extractBrandFromName } = require('../utils/brandExtract');
 
 /** Extract GPU chip name from verbose spec string. e.g. "NVIDIA GeForce RTX 5060 (Blackwell)" → "GeForce RTX 5060" */
 function normalizeGpuChip(val) {

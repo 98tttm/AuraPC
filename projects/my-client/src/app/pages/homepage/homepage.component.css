@@ -625,6 +625,12 @@
   transform: translateY(-6px) scale(1.08);
 }
 
+.icon-strip__item--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .icon-strip__logo {
   width: 44px;
   height: 44px;
