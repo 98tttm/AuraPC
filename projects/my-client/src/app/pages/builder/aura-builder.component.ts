@@ -586,6 +586,8 @@ export class AuraBuilderComponent {
                 let msg = err?.error?.error ?? err?.message ?? 'Không gửi được email.';
                 if (err?.status === 503 && msg.includes('Chưa cấu hình email')) {
                     msg = 'Chưa cấu hình email trên server. Trên Render: Environment → thêm EMAIL_USER và EMAIL_PASS (App Password Gmail) → Redeploy.';
+                } else if (err?.status === 0 || err?.name === 'TimeoutError' || (typeof msg === 'string' && msg.toLowerCase().includes('timeout'))) {
+                    msg = 'Không kết nối được server. Nếu chạy local: mở terminal, cd server, chạy npm start rồi thử lại.';
                 }
                 this.saveModalError.set(msg);
             },

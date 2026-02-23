@@ -21,7 +21,9 @@
    - Mục **Mật khẩu ứng dụng** → Tạo mật khẩu cho "Mail" / "Other"
    - Dán chuỗi 16 ký tự vào `EMAIL_PASS`
 
-4. **Trên Render (deployment)** – nếu vẫn báo "Chưa cấu hình email" hoặc 503:
+4. **Lỗi ENETUNREACH / IPv6**: Nếu gặp lỗi dạng `connect ENETUNREACH 2404:...:465`, server đã ép DNS ưu tiên IPv4 (trong `index.js`). Chỉ cần **redeploy backend trên Render** để áp dụng.
+
+5. **Trên Render (deployment)** – nếu vẫn báo "Chưa cấu hình email" hoặc 503:
    - Vào [Render Dashboard](https://dashboard.render.com) → chọn **service backend** (ví dụ `aurapc-backend`).
    - Tab **Environment** → **Environment Variables**.
    - Thêm (hoặc sửa):
@@ -30,4 +32,4 @@
    - Lưu → vào tab **Manual Deploy** → **Deploy latest commit** (hoặc push commit mới để auto deploy).
    - Đợi deploy xong rồi thử lại "Gửi cấu hình".
 
-Sau khi cấu hình xong, nút **Gửi cấu hình** trong Aura Builder sẽ gửi PDF đến email người dùng nhập.
+Sau khi cấu hình xong, nút **Gửi cấu hình** trong Aura Builder (kể cả khi frontend deploy trên Vercel) sẽ gọi backend trên Render và gửi PDF đến email người dùng nhập.

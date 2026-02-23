@@ -1,4 +1,7 @@
 require('dotenv').config();
+// Ép DNS ưu tiên IPv4 (tránh ENETUNREACH khi Render kết nối Gmail SMTP qua IPv6)
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');

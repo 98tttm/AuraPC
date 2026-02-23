@@ -119,6 +119,7 @@ router.put('/:id/auravisual', async (req, res) => {
 /** Gửi PDF cấu hình qua email */
 router.post('/:id/email-pdf', async (req, res) => {
   try {
+    console.log('[Builder] email-pdf được gọi, id:', req.params.id);
     const { id } = req.params;
     const { email } = req.body;
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -182,8 +183,12 @@ router.post('/:id/email-pdf', async (req, res) => {
     console.log(`[Builder] Đã gửi PDF cấu hình đến ${email}`);
     res.json({ success: true, message: 'Đã gửi thông tin cấu hình đến email của bạn' });
   } catch (err) {
-    console.error('[Builder] Email PDF error:', err.message);
-    res.status(500).json({ error: err.message || 'Không gửi được email' });
+    console.error('[Builder] Email PDF error:', err.message, err.code || '');
+    let msg = err.message || 'Không gửi được email';
+    if (err.code === 'EAUTH' || (msg && msg.toLowerCase().includes('invalid login'))) {
+      msg = 'Sai thông tin đăng nhập Gmail. Kiểm tra EMAIL_USER và EMAIL_PASS (dùng App Password) trong .env.';
+    }
+    res.status(500).json({ error: msg });
   }
 });
 
