@@ -336,11 +336,11 @@ export class ApiService {
     return this.http.get(root + '/', { responseType: 'text' }).pipe(timeout(timeoutMs));
   }
 
-  /** Gửi PDF cấu hình qua email (timeout 70s cho Render free tier cold start) */
+  /** Gửi PDF cấu hình qua email (timeout 120s: Render cold start + PDF + SMTP) */
   emailBuilderPdf(id: string, email: string): Observable<{ success: boolean; message?: string }> {
     return this.http.post<{ success: boolean; message?: string }>(
       `${BASE}/builders/${encodeURIComponent(id)}/email-pdf`,
       { email }
-    ).pipe(timeout(70000));
+    ).pipe(timeout(120000));
   }
 }

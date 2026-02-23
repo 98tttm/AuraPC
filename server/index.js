@@ -21,7 +21,26 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS: cho phép origin Vercel và localhost để tránh status 0 khi POST từ frontend deploy
+const allowedOrigins = [
+  'https://aura-pc-client.vercel.app',
+  'http://localhost:4200',
+  'http://localhost:3000',
+];
+if (process.env.FRONTEND_URL) {
+  try {
+    const u = new URL(process.env.FRONTEND_URL);
+    if (!allowedOrigins.includes(u.origin)) allowedOrigins.push(u.origin);
+  } catch (_) {}
+}
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(null, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('AuraPC Server is running...'));
