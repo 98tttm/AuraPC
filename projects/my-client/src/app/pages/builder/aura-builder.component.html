@@ -17,7 +17,12 @@
                 (click)="goToStep('OVERVIEW')">Tổng quan</li>
             @if (visualImageUrl()) {
             <li class="nav-item nav-item--clickable nav-item--auravisual"
-                [class.active]="currentStep() === 'AURAVISUAL'" (click)="goToStep('AURAVISUAL')">AuraVisual</li>
+                [class.active]="currentStep() === 'AURAVISUAL'" (click)="goToStep('AURAVISUAL')">
+                <video class="nav-item-auravisual-bg" autoplay muted loop playsinline>
+                    <source src="assets/video/universe.mp4" type="video/mp4" />
+                </video>
+                <span class="nav-item-auravisual-label">AuraVisual</span>
+            </li>
             }
             }
         </ul>
@@ -128,8 +133,8 @@
             </div>
             } @else if (currentStep() === 'AURAVISUAL') {
             <div class="av-workflow">
-                <video autoplay loop muted playsinline class="av-bg-video">
-                    <source src="assets/video/universe.mp4" type="video/mp4" />
+                <video class="av-bg-video" autoplay loop muted playsinline preload="auto">
+                    <source src="assets/video/deploy.mp4" type="video/mp4" />
                 </video>
                 <div class="av-overlay"></div>
 
@@ -178,7 +183,7 @@
                                     <path
                                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                                     </path>
-                                </svg> XỬ LÝ N8N</h3>
+                                </svg> Xử lý hình ảnh</h3>
                             <div class="av-process-nodes">
                                 <div class="av-node">
                                     <div class="av-node-icon"><img src="assets/LOGO/LogoBlack.png" alt="AuraPC"
@@ -216,7 +221,7 @@
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                     <polyline points="21 15 16 10 5 21"></polyline>
-                                </svg> KẾT QUẢ AI</h3>
+                                </svg> Góc PC của bạn</h3>
                             <div class="av-result-card">
                                 @if (visualLoading()) {
                                 <div class="av-loading-state">
@@ -238,9 +243,7 @@
                                 } @else if (visualImageUrl()) {
                                 <img [src]="visualImageUrl()" alt="AuraVisual Rendering" class="av-result-img" />
                                 <div class="av-actions">
-                                    <a [href]="visualImageUrl()" download="AuraVisual_PC.png" class="av-btn-primary">Tải
-                                        Ảnh
-                                        8K HD</a>
+                                    <a [href]="visualImageUrl()" download="AuraVisual_PC.png" class="av-btn-primary">Tải Góc Setup</a>
                                 </div>
                                 }
                             </div>

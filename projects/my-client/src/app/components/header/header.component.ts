@@ -76,8 +76,6 @@ export class HeaderComponent implements OnDestroy {
   loginSuccess = signal<boolean>(false);
   /** Bắt đầu animation đóng overlay (sau khi đã hiện xanh OTP) */
   overlayClosing = signal<boolean>(false);
-  /** Mã OTP nhận từ API (hiển thị trong modal khi có - demo/dev) */
-  displayedOtp = signal<string | null>(null);
   navHoveredId = signal<string | null>(null);
   navIndicatorLeft = signal<number>(0);
   navIndicatorWidth = signal<number>(0);
@@ -469,7 +467,6 @@ export class HeaderComponent implements OnDestroy {
     this.otpExpiresAt.set(0);
     this.loginSuccess.set(false);
     this.overlayClosing.set(false);
-    this.displayedOtp.set(null);
     this.stopCountdown();
   }
 
@@ -479,7 +476,6 @@ export class HeaderComponent implements OnDestroy {
     this.otpValue.set('');
     this.otpError.set(null);
     this.otpExpiresAt.set(0);
-    this.displayedOtp.set(null);
     this.stopCountdown();
   }
 
@@ -515,12 +511,7 @@ export class HeaderComponent implements OnDestroy {
     }
     this.auth.requestOtp(phone).subscribe({
       next: (res) => {
-        if (res.devOtp) {
-          this.toast.showOtp(res.devOtp);
-          this.displayedOtp.set(res.devOtp);
-        } else {
-          this.displayedOtp.set(null);
-        }
+        if (res.devOtp) this.toast.showOtp(res.devOtp);
         this.loginStep.set('otp');
         this.otpError.set(null);
         this.otpValue.set('');
@@ -541,12 +532,7 @@ export class HeaderComponent implements OnDestroy {
     const phone = this.loginPhone().trim();
     this.auth.requestOtp(phone).subscribe({
       next: (res) => {
-        if (res.devOtp) {
-          this.toast.showOtp(res.devOtp);
-          this.displayedOtp.set(res.devOtp);
-        } else {
-          this.displayedOtp.set(null);
-        }
+        if (res.devOtp) this.toast.showOtp(res.devOtp);
         const expiresAt = Date.now() + 5 * 60 * 1000;
         this.otpExpiresAt.set(expiresAt);
         this.startCountdown(expiresAt);

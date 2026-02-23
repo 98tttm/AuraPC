@@ -1,9 +1,35 @@
 /* AURAVISUAL TRỰC QUAN - SHOPIFY MINIMALIST THEME */
+@font-face {
+    font-family: 'UTM Nokia';
+    src: url('../../../assets/fonts/UTMNokia.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 .nav-item--auravisual {
-    background: #1a1a1a;
-    border-left: 3px solid #ff6b00 !important;
-    color: #ff6b00 !important;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
+    border-left: none !important;
+    color: #fff !important;
     font-weight: 500;
+    box-shadow: none;
+}
+.nav-item--auravisual .nav-item-auravisual-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    z-index: 0;
+}
+.nav-item--auravisual .nav-item-auravisual-label {
+    position: relative;
+    z-index: 1;
+}
+.nav-item--auravisual.active::after {
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .av-workflow {
@@ -20,24 +46,21 @@
 
 .av-bg-video {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover !important;
-    object-position: center !important;
+    object-position: center center !important;
     z-index: 1;
 }
 
 .av-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
-    background: rgba(18, 18, 18, 0.85);
-    /* Minimalist dark overlay */
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(1px);
     z-index: 2;
 }
 
@@ -57,6 +80,7 @@
 }
 
 .av-header h2 {
+    font-family: 'UTM Nokia', 'Nokia UTM', Impact, sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
     letter-spacing: 1px;
@@ -66,6 +90,7 @@
 }
 
 .av-header p {
+    font-family: 'UTM Nokia', 'Nokia UTM', Impact, sans-serif;
     font-size: 0.9rem;
     color: #999;
 }
@@ -79,13 +104,13 @@
 }
 
 .av-col {
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    box-shadow: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
 }
 
 .av-input {
@@ -112,8 +137,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #e0e0e0;
-    border-bottom: 1px solid #333;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
     padding-bottom: 0.5rem;
     text-transform: uppercase;
 }
@@ -136,11 +161,11 @@
 }
 
 .av-input-list::-webkit-scrollbar-track {
-    background: #111;
+    background: #f3f4f6;
 }
 
 .av-input-list::-webkit-scrollbar-thumb {
-    background: #444;
+    background: #d1d5db;
     border-radius: 4px;
 }
 
@@ -148,10 +173,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: #000;
-    padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #1a1a1a;
+    background: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
 }
 
 .av-input-icon {
@@ -175,7 +201,7 @@
 
 .av-badge {
     font-size: 0.65rem;
-    background: #333;
+    background: #374151;
     color: #fff;
     padding: 2px 6px;
     border-radius: 2px;
@@ -188,7 +214,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: #ccc;
+    color: #1f2937;
 }
 
 /* Arrows */
@@ -202,9 +228,7 @@
 }
 
 .av-arrow::after {
-    content: "→";
-    font-size: 1.5rem;
-    color: #555;
+    content: none;
 }
 
 /* Processing Nodes */
@@ -216,44 +240,45 @@
 }
 
 .av-node {
-    background: #000;
-    border: 1px solid #222;
-    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     padding: 1rem;
     width: 100%;
     display: flex;
     align-items: center;
     gap: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
 }
 
 .av-node-icon {
     width: 40px;
     height: 40px;
-    border-radius: 4px;
-    background: #111;
+    border-radius: 6px;
+    background: #f9fafb;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #333;
+    border: 1px solid #e5e7eb;
     box-shadow: none;
 }
 
 .av-node-text h4 {
     font-size: 0.85rem;
     font-weight: 500;
-    color: #fff;
+    color: #1f2937;
     margin-bottom: 2px;
 }
 
 .av-node-text p {
     font-size: 0.75rem;
-    color: #888;
+    color: #6b7280;
 }
 
 .av-node-line {
     width: 2px;
     height: 20px;
-    background: #444;
+    background: #e5e7eb;
 }
 
 /* Output Result */
@@ -268,9 +293,9 @@
     flex: 1;
     width: 100%;
     object-fit: contain;
-    border-radius: 4px;
-    border: 1px solid #222;
-    background: #111;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
     min-height: 0;
 }
 
@@ -280,21 +305,21 @@
 }
 
 .av-btn-primary {
-    background: #fff;
-    color: #000;
+    background: #1a1a1a;
+    color: #fff;
     padding: 10px 24px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.9rem;
     font-weight: 500;
     text-decoration: none;
-    border: 1px solid #ddd;
+    border: none;
     cursor: pointer;
     transition: background 0.2s;
-    box-shadow: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
 }
 
 .av-btn-primary:hover {
-    background: #f0f0f0;
+    background: #333;
 }
 
 /* Loading & Error States */
@@ -306,17 +331,17 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: #111;
-    border: 1px dashed #444;
-    border-radius: 4px;
+    background: #fff;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
     padding: 2rem;
 }
 
 .av-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid #333;
-    border-top-color: #fff;
+    border: 3px solid #e5e7eb;
+    border-top-color: #1a1a1a;
     border-radius: 50%;
     animation: spinner 1s linear infinite;
     margin-bottom: 1rem;
@@ -331,11 +356,11 @@
 .av-status-title {
     font-size: 1rem;
     font-weight: 500;
-    color: #fff;
+    color: #1f2937;
     margin-bottom: 0.5rem;
 }
 
 .av-status-desc {
     font-size: 0.85rem;
-    color: #888;
+    color: #6b7280;
 }
