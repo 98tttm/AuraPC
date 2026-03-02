@@ -1,0 +1,35 @@
+<section class="wallet-page wallet-page--momo">
+  <div class="wallet-container"
+    style="max-width: 600px; margin: 40px auto; text-align: center; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+
+    @if (isSuccess) {
+    <div style="color: #28a745; margin-bottom: 20px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <h2 style="font-size: 24px; color: #333; margin-bottom: 10px;">Thanh toán Thành Công!</h2>
+    <p style="color: #555; margin-bottom: 5px;">Mã đơn hàng: <strong>{{ orderNumber }}</strong></p>
+    <p style="color: #555; margin-bottom: 30px;">Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đang được xử lý.</p>
+    } @else {
+    <div style="color: #dc3545; margin-bottom: 20px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <h2 style="font-size: 24px; color: #333; margin-bottom: 10px;">Giao dịch Thất Bại</h2>
+    <p style="color: #555; margin-bottom: 30px;">{{ message }}</p>
+    }
+
+    <button
+      style="background: #FF6D2D; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: background 0.2s;"
+      (click)="continueShopping()">
+      Quay lại trang chủ
+    </button>
+  </div>
+</section>

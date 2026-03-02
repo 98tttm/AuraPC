@@ -1,5 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
+const Otp = require('../models/Otp');
+const { signToken, requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -25,16 +27,12 @@ function toStoredPhone(input) {
   return digits;
 }
 
-// OTP in-memory: { [storedPhone]: { code: string, expiresAt: number } }
-const otpStore = new Map();
-const OTP_TTL_MS = 5 * 60 * 1000; // 5 phút
-
 function generateOtp() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
 /** POST /api/auth/request-otp - Gửi OTP (log ra console). */
-router.post('/request-otp', (req, res) => {
+router.post('/request-otp', async (req, res) => {
   try {
     const { phoneNumber } = req.body || {};
     const raw = (phoneNumber ?? '').trim();
@@ -54,7 +52,12 @@ router.post('/request-otp', (req, res) => {
     }
     const stored = toStoredPhone(raw);
     const code = generateOtp();
-    otpStore.set(stored, { code, expiresAt: Date.now() + OTP_TTL_MS });
+    // Lưu OTP vào MongoDB (upsert: nếu đã có SĐT thì cập nhật code mới)
+    await Otp.findOneAndUpdate(
+      { phoneNumber: stored },
+      { code, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
     console.log('[AuraPC Auth] OTP cho', stored, ':', code, '(hiệu lực 5 phút)');
     const payload = { success: true, message: 'Mã OTP đã được gửi.' };
     // Mặc định trả devOtp (demo, chưa có SMS). Ẩn khi đặt ENABLE_DEV_OTP_IN_RESPONSE=false
@@ -90,30 +93,24 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     const stored = toStoredPhone(raw);
-    const record = otpStore.get(stored);
+    // Tìm và xóa OTP từ MongoDB (findOneAndDelete: lấy + xóa atomic)
+    const record = await Otp.findOneAndDelete({ phoneNumber: stored });
     if (!record) {
       return res.status(400).json({
         success: false,
         error: 'OTP_EXPIRED',
-        message: 'Mã xác thực không chính xác. Vui lòng thử lại.',
-      });
-    }
-    if (Date.now() > record.expiresAt) {
-      otpStore.delete(stored);
-      return res.status(400).json({
-        success: false,
-        error: 'OTP_EXPIRED',
-        message: 'Mã đã hết hạn. Vui lòng gửi lại mã.',
+        message: 'Mã xác thực không chính xác hoặc đã hết hạn. Vui lòng thử lại.',
       });
     }
     if (record.code !== code) {
+      // OTP sai — tạo lại record (vì đã xóa)
+      await Otp.create({ phoneNumber: stored, code: record.code });
       return res.status(400).json({
         success: false,
         error: 'OTP_INVALID',
         message: 'Mã xác thực không chính xác. Vui lòng thử lại.',
       });
     }
-    otpStore.delete(stored);
 
     const now = new Date();
     let user = await User.findOne({ phoneNumber: stored }).lean();
@@ -137,10 +134,11 @@ router.post('/verify-otp', async (req, res) => {
       user = await User.findOne({ phoneNumber: stored }).lean();
     }
 
-    // ... (previous code)
     const out = { ...user };
     out.id = out._id.toString();
-    res.json({ success: true, user: out });
+    // Ký JWT token
+    const token = signToken({ userId: out.id, phoneNumber: stored });
+    res.json({ success: true, user: out, token });
   } catch (err) {
     console.error('[POST /api/auth/verify-otp]', err);
     res.status(500).json({ success: false, message: err.message });
@@ -170,10 +168,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 /** PUT /api/auth/profile - Cß║ญp nhß║ญt th├╢ng tin c├í nh├вn */
-router.put('/profile', async (req, res) => {
+router.put('/profile', requireAuth, async (req, res) => {
   try {
-    const { userId, profile } = req.body; // profile: { fullName, gender, dateOfBirth }
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
+    const { profile } = req.body; // profile: { fullName, gender, dateOfBirth }
 
     const update = {};
     if (profile.fullName !== undefined) update['profile.fullName'] = profile.fullName;
@@ -194,10 +192,9 @@ router.put('/profile', async (req, res) => {
 });
 
 /** POST /api/auth/avatar - Upload Avatar */
-router.post('/avatar', upload.single('avatar'), async (req, res) => {
+router.post('/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
   try {
-    const userId = req.body.userId;
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
     // URL file: /uploads/filename
@@ -218,7 +215,7 @@ router.post('/avatar', upload.single('avatar'), async (req, res) => {
 // ===================== ADDRESS BOOK =====================
 
 /** GET /api/auth/addresses/:userId — list all addresses */
-router.get('/addresses/:userId', async (req, res) => {
+router.get('/addresses/:userId', requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).lean();
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -230,10 +227,10 @@ router.get('/addresses/:userId', async (req, res) => {
 });
 
 /** POST /api/auth/addresses — add new address */
-router.post('/addresses', async (req, res) => {
+router.post('/addresses', requireAuth, async (req, res) => {
   try {
-    const { userId, label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
+    const { label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
     if (!fullName || !phone) return res.status(400).json({ success: false, message: 'fullName and phone are required' });
 
     const user = await User.findById(userId);
@@ -264,10 +261,10 @@ router.post('/addresses', async (req, res) => {
 });
 
 /** PUT /api/auth/addresses/:addressId — update address */
-router.put('/addresses/:addressId', async (req, res) => {
+router.put('/addresses/:addressId', requireAuth, async (req, res) => {
   try {
-    const { userId, label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
+    const { label, fullName, phone, city, district, ward, address, isDefault } = req.body || {};
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -297,10 +294,9 @@ router.put('/addresses/:addressId', async (req, res) => {
 });
 
 /** DELETE /api/auth/addresses/:addressId — delete address */
-router.delete('/addresses/:addressId', async (req, res) => {
+router.delete('/addresses/:addressId', requireAuth, async (req, res) => {
   try {
-    const { userId } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -326,10 +322,9 @@ router.delete('/addresses/:addressId', async (req, res) => {
 });
 
 /** PUT /api/auth/addresses/:addressId/default — set as default */
-router.put('/addresses/:addressId/default', async (req, res) => {
+router.put('/addresses/:addressId/default', requireAuth, async (req, res) => {
   try {
-    const { userId } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });

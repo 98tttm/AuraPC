@@ -1,0 +1,105 @@
+@if (loading()) {
+  <div class="loading">Đang tải...</div>
+} @else if (user(); as u) {
+  <div class="page-header">
+    <div>
+      <a routerLink="/users" class="back-link">&larr; Quay lại</a>
+      <h2>Chi tiết khách hàng</h2>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- User Profile -->
+    <div class="card profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">{{ getInitial() }}</div>
+        <div>
+          <h3 class="profile-name">{{ getUserName() }}</h3>
+          <p class="profile-phone">{{ u.phoneNumber }}</p>
+        </div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <span class="profile-stat__value">{{ u.orderCount || 0 }}</span>
+          <span class="profile-stat__label">Đơn hàng</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat__value">{{ u.totalSpent | number:'1.0-0' }}đ</span>
+          <span class="profile-stat__label">Đã chi tiêu</span>
+        </div>
+      </div>
+
+      <div class="profile-info">
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span>{{ u.email || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Giới tính</span>
+          <span>{{ u.profile?.gender || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ngày sinh</span>
+          <span>{{ u.profile?.dateOfBirth ? (u.profile.dateOfBirth | date:'dd/MM/yyyy') : '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tham gia</span>
+          <span>{{ u.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Đăng nhập cuối</span>
+          <span>{{ u.lastLogin ? (u.lastLogin | date:'dd/MM/yyyy HH:mm') : 'Chưa' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Addresses -->
+    <div class="card">
+      <h3 class="card__title">Địa chỉ ({{ u.addresses?.length || 0 }})</h3>
+      @for (addr of u.addresses; track addr._id) {
+        <div class="address-item">
+          <div class="address-item__header">
+            <span class="address-item__label">{{ addr.label }}</span>
+            @if (addr.isDefault) {
+              <span class="badge badge--delivered">Mặc định</span>
+            }
+          </div>
+          <p>{{ addr.fullName }} - {{ addr.phone }}</p>
+          <p class="text-muted">{{ addr.address }}, {{ addr.ward }}, {{ addr.district }}, {{ addr.city }}</p>
+        </div>
+      } @empty {
+        <p class="text-muted">Chưa có địa chỉ</p>
+      }
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="card" style="margin-top: 1.25rem">
+    <h3 class="card__title">Đơn hàng gần đây</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Tổng</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of u.recentOrders; track order._id) {
+          <tr>
+            <td><a [routerLink]="['/orders', order.orderNumber]" class="link">{{ order.orderNumber }}</a></td>
+            <td class="text-bold">{{ order.total | number:'1.0-0' }}đ</td>
+            <td><span class="badge" [class]="'badge--' + order.status">{{ getStatusLabel(order.status) }}</span></td>
+            <td class="text-muted">{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="text-center text-muted">Chưa có đơn hàng</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <div class="loading">Không tìm thấy khách hàng</div>
+}

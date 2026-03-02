@@ -14,7 +14,7 @@ const blogSchema = new mongoose.Schema(
     published: { type: Boolean, default: false },
     publishedAt: { type: Date, default: null },
   },
-  { timestamps: true, strict: false }
+  { timestamps: true, strict: true }
 );
 
 blogSchema.index({ slug: 1 });

@@ -1,0 +1,396 @@
+/* ═════════════════════════════════════════════════
+   AuraHub — Dark Threads-style CSS
+   ═════════════════════════════════════════════════ */
+
+:host { display: block; min-height: 100vh; background: #0a0a0a; color: #f5f5f5; }
+
+/* ─── Layout ─── */
+.hub { max-width: 1100px; margin: 0 auto; padding: 100px 20px 40px; }
+.hub__container { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+
+/* ─── Compose Bar ─── */
+.hub-compose {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; margin-bottom: 8px;
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 16px;
+  cursor: pointer; transition: border-color .2s;
+}
+.hub-compose:hover { border-color: #444; }
+.hub-compose__avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.hub-compose__placeholder { flex: 1; color: #666; font-size: 15px; }
+.hub-compose__btn {
+  padding: 8px 20px; border-radius: 20px;
+  background: #fff; color: #000; font-weight: 600; font-size: 14px;
+  border: none; cursor: pointer; transition: opacity .2s;
+}
+.hub-compose__btn:hover { opacity: .85; }
+
+/* ─── Tabs ─── */
+.hub__tabs {
+  display: flex; gap: 0; margin-bottom: 4px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.hub__tabs button {
+  flex: 1; padding: 14px 0; background: none; border: none;
+  color: #777; font-weight: 600; font-size: 15px; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all .2s;
+}
+.hub__tabs button.active { color: #fff; border-bottom-color: #fff; }
+.hub__tabs button:hover { color: #ccc; }
+
+/* ─── Filter Tag ─── */
+.hub__filter-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; margin: 8px 0;
+  background: #1e1e3a; color: #8b8bff; border-radius: 20px; font-size: 13px;
+}
+.hub__filter-tag button {
+  background: none; border: none; color: #8b8bff; cursor: pointer; font-size: 14px;
+}
+
+/* ─── Post Card ─── */
+.hub-card {
+  padding: 20px; margin-bottom: 2px;
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 16px;
+  cursor: pointer; transition: background .15s;
+}
+.hub-card:hover { background: #1e1e1e; }
+.hub-card--detail { cursor: default; }
+.hub-card--detail:hover { background: #181818; }
+
+.hub-card__head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.hub-card__avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.hub-card__meta { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+.hub-card__name { font-weight: 600; font-size: 14px; color: #fff; }
+.hub-card__time { font-size: 12px; color: #666; }
+.hub-card__repost-badge { font-size: 12px; color: #5bc8af; background: rgba(91,200,175,.12); padding: 2px 8px; border-radius: 8px; }
+
+.hub-card__delete {
+  background: none; border: none; color: #666; cursor: pointer; padding: 4px;
+  border-radius: 6px; transition: all .2s;
+}
+.hub-card__delete:hover { color: #ff4444; background: rgba(255,68,68,.1); }
+
+.hub-card__topic {
+  display: inline-block; font-size: 13px; color: #7b7bff;
+  margin-bottom: 8px; cursor: pointer;
+}
+.hub-card__topic:hover { text-decoration: underline; }
+
+.hub-card__content {
+  font-size: 15px; line-height: 1.55; color: #e5e5e5;
+  margin-bottom: 10px; white-space: pre-wrap; word-break: break-word;
+}
+
+.hub-card__images { display: grid; gap: 4px; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+.hub-card__images--multi { grid-template-columns: repeat(2, 1fr); }
+.hub-card__img { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; }
+
+/* ─── Action Buttons ─── */
+.hub-card__actions { display: flex; align-items: center; gap: 4px; }
+
+.hub-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: none; border: none;
+  color: #777; font-size: 13px; cursor: pointer; border-radius: 20px;
+  transition: all .15s;
+}
+.hub-action:hover { background: rgba(255,255,255,.06); color: #ccc; }
+.hub-action--liked { color: #ff3040 !important; }
+.hub-action--liked:hover { background: rgba(255,48,64,.08); }
+.hub-action svg { flex-shrink: 0; }
+
+/* ─── Share Menu ─── */
+.hub-share-wrap { position: relative; }
+.hub-share-menu {
+  position: absolute; bottom: 42px; right: 0; z-index: 20;
+  background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px;
+  padding: 6px 4px; min-width: 160px; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.hub-share-menu button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 14px; background: none; border: none;
+  color: #e5e5e5; font-size: 14px; cursor: pointer; border-radius: 8px;
+}
+.hub-share-menu button:hover { background: #3a3a3a; }
+
+/* ─── Load More + Empty ─── */
+.hub__load-more {
+  display: block; width: 100%; padding: 14px;
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 12px;
+  color: #aaa; font-size: 14px; cursor: pointer; text-align: center; margin-top: 4px;
+  transition: all .2s;
+}
+.hub__load-more:hover { background: #222; color: #fff; }
+.hub__load-more:disabled { opacity: .5; cursor: default; }
+
+.hub__empty {
+  text-align: center; padding: 60px 20px;
+  color: #666; font-size: 15px;
+}
+.hub__empty button {
+  margin-top: 16px; padding: 10px 24px;
+  background: #fff; color: #000; border: none; border-radius: 20px;
+  font-weight: 600; cursor: pointer;
+}
+.hub__empty button:hover { opacity: .85; }
+
+.hub__loading { text-align: center; padding: 60px; }
+.hub__spinner {
+  width: 32px; height: 32px; margin: 0 auto;
+  border: 3px solid #333; border-top-color: #fff; border-radius: 50%;
+  animation: hub-spin .7s linear infinite;
+}
+@keyframes hub-spin { to { transform: rotate(360deg); } }
+
+/* ─── Sidebar ─── */
+.hub__sidebar { position: sticky; top: 100px; }
+
+.hub-side-card {
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 16px;
+  padding: 20px; margin-bottom: 16px;
+}
+.hub-side-card__title {
+  font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 14px;
+  padding-bottom: 10px; border-bottom: 1px solid #2a2a2a;
+}
+
+.hub-trending-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #1e1e1e; cursor: pointer;
+  transition: background .15s;
+}
+.hub-trending-item:last-child { border-bottom: none; }
+.hub-trending-item:hover { background: rgba(255,255,255,.03); margin: 0 -8px; padding: 10px 8px; border-radius: 8px; }
+.hub-trending-item__content { flex: 1; min-width: 0; }
+.hub-trending-item__author { font-size: 12px; color: #888; font-weight: 600; }
+.hub-trending-item__content p { font-size: 13px; color: #ccc; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hub-trending-item__likes { font-size: 12px; color: #ff6b6b; white-space: nowrap; }
+
+.hub-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.hub-topic-btn {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px;
+  background: #222; border: 1px solid #333; color: #aaa; cursor: pointer;
+  transition: all .2s;
+}
+.hub-topic-btn:hover { background: #2a2a2a; color: #fff; }
+.hub-topic-btn.active {
+  background: #fff; color: #000; border-color: #fff; font-weight: 600;
+}
+
+/* ─── Overlay ─── */
+.hub-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  animation: hub-fade-in .2s ease;
+}
+@keyframes hub-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Post Detail ─── */
+.hub-detail {
+  width: 95%; max-width: 620px; max-height: 90vh; overflow-y: auto;
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 20px;
+  padding: 24px; position: relative;
+  animation: hub-slide-up .25s ease;
+}
+@keyframes hub-slide-up { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.hub-detail__close {
+  position: absolute; top: 16px; right: 16px;
+  background: #2a2a2a; border: none; color: #aaa; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.hub-detail__close:hover { background: #3a3a3a; color: #fff; }
+
+.hub-detail__header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #2a2a2a;
+}
+.hub-detail__header h2 { font-size: 18px; font-weight: 700; }
+.hub-detail__views { font-size: 12px; color: #5bc8af; }
+
+/* ─── Comment Section ─── */
+.hub-detail__comments { margin-top: 20px; }
+
+.hub-detail__sort {
+  display: flex; gap: 12px; margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid #222;
+}
+.hub-detail__sort button {
+  background: none; border: none; color: #666; font-size: 14px;
+  font-weight: 600; cursor: pointer; padding: 4px 0;
+  border-bottom: 2px solid transparent; transition: all .2s;
+}
+.hub-detail__sort button.active { color: #fff; border-bottom-color: #fff; }
+
+.hub-comment-input {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; padding: 12px 16px;
+  background: #111; border: 1px solid #2a2a2a; border-radius: 12px;
+}
+.hub-comment-input__avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.hub-comment-input input {
+  flex: 1; background: none; border: none; color: #e5e5e5;
+  font-size: 14px; outline: none;
+}
+.hub-comment-input input::placeholder { color: #555; }
+.hub-comment-input__btn {
+  padding: 6px 16px; border-radius: 16px;
+  background: #fff; color: #000; border: none; font-weight: 600;
+  font-size: 13px; cursor: pointer;
+}
+.hub-comment-input__btn:disabled { opacity: .4; cursor: default; }
+
+.hub-comment {
+  display: flex; gap: 10px; margin-bottom: 16px;
+  padding-bottom: 16px; border-bottom: 1px solid #1e1e1e;
+}
+.hub-comment:last-child { border-bottom: none; }
+.hub-comment__avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 2px; }
+.hub-comment__body { flex: 1; min-width: 0; }
+.hub-comment__head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.hub-comment__name { font-size: 13px; font-weight: 600; color: #fff; }
+.hub-comment__time { font-size: 11px; color: #666; }
+.hub-comment__delete { background: none; border: none; color: #666; font-size: 12px; cursor: pointer; margin-left: auto; }
+.hub-comment__delete:hover { color: #ff4444; }
+.hub-comment__content { font-size: 14px; color: #ddd; line-height: 1.5; margin-bottom: 6px; }
+
+.hub-comment__actions { display: flex; gap: 16px; }
+.hub-comment__actions button {
+  background: none; border: none; color: #777; font-size: 12px; cursor: pointer;
+  transition: color .15s;
+}
+.hub-comment__actions button:hover { color: #fff; }
+.hub-comment__actions button.liked { color: #ff3040; }
+
+/* ─── Reply ─── */
+.hub-reply {
+  display: flex; gap: 8px; margin-top: 10px; padding: 8px 0 0;
+  margin-left: 8px; border-left: 2px solid #2a2a2a; padding-left: 12px;
+}
+.hub-reply__avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.hub-reply__body { flex: 1; }
+.hub-reply__name { font-size: 12px; font-weight: 600; color: #fff; }
+.hub-reply__time { font-size: 11px; color: #666; margin-left: 6px; }
+.hub-reply__body p { font-size: 13px; color: #ccc; margin: 2px 0 0; }
+
+.hub-reply-input {
+  display: flex; gap: 8px; margin-top: 8px; align-items: center;
+}
+.hub-reply-input input {
+  flex: 1; padding: 8px 12px;
+  background: #111; border: 1px solid #2a2a2a; border-radius: 8px;
+  color: #e5e5e5; font-size: 13px; outline: none;
+}
+.hub-reply-input button {
+  padding: 6px 14px; border-radius: 12px;
+  background: #fff; color: #000; border: none; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.hub-reply-input button.cancel { background: #333; color: #aaa; }
+.hub-reply-input button:disabled { opacity: .4; }
+
+/* ─── Create Post Modal ─── */
+.hub-create {
+  width: 95%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+  background: #181818; border: 1px solid #2a2a2a; border-radius: 20px;
+  animation: hub-slide-up .25s ease;
+}
+
+.hub-create__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid #2a2a2a;
+}
+.hub-create__header h3 { font-size: 16px; font-weight: 700; }
+.hub-create__cancel { background: none; border: none; color: #aaa; font-size: 15px; cursor: pointer; }
+.hub-create__cancel:hover { color: #fff; }
+.hub-create__post-btn {
+  padding: 8px 20px; border-radius: 20px;
+  background: #fff; color: #000; font-weight: 600; font-size: 14px;
+  border: none; cursor: pointer; transition: opacity .2s;
+}
+.hub-create__post-btn:disabled { opacity: .3; cursor: default; }
+.hub-create__post-btn:hover:not(:disabled) { opacity: .85; }
+
+.hub-create__body { padding: 20px; }
+
+.hub-create__user { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.hub-create__avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.hub-create__name { font-weight: 600; font-size: 14px; }
+.hub-create__topic-tag { font-size: 12px; color: #7b7bff; margin-left: 4px; }
+.hub-create__add-topic {
+  display: block; background: none; border: none; color: #666; font-size: 12px;
+  cursor: pointer; padding: 0; margin-top: 2px;
+}
+.hub-create__add-topic:hover { color: #9b9bff; }
+
+.hub-create__topics {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  padding: 10px; background: #111; border-radius: 12px; border: 1px solid #2a2a2a;
+}
+.hub-create__topics button {
+  padding: 6px 14px; border-radius: 16px; font-size: 13px;
+  background: #222; border: 1px solid #333; color: #ccc; cursor: pointer;
+}
+.hub-create__topics button:hover { background: #333; color: #fff; }
+
+.hub-create__textarea {
+  width: 100%; min-height: 100px; max-height: 300px; resize: vertical;
+  background: none; border: none; color: #e5e5e5; font-size: 15px;
+  outline: none; font-family: inherit; line-height: 1.5;
+}
+.hub-create__textarea::placeholder { color: #555; }
+
+.hub-create__previews { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.hub-create__preview { position: relative; border-radius: 10px; overflow: hidden; }
+.hub-create__preview img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.hub-create__preview-remove {
+  position: absolute; top: 6px; right: 6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.7); color: #fff; border: none;
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+.hub-create__toolbar {
+  display: flex; gap: 4px; padding-top: 12px;
+  border-top: 1px solid #2a2a2a; margin-top: 12px;
+}
+.hub-create__tool {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: none; border: none; color: #888; font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.hub-create__tool:hover { background: rgba(255,255,255,.08); color: #fff; }
+
+.hub-create__emojis {
+  display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+  padding: 12px; background: #111; border-radius: 12px; margin-top: 8px;
+  border: 1px solid #2a2a2a;
+}
+.hub-create__emojis button {
+  padding: 8px; font-size: 20px; background: none; border: none; cursor: pointer;
+  border-radius: 8px; transition: background .15s;
+}
+.hub-create__emojis button:hover { background: #2a2a2a; }
+
+.hub-create__uploading {
+  text-align: center; color: #888; font-size: 13px;
+  padding: 8px; margin-top: 8px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .hub__container { grid-template-columns: 1fr; }
+  .hub__sidebar { position: static; order: -1; }
+  .hub-side-card { max-height: none; }
+}
+@media (max-width: 600px) {
+  .hub { padding: 80px 10px 24px; }
+  .hub-card { padding: 16px 14px; border-radius: 12px; }
+  .hub-card__actions { gap: 0; }
+  .hub-action { padding: 6px 10px; font-size: 12px; }
+  .hub-create { border-radius: 14px; }
+  .hub-detail { padding: 18px 14px; border-radius: 14px; }
+  .hub-create__emojis { grid-template-columns: repeat(7, 1fr); }
+}

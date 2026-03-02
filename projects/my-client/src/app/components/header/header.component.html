@@ -140,14 +140,14 @@
               @if (userDropdownOpen() && currentUser()) {
               <div class="user-dropdown">
                 <div class="user-dropdown__inner">
-                  <a routerLink="/tai-khoan" class="user-dropdown__item">
+                  <a routerLink="/tai-khoan" [queryParams]="{ tab: 'profile' }" class="user-dropdown__item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                     Thông tin cá nhân
                   </a>
-                  <a routerLink="/don-hang" class="user-dropdown__item">
+                  <a routerLink="/tai-khoan" [queryParams]="{ tab: 'orders' }" class="user-dropdown__item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
                       <path
@@ -158,7 +158,7 @@
                     </svg>
                     Đơn hàng của tôi
                   </a>
-                  <a routerLink="/tai-khoan" class="user-dropdown__item">
+                  <a routerLink="/tai-khoan" [queryParams]="{ tab: 'address' }" class="user-dropdown__item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                       <circle cx="12" cy="10" r="3"></circle>

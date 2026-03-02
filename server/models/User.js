@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
   },
-  { timestamps: true, strict: false }
+  { timestamps: true, strict: true }
 );
 
 /* phoneNumber đã có index từ unique: true, không khai báo thêm tránh duplicate */

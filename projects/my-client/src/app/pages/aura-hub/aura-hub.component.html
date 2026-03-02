@@ -1,0 +1,415 @@
+<!-- ══════════════════════════════════════════════
+     AURA HUB — Community Forum (Threads-style)
+     ══════════════════════════════════════════════ -->
+
+<!-- POST DETAIL OVERLAY -->
+@if (detailPost(); as dp) {
+<div class="hub-overlay" (click)="closePostDetail()">
+    <div class="hub-detail" (click)="$event.stopPropagation()">
+        <button class="hub-detail__close" (click)="closePostDetail()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </button>
+
+        <div class="hub-detail__header">
+            <h2>Thread</h2>
+            <span class="hub-detail__views">{{ dp.viewCount || 0 }} lượt xem</span>
+        </div>
+
+        <!-- Original Post -->
+        <div class="hub-card hub-card--detail">
+            <div class="hub-card__head">
+                <img [src]="getAvatarUrl(dp.author)" class="hub-card__avatar" alt="" />
+                <div class="hub-card__meta">
+                    <span class="hub-card__name">{{ getDisplayName(dp.author) }}</span>
+                    <span class="hub-card__time">{{ timeAgo(dp.createdAt) }}</span>
+                </div>
+                @if (dp.isRepost) {
+                <span class="hub-card__repost-badge">🔄 Repost</span>
+                }
+                @if (isOwner(dp)) {
+                <button class="hub-card__delete" (click)="deletePost(dp)" title="Xóa bài">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+                }
+            </div>
+            @if (dp.topic) {
+            <span class="hub-card__topic">#{{ dp.topic }}</span>
+            }
+            @if (dp.content) {
+            <p class="hub-card__content">{{ dp.content }}</p>
+            }
+            @if (dp.images?.length) {
+            <div class="hub-card__images" [class.hub-card__images--multi]="dp.images.length > 1">
+                @for (img of dp.images; track img) {
+                <img [src]="getImageUrl(img)" class="hub-card__img" alt="" loading="lazy" />
+                }
+            </div>
+            }
+            <div class="hub-card__actions">
+                <button class="hub-action" [class.hub-action--liked]="isLiked(dp)" (click)="toggleLike(dp)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isLiked(dp) ? '#ff3040' : 'none'"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                    <span>{{ dp.likeCount || 0 }}</span>
+                </button>
+                <button class="hub-action">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <span>{{ dp.commentCount || 0 }}</span>
+                </button>
+                <button class="hub-action" (click)="repost(dp)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 1l4 4-4 4" />
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                        <path d="M7 23l-4-4 4-4" />
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                    </svg>
+                    <span>{{ dp.repostCount || 0 }}</span>
+                </button>
+                <div class="hub-share-wrap">
+                    <button class="hub-action" (click)="toggleShareMenu(dp._id)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13" />
+                            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                        <span>{{ dp.shareCount || 0 }}</span>
+                    </button>
+                    @if (shareMenuPostId() === dp._id) {
+                    <div class="hub-share-menu">
+                        <button (click)="sharePost(dp._id, 'copy_link')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            Copy link
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="hub-detail__comments">
+            <div class="hub-detail__sort">
+                <button [class.active]="commentSort() === 'newest'"
+                    (click)="commentSort.set('newest'); loadComments(dp._id)">Mới nhất</button>
+                <button [class.active]="commentSort() === 'top'"
+                    (click)="commentSort.set('top'); loadComments(dp._id)">Top</button>
+            </div>
+
+            <!-- Comment Input -->
+            <div class="hub-comment-input">
+                <img [src]="getAvatarUrl(currentUser())" class="hub-comment-input__avatar" alt="" />
+                <input type="text" [(ngModel)]="commentText" placeholder="Viết bình luận…"
+                    (keydown.enter)="submitComment()" />
+                <button class="hub-comment-input__btn" (click)="submitComment()"
+                    [disabled]="!commentText().trim()">Gửi</button>
+            </div>
+
+            <!-- Comments List -->
+            @for (comment of detailComments(); track trackByCommentId($index, comment)) {
+            <div class="hub-comment">
+                <img [src]="getAvatarUrl(comment.author)" class="hub-comment__avatar" alt="" />
+                <div class="hub-comment__body">
+                    <div class="hub-comment__head">
+                        <span class="hub-comment__name">{{ getDisplayName(comment.author) }}</span>
+                        <span class="hub-comment__time">{{ timeAgo(comment.createdAt) }}</span>
+                        @if (currentUser()?._id === comment.author?._id) {
+                        <button class="hub-comment__delete" (click)="deleteComment(comment)" title="Xóa">✕</button>
+                        }
+                    </div>
+                    <p class="hub-comment__content">{{ comment.content }}</p>
+                    <div class="hub-comment__actions">
+                        <button (click)="toggleCommentLike(comment)"
+                            [class.liked]="comment.likes?.includes(currentUser()?._id)">
+                            ❤️ {{ comment.likeCount || 0 }}
+                        </button>
+                        <button (click)="startReply(comment)">💬 Trả lời</button>
+                    </div>
+
+                    <!-- Replies -->
+                    @if (comment.replies?.length) {
+                    @for (reply of comment.replies; track reply._id) {
+                    <div class="hub-reply">
+                        <img [src]="getAvatarUrl(reply.author)" class="hub-reply__avatar" alt="" />
+                        <div class="hub-reply__body">
+                            <span class="hub-reply__name">{{ getDisplayName(reply.author) }}</span>
+                            <span class="hub-reply__time">{{ timeAgo(reply.createdAt) }}</span>
+                            <p>{{ reply.content }}</p>
+                        </div>
+                    </div>
+                    }
+                    }
+
+                    <!-- Reply Input -->
+                    @if (replyingTo()?._id === comment._id) {
+                    <div class="hub-reply-input">
+                        <input type="text" [(ngModel)]="replyText"
+                            [placeholder]="'Trả lời ' + getDisplayName(comment.author) + '…'"
+                            (keydown.enter)="submitReply()" />
+                        <button (click)="submitReply()" [disabled]="!replyText().trim()">Gửi</button>
+                        <button class="cancel" (click)="cancelReply()">Hủy</button>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}
+
+<!-- CREATE POST MODAL -->
+@if (showCreateModal()) {
+<div class="hub-overlay" (click)="closeCreateModal()">
+    <div class="hub-create" (click)="$event.stopPropagation()">
+        <div class="hub-create__header">
+            <button class="hub-create__cancel" (click)="closeCreateModal()">Hủy</button>
+            <h3>Bài viết mới</h3>
+            <button class="hub-create__post-btn" (click)="submitPost()"
+                [disabled]="creating() || (!newPostContent().trim() && !newPostImages().length)">
+                {{ creating() ? '...' : 'Đăng' }}
+            </button>
+        </div>
+        <div class="hub-create__body">
+            <div class="hub-create__user">
+                <img [src]="getAvatarUrl(currentUser())" class="hub-create__avatar" alt="" />
+                <div>
+                    <span class="hub-create__name">{{ getDisplayName(currentUser()) }}</span>
+                    @if (newPostTopic()) {
+                    <span class="hub-create__topic-tag">> {{ newPostTopic() }}</span>
+                    } @else {
+                    <button class="hub-create__add-topic" (click)="showTopicDropdown.set(!showTopicDropdown())">Chọn chủ
+                        đề</button>
+                    }
+                </div>
+            </div>
+
+            <!-- Topic Dropdown -->
+            @if (showTopicDropdown()) {
+            <div class="hub-create__topics">
+                @for (t of topics(); track t) {
+                <button (click)="selectTopic(t)">{{ t }}</button>
+                }
+            </div>
+            }
+
+            <textarea class="hub-create__textarea" [(ngModel)]="newPostContent" placeholder="Có gì mới?" rows="4"
+                maxlength="2000"></textarea>
+
+            <!-- Image previews -->
+            @if (newPostImages().length) {
+            <div class="hub-create__previews">
+                @for (img of newPostImages(); track img; let i = $index) {
+                <div class="hub-create__preview">
+                    <img [src]="getImageUrl(img)" alt="" />
+                    <button class="hub-create__preview-remove" (click)="removeImage(i)">✕</button>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Toolbar -->
+            <div class="hub-create__toolbar">
+                <label class="hub-create__tool" title="Thêm ảnh">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <input type="file" accept="image/*" multiple hidden (change)="onImageSelect($event)" />
+                </label>
+                <button class="hub-create__tool" title="Emoji"
+                    (click)="showEmojiPicker.set(!showEmojiPicker())">😀</button>
+                <button class="hub-create__tool" title="Chọn chủ đề"
+                    (click)="showTopicDropdown.set(!showTopicDropdown())">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Emoji Picker -->
+            @if (showEmojiPicker()) {
+            <div class="hub-create__emojis">
+                @for (e of emojis; track e) {
+                <button (click)="insertEmoji(e)">{{ e }}</button>
+                }
+            </div>
+            }
+
+            @if (newPostUploading()) {
+            <div class="hub-create__uploading">Đang tải ảnh lên...</div>
+            }
+        </div>
+    </div>
+</div>
+}
+
+<!-- MAIN LAYOUT -->
+<div class="hub">
+    <div class="hub__container">
+        <!-- ─── Feed Column ─── -->
+        <main class="hub__feed">
+            <!-- Compose Bar -->
+            <div class="hub-compose" (click)="openCreateModal()">
+                <img [src]="getAvatarUrl(currentUser())" class="hub-compose__avatar" alt="" />
+                <span class="hub-compose__placeholder">Có gì mới?</span>
+                <button class="hub-compose__btn">Đăng</button>
+            </div>
+
+            <!-- Sort Tabs -->
+            <div class="hub__tabs">
+                <button [class.active]="sortMode() === 'newest'" (click)="setSort('newest')">Mới nhất</button>
+                <button [class.active]="sortMode() === 'trending'" (click)="setSort('trending')">Trending</button>
+            </div>
+
+            <!-- Active topic filter -->
+            @if (selectedTopic()) {
+            <div class="hub__filter-tag">
+                <span>#{{ selectedTopic() }}</span>
+                <button (click)="filterByTopic('')">✕</button>
+            </div>
+            }
+
+            <!-- Posts Feed -->
+            @for (post of posts(); track trackByPostId($index, post)) {
+            <div class="hub-card" (click)="openPostDetail(post._id)">
+                <div class="hub-card__head">
+                    <img [src]="getAvatarUrl(post.author)" class="hub-card__avatar" alt="" />
+                    <div class="hub-card__meta">
+                        <span class="hub-card__name">{{ getDisplayName(post.author) }}</span>
+                        <span class="hub-card__time">{{ timeAgo(post.createdAt) }}</span>
+                    </div>
+                    @if (post.isRepost) {
+                    <span class="hub-card__repost-badge">🔄</span>
+                    }
+                </div>
+                @if (post.topic) {
+                <span class="hub-card__topic" (click)="$event.stopPropagation(); filterByTopic(post.topic)">#{{
+                    post.topic }}</span>
+                }
+                @if (post.content) {
+                <p class="hub-card__content">{{ post.content }}</p>
+                }
+                @if (post.images?.length) {
+                <div class="hub-card__images" [class.hub-card__images--multi]="post.images.length > 1">
+                    @for (img of post.images; track img) {
+                    <img [src]="getImageUrl(img)" class="hub-card__img" alt="" loading="lazy" />
+                    }
+                </div>
+                }
+                <div class="hub-card__actions" (click)="$event.stopPropagation()">
+                    <button class="hub-action" [class.hub-action--liked]="isLiked(post)" (click)="toggleLike(post)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isLiked(post) ? '#ff3040' : 'none'"
+                            stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                        <span>{{ post.likeCount || 0 }}</span>
+                    </button>
+                    <button class="hub-action" (click)="openPostDetail(post._id)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span>{{ post.commentCount || 0 }}</span>
+                    </button>
+                    <button class="hub-action" (click)="repost(post)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 1l4 4-4 4" />
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                            <path d="M7 23l-4-4 4-4" />
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                        </svg>
+                        <span>{{ post.repostCount || 0 }}</span>
+                    </button>
+                    <div class="hub-share-wrap">
+                        <button class="hub-action" (click)="toggleShareMenu(post._id)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 2L11 13" />
+                                <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                            </svg>
+                        </button>
+                        @if (shareMenuPostId() === post._id) {
+                        <div class="hub-share-menu">
+                            <button (click)="sharePost(post._id, 'copy_link')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                </svg>
+                                Copy link
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- Load More -->
+            @if (page() < totalPages()) { <button class="hub__load-more" (click)="loadMore()" [disabled]="loading()">
+                {{ loading() ? 'Đang tải...' : 'Xem thêm' }}
+                </button>
+                }
+
+                @if (!loading() && !posts().length) {
+                <div class="hub__empty">
+                    <p>Chưa có bài đăng nào.</p>
+                    <button (click)="openCreateModal()">Tạo bài viết đầu tiên!</button>
+                </div>
+                }
+
+                @if (loading() && !posts().length) {
+                <div class="hub__loading">
+                    <div class="hub__spinner"></div>
+                </div>
+                }
+        </main>
+
+        <!-- ─── Sidebar ─── -->
+        <aside class="hub__sidebar">
+            <!-- Trending -->
+            <div class="hub-side-card">
+                <h3 class="hub-side-card__title">🔥 Trending</h3>
+                @for (post of trending(); track post._id) {
+                <div class="hub-trending-item" (click)="openPostDetail(post._id)">
+                    <div class="hub-trending-item__content">
+                        <span class="hub-trending-item__author">{{ getDisplayName(post.author) }}</span>
+                        <p>{{ post.content?.slice(0, 60) }}{{ post.content?.length > 60 ? '...' : '' }}</p>
+                    </div>
+                    <span class="hub-trending-item__likes">❤️ {{ post.likeCount || 0 }}</span>
+                </div>
+                }
+            </div>
+
+            <!-- Topics -->
+            <div class="hub-side-card">
+                <h3 class="hub-side-card__title">📂 Danh mục</h3>
+                <div class="hub-topics">
+                    <button class="hub-topic-btn" [class.active]="!selectedTopic()" (click)="filterByTopic('')">Tất
+                        cả</button>
+                    @for (t of topics(); track t) {
+                    <button class="hub-topic-btn" [class.active]="selectedTopic() === t" (click)="filterByTopic(t)">{{ t
+                        }}</button>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>

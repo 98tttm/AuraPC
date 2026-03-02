@@ -1,19 +1,9 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
 const Builder = require('../models/Builder');
 const { buildConfigPdf } = require('../utils/buildPdf');
+const { getEmailTransporter } = require('../utils/email');
 
 const router = express.Router();
-
-function getEmailTransporter() {
-  const user = process.env.EMAIL_USER || process.env.GMAIL_USER;
-  const pass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) return null;
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-  });
-}
 
 const STEPS = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
 

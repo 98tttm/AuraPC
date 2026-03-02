@@ -1,0 +1,78 @@
+<div class="page-header">
+  <h2>Quản lý đơn hàng</h2>
+</div>
+
+<!-- Filters -->
+<div class="filters card">
+  <div class="filters__group">
+    <input
+      type="text"
+      class="input"
+      placeholder="Tìm mã đơn, tên, SĐT..."
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="onSearch()"
+      style="max-width: 280px"
+    />
+    <select class="select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="pending">Chờ xử lý</option>
+      <option value="confirmed">Đã xác nhận</option>
+      <option value="processing">Đang xử lý</option>
+      <option value="shipped">Đang giao</option>
+      <option value="delivered">Hoàn thành</option>
+      <option value="cancelled">Đã huỷ</option>
+    </select>
+    <button class="btn btn--primary" (click)="onSearch()">Tìm</button>
+  </div>
+  <span class="filters__count">{{ total() }} đơn hàng</span>
+</div>
+
+<!-- Table -->
+<div class="card">
+  @if (loading()) {
+    <div class="loading">Đang tải...</div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Khách hàng</th>
+          <th>Sản phẩm</th>
+          <th>Tổng tiền</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order._id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/orders', order.orderNumber]" class="link">{{ order.orderNumber }}</a>
+            </td>
+            <td>{{ getCustomerName(order) }}</td>
+            <td>{{ order.items?.length || 0 }} sản phẩm</td>
+            <td class="text-bold">{{ order.total | number:'1.0-0' }}đ</td>
+            <td>
+              <span class="badge" [class]="'badge--' + order.status">{{ getStatusLabel(order.status) }}</span>
+            </td>
+            <td class="text-muted">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="text-center text-muted">Không có đơn hàng nào</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button class="pagination__btn" [disabled]="page <= 1" (click)="goToPage(page - 1)">Trước</button>
+        @for (p of [].constructor(totalPages); track $index) {
+          <button class="pagination__btn" [class.pagination__btn--active]="page === $index + 1" (click)="goToPage($index + 1)">
+            {{ $index + 1 }}
+          </button>
+        }
+        <button class="pagination__btn" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">Sau</button>
+      </div>
+    }
+  }
+</div>

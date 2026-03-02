@@ -461,18 +461,22 @@
 }
 
 .pd-btn-buy {
-  background: #FF6D2D;
+  background: #1a1a1a;
   color: #fff;
+}
+
+.pd-btn-buy:hover {
+  background: #333;
 }
 
 .pd-btn-cart {
   background: #fff;
-  border: 2px solid #FF6D2D;
-  color: #FF6D2D;
+  border: 2px solid #1a1a1a;
+  color: #1a1a1a;
 }
 
 .pd-btn-cart:hover {
-  background: rgba(255, 109, 45, 0.05);
+  background: #f5f5f5;
 }
 
 .pd-btn-title {
@@ -940,9 +944,30 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.review-score {
-  text-align: center;
-  min-width: 100px;
+/* Layout theo giao diện mẫu: Trung bình + số + sao + nút bên trái; biểu đồ bar bên phải */
+.pd-review-summary--ref {
+  align-items: flex-start;
+  gap: 2.5rem;
+}
+
+.review-summary-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 140px;
+}
+
+.review-trung-binh {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.review-big-score {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .score-number {
@@ -954,10 +979,9 @@
   margin-bottom: 0.5rem;
 }
 
-.score-stars {
-  display: flex;
-  justify-content: center;
-  gap: 2px;
+.score-number--big {
+  margin-bottom: 0;
+  font-size: 2.5rem;
 }
 
 .star {
@@ -967,6 +991,31 @@
 
 .star.filled {
   color: #FF6D2D;
+}
+
+.star--big {
+  font-size: 2rem;
+  color: #f0ad4e;
+}
+
+.star--big.filled {
+  color: #f0ad4e;
+}
+
+.review-score {
+  text-align: center;
+  min-width: 100px;
+}
+
+.score-stars {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.review-bars-wrap {
+  flex: 1;
+  max-width: 320px;
 }
 
 .review-bars {
@@ -979,6 +1028,26 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.35rem;
+}
+
+.bar-row--ref {
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.bar-row-stars {
+  display: flex;
+  gap: 1px;
+  min-width: 90px;
+}
+
+.star--sm {
+  font-size: 0.85rem;
+  color: #ddd;
+}
+
+.star--sm.filled {
+  color: #f0ad4e;
 }
 
 .bar-label {
@@ -1003,17 +1072,25 @@
 }
 
 .bar-count {
-  font-size: 0.8rem;
-  color: #888;
-  min-width: 20px;
+  font-size: 0.85rem;
+  color: #333;
+  min-width: 24px;
   text-align: right;
 }
 
 /* Review Filters */
 .review-filters {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-right: 0.25rem;
 }
 
 .review-filter-btn {
@@ -1037,6 +1114,304 @@
   background: #FF6D2D;
   color: #fff;
   border-color: #FF6D2D;
+}
+
+/* Nút lọc theo sao: nền xám nhạt */
+.review-filters--star .review-filter-btn--grey {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #555;
+}
+
+.review-filters--star .review-filter-btn--grey:hover {
+  background: #eee;
+  border-color: #ccc;
+  color: #333;
+}
+
+.review-filters--star .review-filter-btn--grey.active {
+  background: #FF6D2D;
+  color: #fff;
+  border-color: #FF6D2D;
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pd-btn-review {
+  padding: 0.5rem 1.25rem;
+  background: #FF6D2D;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pd-btn-review:hover {
+  background: #e55a1a;
+}
+
+/* Nút xanh tròn như giao diện mẫu */
+.pd-btn-review--blue {
+  padding: 0.6rem 1.5rem;
+  background: #2563eb;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.pd-btn-review--blue:hover {
+  background: #1d4ed8;
+}
+
+/* Hỏi đáp: nút + separator + lọc */
+.qa-actions {
+  margin-bottom: 1rem;
+}
+
+.qa-separator {
+  height: 1px;
+  background: #eee;
+  margin-bottom: 1rem;
+}
+
+.review-filters--qa .review-filter-btn--qa {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #555;
+}
+
+.review-filters--qa .review-filter-btn--qa:hover:not(:disabled) {
+  background: #eee;
+  border-color: #ccc;
+  color: #333;
+}
+
+.review-filters--qa .review-filter-btn--qa.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.review-hint {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Popup đánh giá / bình luận */
+.review-modal-overlay,
+.reply-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.review-modal,
+.reply-modal-box {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eee;
+}
+
+.review-modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.review-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.review-modal-close:hover {
+  color: #333;
+}
+
+.review-modal-body {
+  padding: 1.25rem;
+}
+
+.review-modal-product {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.review-modal-product-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.review-modal-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-modal-product-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.review-modal-body .review-form-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.review-star-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 0.25rem;
+}
+
+.review-modal-body textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.review-form-card {
+  padding: 1rem;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.review-form-card h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.review-form-stars {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #ddd;
+  cursor: pointer;
+  padding: 0;
+}
+
+.star-btn.filled {
+  color: #FF6D2D;
+}
+
+.review-form-card textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.form-error {
+  color: #c00;
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.review-loading {
+  padding: 1rem;
+  text-align: center;
+  color: #888;
+}
+
+.reply-btn {
+  background: none;
+  border: none;
+  color: #FF6D2D;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+
+.reply-btn:hover {
+  text-decoration: underline;
+}
+
+.replies-list {
+  margin-top: 0.75rem;
+  margin-left: 1rem;
+}
+
+.reply-form {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.reply-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.5rem;
 }
 
 /* Review Cards */

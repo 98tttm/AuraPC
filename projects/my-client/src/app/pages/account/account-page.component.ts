@@ -1,9 +1,13 @@
-import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit } from '@angular/core';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { AddressService, Address, VNLocation } from '../../core/services/address.service';
+import { ApiService, OrderListItem, Product } from '../../core/services/api.service';
+import { CartService } from '../../core/services/cart.service';
 import { environment } from '../../../environments/environment';
+
+const ORDER_NAME_STORAGE_PREFIX = 'aurapc_order_name_';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -14,9 +18,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './account-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountPageComponent {
+export class AccountPageComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private api = inject(ApiService);
+  private cart = inject(CartService);
   readonly addressService = inject(AddressService);
 
   readonly user = this.auth.currentUser;
@@ -29,12 +36,12 @@ export class AccountPageComponent {
   editDob = '';
   editAvatar = '';
 
-  // Mock orders data
-  mockOrders = [
-    { id: 'ORD-20260115001', date: '15/01/2026', status: 'Đã giao', total: 25890000, items: 2 },
-    { id: 'ORD-20260108002', date: '08/01/2026', status: 'Đang vận chuyển', total: 15200000, items: 1 },
-    { id: 'ORD-20251228003', date: '28/12/2025', status: 'Đã giao', total: 42500000, items: 3 },
-  ];
+  // Orders from API
+  orders = signal<OrderListItem[]>([]);
+  ordersLoading = signal(false);
+  orderStatusTab = signal<'all' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return'>('all');
+  orderSearch = signal('');
+  selectedOrderNumber = signal<string | null>(null);
 
   // Address modal
   showAddressModal = signal(false);
@@ -57,11 +64,37 @@ export class AccountPageComponent {
   // Delete modal
   showDeleteModal = signal(false);
 
+  // Logout confirmation
+  showLogoutModal = signal(false);
+
+  // Tên tùy chỉnh đơn hàng (key = orderId), lưu localStorage
+  orderDisplayNames = signal<Record<string, string>>({});
+  editingOrderNameId = signal<string | null>(null);
+  editingOrderNameValue = '';
+
   constructor() {
     if (!this.auth.currentUser()) {
       this.router.navigate(['/'], { queryParams: { login: '1' } });
     } else {
       this.addressService.loadProvinces();
+    }
+  }
+
+  ngOnInit(): void {
+    this.loadOrderDisplayNames();
+    // Đọc tab từ URL ngay khi load (direct link hoặc refresh)
+    this.syncTabFromUrl(this.route.snapshot.queryParams);
+    // Theo dõi thay đổi query params (khi click link hoặc navigate)
+    this.route.queryParams.subscribe((params) => this.syncTabFromUrl(params));
+  }
+
+  private syncTabFromUrl(params: Record<string, string | undefined>): void {
+    const tab = params['tab'];
+    if (tab === 'orders' || tab === 'address' || tab === 'profile') {
+      this.activeTab.set(tab);
+      this.editMode.set(false);
+      if (tab === 'address') this.addressService.load();
+      if (tab === 'orders') this.loadOrders();
     }
   }
 
@@ -111,9 +144,177 @@ export class AccountPageComponent {
   switchTab(tab: 'profile' | 'orders' | 'address') {
     this.activeTab.set(tab);
     this.editMode.set(false);
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
     if (tab === 'address') {
       this.addressService.load();
     }
+    if (tab === 'orders') {
+      this.loadOrders();
+    }
+  }
+
+  loadOrders(): void {
+    const user = this.user();
+    const userId = user?._id ?? (user as { id?: string })?.id;
+    if (!userId) return;
+    this.ordersLoading.set(true);
+    this.api.getOrdersByUser(userId).subscribe({
+      next: (list) => {
+        this.orders.set(list);
+        this.ordersLoading.set(false);
+      },
+      error: () => {
+        this.orders.set([]);
+        this.ordersLoading.set(false);
+      },
+    });
+  }
+
+  /** Status tab filter: all | processing (pending,confirmed,processing) | shipped | delivered | cancelled | return */
+  readonly orderStatusFilter = (order: OrderListItem): boolean => {
+    const tab = this.orderStatusTab();
+    if (tab === 'all') return true;
+    if (tab === 'return') return false; // no status in schema yet
+    if (tab === 'processing') return ['pending', 'confirmed', 'processing'].includes(order.status);
+    return order.status === tab;
+  };
+
+  readonly filteredOrders = computed(() => {
+    const list = this.orders();
+    const q = this.orderSearch().trim().toLowerCase();
+    let filtered = list.filter((o) => this.orderStatusFilter(o));
+    if (q) {
+      filtered = filtered.filter(
+        (o) =>
+          o.orderNumber.toLowerCase().includes(q) ||
+          (o.items?.some((i) => (i.name || '').toLowerCase().includes(q)) ?? false)
+      );
+    }
+    return filtered;
+  });
+
+  setOrderStatusTab(tab: 'all' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return'): void {
+    this.orderStatusTab.set(tab);
+  }
+
+  orderStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      pending: 'Đang xử lý',
+      confirmed: 'Đang xử lý',
+      processing: 'Đang xử lý',
+      shipped: 'Đang vận chuyển',
+      delivered: 'Đã giao',
+      cancelled: 'Đã hủy',
+    };
+    return map[status] ?? status;
+  }
+
+  orderStatusClass(status: string): string {
+    if (status === 'delivered') return 'status--delivered';
+    if (status === 'shipped') return 'status--shipping';
+    if (status === 'cancelled') return 'status--cancelled';
+    return 'status--pending';
+  }
+
+  formatOrderDate(createdAt: string | undefined): string {
+    if (!createdAt) return '—';
+    const d = new Date(createdAt);
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  orderItemCount(order: OrderListItem): number {
+    return order.items?.reduce((sum, i) => sum + (i.qty || 1), 0) ?? 0;
+  }
+
+  openOrderDetail(orderNumber: string): void {
+    this.selectedOrderNumber.set(orderNumber);
+  }
+
+  cancelOrder(order: OrderListItem): void {
+    if (!confirm('Bạn có chắc muốn hủy đơn hàng #ORD-' + order.orderNumber + '?')) return;
+    // TODO: gọi API hủy đơn khi backend có endpoint
+    alert('Chức năng hủy đơn đang được cập nhật. Vui lòng liên hệ hỗ trợ.');
+  }
+
+  repurchaseOrder(order: OrderListItem): void {
+    const items = order.items ?? [];
+    for (const item of items) {
+      const product = item?.product;
+      const qty = Math.max(1, Number(item?.qty) || 1);
+      if (product && typeof product === 'object' && ('_id' in product || 'id' in product)) {
+        this.cart.add(product as Product, qty);
+      }
+    }
+    this.router.navigate(['/cart']);
+  }
+
+  closeOrderDetail(): void {
+    this.selectedOrderNumber.set(null);
+  }
+
+  readonly selectedOrderDetail = computed(() => {
+    const num = this.selectedOrderNumber();
+    if (!num) return null;
+    return this.orders().find((o) => o.orderNumber === num) ?? null;
+  });
+
+  /** Tên đơn hàng mặc định: "Đơn hàng ngày DD/MM/YYYY" */
+  getOrderDisplayNameDefault(createdAt: string | undefined): string {
+    const d = this.formatOrderDate(createdAt);
+    return d === '—' ? 'Đơn hàng' : `Đơn hàng ngày ${d}`;
+  }
+
+  getOrderDisplayName(orderId: string, createdAt: string | undefined): string {
+    const custom = this.orderDisplayNames()[orderId];
+    if (custom?.trim()) return custom.trim();
+    return this.getOrderDisplayNameDefault(createdAt);
+  }
+
+  loadOrderDisplayNames(): void {
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(ORDER_NAME_STORAGE_PREFIX + 'all') : null;
+      const obj = raw ? JSON.parse(raw) as Record<string, string> : {};
+      this.orderDisplayNames.set(obj);
+    } catch {
+      this.orderDisplayNames.set({});
+    }
+  }
+
+  private saveOrderDisplayNames(names: Record<string, string>): void {
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(ORDER_NAME_STORAGE_PREFIX + 'all', JSON.stringify(names));
+    } catch {}
+    this.orderDisplayNames.set({ ...names });
+  }
+
+  startEditOrderName(detail: OrderListItem): void {
+    this.editingOrderNameId.set(detail._id);
+    this.editingOrderNameValue = this.getOrderDisplayName(detail._id, detail.createdAt);
+  }
+
+  saveOrderName(orderId: string): void {
+    const val = this.editingOrderNameValue?.trim();
+    const names = { ...this.orderDisplayNames() };
+    if (val) names[orderId] = val;
+    else delete names[orderId];
+    this.saveOrderDisplayNames(names);
+    this.editingOrderNameId.set(null);
+  }
+
+  cancelEditOrderName(): void {
+    this.editingOrderNameId.set(null);
+  }
+
+  /** Ảnh sản phẩm trong đơn (item.product.images), trả về URL đầy đủ nếu là path */
+  orderItemImage(item: OrderListItem['items'][0]): string {
+    const p = item.product as { images?: unknown[] } | undefined;
+    if (!p?.images?.length) return '';
+    const first = p.images[0];
+    const url = typeof first === 'string' ? first : (first as { url?: string })?.url ?? '';
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    return base + (url.startsWith('/') ? url : '/' + url);
   }
 
   startEdit() {
@@ -157,6 +358,20 @@ export class AccountPageComponent {
       },
       error: (err) => alert('Lỗi cập nhật: ' + (err.message || 'Không xác định'))
     });
+  }
+
+  openLogoutConfirm(): void {
+    this.showLogoutModal.set(true);
+  }
+
+  closeLogoutConfirm(): void {
+    this.showLogoutModal.set(false);
+  }
+
+  confirmLogout(): void {
+    this.showLogoutModal.set(false);
+    this.auth.logout();
+    this.router.navigate(['/']);
   }
 
   logout(): void {

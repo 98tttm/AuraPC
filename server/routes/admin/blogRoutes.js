@@ -1,7 +1,9 @@
 const express = require('express');
 const Blog = require('../../models/Blog');
+const { requireAdmin } = require('../../middleware/auth');
 
 const router = express.Router();
+router.use(requireAdmin);
 
 router.get('/', async (req, res) => {
   try {

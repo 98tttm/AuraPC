@@ -1,3 +1,4 @@
+// AuraPC Routes
 import { Routes } from '@angular/router';
 import { HomepageComponent } from './pages/homepage/homepage.component';
 import { ProductListComponent } from './pages/product-list/product-list.component';
@@ -24,8 +25,8 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/checkout-qr-payment/checkout-qr-payment.component').then((m) => m.CheckoutQrPaymentComponent),
   },
   {
-    path: 'checkout-momo-payment',
-    loadComponent: () => import('./pages/checkout-momo-payment/checkout-momo-payment.component').then((m) => m.CheckoutMomoPaymentComponent),
+    path: 'checkout-momo-return',
+    loadComponent: () => import('./pages/checkout-momo-return/checkout-momo-return.component').then((m) => m.CheckoutMomoReturnComponent),
   },
   {
     path: 'checkout-zalopay-payment',
@@ -54,6 +55,14 @@ export const routes: Routes = [
   {
     path: 'aura-builder/:id',
     loadComponent: () => import('./pages/builder/aura-builder.component').then(m => m.AuraBuilderComponent),
+  },
+  {
+    path: 'aura-hub',
+    loadComponent: () => import('./pages/aura-hub/aura-hub.component').then(m => m.AuraHubComponent),
+  },
+  {
+    path: 'aura-hub/:postId',
+    loadComponent: () => import('./pages/aura-hub/aura-hub.component').then(m => m.AuraHubComponent),
   },
   { path: '**', redirectTo: '' },
 ];

@@ -1,7 +1,9 @@
 const express = require('express');
 const Category = require('../../models/Category');
+const { requireAdmin } = require('../../middleware/auth');
 
 const router = express.Router();
+router.use(requireAdmin);
 
 router.get('/', async (req, res) => {
   try {

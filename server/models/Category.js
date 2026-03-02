@@ -23,7 +23,7 @@ const categorySchema = new mongoose.Schema(
     display_order: { type: Number, default: 0 },
     meta: { type: mongoose.Schema.Types.Mixed, default: {} },
   },
-  { timestamps: true, strict: false }
+  { timestamps: true, strict: true }
 );
 
 categorySchema.index({ slug: 1 });

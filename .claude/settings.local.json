@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng:*)",
+      "mcp__claude_ai_Figma__get_metadata",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:dish-amity-20127371.figma.site)",
+      "WebFetch(domain:shopify.dev)",
+      "WebSearch",
+      "WebFetch(domain:polaris.shopify.com)",
+      "WebFetch(domain:polaris-react.shopify.com)",
+      "Bash(ls:*)"
+    ]
+  }
+}

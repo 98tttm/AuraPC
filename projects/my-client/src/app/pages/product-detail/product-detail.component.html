@@ -97,11 +97,11 @@
         </div>
 
         <div class="pd-actions">
-          <button class="pd-btn pd-btn-buy">
+          <button class="pd-btn pd-btn-buy" (click)="buyNow()">
             <span class="pd-btn-title">MUA NGAY</span>
             <span class="pd-btn-desc">Giao hàng tận nơi hoặc nhận tại cửa hàng</span>
           </button>
-          <button class="pd-btn pd-btn-cart">
+          <button class="pd-btn pd-btn-cart" (click)="addToCart()">
             <span class="pd-btn-title">THÊM VÀO GIỎ</span>
             <span class="pd-btn-desc">Thêm vào giỏ để chọn tiếp</span>
           </button>
@@ -204,22 +204,32 @@
 
     <!-- Reviews Section -->
     <div class="pd-reviews-section">
-      <h2 class="pd-section-title">Đánh giá sản phẩm <span class="review-count-badge">{{ mockReviews.length }} đánh
-          giá</span></h2>
+      <h2 class="pd-section-title">Đánh giá sản phẩm <span class="review-count-badge">({{ reviewsData()?.reviewCount ??
+          0 }} đánh giá)</span></h2>
 
-      <div class="pd-review-summary">
-        <div class="review-score">
-          <span class="score-number">{{ avgRating.toFixed(1) }}</span>
-          <div class="score-stars">
-            @for (star of [1,2,3,4,5]; track star) {
-            <span class="star" [class.filled]="star <= avgRating">★</span>
-            }
+      <div class="pd-review-summary pd-review-summary--ref">
+        <div class="review-summary-left">
+          <p class="review-trung-binh">Trung bình</p>
+          <div class="review-big-score">
+            <span class="score-number score-number--big">{{ avgRating().toFixed(0) }}</span>
+            <span class="star star--big" [class.filled]="avgRating() >= 1">★</span>
           </div>
+          <button type="button" class="pd-btn pd-btn-review pd-btn-review--blue" (click)="openReviewForm()"
+            [disabled]="isLoggedIn() && !canReview() && !canReviewLoading()">
+            Gửi đánh giá
+          </button>
+          @if (!canReview() && isLoggedIn()) {
+          <span class="review-hint">Chỉ khách hàng đã mua và nhận hàng mới được đánh giá.</span>
+          }
         </div>
-        <div class="review-bars">
-          @for (bar of ratingBars; track bar.star) {
-          <div class="bar-row">
-            <span class="bar-label">{{ bar.star }} ★</span>
+        <div class="review-bars-wrap">
+          @for (bar of ratingBars(); track bar.star) {
+          <div class="bar-row bar-row--ref">
+            <div class="bar-row-stars">
+              @for (s of [1,2,3,4,5]; track s) {
+              <span class="star star--sm" [class.filled]="s <= bar.star">★</span>
+              }
+            </div>
             <div class="bar-track">
               <div class="bar-fill" [style.width.%]="bar.percent"></div>
             </div>
@@ -229,81 +239,229 @@
         </div>
       </div>
 
-      <!-- Review Filter -->
-      <div class="review-filters">
-        <button class="review-filter-btn" [class.active]="reviewFilter === 'all'" (click)="reviewFilter = 'all'">Tất
-          cả</button>
-        <button class="review-filter-btn" [class.active]="reviewFilter === 'newest'"
-          (click)="reviewFilter = 'newest'">Mới nhất</button>
-        <button class="review-filter-btn" [class.active]="reviewFilter === 'photo'" (click)="reviewFilter = 'photo'">Có
-          ảnh</button>
+      <!-- Lọc theo sao -->
+      <div class="review-filters review-filters--star">
+        <span class="filter-label">Lọc theo:</span>
+        <button class="review-filter-btn review-filter-btn--grey" [class.active]="reviewStarFilter() === null"
+          (click)="onReviewStarFilter(null)">Tất cả</button>
+        @for (s of [5,4,3,2,1]; track s) {
+        <button class="review-filter-btn review-filter-btn--grey" [class.active]="reviewStarFilter() === s"
+          (click)="onReviewStarFilter(s)">{{ s }} sao</button>
+        }
       </div>
 
-      <!-- Review List -->
+      <!-- Popup đánh giá -->
+      @if (showReviewForm()) {
+      <div class="review-modal-overlay" (click)="closeReviewPopup()">
+        <div class="review-modal" (click)="$event.stopPropagation()">
+          <div class="review-modal-header">
+            <h3 class="review-modal-title">Đánh giá sản phẩm</h3>
+            <button type="button" class="review-modal-close" (click)="closeReviewPopup()" aria-label="Đóng">×</button>
+          </div>
+          <div class="review-modal-body">
+            <div class="review-modal-product">
+              <img [src]="mainImage(p)" [alt]="p.name" class="review-modal-product-img" />
+              <div class="review-modal-product-info">
+                <span class="review-modal-product-name">{{ p.name }}</span>
+              </div>
+            </div>
+            <div class="review-form-stars">
+              @for (star of [1,2,3,4,5]; track star) {
+              <button type="button" class="star-btn" [class.filled]="star <= reviewRating"
+                (click)="reviewRating = star">★</button>
+              }
+              <span class="review-star-label">{{ ratingLabel(reviewRating) }}</span>
+            </div>
+            <textarea [(ngModel)]="reviewContent"
+              placeholder="Nhập nội dung đánh giá (Vui lòng gõ tiếng Việt có dấu)..."
+              rows="4"></textarea>
+            @if (submitError()) {
+            <p class="form-error">{{ submitError() }}</p>
+            }
+            <div class="form-actions">
+              <button class="pd-btn pd-btn-buy" (click)="submitReview()" [disabled]="submitLoading()">Gửi</button>
+              <button class="pd-btn pd-btn-cart" (click)="closeReviewPopup()">Hủy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      @if (reviewsLoading()) {
+      <div class="review-loading">Đang tải đánh giá...</div>
+      } @else {
       <div class="review-list">
-        @for (review of mockReviews; track review.id) {
+        @for (review of reviews(); track review._id) {
         <div class="review-card">
           <div class="review-header">
-            <div class="review-avatar">{{ review.name.charAt(0) }}</div>
+            <div class="review-avatar">{{ userDisplayName(review).charAt(0) }}</div>
             <div class="review-meta">
-              <span class="review-name">{{ review.name }}</span>
-              <span class="review-date">{{ review.date }}</span>
+              <span class="review-name">{{ userDisplayName(review) }}</span>
+              <span class="review-date">{{ formatDate(review.createdAt) }}</span>
             </div>
             <div class="review-stars-small">
               @for (star of [1,2,3,4,5]; track star) {
-              <span class="star-sm" [class.filled]="star <= review.rating">★</span>
+              <span class="star-sm" [class.filled]="star <= (review.rating ?? 0)">★</span>
               }
             </div>
           </div>
-          <p class="review-text">{{ review.text }}</p>
-        </div>
-        }
-      </div>
-    </div>
-
-    <!-- Q&A Section -->
-    <div class="pd-qa-section">
-      <h2 class="pd-section-title">Đánh giá hỏi đáp <span class="review-count-badge">{{ mockQA.length }} bình
-          luận</span></h2>
-
-      <div class="review-filters">
-        <button class="review-filter-btn" [class.active]="qaFilter === 'all'" (click)="qaFilter = 'all'">Tất cả</button>
-        <button class="review-filter-btn" [class.active]="qaFilter === 'newest'" (click)="qaFilter = 'newest'">Mới
-          nhất</button>
-        <button class="review-filter-btn" [class.active]="qaFilter === 'photo'" (click)="qaFilter = 'photo'">Có
-          ảnh</button>
-      </div>
-
-      <div class="qa-list">
-        @for (qa of mockQA; track qa.id) {
-        <div class="qa-card">
-          <div class="qa-question">
-            <div class="qa-avatar">{{ qa.name.charAt(0) }}</div>
-            <div class="qa-content">
-              <div class="qa-user-info">
-                <span class="qa-name">{{ qa.name }}</span>
-                <span class="qa-date">{{ qa.date }}</span>
+          <p class="review-text">{{ review.content }}</p>
+          <button class="reply-btn" (click)="openReply(review._id)">Trả lời</button>
+          @if (review.replies?.length) {
+          <div class="replies-list">
+            @for (r of review.replies; track r._id) {
+            <div class="qa-reply">
+              <div class="qa-reply-indicator">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 10h10a5 5 0 0 1 0 10h-2" />
+                  <polyline points="7 14 3 10 7 6" />
+                </svg>
               </div>
-              <p class="qa-text">{{ qa.question }}</p>
+              <div class="qa-reply-content">
+                <span class="qa-reply-author">{{ userDisplayName(r) }}</span>
+                <p class="qa-reply-text">{{ r.content }}</p>
+              </div>
             </div>
+            }
           </div>
-          @if (qa.reply) {
-          <div class="qa-reply">
-            <div class="qa-reply-indicator">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 10h10a5 5 0 0 1 0 10h-2" />
-                <polyline points="7 14 3 10 7 6" />
-              </svg>
-            </div>
-            <div class="qa-reply-content">
-              <span class="qa-reply-author">Admin - Aura PC</span>
-              <p class="qa-reply-text">{{ qa.reply }}</p>
+          }
+          @if (replyTargetId() === review._id) {
+          <div class="reply-modal-overlay" (click)="closeReplyPopup()">
+            <div class="review-modal reply-modal-box" (click)="$event.stopPropagation()">
+              <div class="review-modal-header">
+                <h3 class="review-modal-title">Người bình luận: {{ currentUserDisplayName() }}</h3>
+                <button type="button" class="review-modal-close" (click)="closeReplyPopup()"
+                  aria-label="Đóng">×</button>
+              </div>
+              <div class="review-modal-body">
+                <textarea [(ngModel)]="replyContent"
+                  placeholder="Nhập nội dung trả lời (Vui lòng gõ tiếng Việt có dấu)..." rows="4"></textarea>
+                @if (submitError()) {
+                <p class="form-error">{{ submitError() }}</p>
+                }
+                <div class="form-actions">
+                  <button class="pd-btn pd-btn-buy" (click)="submitReply()" [disabled]="submitLoading()">Gửi</button>
+                  <button class="pd-btn pd-btn-cart" (click)="closeReplyPopup()">Hủy</button>
+                </div>
+              </div>
             </div>
           </div>
           }
         </div>
         }
       </div>
+      }
+    </div>
+
+    <!-- Q&A Section -->
+    <div class="pd-qa-section">
+      <h2 class="pd-section-title">Hỏi đáp <span class="review-count-badge">({{ reviewsData()?.commentCount ?? 0 }} bình
+          luận)</span></h2>
+
+      <div class="qa-actions">
+        <button type="button" class="pd-btn pd-btn-review pd-btn-review--blue" (click)="openCommentForm()">Gửi bình
+          luận</button>
+      </div>
+      <div class="qa-separator"></div>
+      <div class="review-filters review-filters--qa">
+        <span class="filter-label">Lọc theo:</span>
+        <button class="review-filter-btn review-filter-btn--qa" [class.active]="qaSort() === 'newest'"
+          (click)="onQaSortChange('newest')">
+          Mới nhất
+        </button>
+        <button class="review-filter-btn review-filter-btn--qa" [class.active]="qaSort() === 'oldest'"
+          (click)="onQaSortChange('oldest')">
+          Cũ nhất
+        </button>
+        <button class="review-filter-btn review-filter-btn--qa" [class.active]="false" disabled title="Sắp có">
+          Hữu ích nhất
+        </button>
+      </div>
+
+      <!-- Popup bình luận -->
+      @if (showCommentForm()) {
+      <div class="review-modal-overlay" (click)="closeCommentPopup()">
+        <div class="review-modal" (click)="$event.stopPropagation()">
+          <div class="review-modal-header">
+            <h3 class="review-modal-title">Người bình luận: {{ currentUserDisplayName() }}</h3>
+            <button type="button" class="review-modal-close" (click)="closeCommentPopup()" aria-label="Đóng">×</button>
+          </div>
+          <div class="review-modal-body">
+            <textarea [(ngModel)]="commentContent"
+              placeholder="Nhập nội dung bình luận (Vui lòng gõ tiếng Việt có dấu)..." rows="4"></textarea>
+            @if (submitError()) {
+            <p class="form-error">{{ submitError() }}</p>
+            }
+            <div class="form-actions">
+              <button class="pd-btn pd-btn-buy" (click)="submitComment()" [disabled]="submitLoading()">Gửi</button>
+              <button class="pd-btn pd-btn-cart" (click)="closeCommentPopup()">Hủy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      @if (reviewsLoading()) {
+      <div class="review-loading">Đang tải bình luận...</div>
+      } @else {
+      <div class="qa-list">
+        @for (qa of comments(); track qa._id) {
+        <div class="qa-card">
+          <div class="qa-question">
+            <div class="qa-avatar">{{ userDisplayName(qa).charAt(0) }}</div>
+            <div class="qa-content">
+              <div class="qa-user-info">
+                <span class="qa-name">{{ userDisplayName(qa) }}</span>
+                <span class="qa-date">{{ formatDate(qa.createdAt) }}</span>
+              </div>
+              <p class="qa-text">{{ qa.content }}</p>
+            </div>
+          </div>
+          @if (qa.replies?.length) {
+          <div class="replies-list">
+            @for (r of qa.replies; track r._id) {
+            <div class="qa-reply">
+              <div class="qa-reply-indicator">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 10h10a5 5 0 0 1 0 10h-2" />
+                  <polyline points="7 14 3 10 7 6" />
+                </svg>
+              </div>
+              <div class="qa-reply-content">
+                <span class="qa-reply-author">{{ userDisplayName(r) }}</span>
+                <p class="qa-reply-text">{{ r.content }}</p>
+              </div>
+            </div>
+            }
+          </div>
+          }
+          <button class="reply-btn" (click)="openReply(qa._id)">Trả lời</button>
+          @if (replyTargetId() === qa._id) {
+          <div class="reply-modal-overlay" (click)="closeReplyPopup()">
+            <div class="review-modal reply-modal-box" (click)="$event.stopPropagation()">
+              <div class="review-modal-header">
+                <h3 class="review-modal-title">Người bình luận: {{ currentUserDisplayName() }}</h3>
+                <button type="button" class="review-modal-close" (click)="closeReplyPopup()"
+                  aria-label="Đóng">×</button>
+              </div>
+              <div class="review-modal-body">
+                <textarea [(ngModel)]="replyContent"
+                  placeholder="Nhập nội dung trả lời (Vui lòng gõ tiếng Việt có dấu)..." rows="4"></textarea>
+                @if (submitError()) {
+                <p class="form-error">{{ submitError() }}</p>
+                }
+                <div class="form-actions">
+                  <button class="pd-btn pd-btn-buy" (click)="submitReply()" [disabled]="submitLoading()">Gửi</button>
+                  <button class="pd-btn pd-btn-cart" (click)="closeReplyPopup()">Hủy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
     </div>
 
     <!-- Recently Viewed -->

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
@@ -8,17 +8,18 @@ import { ToastService } from '../../core/services/toast.service';
 import { Location } from '@angular/common';
 import { AddressService, Address, VNLocation } from '../../core/services/address.service';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
+import { CodOtpDialogComponent } from '../../components/cod-otp-dialog/cod-otp-dialog.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, CheckoutStepperComponent],
+  imports: [CommonModule, FormsModule, RouterLink, CheckoutStepperComponent, CodOtpDialogComponent],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
 })
-export class CheckoutComponent implements OnInit, OnDestroy {
-  @ViewChildren('codOtpInput') codOtpInputs!: QueryList<ElementRef<HTMLInputElement>>;
+export class CheckoutComponent implements OnInit {
+  @ViewChild('codOtpDialog') codOtpDialog!: CodOtpDialogComponent;
 
   private cart = inject(CartService);
   private api = inject(ApiService);
@@ -45,7 +46,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   paymentMethod = 'cod';
   requestInvoice = false;
   invoiceEmail = '';
-  invoiceType = 'personal'; // 'personal' or 'company'
+  invoiceType: 'personal' | 'company' = 'personal';
 
   // Selected saved address ID
   selectedAddressId = '';
@@ -75,11 +76,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   /** COD: popup xác nhận OTP */
   showCodOtpPopup = signal(false);
   codOtpPhone = '';
-  codOtpValue = signal('');
-  codOtpError = signal<string | null>(null);
-  codOtpExpiresAt = signal(0);
-  codOtpCountdownSeconds = signal(0);
-  private codCountdownInterval: ReturnType<typeof setInterval> | null = null;
 
 
   // Cart data
@@ -361,22 +357,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // QR / MoMo / ZaloPay / ATM: không tạo đơn ngay — lưu payload + summary, chuyển sang trang thanh toán tương ứng.
-    if (this.paymentMethod === 'qr' || this.paymentMethod === 'momo' || this.paymentMethod === 'zalopay' || this.paymentMethod === 'atm') {
+    // QR / ZaloPay: không tạo đơn ngay — lưu payload + summary, chuyển sang trang thanh toán tương ứng.
+    if (this.paymentMethod === 'qr' || this.paymentMethod === 'zalopay') {
       const payload = this.buildOrderPayload();
       const summary = {
         originalTotal: this.originalTotal(),
         directDiscount: this.directDiscount(),
         amount: this.selectedTotal(),
       };
-      const storageKey = this.paymentMethod === 'qr' ? 'aurapc_qr_pending'
-        : this.paymentMethod === 'momo' ? 'aurapc_momo_pending'
-        : this.paymentMethod === 'zalopay' ? 'aurapc_zalopay_pending'
-        : 'aurapc_atm_pending';
-      const route = this.paymentMethod === 'qr' ? '/checkout-qr-payment'
-        : this.paymentMethod === 'momo' ? '/checkout-momo-payment'
-        : this.paymentMethod === 'zalopay' ? '/checkout-zalopay-payment'
-        : '/checkout-atm-payment';
+      const storageKey = this.paymentMethod === 'qr' ? 'aurapc_qr_pending' : 'aurapc_zalopay_pending';
+      const route = this.paymentMethod === 'qr' ? '/checkout-qr-payment' : '/checkout-zalopay-payment';
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({ ...payload, ...summary }));
         sessionStorage.setItem('aurapc_checkout_payment_method', this.paymentMethod);
@@ -385,6 +375,33 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         return;
       }
       this.router.navigate([route], { queryParams: { amount: this.selectedTotal() } });
+      return;
+    }
+
+    // MoMo / ATM (qua MoMo): Khởi tạo thanh toán với server và redirect tới payUrl của MoMo
+    if (this.paymentMethod === 'momo' || this.paymentMethod === 'atm') {
+      this.submitting.set(true);
+      const payload = this.buildOrderPayload();
+      this.api.createMoMoPayment({
+        items: payload.items,
+        shippingAddress: payload.shippingAddress,
+        paymentMethod: this.paymentMethod,
+        directDiscount: this.directDiscount(),
+      }).subscribe({
+        next: (res) => {
+          if (res.payUrl) {
+            // Chuyển hướng người dùng qua cổng MoMo
+            window.location.href = res.payUrl;
+          } else {
+            this.submitting.set(false);
+            this.errorMessage.set('Không nhận được URL thanh toán từ MoMo.');
+          }
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.errorMessage.set(err?.error?.message || 'Lỗi khi khởi tạo thanh toán MoMo.');
+        }
+      });
       return;
     }
 
@@ -401,13 +418,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.submitting.set(false);
           if (res.devOtp) this.toast.showOtp(res.devOtp);
           this.codOtpPhone = phone;
-          this.codOtpValue.set('');
-          this.codOtpError.set(null);
-          const expiresAt = Date.now() + 5 * 60 * 1000;
-          this.codOtpExpiresAt.set(expiresAt);
-          this.startCodCountdown(expiresAt);
           this.showCodOtpPopup.set(true);
-          setTimeout(() => this.focusCodOtpInput(0), 100);
+          // Start countdown in the dialog after it renders
+          setTimeout(() => this.codOtpDialog?.startCountdown(), 50);
         },
         error: (err) => {
           this.submitting.set(false);
@@ -421,7 +434,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   /** Build payload cho createOrder (dùng cho QR pending và doCreateOrder). */
-  private buildOrderPayload(): { items: { product: string; name: string; price: number; qty: number }[]; shippingAddress: Record<string, string> } {
+  private buildOrderPayload(): {
+    items: { product: string; name: string; price: number; qty: number }[];
+    shippingAddress: Record<string, string>;
+    requestInvoice?: boolean;
+    invoiceEmail?: string;
+    invoiceType?: 'personal' | 'company';
+  } {
     const items = this.cartItems().map(i => ({
       product: i.product._id!,
       name: i.product.name,
@@ -438,20 +457,37 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       ward: this.ward,
       note: this.requestInvoice ? '[Yêu cầu HĐĐT - ' + (this.invoiceType === 'company' ? 'Công ty' : 'Cá nhân') + '] ' + this.note : this.note,
     };
-    return { items, shippingAddress };
+    const payload: {
+      items: typeof items;
+      shippingAddress: Record<string, string>;
+      requestInvoice?: boolean;
+      invoiceEmail?: string;
+      invoiceType?: 'personal' | 'company';
+    } = { items, shippingAddress };
+    if (this.requestInvoice && this.invoiceEmail?.trim()) {
+      payload.requestInvoice = true;
+      payload.invoiceEmail = this.invoiceEmail.trim();
+      payload.invoiceType = this.invoiceType;
+    }
+    return payload;
   }
 
   /** Tạo đơn hàng (gọi trực tiếp khi không COD, hoặc sau khi xác thực OTP COD). */
   doCreateOrder(): void {
-    const { items, shippingAddress } = this.buildOrderPayload();
+    const payload = this.buildOrderPayload();
+    const { items, shippingAddress, requestInvoice, invoiceEmail, invoiceType } = payload;
     this.submitting.set(true);
+    const user = this.auth.currentUser();
+    const userId = user?._id ?? (user as { id?: string })?.id;
     this.api.createOrder({
       items,
       shippingAddress,
+      user: userId ?? undefined,
+      ...(requestInvoice && invoiceEmail ? { requestInvoice: true, invoiceEmail, invoiceType } : {}),
     }).subscribe({
       next: (res) => {
         this.cart.clear();
-        try { sessionStorage.removeItem('aurapc_checkout_payment_method'); } catch {}
+        try { sessionStorage.removeItem('aurapc_checkout_payment_method'); } catch { }
         this.router.navigate(['/checkout-success'], { queryParams: { order: res.orderNumber } });
       },
       error: (err) => {
@@ -461,83 +497,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.stopCodCountdown();
-  }
-
   closeCodOtpPopup(): void {
     this.showCodOtpPopup.set(false);
-    this.codOtpValue.set('');
-    this.codOtpError.set(null);
-    this.stopCodCountdown();
   }
 
-  codCountdownText(): string {
-    const s = this.codOtpCountdownSeconds();
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, '0')}`;
-  }
-
-  private startCodCountdown(expiresAt: number): void {
-    this.stopCodCountdown();
-    const tick = () => {
-      const left = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
-      this.codOtpCountdownSeconds.set(left);
-      if (left <= 0) this.stopCodCountdown();
-    };
-    tick();
-    this.codCountdownInterval = setInterval(tick, 1000);
-  }
-
-  private stopCodCountdown(): void {
-    if (this.codCountdownInterval) {
-      clearInterval(this.codCountdownInterval);
-      this.codCountdownInterval = null;
-    }
-    this.codOtpCountdownSeconds.set(0);
-  }
-
-  getCodOtpDigit(index: number): string {
-    const s = this.codOtpValue();
-    return index >= 0 && index < s.length ? s[index] : '';
-  }
-
-  setCodOtpDigit(index: number, value: string): void {
-    const v = value.replace(/\D/g, '').slice(0, 1);
-    const cur = this.codOtpValue().split('');
-    while (cur.length < 6) cur.push('');
-    cur[index] = v;
-    this.codOtpValue.set(cur.join(''));
-    if (v && index < 5) setTimeout(() => this.focusCodOtpInput(index + 1), 0);
-  }
-
-  focusCodOtpInput(index: number): void {
-    const list = this.codOtpInputs;
-    if (list && index >= 0 && index < list.length) list.get(index)?.nativeElement.focus();
-  }
-
-  onCodOtpKeydown(event: KeyboardEvent, index: number): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.onCodOtpSubmit();
-      return;
-    }
-    if (event.key === 'Backspace' && !this.getCodOtpDigit(index) && index > 0) {
-      const cur = this.codOtpValue().split('');
-      cur[index - 1] = '';
-      this.codOtpValue.set(cur.join(''));
-      setTimeout(() => this.focusCodOtpInput(index - 1), 0);
-    }
-  }
-
-  onCodOtpSubmit(): void {
-    this.codOtpError.set(null);
-    const otp = this.codOtpValue().replace(/\D/g, '');
-    if (otp.length !== 6) {
-      this.codOtpError.set('Vui lòng nhập đủ 6 chữ số.');
-      return;
-    }
+  /** Called when CodOtpDialogComponent emits verified OTP code */
+  onOtpVerified(otp: string): void {
     this.submitting.set(true);
     this.auth.verifyOtp(this.codOtpPhone, otp).subscribe({
       next: () => {
@@ -546,22 +511,24 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.submitting.set(false);
-        this.codOtpError.set(err?.error?.message || 'Mã xác thực không đúng. Vui lòng thử lại.');
+        if (this.codOtpDialog) {
+          this.codOtpDialog.error.set(err?.error?.message || 'Mã xác thực không đúng. Vui lòng thử lại.');
+        }
       },
     });
   }
 
-  resendCodOtp(): void {
-    this.codOtpError.set(null);
+  /** Called when CodOtpDialogComponent requests OTP resend */
+  onResendOtp(): void {
     this.auth.requestOtp(this.codOtpPhone).subscribe({
       next: (res) => {
         if (res.devOtp) this.toast.showOtp(res.devOtp);
-        const expiresAt = Date.now() + 5 * 60 * 1000;
-        this.codOtpExpiresAt.set(expiresAt);
-        this.startCodCountdown(expiresAt);
+        this.codOtpDialog?.startCountdown();
       },
       error: (err) => {
-        this.codOtpError.set(err?.error?.message || 'Không gửi lại được mã.');
+        if (this.codOtpDialog) {
+          this.codOtpDialog.error.set(err?.error?.message || 'Không gửi lại được mã.');
+        }
       },
     });
   }

@@ -1,19 +1,27 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, effect } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ApiService, Product, productMainImage, productDisplayPrice, productHasSale, productSalePercent } from '../../core/services/api.service';
+import { ApiService, Product, ProductReviewItem, ProductReviewsResponse, productMainImage, productDisplayPrice, productHasSale, productSalePercent } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
+import { CartService } from '../../core/services/cart.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDetailComponent {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private api = inject(ApiService);
+  private auth = inject(AuthService);
+  private cart = inject(CartService);
+  private toast = inject(ToastService);
   private sanitizer = inject(DomSanitizer);
 
   product = signal<Product | null>(null);
@@ -24,62 +32,63 @@ export class ProductDetailComponent {
   showSpecsModal = signal(false);
   relatedProducts = signal<Product[]>([]);
 
-  // Review & QA filters
-  reviewFilter = 'all';
-  qaFilter = 'all';
+  // Đánh giá: lọc theo sao (null = tất cả)
+  reviewStarFilter = signal<number | null>(null);
+  // Hỏi đáp: sắp xếp Mới nhất / Cũ nhất
+  qaSort = signal<'newest' | 'oldest'>('newest');
+  reviewsData = signal<ProductReviewsResponse | null>(null);
+  reviewsLoading = signal(false);
+  canReview = signal(false);
+  canReviewLoading = signal(false);
 
-  // Mock reviews data
-  mockReviews = [
-    {
-      id: 1, name: 'Quốc NC', date: '15/01/2026', rating: 5,
-      text: 'Thiết bị rất tốt, chạy mượt các tác vụ từ làm việc đến chơi game. Máy được lắp ráp gọn gàng, hiệu năng cao với hệ thống làm mát hiệu quả. Nhận được hỗ trợ tận tình, 5 sao nhé.'
-    },
-    {
-      id: 2, name: 'An Phạm', date: '12/01/2026', rating: 5,
-      text: 'PC dùng rất mạnh mẽ, chạy mượt đa tác vụ và kể cả đồ chơi game. Máy được lắp rất gọn gàng. Sản phẩm hoàn toàn xứng đáng với giá tiền.'
-    },
-    {
-      id: 3, name: 'Minh Trần', date: '08/01/2026', rating: 4,
-      text: 'Sản phẩm tốt, đóng gói cẩn thận. Giao hàng nhanh, nhân viên tư vấn nhiệt tình. Sẽ ủng hộ shop tiếp!'
-    },
-    {
-      id: 4, name: 'Hùng Lê', date: '03/01/2026', rating: 5,
-      text: 'PC rất ok, cấu hình mạnh, chơi game max setting mượt mà. Bên shop tư vấn rất nhiệt tình. Recommend cho ae game thủ.'
-    },
-  ];
+  // Form state
+  showReviewForm = signal(false);
+  showCommentForm = signal(false);
+  reviewContent = '';
+  reviewRating = 5;
+  commentContent = '';
+  replyTargetId = signal<string | null>(null);
+  replyContent = '';
+  submitLoading = signal(false);
+  submitError = signal<string | null>(null);
 
-  // Mock Q&A data
-  mockQA = [
-    {
-      id: 1, name: 'Quốc PC', date: '17/01/2026',
-      question: 'Máy có chương trình giảm giá gì thêm k?',
-      reply: 'Hiện sản phẩm đang giảm PC đang có ưu đãi giảm giá 10.000.000đ, và nhiều ưu đãi trang gia từ thương hiệu. Anh vui lòng liên hệ AuraPC để được tư vấn chi tiết ạ.'
-    },
-    {
-      id: 2, name: 'An Thanh Thịnh', date: '14/01/2026',
-      question: 'Hiện tại sản phẩm này bên PC đang có mức giá 50.18.000d, và ngoài ra nhiều ưu đãi gia hàng gì không ạ? Hiện tại em rất quan tâm đến sản phẩm này ạ',
-      reply: 'Hiện tại sản phẩm này còn có chương trình mua kèm phụ kiện giảm thêm 5%. Anh/chị liên hệ hotline để được tư vấn chi tiết nhé.'
-    },
-    {
-      id: 3, name: 'Thanh Phong', date: '10/01/2026',
-      question: 'Máy có chương trình giảm giá gì ạ?',
-      reply: 'Hiện tại, sản phẩm Aura PC đang có mức giảm 10.200.000đ, và khách hàng mua trong tháng này sẽ được tặng thêm bộ phụ kiện gaming cao cấp.'
-    },
-  ];
+  readonly isLoggedIn = computed(() => !!this.auth.currentUser());
 
-  // Rating summary computed from mock data
-  get avgRating(): number {
-    const total = this.mockReviews.reduce((sum, r) => sum + r.rating, 0);
-    return this.mockReviews.length ? total / this.mockReviews.length : 0;
+  /** Tên hiển thị của user đang đăng nhập (ưu tiên tên, không hiển thị SĐT thô). */
+  currentUserDisplayName(): string {
+    const u = this.auth.currentUser();
+    if (!u) return '';
+    const name = u.profile?.fullName;
+    if (name && String(name).trim()) return name;
+    if (u.username && String(u.username).trim()) return u.username;
+    if (u.phoneNumber) return u.phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1***$3');
+    return 'Khách';
   }
 
-  get ratingBars(): { star: number; count: number; percent: number }[] {
-    const total = this.mockReviews.length || 1;
-    return [5, 4, 3, 2, 1].map(star => {
-      const count = this.mockReviews.filter(r => r.rating === star).length;
-      return { star, count, percent: (count / total) * 100 };
-    });
+  /** Nhãn theo số sao đánh giá */
+  ratingLabel(rating: number): string {
+    const labels: Record<number, string> = { 1: 'Rất tệ', 2: 'Tệ', 3: 'Bình thường', 4: 'Tốt', 5: 'Tuyệt vời' };
+    return labels[rating] ?? '';
   }
+  readonly reviews = computed(() => {
+    const d = this.reviewsData();
+    if (!d) return [];
+    const list = d.items.filter((i) => i.type === 'review');
+    const star = this.reviewStarFilter();
+    if (star != null) return list.filter((r) => (r.rating ?? 0) === star);
+    return list;
+  });
+  readonly comments = computed(() => {
+    const d = this.reviewsData();
+    if (!d) return [];
+    return d.items.filter((i) => i.type === 'comment');
+  });
+  readonly avgRating = computed(() => this.reviewsData()?.avgRating ?? 0);
+  readonly ratingBars = computed(() => {
+    const bars = this.reviewsData()?.ratingBars ?? [];
+    const total = bars.reduce((s, b) => s + b.count, 0) || 1;
+    return bars.map((b) => ({ ...b, percent: (b.count / total) * 100 }));
+  });
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -93,7 +102,11 @@ export class ProductDetailComponent {
         this.product.set(p);
         this.currentImage.set(productMainImage(p));
         this.loading.set(false);
-        // Load related products from same category
+        const pid = p._id ?? (p as { id?: string })?.id;
+        if (pid) {
+          this.loadReviews(pid);
+          this.checkCanReview(pid);
+        }
         if (p.category) {
           const catSlug = p.category.slug || p.category.category_id;
           this.api.getProducts({ category: catSlug, limit: 4 }).subscribe({
@@ -110,6 +123,232 @@ export class ProductDetailComponent {
         this.loading.set(false);
       },
     });
+
+    // Re-check canReview and reload reviews when user logs in/out
+    let prevUserId: string | null | undefined = undefined;
+    effect(() => {
+      const user = this.auth.currentUser();
+      const currentUserId = user?._id ?? (user as { id?: string })?.id ?? null;
+      if (prevUserId === undefined) {
+        prevUserId = currentUserId;
+        return;
+      }
+      if (currentUserId !== prevUserId) {
+        prevUserId = currentUserId;
+        const p = this.product();
+        const pid = p?._id ?? (p as { id?: string })?.id;
+        if (pid) {
+          this.checkCanReview(pid);
+          this.loadReviews(pid);
+        }
+      }
+    });
+  }
+
+  private loadReviews(productId: string): void {
+    this.reviewsLoading.set(true);
+    this.api
+      .getProductReviews(productId, 'all', 'all', { sort: this.qaSort() })
+      .subscribe({
+        next: (res) => {
+          this.reviewsData.set(res);
+          this.reviewsLoading.set(false);
+        },
+        error: () => this.reviewsLoading.set(false),
+      });
+  }
+
+  private checkCanReview(productId: string): void {
+    if (!this.auth.currentUser()) {
+      this.canReview.set(false);
+      this.canReviewLoading.set(false);
+      return;
+    }
+    this.canReviewLoading.set(true);
+    this.api.canReview(productId).subscribe({
+      next: (res) => {
+        this.canReview.set(res.canReview);
+        this.canReviewLoading.set(false);
+      },
+      error: () => {
+        this.canReview.set(false);
+        this.canReviewLoading.set(false);
+      },
+    });
+  }
+
+  onReviewStarFilter(star: number | null): void {
+    this.reviewStarFilter.set(star);
+  }
+
+  onQaSortChange(sort: 'newest' | 'oldest'): void {
+    this.qaSort.set(sort);
+    const p = this.product();
+    const pid = p?._id ?? (p as { id?: string })?.id;
+    if (pid) this.loadReviews(pid);
+  }
+
+  openReviewForm(): void {
+    if (!this.isLoggedIn()) {
+      this.auth.showLoginPopup$.next();
+      return;
+    }
+    if (!this.canReview()) {
+      this.toast.showInfo('Chỉ khách hàng đã mua và nhận hàng mới được đánh giá.');
+      return;
+    }
+    this.showReviewForm.set(true);
+    this.showCommentForm.set(false);
+    this.submitError.set(null);
+  }
+
+  openCommentForm(): void {
+    if (!this.isLoggedIn()) {
+      this.auth.showLoginPopup$.next();
+      return;
+    }
+    this.showCommentForm.set(true);
+    this.showReviewForm.set(false);
+    this.submitError.set(null);
+  }
+
+  submitReview(): void {
+    const p = this.product();
+    const pid = p?._id ?? (p as { id?: string })?.id;
+    if (!pid || !this.auth.currentUser()) return;
+    const content = this.reviewContent.trim();
+    if (!content) {
+      this.submitError.set('Vui lòng nhập nội dung đánh giá.');
+      return;
+    }
+    this.submitLoading.set(true);
+    this.submitError.set(null);
+    this.api
+      .createReviewComment({
+        productId: pid,
+        type: 'review',
+        content,
+        rating: this.reviewRating,
+      })
+      .subscribe({
+        next: () => {
+          this.reviewContent = '';
+          this.reviewRating = 5;
+          this.showReviewForm.set(false);
+          this.submitLoading.set(false);
+          this.loadReviews(pid);
+          this.checkCanReview(pid);
+        },
+        error: (err) => {
+          this.submitError.set(err.error?.error || 'Gửi đánh giá thất bại.');
+          this.submitLoading.set(false);
+        },
+      });
+  }
+
+  submitComment(): void {
+    const p = this.product();
+    const pid = p?._id ?? (p as { id?: string })?.id;
+    if (!pid || !this.auth.currentUser()) return;
+    const content = this.commentContent.trim();
+    if (!content) {
+      this.submitError.set('Vui lòng nhập nội dung bình luận.');
+      return;
+    }
+    this.submitLoading.set(true);
+    this.submitError.set(null);
+    this.api
+      .createReviewComment({
+        productId: pid,
+        type: 'comment',
+        content,
+      })
+      .subscribe({
+        next: () => {
+          this.commentContent = '';
+          this.showCommentForm.set(false);
+          this.submitLoading.set(false);
+          this.loadReviews(pid);
+        },
+        error: (err) => {
+          this.submitError.set(err.error?.error || 'Gửi bình luận thất bại.');
+          this.submitLoading.set(false);
+        },
+      });
+  }
+
+  openReply(itemId: string): void {
+    if (!this.isLoggedIn()) {
+      this.auth.showLoginPopup$.next();
+      return;
+    }
+    this.replyTargetId.set(itemId);
+    this.replyContent = '';
+    this.submitError.set(null);
+  }
+
+  cancelReply(): void {
+    this.replyTargetId.set(null);
+  }
+
+  submitReply(): void {
+    const targetId = this.replyTargetId();
+    if (!targetId || !this.auth.currentUser()) return;
+    const content = this.replyContent.trim();
+    if (!content) {
+      this.submitError.set('Vui lòng nhập nội dung phản hồi.');
+      return;
+    }
+    this.submitLoading.set(true);
+    this.submitError.set(null);
+    this.api.addReviewReply(targetId, content).subscribe({
+      next: () => {
+        this.replyTargetId.set(null);
+        this.replyContent = '';
+        this.submitLoading.set(false);
+        const p = this.product();
+        const pid = p?._id ?? (p as { id?: string })?.id;
+        if (pid) this.loadReviews(pid);
+      },
+      error: (err) => {
+        this.submitError.set(err.error?.error || 'Gửi phản hồi thất bại.');
+        this.submitLoading.set(false);
+      },
+    });
+  }
+
+  /** Hiển thị theo tên người dùng (ưu tiên tên, không dùng SĐT thô). */
+  userDisplayName(item: ProductReviewItem): string {
+    const u = item.user;
+    if (!u) return 'Khách';
+    const name = (u as { profile?: { fullName?: string } })?.profile?.fullName;
+    if (name && String(name).trim()) return name;
+    const un = (u as { username?: string })?.username;
+    if (un && String(un).trim()) return un;
+    const ph = (u as { phoneNumber?: string })?.phoneNumber;
+    if (ph) return ph.replace(/(\d{4})(\d{3})(\d{3})/, '$1***$3');
+    return 'Khách';
+  }
+
+  closeReviewPopup(): void {
+    this.showReviewForm.set(false);
+    this.submitError.set(null);
+  }
+
+  closeCommentPopup(): void {
+    this.showCommentForm.set(false);
+    this.submitError.set(null);
+  }
+
+  closeReplyPopup(): void {
+    this.replyTargetId.set(null);
+    this.submitError.set(null);
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   mainImage(p: Product): string {
@@ -253,5 +492,21 @@ export class ProductDetailComponent {
     if (!p) return [];
     const all = this.specEntries(p);
     return all.slice(0, 10);
+  }
+
+  /** Mua ngay: thêm vào giỏ + chuyển hướng tới trang giỏ hàng */
+  buyNow(): void {
+    const p = this.product();
+    if (!p) return;
+    this.cart.add(p, 1);
+    this.router.navigate(['/cart']);
+  }
+
+  /** Thêm vào giỏ hàng (không chuyển hướng) */
+  addToCart(): void {
+    const p = this.product();
+    if (!p) return;
+    this.cart.add(p, 1);
+    this.toast.showInfo('Đã thêm sản phẩm vào giỏ hàng!');
   }
 }

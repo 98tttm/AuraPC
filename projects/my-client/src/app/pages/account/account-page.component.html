@@ -24,25 +24,25 @@
       </div>
       <ul class="account__nav">
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'profile'">
-          <button type="button" class="account__nav-link" (click)="switchTab('profile')">
+          <a routerLink="/tai-khoan" [queryParams]="{ tab: 'profile' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--user"></span>
             <span>Thông tin cá nhân</span>
-          </button>
+          </a>
         </li>
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'orders'">
-          <button type="button" class="account__nav-link" (click)="switchTab('orders')">
+          <a routerLink="/tai-khoan" [queryParams]="{ tab: 'orders' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--order"></span>
             <span>Đơn hàng của tôi</span>
-          </button>
+          </a>
         </li>
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'address'">
-          <button type="button" class="account__nav-link" (click)="switchTab('address')">
+          <a routerLink="/tai-khoan" [queryParams]="{ tab: 'address' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--address"></span>
             <span>Quản lý sổ địa chỉ</span>
-          </button>
+          </a>
         </li>
         <li class="account__nav-item">
-          <button type="button" class="account__nav-link account__nav-link--logout" (click)="logout()">
+          <button type="button" class="account__nav-link account__nav-link--logout" (click)="openLogoutConfirm()">
             <span class="account__nav-icon account__nav-icon--logout"></span>
             <span>Đăng xuất</span>
           </button>
@@ -140,41 +140,190 @@
 
       <!-- Orders Tab -->
       @if (activeTab() === 'orders') {
-      <div class="account__card">
-        <h1 class="account__title">Đơn hàng của tôi</h1>
-        @if (mockOrders.length === 0) {
-        <div class="account__empty">
-          <p>Bạn chưa có đơn hàng nào</p>
-          <a routerLink="/san-pham" class="account__shop-link">Mua sắm ngay</a>
+      <div class="account__card account__card--orders">
+        <div class="account__orders-header">
+          <h1 class="account__title">Đơn hàng của tôi</h1>
+          <div class="account__orders-search">
+            <input
+              type="text"
+              class="account__search-input"
+              placeholder="Tìm theo tên đơn, mã đơn, hoặc tên sản phẩm..."
+              [value]="orderSearch()"
+              (input)="orderSearch.set($any($event.target).value)"
+            />
+            <span class="account__search-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </span>
+          </div>
+        </div>
+        <nav class="account__order-tabs">
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'all'" (click)="setOrderStatusTab('all')">Tất cả</button>
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'processing'" (click)="setOrderStatusTab('processing')">Đang xử lý</button>
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'shipped'" (click)="setOrderStatusTab('shipped')">Đang giao</button>
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'delivered'" (click)="setOrderStatusTab('delivered')">Đã giao</button>
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'cancelled'" (click)="setOrderStatusTab('cancelled')">Đã hủy</button>
+          <button type="button" class="account__order-tab" [class.account__order-tab--active]="orderStatusTab() === 'return'" (click)="setOrderStatusTab('return')">Trả hàng</button>
+        </nav>
+        @if (ordersLoading()) {
+        <div class="account__orders-loading">Đang tải...</div>
+        } @else if (filteredOrders().length === 0) {
+        <div class="account__empty account__empty--orders">
+          <div class="account__empty-illus">
+            <svg class="account__empty-box" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 35 L20 85 L100 85 L100 35 Z" stroke="#ccc" stroke-width="1.5" fill="#f5f5f5"/>
+              <path d="M15 35 L60 20 L105 35" stroke="#ccc" stroke-width="1.5" fill="none"/>
+              <path d="M60 20 L60 85" stroke="#ddd" stroke-width="1" stroke-dasharray="4 2"/>
+              <path d="M60 45 L75 65 L95 55 L85 35 L60 25 Z" stroke="#FF6D2D" stroke-width="1.2" fill="none" opacity="0.8"/>
+              <circle cx="78" cy="52" r="3" fill="#FF6D2D" opacity="0.6"/>
+            </svg>
+          </div>
+          <p class="account__empty-title">Bạn chưa có đơn hàng nào.</p>
+          <p class="account__empty-desc">Cùng khám phá hàng ngàn sản phẩm tại AuraPC nhé!</p>
+          <a routerLink="/san-pham" class="account__shop-link account__shop-link--primary">Khám phá ngay</a>
         </div>
         } @else {
-        <div class="account__orders-list">
-          @for (order of mockOrders; track order.id) {
-          <div class="account__order-card">
-            <div class="order-header">
-              <span class="order-id">{{ order.id }}</span>
-              <span class="order-status" [class]="getStatusClass(order.status)">{{ order.status }}</span>
+        <div class="account__orders-list account__orders-list--new">
+          @for (order of filteredOrders(); track order._id) {
+          <div class="account__order-card account__order-card--new">
+            <div class="account__order-card-header">
+              <div class="account__order-card-title-wrap">
+                @if (editingOrderNameId() === order._id) {
+                <div class="account__order-name-edit account__order-name-edit--card">
+                  <input type="text" class="account__order-name-input" [(ngModel)]="editingOrderNameValue" (keydown.enter)="saveOrderName(order._id)" placeholder="Tên đơn hàng" />
+                  <button type="button" class="account__order-name-btn" (click)="saveOrderName(order._id)">Lưu</button>
+                  <button type="button" class="account__order-name-btn account__order-name-btn--cancel" (click)="cancelEditOrderName()">Hủy</button>
+                </div>
+                } @else {
+                <h3 class="account__order-card-title">{{ getOrderDisplayName(order._id, order.createdAt) }}</h3>
+                <button type="button" class="account__order-card-edit" (click)="startEditOrderName(order)" aria-label="Đổi tên đơn hàng">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                </button>
+                }
+                <p class="account__order-card-meta">Giao hàng tận nơi · #ORD-{{ order.orderNumber }}</p>
+              </div>
+              <span class="account__order-card-status" [class]="orderStatusClass(order.status)">{{ orderStatusLabel(order.status) }}</span>
             </div>
-            <div class="order-info">
-              <div class="order-detail">
-                <span class="order-label">Ngày đặt:</span>
-                <span>{{ order.date }}</span>
+            <div class="account__order-card-product">
+              @if (order.items.length; as len) {
+              <div class="account__order-card-product-img-wrap">
+                @if (orderItemImage(order.items[0]); as src) {
+                <img [src]="src" alt="" class="account__order-card-product-img" />
+                } @else {
+                <div class="account__order-card-product-img-placeholder"></div>
+                }
               </div>
-              <div class="order-detail">
-                <span class="order-label">Số SP:</span>
-                <span>{{ order.items }}</span>
+              <div class="account__order-card-product-info">
+                <p class="account__order-card-product-name">{{ order.items[0].name }}</p>
+                <p class="account__order-card-product-meta">{{ formatPrice(order.items[0].price || 0) }} <span class="account__order-card-product-qty">x{{ order.items[0].qty }} {{ len > 1 ? '(+' + (len - 1) + ' SP khác)' : '' }}</span></p>
               </div>
-              <div class="order-detail">
-                <span class="order-label">Tổng tiền:</span>
-                <span class="order-total">{{ formatPrice(order.total) }}</span>
+              }
+            </div>
+            <div class="account__order-card-footer">
+              <a href="#" class="account__order-card-detail-link" (click)="$event.preventDefault(); openOrderDetail(order.orderNumber)">Xem chi tiết</a>
+              <div class="account__order-card-actions">
+                <span class="account__order-card-total">Thành tiền: <strong>{{ formatPrice(order.total) }}</strong></span>
+                <button type="button" class="account__order-card-btn account__order-card-btn--cancel" (click)="cancelOrder(order)">Hủy đơn</button>
+                <button type="button" class="account__order-card-btn account__order-card-btn--repurchase" (click)="repurchaseOrder(order)">Mua lại</button>
               </div>
             </div>
-            <button class="order-detail-btn">Xem chi tiết</button>
           </div>
           }
         </div>
         }
       </div>
+      <!-- Order detail modal -->
+      @if (selectedOrderDetail(); as detail) {
+      <div class="account__modal-backdrop" (click)="closeOrderDetail()" role="button" tabindex="0" (keydown.escape)="closeOrderDetail()"></div>
+      <div class="account__modal account__modal--order account__modal--order-large" role="dialog">
+        <div class="account__modal-header">
+          <div class="account__modal-header-main">
+            @if (editingOrderNameId() === detail._id) {
+            <div class="account__order-name-edit">
+              <input type="text" class="account__order-name-input" [(ngModel)]="editingOrderNameValue" (keydown.enter)="saveOrderName(detail._id)" placeholder="Tên đơn hàng" />
+              <button type="button" class="account__order-name-btn" (click)="saveOrderName(detail._id)">Lưu</button>
+              <button type="button" class="account__order-name-btn account__order-name-btn--cancel" (click)="cancelEditOrderName()">Hủy</button>
+            </div>
+            } @else {
+            <h2 class="account__modal-title account__modal-title--name">{{ getOrderDisplayName(detail._id, detail.createdAt) }}</h2>
+            <button type="button" class="account__modal-edit-name" (click)="startEditOrderName(detail)" aria-label="Đổi tên đơn hàng">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+            }
+            <p class="account__modal-order-code">Giao hàng tận nơi · #ORD-{{ detail.orderNumber }}</p>
+          </div>
+          <div class="account__modal-header-right">
+            <span class="account__order-status-badge" [class]="orderStatusClass(detail.status)">{{ orderStatusLabel(detail.status) }}</span>
+            <button type="button" class="account__modal-close" (click)="closeOrderDetail()" aria-label="Đóng">&times;</button>
+          </div>
+        </div>
+        <div class="account__modal-body account__modal-body--sections">
+          <div class="account__order-section">
+            <h3 class="account__order-section-title">Thông tin người nhận</h3>
+            @if (detail.shippingAddress) {
+            <p class="account__order-text">{{ detail.shippingAddress['fullName'] || '—' }}</p>
+            <p class="account__order-text">{{ detail.shippingAddress['phone'] || '—' }}</p>
+            @if (detail.shippingAddress['email']) {
+            <p class="account__order-text">{{ detail.shippingAddress['email'] }}</p>
+            }
+            } @else {
+            <p class="account__order-text">—</p>
+            }
+          </div>
+          <div class="account__order-section">
+            <h3 class="account__order-section-title">Nhận hàng tại</h3>
+            @if (detail.shippingAddress?.['address'] || detail.shippingAddress?.['ward'] || detail.shippingAddress?.['district'] || detail.shippingAddress?.['city']) {
+            <p class="account__order-text">{{ detail.shippingAddress?.['address'] }}, {{ detail.shippingAddress?.['ward'] }}, {{ detail.shippingAddress?.['district'] }}, {{ detail.shippingAddress?.['city'] }}</p>
+            } @else {
+            <p class="account__order-text">—</p>
+            }
+          </div>
+          <div class="account__order-section">
+            <h3 class="account__order-section-title">Danh sách sản phẩm</h3>
+            <div class="account__order-products">
+              @for (item of detail.items; track item.product || item.name) {
+              <div class="account__order-product-row">
+                <div class="account__order-product-img-wrap">
+                  @if (orderItemImage(item); as src) {
+                  <img [src]="src" alt="" class="account__order-product-img" />
+                  } @else {
+                  <div class="account__order-product-img-placeholder"></div>
+                  }
+                </div>
+                <div class="account__order-product-info">
+                  <p class="account__order-product-name">{{ item.name }}</p>
+                  <p class="account__order-product-meta">{{ formatPrice(item.price || 0) }} &times; {{ item.qty }}</p>
+                </div>
+                <p class="account__order-product-total">{{ formatPrice((item.price || 0) * (item.qty || 1)) }}</p>
+              </div>
+              }
+            </div>
+          </div>
+          <div class="account__order-section account__order-section--payment">
+            <h3 class="account__order-section-title">Thông tin thanh toán</h3>
+            <div class="account__order-payment-rows">
+              <div class="account__order-payment-row">
+                <span>Tổng tiền hàng</span>
+                <span>{{ formatPrice(detail.total - (detail.shippingFee || 0) + (detail.discount || 0)) }}</span>
+              </div>
+              <div class="account__order-payment-row">
+                <span>Phí vận chuyển</span>
+                <span>{{ formatPrice(detail.shippingFee || 0) }}</span>
+              </div>
+              @if ((detail.discount || 0) > 0) {
+              <div class="account__order-payment-row">
+                <span>Giảm giá</span>
+                <span>-{{ formatPrice(detail.discount || 0) }}</span>
+              </div>
+              }
+              <div class="account__order-payment-row account__order-payment-row--total">
+                <span>Thành tiền</span>
+                <span class="order-total">{{ formatPrice(detail.total) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
       }
 
       <!-- Address Tab -->
@@ -325,5 +474,19 @@
       }
     </main>
   </div>
+
+  <!-- Logout confirmation popup -->
+  @if (showLogoutModal()) {
+  <div class="account__logout-overlay" (click)="closeLogoutConfirm()" role="button" tabindex="0">
+    <div class="account__logout-popup" (click)="$event.stopPropagation()">
+      <h3 class="account__logout-title">Xác nhận đăng xuất</h3>
+      <p class="account__logout-msg">Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?</p>
+      <div class="account__logout-actions">
+        <button type="button" class="account__logout-btn account__logout-btn--cancel" (click)="closeLogoutConfirm()">Hủy</button>
+        <button type="button" class="account__logout-btn account__logout-btn--confirm" (click)="confirmLogout()">Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+  }
 </div>
 }

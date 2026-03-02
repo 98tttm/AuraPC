@@ -1,0 +1,115 @@
+@if (loading()) {
+  <div class="loading">Đang tải...</div>
+} @else if (order(); as o) {
+  <div class="page-header">
+    <div>
+      <a routerLink="/orders" class="back-link">&larr; Quay lại</a>
+      <h2>Đơn hàng #{{ o.orderNumber }}</h2>
+    </div>
+    <span class="badge" [class]="'badge--' + o.status" style="font-size: 0.85rem; padding: 0.35rem 1rem;">
+      {{ getStatusLabel(o.status) }}
+    </span>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Order Info -->
+    <div class="card">
+      <h3 class="card__title">Thông tin đơn hàng</h3>
+      <div class="info-row">
+        <span class="info-label">Ngày tạo</span>
+        <span>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Trạng thái</span>
+        <div class="status-update">
+          <select class="select" [(ngModel)]="newStatus">
+            @for (s of statuses; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+          <button class="btn btn--primary" (click)="updateStatus()" [disabled]="updating() || newStatus === o.status">
+            @if (updating()) { Đang cập nhật... } @else { Cập nhật }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="card">
+      <h3 class="card__title">Thông tin khách hàng</h3>
+      <div class="info-row">
+        <span class="info-label">Họ tên</span>
+        <span>{{ o.shippingAddress?.fullName || 'N/A' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">SĐT</span>
+        <span>{{ o.shippingAddress?.phone || o.user?.phoneNumber || 'N/A' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span>{{ o.shippingAddress?.email || 'N/A' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Địa chỉ</span>
+        <span>
+          {{ o.shippingAddress?.address }}
+          @if (o.shippingAddress?.ward) { , {{ o.shippingAddress.ward }} }
+          @if (o.shippingAddress?.district) { , {{ o.shippingAddress.district }} }
+          @if (o.shippingAddress?.city) { , {{ o.shippingAddress.city }} }
+        </span>
+      </div>
+      @if (o.shippingAddress?.note) {
+        <div class="info-row">
+          <span class="info-label">Ghi chú</span>
+          <span>{{ o.shippingAddress.note }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Items -->
+  <div class="card" style="margin-top: 1.25rem">
+    <h3 class="card__title">Sản phẩm ({{ o.items?.length || 0 }})</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Đơn giá</th>
+          <th>Số lượng</th>
+          <th>Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of o.items; track item._id) {
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.price | number:'1.0-0' }}đ</td>
+            <td>{{ item.qty }}</td>
+            <td class="text-bold">{{ item.price * item.qty | number:'1.0-0' }}đ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="totals">
+      @if (o.shippingFee) {
+        <div class="totals__row">
+          <span>Phí vận chuyển</span>
+          <span>{{ o.shippingFee | number:'1.0-0' }}đ</span>
+        </div>
+      }
+      @if (o.discount) {
+        <div class="totals__row">
+          <span>Giảm giá</span>
+          <span class="text-red">-{{ o.discount | number:'1.0-0' }}đ</span>
+        </div>
+      }
+      <div class="totals__row totals__row--total">
+        <span>Tổng cộng</span>
+        <span>{{ o.total | number:'1.0-0' }}đ</span>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="loading">Không tìm thấy đơn hàng</div>
+}

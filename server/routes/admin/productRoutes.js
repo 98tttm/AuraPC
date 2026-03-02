@@ -1,7 +1,9 @@
 const express = require('express');
 const Product = require('../../models/Product');
+const { requireAdmin } = require('../../middleware/auth');
 
 const router = express.Router();
+router.use(requireAdmin);
 
 router.get('/', async (req, res) => {
   try {
@@ -9,9 +11,10 @@ router.get('/', async (req, res) => {
     const filter = {};
     if (category) filter.category = category;
     if (search && search.trim()) {
+      const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { name: new RegExp(search.trim(), 'i') },
-        { slug: new RegExp(search.trim(), 'i') },
+        { name: new RegExp(escapedSearch, 'i') },
+        { slug: new RegExp(escapedSearch, 'i') },
       ];
     }
     const skip = (Math.max(1, parseInt(page, 10)) - 1) * parseInt(limit, 10);

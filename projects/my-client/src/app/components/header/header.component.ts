@@ -122,7 +122,7 @@ export class HeaderComponent implements OnDestroy {
     { id: 'products', label: 'SẢN PHẨM', route: '/san-pham' },
     { id: 'guide', label: 'HƯỚNG DẪN', route: '/' },
     { id: 'aura-builder', label: 'AURA BUILDER', route: '/aura-builder' },
-    { id: 'auralab', label: 'AURALAB', route: '/' },
+    { id: 'aurahub', label: 'AURAHUB', route: '/aura-hub' },
     { id: 'support', label: 'HỖ TRỢ', route: '/' },
   ];
 

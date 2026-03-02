@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h2>Quản lý khách hàng</h2>
+</div>
+
+<!-- Search -->
+<div class="filters card">
+  <div class="filters__group">
+    <input
+      type="text"
+      class="input"
+      placeholder="Tìm theo tên, SĐT, email..."
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="onSearch()"
+      style="max-width: 300px"
+    />
+    <button class="btn btn--primary" (click)="onSearch()">Tìm</button>
+  </div>
+  <span class="filters__count">{{ total() }} khách hàng</span>
+</div>
+
+<!-- Table -->
+<div class="card">
+  @if (loading()) {
+    <div class="loading">Đang tải...</div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Khách hàng</th>
+          <th>SĐT</th>
+          <th>Email</th>
+          <th>Đơn hàng</th>
+          <th>Đăng nhập gần nhất</th>
+          <th>Ngày tham gia</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user._id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/users', user._id]" class="user-cell">
+                <div class="user-avatar">{{ getInitial(user) }}</div>
+                <span class="user-name">{{ getUserName(user) }}</span>
+              </a>
+            </td>
+            <td>{{ user.phoneNumber }}</td>
+            <td class="text-muted">{{ user.email || '-' }}</td>
+            <td>{{ user.orderCount || 0 }}</td>
+            <td class="text-muted">{{ user.lastLogin ? (user.lastLogin | date:'dd/MM/yyyy') : 'Chưa' }}</td>
+            <td class="text-muted">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="text-center text-muted">Không có khách hàng nào</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button class="pagination__btn" [disabled]="page <= 1" (click)="goToPage(page - 1)">Trước</button>
+        @for (p of [].constructor(totalPages); track $index) {
+          <button class="pagination__btn" [class.pagination__btn--active]="page === $index + 1" (click)="goToPage($index + 1)">
+            {{ $index + 1 }}
+          </button>
+        }
+        <button class="pagination__btn" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">Sau</button>
+      </div>
+    }
+  }
+</div>

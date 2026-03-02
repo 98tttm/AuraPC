@@ -69,6 +69,21 @@ export function productSalePercent(p: Product): number {
 
 export type ProductSort = 'featured' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc' | 'newest' | 'best_seller';
 
+/** Order list item (from GET /api/orders?userId=...) */
+export interface OrderListItem {
+  _id: string;
+  orderNumber: string;
+  user?: string | null;
+  items: { product?: { _id: string; name?: string; slug?: string; images?: ProductImage[] }; name: string; price: number; qty: number }[];
+  shippingAddress?: Record<string, string>;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  total: number;
+  shippingFee?: number;
+  discount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface ProductsResponse {
   items: Product[];
   total: number;
@@ -109,6 +124,30 @@ export interface BlogsResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+/** Review/Comment từ API */
+export interface ProductReviewItem {
+  _id: string;
+  product: string;
+  user: { _id: string; profile?: { fullName?: string }; phoneNumber?: string; username?: string };
+  type: 'review' | 'comment';
+  rating?: number;
+  content: string;
+  images?: string[];
+  parent?: string | null;
+  replies?: ProductReviewItem[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ProductReviewsResponse {
+  items: ProductReviewItem[];
+  total: number;
+  avgRating: number;
+  ratingBars: { star: number; count: number }[];
+  reviewCount: number;
+  commentCount: number;
 }
 
 /** Response từ /api/products/filter-options */
@@ -275,13 +314,34 @@ export class ApiService {
     return this.http.get<BlogPost>(`${BASE}/blogs/by-slug/${encodeURIComponent(slug)}`);
   }
 
+  /** Gửi yêu cầu thanh toán MoMo (Ví MoMo hoặc thẻ ATM NAPAS) */
+  createMoMoPayment(payload: {
+    items: { product: string; name: string; price: number; qty: number }[];
+    shippingAddress: Record<string, string>;
+    paymentMethod: string;
+    directDiscount?: number;
+  }): Observable<{ success: boolean; payUrl: string }> {
+    return this.http.post<{ success: boolean; payUrl: string }>(`${BASE}/payment/momo/create`, payload);
+  }
+
   createOrder(body: {
     items: { product: string; name: string; price: number; qty: number }[];
     shippingAddress?: Record<string, string>;
     shippingFee?: number;
     discount?: number;
+    user?: string;
+    requestInvoice?: boolean;
+    invoiceEmail?: string;
+    invoiceType?: 'personal' | 'company';
   }): Observable<{ _id: string; orderNumber: string; total: number }> {
     return this.http.post<{ _id: string; orderNumber: string; total: number }>(`${BASE}/orders`, body);
+  }
+
+  /** List orders for a user. Optional status filter (pending, confirmed, processing, shipped, delivered, cancelled, or 'all'). */
+  getOrdersByUser(userId: string, status?: string): Observable<OrderListItem[]> {
+    let url = `${BASE}/orders?userId=${encodeURIComponent(userId)}`;
+    if (status && status !== 'all') url += `&status=${encodeURIComponent(status)}`;
+    return this.http.get<OrderListItem[]>(url);
   }
 
   getOrder(orderNumber: string): Observable<unknown> {
@@ -330,6 +390,45 @@ export class ApiService {
     );
   }
 
+  /** Danh sách đánh giá & bình luận sản phẩm. rating: 1-5 lọc theo sao; sort: newest | oldest */
+  getProductReviews(
+    productId: string,
+    filter: 'all' | 'newest' | 'with_photo' = 'all',
+    type: 'all' | 'review' | 'comment' = 'all',
+    options?: { rating?: number; sort?: 'newest' | 'oldest' }
+  ): Observable<ProductReviewsResponse> {
+    let params = new HttpParams().set('productId', productId).set('filter', filter);
+    if (type !== 'all') params = params.set('type', type);
+    if (options?.rating != null && options.rating >= 1 && options.rating <= 5) params = params.set('rating', String(options.rating));
+    if (options?.sort) params = params.set('sort', options.sort);
+    return this.http.get<ProductReviewsResponse>(`${BASE}/reviews`, { params });
+  }
+
+  /** Kiểm tra user có được đánh giá (đã mua + đã nhận hàng) */
+  canReview(productId: string): Observable<{ canReview: boolean }> {
+    return this.http.get<{ canReview: boolean }>(`${BASE}/reviews/can-review`, {
+      params: { productId },
+    });
+  }
+
+  /** Tạo đánh giá (có sao) hoặc bình luận */
+  createReviewComment(body: {
+    productId: string;
+    type: 'review' | 'comment';
+    content: string;
+    rating?: number;
+    images?: string[];
+  }): Observable<ProductReviewItem> {
+    return this.http.post<ProductReviewItem>(`${BASE}/reviews`, body);
+  }
+
+  /** Phản hồi (reply) vào review/comment */
+  addReviewReply(reviewId: string, content: string): Observable<ProductReviewItem> {
+    return this.http.post<ProductReviewItem>(`${BASE}/reviews/${encodeURIComponent(reviewId)}/reply`, {
+      content,
+    });
+  }
+
   /** Ping backend gốc (timeout 65s cho Render cold start khi bấm Kiểm tra kết nối) */
   pingBackend(timeoutMs = 65000): Observable<unknown> {
     const root = BASE.replace(/\/api\/?$/, '');
@@ -342,5 +441,76 @@ export class ApiService {
       `${BASE}/builders/${encodeURIComponent(id)}/email-pdf`,
       { email }
     ).pipe(timeout(120000));
+  }
+
+  // ─── AURAHUB API ──────────────────────────────────────
+
+  getHubPosts(params: { page?: number; limit?: number; topic?: string; sort?: string } = {}): Observable<{
+    posts: any[]; total: number; page: number; totalPages: number;
+  }> {
+    let hp = new HttpParams();
+    if (params.page) hp = hp.set('page', String(params.page));
+    if (params.limit) hp = hp.set('limit', String(params.limit));
+    if (params.topic) hp = hp.set('topic', params.topic);
+    if (params.sort) hp = hp.set('sort', params.sort);
+    return this.http.get<any>(`${BASE}/hub/posts`, { params: hp });
+  }
+
+  getHubPost(id: string): Observable<any> {
+    return this.http.get<any>(`${BASE}/hub/posts/${encodeURIComponent(id)}`);
+  }
+
+  createHubPost(body: { content?: string; images?: string[]; topic?: string; poll?: any; replyOption?: string; scheduledAt?: string }): Observable<any> {
+    return this.http.post<any>(`${BASE}/hub/posts`, body);
+  }
+
+  deleteHubPost(id: string): Observable<any> {
+    return this.http.delete<any>(`${BASE}/hub/posts/${encodeURIComponent(id)}`);
+  }
+
+  toggleHubLike(postId: string): Observable<{ liked: boolean; likeCount: number }> {
+    return this.http.post<{ liked: boolean; likeCount: number }>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/like`, {});
+  }
+
+  repostHub(postId: string): Observable<any> {
+    return this.http.post<any>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/repost`, {});
+  }
+
+  shareHub(postId: string, method: string = 'copy_link'): Observable<{ shareCount: number }> {
+    return this.http.post<{ shareCount: number }>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/share`, { method });
+  }
+
+  getHubComments(postId: string, sort: string = 'newest'): Observable<any[]> {
+    return this.http.get<any[]>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/comments`, { params: { sort } });
+  }
+
+  createHubComment(postId: string, body: { content: string; images?: string[]; parentComment?: string }): Observable<any> {
+    return this.http.post<any>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/comments`, body);
+  }
+
+  toggleHubCommentLike(commentId: string): Observable<{ liked: boolean; likeCount: number }> {
+    return this.http.post<{ liked: boolean; likeCount: number }>(`${BASE}/hub/comments/${encodeURIComponent(commentId)}/like`, {});
+  }
+
+  deleteHubComment(commentId: string): Observable<any> {
+    return this.http.delete<any>(`${BASE}/hub/comments/${encodeURIComponent(commentId)}`);
+  }
+
+  voteHubPoll(postId: string, optionIndex: number): Observable<{ poll: any }> {
+    return this.http.post<{ poll: any }>(`${BASE}/hub/posts/${encodeURIComponent(postId)}/vote`, { optionIndex });
+  }
+
+  getHubTopics(): Observable<string[]> {
+    return this.http.get<string[]>(`${BASE}/hub/topics`);
+  }
+
+  getHubTrending(limit: number = 5): Observable<any[]> {
+    return this.http.get<any[]>(`${BASE}/hub/trending`, { params: { limit: String(limit) } });
+  }
+
+  uploadHubImages(files: File[]): Observable<{ urls: string[] }> {
+    const fd = new FormData();
+    files.forEach(f => fd.append('images', f));
+    return this.http.post<{ urls: string[] }>(`${BASE}/hub/upload`, fd);
   }
 }

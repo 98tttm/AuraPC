@@ -2,11 +2,9 @@
 const mongoose = require('mongoose');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
-
-// In production should read userId from verified JWT.
-const getUserId = (req) => req.headers['x-user-id'] || req.body?.userId || req.query?.userId;
 
 const normalizeId = (value) => {
   if (!value) return '';
@@ -56,9 +54,9 @@ async function getPopulatedItems(userId) {
     .map((item) => ({ product: item.product, quantity: item.quantity }));
 }
 
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
     if (!userId) return res.json({ success: true, items: [] });
 
     const cart = await Cart.findOne({ user: userId });
@@ -74,10 +72,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/sync', async (req, res) => {
+router.post('/sync', requireAuth, async (req, res) => {
   try {
-    const { userId, items } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const userId = req.userId;
+    const { items } = req.body || {};
 
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
@@ -109,10 +107,10 @@ router.post('/sync', async (req, res) => {
   }
 });
 
-router.post('/add', async (req, res) => {
+router.post('/add', requireAuth, async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
+    const userId = req.userId;
+    const { productId, quantity } = req.body || {};
     if (!productId) return res.status(400).json({ success: false, message: 'Missing productId' });
 
     const resolvedProductId = await resolveProductObjectId(productId);
@@ -142,10 +140,10 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.put('/update', async (req, res) => {
+router.put('/update', requireAuth, async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
+    const userId = req.userId;
+    const { productId, quantity } = req.body || {};
     if (!productId) return res.status(400).json({ success: false, message: 'Missing productId' });
 
     const resolvedProductId = await resolveProductObjectId(productId);
@@ -175,12 +173,10 @@ router.put('/update', async (req, res) => {
   }
 });
 
-router.delete('/remove', async (req, res) => {
+router.delete('/remove', requireAuth, async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.userId;
     const productId = String(req.query?.productId || '').trim();
-
-    if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
     if (!productId) return res.status(400).json({ success: false, message: 'Missing productId' });
 
     const resolvedProductId = await resolveProductObjectId(productId);
@@ -207,10 +203,10 @@ router.delete('/remove', async (req, res) => {
 });
 
 // Remove multiple products at once (batch delete)
-router.post('/remove-multiple', async (req, res) => {
+router.post('/remove-multiple', requireAuth, async (req, res) => {
   try {
-    const { userId, productIds } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'Login required' });
+    const userId = req.userId;
+    const { productIds } = req.body || {};
     if (!Array.isArray(productIds) || productIds.length === 0) {
       return res.status(400).json({ success: false, message: 'Missing productIds array' });
     }

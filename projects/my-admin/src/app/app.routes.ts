@@ -1,10 +1,17 @@
 import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
+import { adminAuthGuard } from './core/auth/admin-auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
     path: '',
     component: AdminLayoutComponent,
+    canActivate: [adminAuthGuard],
     children: [
       {
         path: '',
@@ -40,6 +47,26 @@ export const routes: Routes = [
         path: 'categories/:id/edit',
         loadComponent: () =>
           import('./pages/categories-admin/category-form.component').then((m) => m.CategoryFormComponent),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./pages/orders-admin/orders-list-admin.component').then((m) => m.OrdersListAdminComponent),
+      },
+      {
+        path: 'orders/:orderNumber',
+        loadComponent: () =>
+          import('./pages/orders-admin/order-detail-admin.component').then((m) => m.OrderDetailAdminComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./pages/users-admin/users-list-admin.component').then((m) => m.UsersListAdminComponent),
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () =>
+          import('./pages/users-admin/user-detail-admin.component').then((m) => m.UserDetailAdminComponent),
       },
       {
         path: 'blogs',

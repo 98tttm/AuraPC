@@ -5,6 +5,7 @@ import { Observable, tap, Subject } from 'rxjs';
 
 const BASE = `${environment.apiUrl}/auth`;
 const STORAGE_KEY = 'aurapc_user';
+const TOKEN_KEY = 'aurapc_token';
 
 export interface UserProfile {
   fullName: string;
@@ -38,6 +39,7 @@ export interface RequestOtpResponse {
 export interface VerifyOtpResponse {
   success: boolean;
   user?: User;
+  token?: string;
   message?: string;
   error?: string;
 }
@@ -69,6 +71,23 @@ export class AuthService {
     } catch { }
   }
 
+  private persistToken(token: string | null): void {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      if (token) localStorage.setItem(TOKEN_KEY, token);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch { }
+  }
+
+  getToken(): string | null {
+    try {
+      if (typeof localStorage === 'undefined') return null;
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  }
+
   requestOtp(phoneNumber: string): Observable<RequestOtpResponse> {
     return this.http.post<RequestOtpResponse>(`${BASE}/request-otp`, { phoneNumber });
   }
@@ -79,6 +98,7 @@ export class AuthService {
         if (res.success && res.user) {
           this.currentUser.set(res.user);
           this.persistUser(res.user);
+          if (res.token) this.persistToken(res.token);
         }
       })
     );
@@ -127,5 +147,6 @@ export class AuthService {
   logout(): void {
     this.currentUser.set(null);
     this.persistUser(null);
+    this.persistToken(null);
   }
 }

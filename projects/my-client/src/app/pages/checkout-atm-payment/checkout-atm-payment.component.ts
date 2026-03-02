@@ -2,6 +2,7 @@ import { Component, inject, computed, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
 
 const PENDING_KEY = 'aurapc_atm_pending';
@@ -25,6 +26,7 @@ export class CheckoutAtmPaymentComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private api = inject(ApiService);
+  private auth = inject(AuthService);
   private cart = inject(CartService);
 
   orderNumber = '';
@@ -89,9 +91,12 @@ export class CheckoutAtmPaymentComponent implements OnInit {
     }
     this.confirmError = '';
     this.confirmSubmitting = true;
+    const user = this.auth.currentUser();
+    const userId = user?._id ?? (user as { id?: string })?.id;
     this.api.createOrder({
       items: pending.items,
       shippingAddress: pending.shippingAddress,
+      user: userId ?? undefined,
     }).subscribe({
       next: (res) => {
         this.cart.clear();
