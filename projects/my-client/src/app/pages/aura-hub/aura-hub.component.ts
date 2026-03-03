@@ -51,17 +51,38 @@ export class AuraHubComponent implements OnInit, OnDestroy {
     showEmojiPicker = signal(false);
     creating = signal(false);
 
-    // Share menu
+    // Share + more menus
     shareMenuPostId = signal<string | null>(null);
+    moreMenuPostId = signal<string | null>(null);
 
     // User
     currentUser = this.auth.currentUser;
+    followingIds = signal<Set<string>>(new Set<string>());
+
+    // ─── Reply Modal State ───
+    replyModalPost = signal<any>(null);
+    replyModalContent = signal<string>('');
+    replyModalImages = signal<string[]>([]);
+    replyModalUploading = signal<boolean>(false);
+    replyModalSubmitting = signal<boolean>(false);
 
     readonly emojis = ['😀', '😂', '🤣', '😍', '🥰', '😎', '🤔', '👍', '❤️', '🔥', '💯', '🙌', '👏', '🎉', '😱', '💻', '🖥️', '⌨️', '🖱️', '🎮'];
 
     ngOnInit(): void {
         this.api.getHubTopics().subscribe(t => this.topics.set(t));
         this.api.getHubTrending(5).subscribe(t => this.trending.set(t));
+        // Load following list for follow button
+        const u = this.currentUser();
+        const userId = u?._id ?? (u as any)?.id;
+        if (userId) {
+            this.api.getFollowing(userId).subscribe({
+                next: (res) => {
+                    const ids = new Set<string>((res.following || []).map((x: any) => x._id));
+                    this.followingIds.set(ids);
+                },
+                error: () => { },
+            });
+        }
 
         // Check if we have a postId route param
         const postId = this.route.snapshot.paramMap.get('postId');
@@ -179,6 +200,66 @@ export class AuraHubComponent implements OnInit, OnDestroy {
         });
     }
 
+    // ─── Reply Modal ───
+    openReplyModal(post: any): void {
+        if (!this.currentUser()) {
+            this.auth.showLoginPopup$.next();
+            return;
+        }
+        this.replyModalPost.set(post);
+        this.replyModalContent.set('');
+        this.replyModalImages.set([]);
+        this.replyModalUploading.set(false);
+    }
+
+    closeReplyModal(): void {
+        this.replyModalPost.set(null);
+        this.replyModalContent.set('');
+        this.replyModalImages.set([]);
+    }
+
+    onReplyImageSelect(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files?.length) return;
+        this.replyModalUploading.set(true);
+        this.api.uploadHubImages(Array.from(input.files)).subscribe({
+            next: (res) => {
+                this.replyModalImages.update(imgs => [...imgs, ...res.urls]);
+                this.replyModalUploading.set(false);
+            },
+            error: () => this.replyModalUploading.set(false),
+        });
+        input.value = '';
+    }
+
+    removeReplyImage(index: number): void {
+        this.replyModalImages.update(imgs => imgs.filter((_, i) => i !== index));
+    }
+
+    submitReplyModal(): void {
+        const post = this.replyModalPost();
+        if (!post) return;
+        const content = this.replyModalContent().trim();
+        const images = this.replyModalImages();
+
+        if (!content && !images.length) return;
+        this.replyModalSubmitting.set(true);
+        this.api.createHubComment(post._id, { content, images: images }).subscribe({
+            next: (comment) => {
+                // Thêm một comment đếm giả lập trên UI gốc
+                post.commentCount = (post.commentCount || 0) + 1;
+
+                this.toast.showInfo('Đã trả lời bài viết.');
+                this.closeReplyModal();
+                this.replyModalSubmitting.set(false);
+            },
+            error: () => {
+                this.toast.showInfo('Lỗi đăng bình luận.');
+                this.replyModalSubmitting.set(false);
+            }
+        });
+    }
+
     // ─── Like ───
     toggleLike(post: any): void {
         if (!this.currentUser()) { this.auth.showLoginPopup$.next(); return; }
@@ -202,20 +283,7 @@ export class AuraHubComponent implements OnInit, OnDestroy {
         return post.likes.includes(uid);
     }
 
-    // ─── Repost ───
-    repost(post: any): void {
-        if (!this.currentUser()) { this.auth.showLoginPopup$.next(); return; }
-        this.api.repostHub(post._id).subscribe({
-            next: (repost) => {
-                post.repostCount = (post.repostCount || 0) + 1;
-                this.posts.update(prev => [repost, ...prev]);
-            },
-            error: (err) => {
-                const msg = err?.error?.message || 'Không thể repost';
-                this.toast.showInfo(msg);
-            },
-        });
-    }
+
 
     // ─── Share ───
     toggleShareMenu(postId: string): void {
@@ -234,6 +302,44 @@ export class AuraHubComponent implements OnInit, OnDestroy {
             this.api.shareHub(postId, method).subscribe();
         }
         this.shareMenuPostId.set(null);
+    }
+
+    // ─── Post More Menu (3 dots) ───
+    toggleMoreMenu(postId: string): void {
+        this.moreMenuPostId.update(cur => (cur === postId ? null : postId));
+    }
+
+    onPostMenuAction(post: any, action: 'save' | 'not_interested' | 'mute' | 'restrict' | 'block' | 'report'): void {
+        switch (action) {
+            case 'save':
+                this.toast.showInfo('Đã lưu bài viết (demo UI).');
+                break;
+            case 'not_interested':
+                this.toast.showInfo('Chúng tôi sẽ hiển thị ít nội dung tương tự hơn.');
+                break;
+            case 'mute':
+                this.toast.showInfo('Đã tắt thông báo từ người này (demo UI).');
+                break;
+            case 'restrict':
+                this.toast.showInfo('Đã hạn chế tài khoản (demo UI).');
+                break;
+            case 'block':
+                this.toast.showInfo('Đã chặn tài khoản (demo UI).');
+                break;
+            case 'report':
+                this.toast.showInfo('Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét.');
+                break;
+        }
+        this.moreMenuPostId.set(null);
+    }
+
+    copyPostLink(post: any): void {
+        const baseUrl = window.location.origin;
+        const link = `${baseUrl}/aura-hub/${post._id}`;
+        navigator.clipboard.writeText(link).then(() => {
+            this.toast.showInfo('Đã copy link!');
+        });
+        this.moreMenuPostId.set(null);
     }
 
     // ─── Post Detail ───
@@ -379,6 +485,41 @@ export class AuraHubComponent implements OnInit, OnDestroy {
 
     isOwner(post: any): boolean {
         return this.currentUser()?._id === post?.author?._id;
+    }
+
+    // Follow helpers
+    isFollowingUser(user: any): boolean {
+        const uid = user?._id;
+        if (!uid) return false;
+        return this.followingIds().has(uid);
+    }
+
+    toggleFollowUser(user: any): void {
+        const targetId = user?._id;
+        if (!targetId) return;
+        if (!this.currentUser()) {
+            this.auth.showLoginPopup$.next();
+            return;
+        }
+        // Optimistic update
+        const set = new Set(this.followingIds());
+        const currentlyFollowing = set.has(targetId);
+        if (currentlyFollowing) set.delete(targetId); else set.add(targetId);
+        this.followingIds.set(set);
+
+        this.api.toggleFollow(targetId).subscribe({
+            next: (res) => {
+                const finalSet = new Set(this.followingIds());
+                if (res.following) finalSet.add(targetId); else finalSet.delete(targetId);
+                this.followingIds.set(finalSet);
+            },
+            error: () => {
+                // revert on error
+                const revertSet = new Set(this.followingIds());
+                if (currentlyFollowing) revertSet.add(targetId); else revertSet.delete(targetId);
+                this.followingIds.set(revertSet);
+            },
+        });
     }
 
     trackByPostId(index: number, post: any): string {
