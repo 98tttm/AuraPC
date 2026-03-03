@@ -1,5 +1,21 @@
 @if (loading()) {
-  <div class="loading">Đang tải...</div>
+  <div class="loading-container">
+    <div class="skeleton skeleton--title" style="width: 200px"></div>
+    <div class="skeleton skeleton--text" style="width: 120px; margin-top: 0.5rem"></div>
+    <div class="detail-grid" style="margin-top: 1.5rem">
+      <div class="card">
+        <div class="skeleton skeleton--text" style="width: 60%"></div>
+        <div class="skeleton skeleton--text" style="width: 40%; margin-top: 1rem"></div>
+        <div class="skeleton skeleton--text" style="width: 80%; margin-top: 1rem"></div>
+      </div>
+      <div class="card">
+        <div class="skeleton skeleton--text" style="width: 60%"></div>
+        <div class="skeleton skeleton--text" style="width: 40%; margin-top: 1rem"></div>
+      </div>
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="alert-error">{{ error() }}</div>
 } @else if (order(); as o) {
   <div class="page-header">
     <div>
@@ -10,6 +26,36 @@
       {{ getStatusLabel(o.status) }}
     </span>
   </div>
+
+  <!-- Status Stepper -->
+  @if (o.status !== 'cancelled') {
+    <div class="stepper">
+      @for (step of stepperSteps; track step; let i = $index) {
+        <div class="stepper__step" [class.stepper__step--complete]="isStepComplete(step)" [class.stepper__step--current]="isStepCurrent(step)">
+          <div class="stepper__circle">
+            @if (isStepComplete(step) && !isStepCurrent(step)) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+          <span class="stepper__label">{{ getStatusLabel(step) }}</span>
+        </div>
+        @if (i < stepperSteps.length - 1) {
+          <div class="stepper__line" [class.stepper__line--complete]="isStepComplete(stepperSteps[i + 1])"></div>
+        }
+      }
+    </div>
+  } @else {
+    <div class="cancelled-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      Đơn hàng đã bị huỷ
+    </div>
+  }
 
   <div class="detail-grid">
     <!-- Order Info -->
@@ -53,15 +99,15 @@
         <span class="info-label">Địa chỉ</span>
         <span>
           {{ o.shippingAddress?.address }}
-          @if (o.shippingAddress?.ward) { , {{ o.shippingAddress.ward }} }
-          @if (o.shippingAddress?.district) { , {{ o.shippingAddress.district }} }
-          @if (o.shippingAddress?.city) { , {{ o.shippingAddress.city }} }
+          @if (o.shippingAddress?.ward) { , {{ o.shippingAddress?.ward }} }
+          @if (o.shippingAddress?.district) { , {{ o.shippingAddress?.district }} }
+          @if (o.shippingAddress?.city) { , {{ o.shippingAddress?.city }} }
         </span>
       </div>
       @if (o.shippingAddress?.note) {
         <div class="info-row">
           <span class="info-label">Ghi chú</span>
-          <span>{{ o.shippingAddress.note }}</span>
+          <span>{{ o.shippingAddress?.note }}</span>
         </div>
       }
     </div>
@@ -111,5 +157,11 @@
     </div>
   </div>
 } @else {
-  <div class="loading">Không tìm thấy đơn hàng</div>
+  <div class="empty-state" style="padding: 3rem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+      <rect x="2" y="3" width="20" height="18" rx="2"/>
+    </svg>
+    <span>Không tìm thấy đơn hàng</span>
+    <a routerLink="/orders" class="btn btn--outline btn--sm">Quay lại danh sách</a>
+  </div>
 }

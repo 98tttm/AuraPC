@@ -5,6 +5,7 @@ const fs = require('fs');
 const Post = require('../models/Post');
 const HubComment = require('../models/HubComment');
 const Share = require('../models/Share');
+const User = require('../models/User');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -113,6 +114,14 @@ router.post('/posts', requireAuth, async (req, res) => {
         }
 
         const post = await Post.create(postData);
+
+        // Link post vào user.hubPosts để lưu postId theo user
+        await User.findByIdAndUpdate(
+            req.userId,
+            { $addToSet: { hubPosts: post._id } },
+            { new: false }
+        );
+
         const populated = await Post.findById(post._id)
             .populate('author', 'username avatar profile phoneNumber')
             .lean();
@@ -155,6 +164,17 @@ router.delete('/posts/:id', requireAuth, async (req, res) => {
         await HubComment.deleteMany({ post: post._id });
         await Share.deleteMany({ post: post._id });
         await post.deleteOne();
+
+        // Gỡ post khỏi các danh sách hubPosts / hubReposts trên user (nếu có)
+        await User.updateMany(
+            {},
+            {
+                $pull: {
+                    hubPosts: post._id,
+                    hubReposts: post._id,
+                },
+            }
+        );
 
         res.json({ message: 'Đã xóa bài đăng' });
     } catch (err) {
@@ -211,6 +231,13 @@ router.post('/posts/:id/repost', requireAuth, async (req, res) => {
         original.repostCount += 1;
         await original.save();
 
+        // Link repost vào user.hubReposts
+        await User.findByIdAndUpdate(
+            req.userId,
+            { $addToSet: { hubReposts: repost._id } },
+            { new: false }
+        );
+
         const populated = await Post.findById(repost._id)
             .populate('author', 'username avatar profile phoneNumber')
             .populate('repostedBy', 'username avatar profile')
@@ -240,6 +267,62 @@ router.post('/posts/:id/share', requireAuth, async (req, res) => {
     } catch (err) {
         console.error('Hub POST share error:', err);
         res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// ─── USER ACTIVITY (for AuraHub profile) ─────────────────
+
+/** GET /api/hub/user/:userId/posts?type=threads|media|reposts */
+router.get('/user/:userId/posts', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { type = 'threads' } = req.query;
+
+        const baseFilter = { isPublished: true };
+        let filter = { ...baseFilter, author: userId };
+
+        if (type === 'media') {
+            filter = {
+                ...filter,
+                images: { $exists: true, $ne: [], $not: { $size: 0 } },
+            };
+        }
+
+        if (type === 'reposts') {
+            filter = {
+                isRepost: true,
+                repostedBy: userId,
+            };
+        }
+
+        const posts = await Post.find(filter)
+            .sort({ createdAt: -1 })
+            .populate('author', 'username avatar profile phoneNumber')
+            .populate('repostedBy', 'username avatar profile')
+            .populate({ path: 'originalPost', populate: { path: 'author', select: 'username avatar profile' } })
+            .lean();
+
+        res.json({ success: true, items: posts });
+    } catch (err) {
+        console.error('Hub GET /user/:userId/posts error:', err);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+/** GET /api/hub/user/:userId/replies — comments user has written */
+router.get('/user/:userId/replies', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const comments = await HubComment.find({ author: userId })
+            .sort({ createdAt: -1 })
+            .populate('post', 'content images author topic isRepost originalPost repostedBy createdAt')
+            .populate('author', 'username avatar profile phoneNumber')
+            .lean();
+
+        res.json({ success: true, items: comments });
+    } catch (err) {
+        console.error('Hub GET /user/:userId/replies error:', err);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 });
 

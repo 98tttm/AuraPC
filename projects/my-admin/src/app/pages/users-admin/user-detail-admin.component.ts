@@ -1,7 +1,8 @@
 import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
-import { AdminApiService } from '../../core/admin-api.service';
+import { AdminApiService, User } from '../../core/admin-api.service';
+import { ORDER_STATUS_LABELS } from '../../core/constants';
 
 @Component({
   selector: 'app-user-detail-admin',
@@ -15,8 +16,9 @@ export class UserDetailAdminComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private api = inject(AdminApiService);
 
-  user = signal<any>(null);
+  user = signal<User | null>(null);
   loading = signal(true);
+  error = signal('');
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -26,7 +28,10 @@ export class UserDetailAdminComponent implements OnInit {
           this.user.set(user);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: (err) => {
+          this.error.set(err?.error?.error || 'Không tìm thấy khách hàng');
+          this.loading.set(false);
+        },
       });
     }
   }
@@ -41,10 +46,6 @@ export class UserDetailAdminComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      pending: 'Chờ xử lý', confirmed: 'Đã xác nhận', processing: 'Đang xử lý',
-      shipped: 'Đang giao', delivered: 'Hoàn thành', cancelled: 'Đã huỷ',
-    };
-    return map[status] || status;
+    return ORDER_STATUS_LABELS[status] || status;
   }
 }

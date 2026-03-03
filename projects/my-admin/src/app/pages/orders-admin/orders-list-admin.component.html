@@ -4,18 +4,11 @@
     <h2>Đơn hàng</h2>
     <p>Quản lý và theo dõi đơn hàng</p>
   </div>
-  <div class="page-header__actions">
-    <select class="select" [(ngModel)]="statusFilter" (change)="onFilterChange()" style="width: auto">
-      <option value="">Tất cả đơn</option>
-      <option value="pending">Chờ xử lý</option>
-      <option value="confirmed">Đã xác nhận</option>
-      <option value="processing">Đang xử lý</option>
-      <option value="shipped">Đang giao</option>
-      <option value="delivered">Hoàn thành</option>
-      <option value="cancelled">Đã huỷ</option>
-    </select>
-  </div>
 </div>
+
+@if (error()) {
+  <div class="alert-error">{{ error() }}</div>
+}
 
 <!-- Stat Cards -->
 <div class="stat-cards">
@@ -135,8 +128,40 @@
     </div>
   </div>
 
+  <!-- Filters Row -->
+  <div class="filters-row">
+    <div class="filter-pills">
+      @for (opt of statusOptions; track opt.value) {
+        <button class="filter-pill" [class.filter-pill--active]="statusFilter === opt.value" (click)="setStatusFilter(opt.value)">
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+    <div class="date-filters">
+      <label class="date-filter">
+        <span class="date-filter__label">Từ</span>
+        <input type="date" class="date-filter__input" [(ngModel)]="dateFrom" (change)="onDateFilterChange()" />
+      </label>
+      <label class="date-filter">
+        <span class="date-filter__label">Đến</span>
+        <input type="date" class="date-filter__input" [(ngModel)]="dateTo" (change)="onDateFilterChange()" />
+      </label>
+    </div>
+  </div>
+
   @if (loading()) {
-    <div class="loading">Đang tải...</div>
+    <div class="skeleton-table">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton--text" style="width: 80px"></div>
+          <div style="flex: 1">
+            <div class="skeleton skeleton--text" style="width: 50%"></div>
+          </div>
+          <div class="skeleton skeleton--text" style="width: 80px"></div>
+          <div class="skeleton skeleton--text" style="width: 60px"></div>
+        </div>
+      }
+    </div>
   } @else {
     <table class="data-table">
       <thead>
@@ -163,7 +188,7 @@
               </div>
             </td>
             <td>
-              @if (order.items?.length > 0) {
+              @if (order.items && order.items.length > 0) {
                 {{ order.items[0].name }}
                 @if (order.items.length > 1) {
                   <span class="text-muted"> +{{ order.items.length - 1 }} sản phẩm</span>
@@ -175,7 +200,16 @@
             <td class="text-muted">{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="6" class="text-center text-muted">Không có đơn hàng nào</td></tr>
+          <tr>
+            <td colspan="6" class="empty-state-cell">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                  <rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h6"/>
+                </svg>
+                <span>Không có đơn hàng nào</span>
+              </div>
+            </td>
+          </tr>
         }
       </tbody>
     </table>

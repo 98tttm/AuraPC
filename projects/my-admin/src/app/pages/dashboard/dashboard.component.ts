@@ -3,8 +3,9 @@ import { RouterLink } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
-import { AdminApiService } from '../../core/admin-api.service';
+import { AdminApiService, Order, TopProductPoint } from '../../core/admin-api.service';
 import { AdminAuthService } from '../../core/auth/admin-auth.service';
+import { ORDER_STATUS_LABELS, ORDER_STATUS_KEYS, ORDER_STATUS_COLORS } from '../../core/constants';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,6 +20,7 @@ export class DashboardComponent implements OnInit {
   private auth = inject(AdminAuthService);
 
   loading = signal(true);
+  error = signal('');
   admin = this.auth.currentAdmin;
   today = new Date();
 
@@ -30,9 +32,9 @@ export class DashboardComponent implements OnInit {
   ordersLastMonth = signal(0);
   revenueThisMonth = signal(0);
   revenueLastMonth = signal(0);
-  recentOrders = signal<any[]>([]);
+  recentOrders = signal<Order[]>([]);
   ordersByStatus = signal<Record<string, number>>({});
-  topProducts = signal<any[]>([]);
+  topProducts = signal<TopProductPoint[]>([]);
 
   // Area chart — revenue trend (12 months)
   areaChartData = signal<ChartConfiguration<'line'>['data']>({
@@ -108,21 +110,21 @@ export class DashboardComponent implements OnInit {
         this.ordersByStatus.set(stats.ordersByStatus || {});
 
         const statusMap = stats.ordersByStatus || {};
-        const statusLabels = ['Chờ xử lý', 'Đã xác nhận', 'Đang xử lý', 'Đang giao', 'Hoàn thành', 'Đã huỷ'];
-        const statusKeys = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
-        const statusColors = ['#eab308', '#2563eb', '#7c3aed', '#0d9488', '#16a34a', '#dc2626'];
         this.doughnutChartData.set({
-          labels: statusLabels,
+          labels: ORDER_STATUS_KEYS.map(k => ORDER_STATUS_LABELS[k]),
           datasets: [{
-            data: statusKeys.map((k) => statusMap[k] || 0),
-            backgroundColor: statusColors,
+            data: ORDER_STATUS_KEYS.map(k => statusMap[k] || 0),
+            backgroundColor: ORDER_STATUS_KEYS.map(k => ORDER_STATUS_COLORS[k]),
             borderWidth: 0,
           }],
         });
 
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.error.set(err?.error?.error || 'Không thể tải dữ liệu dashboard');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -131,24 +133,25 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         const monthNames = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
         this.areaChartData.set({
-          labels: data.map((d: any) => {
+          labels: data.map(d => {
             const month = parseInt(d._id.split('-')[1], 10);
             return monthNames[month - 1];
           }),
           datasets: [{
-            data: data.map((d: any) => d.revenue),
-            borderColor: '#1a1a2e',
-            backgroundColor: 'rgba(26, 26, 46, 0.08)',
+            data: data.map(d => d.revenue),
+            borderColor: 'var(--accent)',
+            backgroundColor: 'var(--accent-light)',
             fill: true,
             tension: 0.4,
             pointRadius: 5,
-            pointBackgroundColor: '#1a1a2e',
-            pointBorderColor: '#fff',
+            pointBackgroundColor: 'var(--accent)',
+            pointBorderColor: 'var(--bg-card)',
             pointBorderWidth: 2,
             pointHoverRadius: 7,
           }],
         });
       },
+      error: () => { /* chart is non-critical */ },
     });
   }
 
@@ -157,15 +160,16 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         this.topProducts.set(data);
         this.topBarChartData.set({
-          labels: data.map((d: any) => d._id?.substring(0, 25) || 'N/A'),
+          labels: data.map(d => d._id?.substring(0, 25) || 'N/A'),
           datasets: [{
-            data: data.map((d: any) => d.totalQty),
+            data: data.map(d => d.totalQty),
             backgroundColor: ['#1a1a2e', '#374151', '#4b5563', '#6b7280', '#9ca3af'],
             borderRadius: 4,
             barThickness: 20,
           }],
         });
       },
+      error: () => { /* chart is non-critical */ },
     });
   }
 
@@ -175,18 +179,10 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      pending: 'Chờ xử lý',
-      confirmed: 'Đã xác nhận',
-      processing: 'Đang xử lý',
-      shipped: 'Đang giao',
-      delivered: 'Hoàn thành',
-      cancelled: 'Đã huỷ',
-    };
-    return map[status] || status;
+    return ORDER_STATUS_LABELS[status] || status;
   }
 
-  getCustomerName(order: any): string {
+  getCustomerName(order: Order): string {
     return order.user?.profile?.fullName || order.shippingAddress?.fullName || order.user?.phoneNumber || 'N/A';
   }
 

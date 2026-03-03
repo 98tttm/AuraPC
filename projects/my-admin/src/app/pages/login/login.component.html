@@ -18,7 +18,7 @@
         <div class="login-error">{{ error() }}</div>
       }
 
-      <div class="login-field">
+      <div class="login-field" [class.login-field--error]="emailError">
         <label for="email">Email</label>
         <input
           id="email"
@@ -28,9 +28,12 @@
           placeholder="admin@st.uel.edu.vn"
           autocomplete="email"
         />
+        @if (emailError) {
+          <span class="field-error">{{ emailError }}</span>
+        }
       </div>
 
-      <div class="login-field">
+      <div class="login-field" [class.login-field--error]="passwordError">
         <label for="password">Mật khẩu</label>
         <input
           id="password"
@@ -40,6 +43,9 @@
           placeholder="Nhập mật khẩu"
           autocomplete="current-password"
         />
+        @if (passwordError) {
+          <span class="field-error">{{ passwordError }}</span>
+        }
       </div>
 
       <button type="submit" class="login-btn" [disabled]="loading()">

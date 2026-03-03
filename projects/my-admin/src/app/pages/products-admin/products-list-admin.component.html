@@ -37,7 +37,7 @@
     </div>
     <span class="stat-card__label">Đang bán</span>
     <span class="stat-card__value">{{ activeProducts() }}</span>
-    <span class="stat-card__sub">hoạt động</span>
+    <span class="stat-card__sub">trang hiện tại</span>
   </div>
 
   <div class="stat-card">
@@ -51,7 +51,7 @@
     </div>
     <span class="stat-card__label">Sắp hết hàng</span>
     <span class="stat-card__value">{{ lowStockProducts() }}</span>
-    <span class="stat-card__sub">cần nhập thêm</span>
+    <span class="stat-card__sub">trang hiện tại</span>
   </div>
 
   <div class="stat-card">
@@ -64,7 +64,7 @@
     </div>
     <span class="stat-card__label">Hết hàng</span>
     <span class="stat-card__value">{{ outOfStockProducts() }}</span>
-    <span class="stat-card__sub">cần xử lý</span>
+    <span class="stat-card__sub">trang hiện tại</span>
   </div>
 </div>
 
@@ -72,7 +72,7 @@
 <div class="charts-row">
   <div class="chart-card">
     <div class="chart-card__title">Danh mục</div>
-    <div class="chart-card__subtitle">Phân bổ sản phẩm</div>
+    <div class="chart-card__subtitle">Phân bổ sản phẩm (trang hiện tại)</div>
     <div class="chart-wrapper">
       <canvas baseChart type="doughnut" [data]="categoryChartData()" [options]="categoryChartOptions"></canvas>
     </div>
@@ -98,15 +98,37 @@
   </div>
 
   @if (loading()) {
-    <div class="loading">Đang tải...</div>
+    <div class="skeleton-table">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton--img"></div>
+          <div style="flex: 1">
+            <div class="skeleton skeleton--text" style="width: 60%"></div>
+            <div class="skeleton skeleton--text" style="width: 30%; margin-top: 0.3rem"></div>
+          </div>
+          <div class="skeleton skeleton--text" style="width: 60px"></div>
+          <div class="skeleton skeleton--text" style="width: 80px"></div>
+          <div class="skeleton skeleton--text" style="width: 60px"></div>
+        </div>
+      }
+    </div>
   } @else {
     <table class="data-table">
       <thead>
         <tr>
-          <th>Sản phẩm</th>
+          <th class="sortable" (click)="toggleSort('name')">
+            Sản phẩm
+            @if (sortColumn === 'name') { <span class="sort-arrow">{{ sortDir === 'asc' ? '↑' : '↓' }}</span> }
+          </th>
           <th>Danh mục</th>
-          <th>Giá</th>
-          <th>Kho</th>
+          <th class="sortable" (click)="toggleSort('price')">
+            Giá
+            @if (sortColumn === 'price') { <span class="sort-arrow">{{ sortDir === 'asc' ? '↑' : '↓' }}</span> }
+          </th>
+          <th class="sortable" (click)="toggleSort('stock')">
+            Kho
+            @if (sortColumn === 'stock') { <span class="sort-arrow">{{ sortDir === 'asc' ? '↑' : '↓' }}</span> }
+          </th>
           <th>Trạng thái</th>
           <th></th>
         </tr>
@@ -159,7 +181,18 @@
             </td>
           </tr>
         } @empty {
-          <tr><td colspan="6" class="text-center text-muted">Chưa có sản phẩm nào</td></tr>
+          <tr>
+            <td colspan="6" class="empty-state-cell">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                  <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+                <span>Chưa có sản phẩm nào</span>
+                <a routerLink="/products/new" class="btn btn--primary btn--sm">+ Thêm sản phẩm</a>
+              </div>
+            </td>
+          </tr>
         }
       </tbody>
     </table>

@@ -133,3 +133,15 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.login-field--error input {
+  border-color: var(--accent-red);
+}
+.login-field--error input:focus {
+  box-shadow: 0 0 0 3px var(--accent-red-light);
+}
+.field-error {
+  font-size: 0.75rem;
+  color: var(--accent-red);
+  margin-top: 0.2rem;
+}

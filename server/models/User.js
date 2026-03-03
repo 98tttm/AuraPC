@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: '' },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
+    // AuraHub social graph
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    followerCount: { type: Number, default: 0 },
+    followingCount: { type: Number, default: 0 },
+    // AuraHub posts mapping (store Post IDs)
+    hubPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    hubReposts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true, strict: true }
 );

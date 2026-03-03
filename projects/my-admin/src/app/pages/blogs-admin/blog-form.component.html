@@ -10,26 +10,42 @@
 }
 
 <form (ngSubmit)="submit()" class="form">
-  <div class="field">
-    <label>Tiêu đề *</label>
-    <input type="text" [(ngModel)]="model.title" name="title" required />
+  <div class="field" [class.field--error]="titleError">
+    <label>Tiêu đề <span class="required">*</span></label>
+    <input type="text" [(ngModel)]="model.title" name="title" (ngModelChange)="onTitleChange()" placeholder="Nhập tiêu đề bài viết" />
+    @if (titleError) {
+      <span class="field-error">{{ titleError }}</span>
+    }
   </div>
   <div class="field">
     <label>Slug</label>
-    <input type="text" [(ngModel)]="model.slug" name="slug" />
+    <input type="text" [(ngModel)]="model.slug" name="slug" placeholder="tu-dong-tao-tu-tieu-de" />
   </div>
   <div class="field">
     <label>Mô tả ngắn</label>
     <textarea [(ngModel)]="model.excerpt" name="excerpt" rows="2"></textarea>
   </div>
   <div class="field">
-    <label>Nội dung</label>
+    <div class="field-header">
+      <label>Nội dung</label>
+      <button type="button" class="btn btn--ghost btn--sm" (click)="togglePreview()">
+        {{ showPreview() ? 'Ẩn xem trước' : 'Xem trước' }}
+      </button>
+    </div>
     <textarea [(ngModel)]="model.content" name="content" rows="8"></textarea>
+    @if (showPreview() && model.content) {
+      <div class="content-preview" [innerHTML]="model.content"></div>
+    }
   </div>
   <div class="row">
     <div class="field">
       <label>Ảnh bìa (URL)</label>
-      <input type="text" [(ngModel)]="model.coverImage" name="coverImage" />
+      <input type="text" [(ngModel)]="model.coverImage" name="coverImage" placeholder="https://..." />
+      @if (model.coverImage) {
+        <div class="cover-preview">
+          <img [src]="model.coverImage" alt="" class="cover-preview__img" />
+        </div>
+      }
     </div>
     <div class="field">
       <label>Tác giả</label>
@@ -40,7 +56,9 @@
     <label><input type="checkbox" [(ngModel)]="model.published" name="published" /> Xuất bản</label>
   </div>
   <div class="actions">
-    <button type="submit" class="btn btn--primary" [disabled]="loading()">{{ id() ? 'Cập nhật' : 'Tạo' }}</button>
+    <button type="submit" class="btn btn--primary" [disabled]="loading()">
+      @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật' : 'Tạo' }} }
+    </button>
     <a routerLink="/blogs" class="btn btn--outline">Hủy</a>
   </div>
 </form>

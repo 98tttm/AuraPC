@@ -14,7 +14,7 @@ export interface Product {
   shortDescription?: string;
   price: number;
   salePrice?: number;
-  category?: string;
+  category?: string | { _id: string; name: string; slug?: string };
   images?: { url: string; alt?: string }[];
   specs?: Record<string, unknown>;
   stock?: number;
@@ -61,18 +61,33 @@ export interface BlogsListResponse {
 }
 
 // === Order interfaces ===
+export interface OrderItemProduct {
+  _id: string;
+  name?: string;
+  slug?: string;
+  images?: { url: string; alt?: string }[];
+}
+
 export interface OrderItem {
   _id?: string;
-  product?: any;
+  product?: OrderItemProduct | string;
   name: string;
   price: number;
   qty: number;
 }
 
+export interface OrderUser {
+  _id: string;
+  phoneNumber?: string;
+  email?: string;
+  username?: string;
+  profile?: { fullName?: string; dateOfBirth?: string; gender?: string };
+}
+
 export interface Order {
   _id?: string;
   orderNumber: string;
-  user?: any;
+  user?: OrderUser;
   items: OrderItem[];
   shippingAddress?: {
     fullName?: string;
@@ -105,7 +120,7 @@ export interface User {
   email?: string;
   username?: string;
   profile?: { fullName?: string; dateOfBirth?: string; gender?: string };
-  addresses?: any[];
+  addresses?: { _id?: string; label?: string; fullName?: string; phone?: string; address?: string; ward?: string; district?: string; city?: string; isDefault?: boolean }[];
   avatar?: string;
   active?: boolean;
   lastLogin?: string;
@@ -123,6 +138,22 @@ export interface UsersListResponse {
 }
 
 // === Dashboard interfaces ===
+export interface OrderChartPoint {
+  _id: string;
+  count: number;
+}
+
+export interface RevenueChartPoint {
+  _id: string;
+  revenue: number;
+}
+
+export interface TopProductPoint {
+  _id: string;
+  totalQty: number;
+  totalRevenue: number;
+}
+
 export interface DashboardStats {
   totalRevenue: number;
   revenueThisMonth: number;
@@ -133,7 +164,7 @@ export interface DashboardStats {
   ordersByStatus: Record<string, number>;
   totalUsers: number;
   totalProducts: number;
-  recentOrders: any[];
+  recentOrders: Order[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -145,20 +176,20 @@ export class AdminApiService {
     return this.http.get<DashboardStats>(`${BASE}/admin/dashboard/stats`);
   }
 
-  getOrderChart(days = 7): Observable<any[]> {
-    return this.http.get<any[]>(`${BASE}/admin/dashboard/chart/orders`, {
+  getOrderChart(days = 7): Observable<OrderChartPoint[]> {
+    return this.http.get<OrderChartPoint[]>(`${BASE}/admin/dashboard/chart/orders`, {
       params: { days: days.toString() },
     });
   }
 
-  getRevenueChart(months = 6): Observable<any[]> {
-    return this.http.get<any[]>(`${BASE}/admin/dashboard/chart/revenue`, {
+  getRevenueChart(months = 6): Observable<RevenueChartPoint[]> {
+    return this.http.get<RevenueChartPoint[]>(`${BASE}/admin/dashboard/chart/revenue`, {
       params: { months: months.toString() },
     });
   }
 
-  getTopProducts(limit = 5): Observable<any[]> {
-    return this.http.get<any[]>(`${BASE}/admin/dashboard/top-products`, {
+  getTopProducts(limit = 5): Observable<TopProductPoint[]> {
+    return this.http.get<TopProductPoint[]>(`${BASE}/admin/dashboard/top-products`, {
       params: { limit: limit.toString() },
     });
   }

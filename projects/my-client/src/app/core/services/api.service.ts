@@ -344,6 +344,27 @@ export class ApiService {
     return this.http.get<OrderListItem[]>(url);
   }
 
+  // ─── AUTH / USER SOCIAL (FOLLOW) ───
+
+  toggleFollow(targetUserId: string): Observable<{ success: boolean; following: boolean; followerCount: number; followingCount: number }> {
+    return this.http.post<{ success: boolean; following: boolean; followerCount: number; followingCount: number }>(
+      `${BASE}/auth/follow/${encodeURIComponent(targetUserId)}`,
+      {}
+    );
+  }
+
+  getFollowers(userId: string): Observable<{ success: boolean; followerCount: number; followers: any[] }> {
+    return this.http.get<{ success: boolean; followerCount: number; followers: any[] }>(
+      `${BASE}/auth/followers/${encodeURIComponent(userId)}`
+    );
+  }
+
+  getFollowing(userId: string): Observable<{ success: boolean; followingCount: number; following: any[] }> {
+    return this.http.get<{ success: boolean; followingCount: number; following: any[] }>(
+      `${BASE}/auth/following/${encodeURIComponent(userId)}`
+    );
+  }
+
   getOrder(orderNumber: string): Observable<unknown> {
     return this.http.get(`${BASE}/orders/${encodeURIComponent(orderNumber)}`);
   }
@@ -512,5 +533,20 @@ export class ApiService {
     const fd = new FormData();
     files.forEach(f => fd.append('images', f));
     return this.http.post<{ urls: string[] }>(`${BASE}/hub/upload`, fd);
+  }
+
+  // AuraHub user activity
+  getHubUserPosts(userId: string, type: 'threads' | 'media' | 'reposts') {
+    const params = new HttpParams().set('type', type);
+    return this.http.get<{ success: boolean; items: any[] }>(
+      `${BASE}/hub/user/${encodeURIComponent(userId)}/posts`,
+      { params }
+    );
+  }
+
+  getHubUserReplies(userId: string) {
+    return this.http.get<{ success: boolean; items: any[] }>(
+      `${BASE}/hub/user/${encodeURIComponent(userId)}/replies`
+    );
   }
 }

@@ -13,6 +13,16 @@
   margin-top: 0.15rem;
 }
 
+/* ── Charts Row ── */
+.charts-row {
+  margin-bottom: 1rem;
+}
+
+.chart-wrapper {
+  height: 220px;
+  position: relative;
+}
+
 /* user cell in table */
 .user-cell {
   display: flex;

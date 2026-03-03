@@ -95,6 +95,40 @@
   margin-bottom: 1rem;
 }
 
+/* ── Field Header ── */
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+.field-header label { margin-bottom: 0; }
+
+/* ── Content Preview ── */
+.content-preview {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* ── Cover Image Preview ── */
+.cover-preview {
+  margin-top: 0.5rem;
+}
+.cover-preview__img {
+  max-width: 200px;
+  max-height: 120px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  object-fit: cover;
+}
+
 @media (max-width: 640px) {
   .row { flex-direction: column; gap: 0; }
 }

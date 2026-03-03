@@ -1,6 +1,25 @@
 @if (loading()) {
-  <div class="loading">Đang tải dữ liệu...</div>
+  <!-- Loading Skeletons -->
+  <div class="welcome-header">
+    <div>
+      <div class="skeleton skeleton--title"></div>
+      <div class="skeleton skeleton--text" style="width: 240px; margin-top: 0.5rem;"></div>
+    </div>
+  </div>
+  <div class="stat-cards">
+    @for (_ of [1,2,3,4]; track $index) {
+      <div class="stat-card">
+        <div class="skeleton skeleton--icon"></div>
+        <div class="skeleton skeleton--text" style="width: 80px;"></div>
+        <div class="skeleton skeleton--value"></div>
+      </div>
+    }
+  </div>
 } @else {
+  @if (error()) {
+    <div class="alert-error">{{ error() }}</div>
+  }
+
   <!-- Welcome Header -->
   <div class="welcome-header">
     <div>
@@ -138,7 +157,7 @@
     </div>
   </div>
 
-  <!-- Bottom: Top Products + Order Status + Recent Orders -->
+  <!-- Bottom: Top Products + Order Status -->
   <div class="bottom-grid">
     <!-- Top Products -->
     <div class="chart-card">
@@ -207,7 +226,16 @@
             <td class="text-muted">{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="5" class="text-center text-muted">Chưa có đơn hàng</td></tr>
+          <tr>
+            <td colspan="5" class="empty-state-cell">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                  <rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h6"/><path d="M8 15h4"/>
+                </svg>
+                <span>Chưa có đơn hàng nào</span>
+              </div>
+            </td>
+          </tr>
         }
       </tbody>
     </table>

@@ -1,7 +1,40 @@
-.page-header__actions {
+/* ── Filters Row ── */
+.filters-row {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.date-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.date-filter__label {
+  font-weight: 500;
+}
+.date-filter__input {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.date-filter__input:focus {
+  border-color: var(--text-secondary);
 }
 
 /* ── Charts Row ── */

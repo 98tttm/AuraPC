@@ -2,7 +2,10 @@ import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@ang
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
-import { AdminApiService } from '../../core/admin-api.service';
+import { AdminApiService, Order } from '../../core/admin-api.service';
+import { ToastService } from '../../core/toast.service';
+import { ConfirmService } from '../../shared/confirm-dialog.component';
+import { ORDER_STATUS_LABELS, ORDER_STATUS_KEYS } from '../../core/constants';
 
 @Component({
   selector: 'app-order-detail-admin',
@@ -15,20 +18,19 @@ import { AdminApiService } from '../../core/admin-api.service';
 export class OrderDetailAdminComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private api = inject(AdminApiService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
-  order = signal<any>(null);
+  order = signal<Order | null>(null);
   loading = signal(true);
+  error = signal('');
   updating = signal(false);
   newStatus = '';
 
-  statuses = [
-    { value: 'pending', label: 'Chờ xử lý' },
-    { value: 'confirmed', label: 'Đã xác nhận' },
-    { value: 'processing', label: 'Đang xử lý' },
-    { value: 'shipped', label: 'Đang giao' },
-    { value: 'delivered', label: 'Hoàn thành' },
-    { value: 'cancelled', label: 'Đã huỷ' },
-  ];
+  statuses = ORDER_STATUS_KEYS.map(k => ({ value: k, label: ORDER_STATUS_LABELS[k] }));
+
+  // Stepper steps (excluding cancelled)
+  stepperSteps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 
   ngOnInit(): void {
     const orderNumber = this.route.snapshot.paramMap.get('orderNumber');
@@ -39,31 +41,59 @@ export class OrderDetailAdminComponent implements OnInit {
           this.newStatus = order.status;
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: (err) => {
+          this.error.set(err?.error?.error || 'Không tìm thấy đơn hàng');
+          this.loading.set(false);
+        },
       });
     }
   }
 
-  updateStatus(): void {
+  async updateStatus(): Promise<void> {
     const o = this.order();
     if (!o || this.newStatus === o.status) return;
+
+    const confirmed = await this.confirm.confirm({
+      title: 'Cập nhật trạng thái',
+      message: `Đổi trạng thái đơn hàng #${o.orderNumber} từ "${this.getStatusLabel(o.status)}" sang "${this.getStatusLabel(this.newStatus)}"?`,
+      confirmText: 'Cập nhật',
+    });
+    if (!confirmed) return;
 
     this.updating.set(true);
     this.api.updateOrderStatus(o.orderNumber, this.newStatus).subscribe({
       next: (updated) => {
         this.order.set(updated);
         this.updating.set(false);
+        this.toast.success('Đã cập nhật trạng thái');
       },
-      error: () => this.updating.set(false),
+      error: (err) => {
+        this.updating.set(false);
+        this.toast.error(err?.error?.error || 'Cập nhật thất bại');
+      },
     });
   }
 
   getStatusLabel(status: string): string {
-    return this.statuses.find((s) => s.value === status)?.label || status;
+    return ORDER_STATUS_LABELS[status] || status;
   }
 
   getCustomerName(): string {
     const o = this.order();
     return o?.user?.profile?.fullName || o?.shippingAddress?.fullName || o?.user?.phoneNumber || 'N/A';
+  }
+
+  getStepIndex(status: string): number {
+    return this.stepperSteps.indexOf(status);
+  }
+
+  isStepComplete(step: string): boolean {
+    const o = this.order();
+    if (!o || o.status === 'cancelled') return false;
+    return this.getStepIndex(o.status) >= this.getStepIndex(step);
+  }
+
+  isStepCurrent(step: string): boolean {
+    return this.order()?.status === step;
   }
 }

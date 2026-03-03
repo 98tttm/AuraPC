@@ -1,60 +1,93 @@
 <div class="page">
   <div class="page-header">
-    <h1>{{ id() ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
-    <a routerLink="/products" class="btn">← Danh sách</a>
+    <div>
+      <a routerLink="/products" class="back-link">&larr; Quay lại</a>
+      <h2>{{ id() ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h2>
+    </div>
   </div>
   @if (error()) {
-    <div class="alert alert-error">{{ error() }}</div>
+    <div class="alert-error">{{ error() }}</div>
   }
   <form (ngSubmit)="submit()" class="form">
-    <div class="field">
-      <label>Tên *</label>
-      <input type="text" [(ngModel)]="model.name" name="name" required />
+    <div class="field" [class.field--error]="nameError">
+      <label>Tên <span class="required">*</span></label>
+      <input type="text" [(ngModel)]="model.name" name="name" (ngModelChange)="onNameChange()" placeholder="Nhập tên sản phẩm" />
+      @if (nameError) {
+        <span class="field-error">{{ nameError }}</span>
+      }
     </div>
     <div class="field">
       <label>Slug</label>
-      <input type="text" [(ngModel)]="model.slug" name="slug" placeholder="tu-dong-tao-neu-de-trong" />
+      <input type="text" [(ngModel)]="model.slug" name="slug" (ngModelChange)="onFieldChange()" placeholder="tu-dong-tao-tu-ten" />
     </div>
     <div class="field">
       <label>Mô tả ngắn</label>
-      <input type="text" [(ngModel)]="model.shortDescription" name="shortDescription" />
+      <input type="text" [(ngModel)]="model.shortDescription" name="shortDescription" (ngModelChange)="onFieldChange()" />
     </div>
     <div class="field">
       <label>Mô tả</label>
-      <textarea [(ngModel)]="model.description" name="description" rows="4"></textarea>
+      <textarea [(ngModel)]="model.description" name="description" rows="4" (ngModelChange)="onFieldChange()"></textarea>
     </div>
     <div class="row">
-      <div class="field">
-        <label>Giá *</label>
-        <input type="number" [(ngModel)]="model.price" name="price" min="0" step="1000" />
+      <div class="field" [class.field--error]="priceError">
+        <label>Giá <span class="required">*</span></label>
+        <input type="number" [(ngModel)]="model.price" name="price" min="0" step="1000" (ngModelChange)="onFieldChange()" />
+        @if (priceError) {
+          <span class="field-error">{{ priceError }}</span>
+        }
       </div>
       <div class="field">
         <label>Giá sale</label>
-        <input type="number" [(ngModel)]="model.salePrice" name="salePrice" min="0" step="1000" />
+        <input type="number" [(ngModel)]="model.salePrice" name="salePrice" min="0" step="1000" (ngModelChange)="onFieldChange()" />
       </div>
     </div>
     <div class="row">
       <div class="field">
         <label>Danh mục</label>
-        <select [(ngModel)]="model.category" name="category">
+        <select [(ngModel)]="model.category" name="category" (ngModelChange)="onFieldChange()">
           <option [ngValue]="undefined">-- Chọn --</option>
           @for (c of categories(); track c._id) {
             <option [ngValue]="c._id">{{ c.name }}</option>
           }
         </select>
       </div>
-      <div class="field">
+      <div class="field" [class.field--error]="stockError">
         <label>Tồn kho</label>
-        <input type="number" [(ngModel)]="model.stock" name="stock" min="0" />
+        <input type="number" [(ngModel)]="model.stock" name="stock" min="0" (ngModelChange)="onFieldChange()" />
+        @if (stockError) {
+          <span class="field-error">{{ stockError }}</span>
+        }
       </div>
     </div>
+
+    <!-- Images -->
+    <div class="field">
+      <label>Hình ảnh</label>
+      <div class="image-input-row">
+        <input type="text" [(ngModel)]="imageUrlInput" name="imageUrl" placeholder="Nhập URL ảnh rồi nhấn Thêm" (keyup.enter)="addImageUrl(); $event.preventDefault()" />
+        <button type="button" class="btn btn--outline btn--sm" (click)="addImageUrl()">Thêm</button>
+      </div>
+      @if (model.images && model.images.length > 0) {
+        <div class="image-preview-list">
+          @for (img of model.images; track $index) {
+            <div class="image-preview-item">
+              <img [src]="img.url" alt="" class="image-preview-item__img" />
+              <button type="button" class="image-preview-item__remove" (click)="removeImage($index)" title="Xóa">×</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
     <div class="field row check">
-      <label><input type="checkbox" [(ngModel)]="model.featured" name="featured" /> Nổi bật</label>
-      <label><input type="checkbox" [(ngModel)]="model.active" name="active" /> Hiển thị</label>
+      <label><input type="checkbox" [(ngModel)]="model.featured" name="featured" (ngModelChange)="onFieldChange()" /> Nổi bật</label>
+      <label><input type="checkbox" [(ngModel)]="model.active" name="active" (ngModelChange)="onFieldChange()" /> Hiển thị</label>
     </div>
     <div class="actions">
-      <button type="submit" class="btn btn-primary" [disabled]="loading()">{{ id() ? 'Cập nhật' : 'Tạo' }}</button>
-      <a routerLink="/products" class="btn">Hủy</a>
+      <button type="submit" class="btn btn--primary" [disabled]="loading()">
+        @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật' : 'Tạo' }} }
+      </button>
+      <a routerLink="/products" class="btn btn--outline">Hủy</a>
     </div>
   </form>
 </div>

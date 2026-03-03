@@ -16,6 +16,7 @@ export class LoginComponent {
   password = '';
   loading = signal(false);
   error = signal('');
+  touched = signal(false);
 
   constructor(
     private auth: AdminAuthService,
@@ -26,11 +27,23 @@ export class LoginComponent {
     }
   }
 
+  get emailError(): string {
+    if (!this.touched()) return '';
+    if (!this.email.trim()) return 'Vui lòng nhập email';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) return 'Email không hợp lệ';
+    return '';
+  }
+
+  get passwordError(): string {
+    if (!this.touched()) return '';
+    if (!this.password) return 'Vui lòng nhập mật khẩu';
+    return '';
+  }
+
   onSubmit(): void {
-    if (!this.email || !this.password) {
-      this.error.set('Vui lòng nhập email và mật khẩu');
-      return;
-    }
+    this.touched.set(true);
+    if (this.emailError || this.passwordError) return;
+
     this.loading.set(true);
     this.error.set('');
 

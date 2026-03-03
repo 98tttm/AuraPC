@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
-import { AdminApiService, DashboardStats } from '../../core/admin-api.service';
+import { AdminApiService, Order } from '../../core/admin-api.service';
+import { ORDER_STATUS_LABELS } from '../../core/constants';
 
 @Component({
   selector: 'app-orders-list-admin',
@@ -17,13 +18,16 @@ import { AdminApiService, DashboardStats } from '../../core/admin-api.service';
 export class OrdersListAdminComponent implements OnInit {
   private api = inject(AdminApiService);
 
-  orders = signal<any[]>([]);
+  orders = signal<Order[]>([]);
   total = signal(0);
   loading = signal(true);
+  error = signal('');
   page = 1;
   limit = 20;
   statusFilter = '';
   searchQuery = '';
+  dateFrom = '';
+  dateTo = '';
 
   // Stats
   totalOrders = signal(0);
@@ -62,6 +66,17 @@ export class OrdersListAdminComponent implements OnInit {
     },
   };
 
+  // Status filter pills
+  statusOptions = [
+    { value: '', label: 'Tất cả' },
+    { value: 'pending', label: 'Chờ xử lý' },
+    { value: 'confirmed', label: 'Đã xác nhận' },
+    { value: 'processing', label: 'Đang xử lý' },
+    { value: 'shipped', label: 'Đang giao' },
+    { value: 'delivered', label: 'Hoàn thành' },
+    { value: 'cancelled', label: 'Đã huỷ' },
+  ];
+
   ngOnInit(): void {
     this.loadOrders();
     this.loadStats();
@@ -70,13 +85,24 @@ export class OrdersListAdminComponent implements OnInit {
 
   loadOrders(): void {
     this.loading.set(true);
-    this.api.getOrders({ page: this.page, limit: this.limit, status: this.statusFilter, search: this.searchQuery }).subscribe({
+    this.error.set('');
+    this.api.getOrders({
+      page: this.page,
+      limit: this.limit,
+      status: this.statusFilter,
+      search: this.searchQuery,
+      from: this.dateFrom || undefined,
+      to: this.dateTo || undefined,
+    }).subscribe({
       next: (res) => {
         this.orders.set(res.items);
         this.total.set(res.total);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.error.set(err?.error?.error || 'Lỗi tải danh sách đơn hàng');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -102,6 +128,7 @@ export class OrdersListAdminComponent implements OnInit {
           datasets: [{ data: keys.map(k => statusMap[k] || 0), backgroundColor: colors, borderRadius: 4, barThickness: 18 }],
         });
       },
+      error: () => {},
     });
   }
 
@@ -109,12 +136,12 @@ export class OrdersListAdminComponent implements OnInit {
     this.api.getOrderChart(30).subscribe({
       next: (data) => {
         this.trendChartData.set({
-          labels: data.map((d: any) => {
+          labels: data.map(d => {
             const date = new Date(d._id);
             return `${date.getDate()}/${date.getMonth() + 1}`;
           }),
           datasets: [{
-            data: data.map((d: any) => d.count),
+            data: data.map(d => d.count),
             borderColor: '#1a1a2e',
             backgroundColor: 'rgba(26, 26, 46, 0.06)',
             fill: true,
@@ -126,10 +153,17 @@ export class OrdersListAdminComponent implements OnInit {
           }],
         });
       },
+      error: () => {},
     });
   }
 
-  onFilterChange(): void {
+  setStatusFilter(status: string): void {
+    this.statusFilter = status;
+    this.page = 1;
+    this.loadOrders();
+  }
+
+  onDateFilterChange(): void {
     this.page = 1;
     this.loadOrders();
   }
@@ -148,20 +182,16 @@ export class OrdersListAdminComponent implements OnInit {
     return Math.ceil(this.total() / this.limit);
   }
 
-  getCustomerName(order: any): string {
+  getCustomerName(order: Order): string {
     return order.user?.profile?.fullName || order.shippingAddress?.fullName || order.user?.phoneNumber || 'N/A';
   }
 
-  getCustomerEmail(order: any): string {
+  getCustomerEmail(order: Order): string {
     return order.shippingAddress?.email || order.user?.email || '';
   }
 
   getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      pending: 'Chờ xử lý', confirmed: 'Đã xác nhận', processing: 'Đang xử lý',
-      shipped: 'Đang giao', delivered: 'Hoàn thành', cancelled: 'Đã huỷ',
-    };
-    return map[status] || status;
+    return ORDER_STATUS_LABELS[status] || status;
   }
 
   getPercentChange(current: number, previous: number): number {

@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
-import { AdminApiService } from '../../core/admin-api.service';
+import { AdminApiService, User } from '../../core/admin-api.service';
+import { getUserSegment, getUserSegmentLabel } from '../../core/constants';
 
 @Component({
   selector: 'app-users-list-admin',
@@ -17,9 +18,10 @@ import { AdminApiService } from '../../core/admin-api.service';
 export class UsersListAdminComponent implements OnInit {
   private api = inject(AdminApiService);
 
-  users = signal<any[]>([]);
+  users = signal<User[]>([]);
   total = signal(0);
   loading = signal(true);
+  error = signal('');
   page = 1;
   limit = 20;
   searchQuery = '';
@@ -44,6 +46,7 @@ export class UsersListAdminComponent implements OnInit {
 
   loadUsers(): void {
     this.loading.set(true);
+    this.error.set('');
     this.api.getUsers({ page: this.page, limit: this.limit, search: this.searchQuery }).subscribe({
       next: (res) => {
         this.users.set(res.items);
@@ -51,7 +54,10 @@ export class UsersListAdminComponent implements OnInit {
         this.buildSegmentChart(res.items);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.error.set(err?.error?.error || 'Lỗi tải danh sách khách hàng');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -61,20 +67,21 @@ export class UsersListAdminComponent implements OnInit {
         this.totalUsers.set(stats.totalUsers);
         this.totalOrders.set(stats.totalOrders);
       },
+      error: () => {},
     });
   }
 
-  private buildSegmentChart(users: any[]): void {
+  private buildSegmentChart(users: User[]): void {
     let vip = 0, regular = 0, newUser = 0, atRisk = 0;
     users.forEach(u => {
-      const orders = u.orderCount || 0;
-      if (orders >= 10) vip++;
-      else if (orders >= 3) regular++;
-      else if (orders >= 1) newUser++;
+      const seg = getUserSegment(u.orderCount || 0);
+      if (seg === 'vip') vip++;
+      else if (seg === 'regular') regular++;
+      else if (seg === 'new') newUser++;
       else atRisk++;
     });
     this.segmentChartData.set({
-      labels: ['VIP', 'Thường xuyên', 'Mới', 'Rủi ro'],
+      labels: ['VIP', 'Thường xuyên', 'Mới', 'Chưa mua'],
       datasets: [{
         data: [vip, regular, newUser, atRisk],
         backgroundColor: ['#7c3aed', '#0d9488', '#2563eb', '#dc2626'],
@@ -97,32 +104,27 @@ export class UsersListAdminComponent implements OnInit {
     return Math.ceil(this.total() / this.limit);
   }
 
-  getUserName(user: any): string {
+  getUserName(user: User): string {
     return user.profile?.fullName || user.username || user.phoneNumber;
   }
 
-  getInitial(user: any): string {
+  getInitial(user: User): string {
     return this.getUserName(user).charAt(0).toUpperCase();
   }
 
-  getUserLocation(user: any): string {
-    if (user.addresses?.length > 0) {
+  getUserLocation(user: User): string {
+    if (user.addresses && user.addresses.length > 0) {
       const addr = user.addresses[0];
       return [addr.district, addr.city].filter(Boolean).join(', ') || '';
     }
     return '';
   }
 
-  getSegment(user: any): string {
-    const orders = user.orderCount || 0;
-    if (orders >= 10) return 'vip';
-    if (orders >= 3) return 'regular';
-    if (orders >= 1) return 'new';
-    return 'inactive';
+  getSegment(user: User): string {
+    return getUserSegment(user.orderCount || 0);
   }
 
-  getSegmentLabel(user: any): string {
-    const map: Record<string, string> = { vip: 'VIP', regular: 'Thường xuyên', new: 'Mới', inactive: 'Chưa mua' };
-    return map[this.getSegment(user)] || '';
+  getSegmentLabel(user: User): string {
+    return getUserSegmentLabel(user.orderCount || 0);
   }
 }

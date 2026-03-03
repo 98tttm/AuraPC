@@ -58,11 +58,14 @@ router.post('/request-otp', async (req, res) => {
       { code, createdAt: new Date() },
       { upsert: true, new: true }
     );
-    console.log('[AuraPC Auth] OTP cho', stored, ':', code, '(hiệu lực 5 phút)');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[AuraPC Auth] OTP cho', stored, ':', code, '(hiệu lực 5 phút)');
+    }
     const payload = { success: true, message: 'Mã OTP đã được gửi.' };
-    // Mặc định trả devOtp (demo, chưa có SMS). Ẩn khi đặt ENABLE_DEV_OTP_IN_RESPONSE=false
-    const hideOtpInResponse = process.env.ENABLE_DEV_OTP_IN_RESPONSE === 'false';
-    if (!hideOtpInResponse) payload.devOtp = code;
+    // Only expose devOtp in development mode (never in production)
+    if (process.env.NODE_ENV === 'development') {
+      payload.devOtp = code;
+    }
     res.json(payload);
   } catch (err) {
     console.error('[POST /api/auth/request-otp]', err);
@@ -167,7 +170,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-/** PUT /api/auth/profile - Cß║ญp nhß║ญt th├╢ng tin c├í nh├вn */
+/** PUT /api/auth/profile - Cập nhật thông tin cá nhân */
 router.put('/profile', requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
@@ -208,6 +211,87 @@ router.post('/avatar', requireAuth, upload.single('avatar'), async (req, res) =>
     res.json({ success: true, user: out, avatarUrl });
   } catch (err) {
     console.error('[POST /api/auth/avatar]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ===================== FOLLOW (AuraHub) =====================
+
+/** POST /api/auth/follow/:targetId - follow/unfollow user */
+router.post('/follow/:targetId', requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const targetId = req.params.targetId;
+    if (userId === targetId) {
+      return res.status(400).json({ success: false, message: 'Bạn không thể follow chính mình.' });
+    }
+
+    const [me, target] = await Promise.all([
+      User.findById(userId),
+      User.findById(targetId),
+    ]);
+    if (!me || !target) {
+      return res.status(404).json({ success: false, message: 'User không tồn tại.' });
+    }
+
+    const isFollowing = me.following.some((id) => id.toString() === targetId);
+    if (isFollowing) {
+      // Unfollow
+      me.following = me.following.filter((id) => id.toString() !== targetId);
+      target.followers = target.followers.filter((id) => id.toString() !== userId);
+    } else {
+      me.following.push(target._id);
+      target.followers.push(me._id);
+    }
+    me.followingCount = me.following.length;
+    target.followerCount = target.followers.length;
+
+    await Promise.all([me.save(), target.save()]);
+
+    return res.json({
+      success: true,
+      following: !isFollowing,
+      followerCount: target.followerCount,
+      followingCount: me.followingCount,
+    });
+  } catch (err) {
+    console.error('[POST /api/auth/follow/:targetId]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** GET /api/auth/followers/:userId - list followers */
+router.get('/followers/:userId', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .populate('followers', 'username avatar profile phoneNumber')
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User không tồn tại.' });
+    res.json({
+      success: true,
+      followerCount: user.followerCount || (user.followers?.length ?? 0),
+      followers: user.followers || [],
+    });
+  } catch (err) {
+    console.error('[GET /api/auth/followers/:userId]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/** GET /api/auth/following/:userId - list following */
+router.get('/following/:userId', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .populate('following', 'username avatar profile phoneNumber')
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User không tồn tại.' });
+    res.json({
+      success: true,
+      followingCount: user.followingCount || (user.following?.length ?? 0),
+      following: user.following || [],
+    });
+  } catch (err) {
+    console.error('[GET /api/auth/following/:userId]', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });

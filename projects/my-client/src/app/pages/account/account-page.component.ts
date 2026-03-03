@@ -27,7 +27,7 @@ export class AccountPageComponent implements OnInit {
   readonly addressService = inject(AddressService);
 
   readonly user = this.auth.currentUser;
-  activeTab = signal<'profile' | 'orders' | 'address'>('profile');
+  activeTab = signal<'profile' | 'orders' | 'address' | 'hub'>('profile');
   editMode = signal(false);
 
   // Edit form fields
@@ -67,6 +67,21 @@ export class AccountPageComponent implements OnInit {
   // Logout confirmation
   showLogoutModal = signal(false);
 
+  // Hub social counters
+  followerCount = signal(0);
+  followingCount = signal(0);
+  followersList = signal<any[]>([]);
+  followingList = signal<any[]>([]);
+
+  showFollowsModal = signal(false);
+  followsTab = signal<'followers' | 'following'>('followers');
+  hubTab = signal<'threads' | 'replies' | 'media'>('threads');
+  hubThreads = signal<any[]>([]);
+  hubReplies = signal<any[]>([]);
+  hubMedia = signal<any[]>([]);
+
+  hubLoading = signal(false);
+
   // Tên tùy chỉnh đơn hàng (key = orderId), lưu localStorage
   orderDisplayNames = signal<Record<string, string>>({});
   editingOrderNameId = signal<string | null>(null);
@@ -86,15 +101,21 @@ export class AccountPageComponent implements OnInit {
     this.syncTabFromUrl(this.route.snapshot.queryParams);
     // Theo dõi thay đổi query params (khi click link hoặc navigate)
     this.route.queryParams.subscribe((params) => this.syncTabFromUrl(params));
+    this.loadSocialCounts(); // Load ALWAYS
   }
 
   private syncTabFromUrl(params: Record<string, string | undefined>): void {
     const tab = params['tab'];
-    if (tab === 'orders' || tab === 'address' || tab === 'profile') {
-      this.activeTab.set(tab);
+    if (tab === 'orders' || tab === 'address' || tab === 'profile' || tab === 'hub') {
+      this.activeTab.set(tab as any);
       this.editMode.set(false);
       if (tab === 'address') this.addressService.load();
       if (tab === 'orders') this.loadOrders();
+      if (tab === 'hub') {
+        this.loadSocialCounts();
+        // luôn load Threads lần đầu khi vào tab Hoạt động AuraHub
+        this.setHubTab(this.hubTab());
+      }
     }
   }
 
@@ -141,16 +162,116 @@ export class AccountPageComponent implements OnInit {
     return price.toLocaleString('vi-VN') + '₫';
   }
 
-  switchTab(tab: 'profile' | 'orders' | 'address') {
+  switchTab(tab: 'profile' | 'orders' | 'address' | 'hub') {
     this.activeTab.set(tab);
     this.editMode.set(false);
     this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
     if (tab === 'address') {
       this.addressService.load();
     }
-    if (tab === 'orders') {
-      this.loadOrders();
+    if (tab === 'orders') this.loadOrders();
+    if (tab === 'hub') {
+      this.setHubTab(this.hubTab());
     }
+  }
+
+  private loadSocialCounts(): void {
+    const u = this.user();
+    const userId = u?._id ?? (u as any)?.id;
+    if (!userId) return;
+    this.api.getFollowers(userId).subscribe({
+      next: (res) => {
+        this.followerCount.set(res.followerCount ?? (res.followers?.length ?? 0));
+        this.followersList.set(res.followers || []);
+      },
+      error: () => { },
+    });
+    this.api.getFollowing(userId).subscribe({
+      next: (res) => {
+        this.followingCount.set(res.followingCount ?? (res.following?.length ?? 0));
+        this.followingList.set(res.following || []);
+      },
+      error: () => { },
+    });
+  }
+
+  // Modals for followers/following
+  openFollowsModal(tab: 'followers' | 'following'): void {
+    this.followsTab.set(tab);
+    this.showFollowsModal.set(true);
+  }
+
+  closeFollowsModal(): void {
+    this.showFollowsModal.set(false);
+  }
+
+  getUserDisplayName(u: any): string {
+    return u?.profile?.fullName || u?.username || u?.phoneNumber || 'Người dùng';
+  }
+
+  getUserAvatarUrl(u: any): string {
+    if (u?.avatar) {
+      if (u.avatar.startsWith('http')) return u.avatar;
+      return `${environment.apiUrl.replace('/api', '')}${u.avatar.startsWith('/') ? '' : '/'}${u.avatar}`;
+    }
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.getUserDisplayName(u))}&background=random`;
+  }
+
+  isCurrentUserFollowing(targetUserId: string): boolean {
+    return this.followingList().some(u => u._id === targetUserId);
+  }
+
+  toggleFollowUser(targetUser: any): void {
+    const targetUserId = targetUser._id;
+    if (!targetUserId) return;
+    this.api.toggleFollow(targetUserId).subscribe({
+      next: (res) => {
+        this.followingCount.set(res.followingCount);
+        // Cần reload lại danh sách để modal update chính xác
+        this.loadSocialCounts();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'Không thể thực hiện Follow';
+        alert(msg);
+      }
+    });
+  }
+
+  // Hoạt động AuraHub
+  setHubTab(tab: 'threads' | 'replies' | 'media'): void {
+    this.hubTab.set(tab);
+    this.loadHubActivity(tab);
+  }
+
+  private loadHubActivity(tab: 'threads' | 'replies' | 'media'): void {
+    const u = this.user();
+    const userId = u?._id ?? (u as any)?.id;
+    if (!userId) return;
+    this.hubLoading.set(true);
+    if (tab === 'replies') {
+      this.api.getHubUserReplies(userId).subscribe({
+        next: (res) => {
+          this.hubReplies.set(res.items || []);
+          this.hubLoading.set(false);
+        },
+        error: () => this.hubLoading.set(false),
+      });
+      return;
+    }
+    const typeMap: Record<'threads' | 'media', 'threads' | 'media'> = {
+      threads: 'threads',
+      media: 'media',
+    };
+    this.api.getHubUserPosts(userId, typeMap[tab]).subscribe({
+      next: (res) => {
+        const items = res.items || [];
+        if (tab === 'threads') this.hubThreads.set(items);
+        if (tab === 'media') this.hubMedia.set(items);
+
+        this.hubLoading.set(false);
+      },
+      error: () => this.hubLoading.set(false),
+    });
   }
 
   loadOrders(): void {
@@ -283,7 +404,7 @@ export class AccountPageComponent implements OnInit {
   private saveOrderDisplayNames(names: Record<string, string>): void {
     try {
       if (typeof localStorage !== 'undefined') localStorage.setItem(ORDER_NAME_STORAGE_PREFIX + 'all', JSON.stringify(names));
-    } catch {}
+    } catch { }
     this.orderDisplayNames.set({ ...names });
   }
 
@@ -539,5 +660,47 @@ export class AccountPageComponent implements OnInit {
 
   setDefaultAddress(addressId: string) {
     this.addressService.setDefault(addressId);
+  }
+
+  // ─── AuraHub Activity Helpers ───
+  timeAgo(date: string): string {
+    const now = Date.now();
+    const d = new Date(date).getTime();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return `${diff}s`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+    return new Date(date).toLocaleDateString('vi-VN');
+  }
+
+  getHubImageUrl(url: string): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const base = environment.apiUrl.replace(/\/api$/, '');
+    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
+
+  openHubPost(postId: string): void {
+    this.router.navigate(['/aura-hub', postId]);
+  }
+
+  getHubDisplayName(user: any): string {
+    if (!user) return 'Ẩn danh';
+    if (user.profile?.fullName) return user.profile.fullName;
+    if (user.username) return user.username;
+    if (user.phoneNumber) {
+      const d = user.phoneNumber.replace(/\D/g, '');
+      if (d.length === 11 && d.startsWith('84')) return '0' + d.slice(2);
+      return user.phoneNumber;
+    }
+    return 'Ẩn danh';
+  }
+
+  getHubAvatarUrl(user: any): string {
+    if (!user?.avatar) return 'assets/AVT/avtdefaut.png';
+    if (user.avatar.startsWith('http')) return user.avatar;
+    const base = environment.apiUrl.replace(/\/api$/, '');
+    return `${base}${user.avatar}`;
   }
 }

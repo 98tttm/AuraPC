@@ -20,14 +20,43 @@
             <div class="td-popup__title-wrap">
                 <span class="td-popup__title">Thread</span>
             </div>
-            <button class="td-popup__more">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="19" cy="12" r="1"></circle>
-                    <circle cx="5" cy="12" r="1"></circle>
-                </svg>
-            </button>
+            <div class="hub-card__menu-wrap" (click)="$event.stopPropagation()">
+                <button class="td-popup__more" (click)="toggleMoreMenu(dp._id); $event.stopPropagation()"
+                    title="Tùy chọn bài viết">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                </button>
+                @if (moreMenuPostId() === dp._id) {
+                <div class="hub-card__menu-dropdown">
+                    @if (isOwner(dp)) {
+                    <button class="hub-card__menu-item hub-card__menu-item--danger"
+                        (click)="deletePost(dp); $event.stopPropagation()">Xóa bài viết</button>
+                    } @else {
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'save'); $event.stopPropagation()">Lưu
+                        bài viết</button>
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'not_interested'); $event.stopPropagation()">Không quan
+                        tâm</button>
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'mute'); $event.stopPropagation()">Tắt thông báo từ người
+                        này</button>
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'restrict'); $event.stopPropagation()">Hạn chế tài khoản</button>
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'block'); $event.stopPropagation()">Chặn người dùng</button>
+                    <button class="hub-card__menu-item"
+                        (click)="onPostMenuAction(dp, 'report'); $event.stopPropagation()">Báo cáo bài viết</button>
+                    <button class="hub-card__menu-item" (click)="copyPostLink(dp); $event.stopPropagation()">Copy
+                        link</button>
+                    }
+                </div>
+                }
+            </div>
         </div>
 
         <!-- Scrollable Body -->
@@ -36,29 +65,25 @@
             <div class="td-post">
                 <div class="td-post__head">
                     <div class="td-post__author-info">
-                        <img [src]="getAvatarUrl(dp.author)" class="td-post__avatar" alt="" />
+                        <div class="hub-card__avatar-wrap">
+                            <img [src]="getAvatarUrl(dp.author)" class="td-post__avatar" alt="" />
+                            @if (currentUser()?._id && currentUser()!._id !== dp.author?._id &&
+                            !isFollowingUser(dp.author)) {
+                            <button class="hub-card__follow-icon"
+                                (click)="toggleFollowUser(dp.author); $event.stopPropagation()" title="Theo dõi">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            }
+                        </div>
                         <span class="td-post__name">{{ getDisplayName(dp.author) }}</span>
                         <span class="td-post__time">{{ timeAgo(dp.createdAt) }}</span>
                     </div>
 
-                    <div class="hub-card__menu-wrap" (click)="$event.stopPropagation()">
-                        <button class="hub-card__menu" (click)="toggleMoreMenu(dp._id); $event.stopPropagation()">
-                            <span class="hub-card__menu-dots">
-                                <span></span><span></span><span></span>
-                            </span>
-                        </button>
-                        @if (moreMenuPostId() === dp._id) {
-                        <div class="hub-card__menu-dropdown">
-                            <!-- Menu items -->
-                            <button class="hub-card__menu-item"
-                                (click)="copyPostLink(dp); $event.stopPropagation()">Copy link</button>
-                            @if (isOwner(dp)) {
-                            <button class="hub-card__menu-item hub-card__menu-item--danger"
-                                (click)="deletePost(dp); $event.stopPropagation()">Xóa bài viết</button>
-                            }
-                        </div>
-                        }
-                    </div>
+                    <!-- Removed duplicate more menu from here (now in popup header) -->
                 </div>
 
                 @if (dp.topic) {
@@ -428,36 +453,49 @@
             @for (post of posts(); track trackByPostId($index, post)) {
             <div class="hub-card" (click)="openPostDetail(post._id)">
                 <div class="hub-card__left">
-                    <img [src]="getAvatarUrl(post.author)" class="hub-card__avatar" alt="" />
+                    <div class="hub-card__avatar-wrap">
+                        <img [src]="getAvatarUrl(post.author)" class="hub-card__avatar" alt="" />
+                        @if (currentUser()?._id && currentUser()!._id !== post.author?._id &&
+                        !isFollowingUser(post.author)) {
+                        <button class="hub-card__follow-icon"
+                            (click)="toggleFollowUser(post.author); $event.stopPropagation()" title="Theo dõi">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        }
+                    </div>
                 </div>
                 <div class="hub-card__right">
                     <div class="hub-card__head">
                         <div class="hub-card__meta">
                             <span class="hub-card__name">{{ getDisplayName(post.author) }}</span>
                             <span class="hub-card__time">{{ timeAgo(post.createdAt) }}</span>
-                            <button class="hub-follow-btn" *ngIf="currentUser()?._id !== post.author?._id"
-                                (click)="toggleFollowUser(post.author); $event.stopPropagation()">
-                                {{ isFollowingUser(post.author) ? 'Đang theo dõi' : 'Follow' }}
-                            </button>
                         </div>
                         <div class="hub-card__menu-wrap" (click)="$event.stopPropagation()">
                             <button class="hub-card__menu" (click)="toggleMoreMenu(post._id); $event.stopPropagation()"
                                 title="Tùy chọn bài viết">
-                                <span class="hub-card__menu-dots">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="19" cy="12" r="1"></circle>
+                                    <circle cx="5" cy="12" r="1"></circle>
+                                </svg>
                             </button>
                             @if (moreMenuPostId() === post._id) {
                             <div class="hub-card__menu-dropdown">
+                                @if (isOwner(post)) {
+                                <button class="hub-card__menu-item hub-card__menu-item--danger"
+                                    (click)="deletePost(post); $event.stopPropagation()">Xóa bài viết</button>
+                                } @else {
                                 <button class="hub-card__menu-item"
                                     (click)="onPostMenuAction(post, 'save'); $event.stopPropagation()">Lưu bài
                                     viết</button>
                                 <button class="hub-card__menu-item"
                                     (click)="onPostMenuAction(post, 'not_interested'); $event.stopPropagation()">Không
-                                    quan
-                                    tâm</button>
+                                    quan tâm</button>
                                 <button class="hub-card__menu-item"
                                     (click)="onPostMenuAction(post, 'mute'); $event.stopPropagation()">Tắt thông báo từ
                                     người này</button>
@@ -472,9 +510,6 @@
                                     viết</button>
                                 <button class="hub-card__menu-item"
                                     (click)="copyPostLink(post); $event.stopPropagation()">Copy link</button>
-                                @if (isOwner(post)) {
-                                <button class="hub-card__menu-item hub-card__menu-item--danger"
-                                    (click)="deletePost(post); $event.stopPropagation()">Xóa bài viết</button>
                                 }
                             </div>
                             }

@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { AdminApiService, Product } from '../../core/admin-api.service';
+import { ToastService } from '../../core/toast.service';
+import { ConfirmService } from '../../shared/confirm-dialog.component';
+import { getStockStatus, getStockLabel, getStockPercent } from '../../core/constants';
 
 @Component({
   selector: 'app-products-list-admin',
@@ -16,6 +19,8 @@ import { AdminApiService, Product } from '../../core/admin-api.service';
 })
 export class ProductsListAdminComponent implements OnInit {
   private api = inject(AdminApiService);
+  private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   items = signal<Product[]>([]);
   total = signal(0);
@@ -24,8 +29,10 @@ export class ProductsListAdminComponent implements OnInit {
   page = 1;
   limit = 20;
   searchQuery = '';
+  sortColumn = '';
+  sortDir: 'asc' | 'desc' = 'asc';
 
-  // Computed stats
+  // Stats from total (not page data)
   totalProducts = computed(() => this.total());
   activeProducts = computed(() => this.items().filter(p => p.active !== false).length);
   lowStockProducts = computed(() => this.items().filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) < 5).length);
@@ -89,11 +96,40 @@ export class ProductsListAdminComponent implements OnInit {
     return Math.ceil(this.total() / this.limit);
   }
 
-  delete(id: string, name: string): void {
-    if (!confirm(`Xóa sản phẩm "${name}"?`)) return;
+  toggleSort(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDir = 'asc';
+    }
+    const sorted = [...this.items()].sort((a, b) => {
+      let valA: number | string = '';
+      let valB: number | string = '';
+      if (column === 'name') { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
+      else if (column === 'price') { valA = a.salePrice ?? a.price; valB = b.salePrice ?? b.price; }
+      else if (column === 'stock') { valA = a.stock ?? 0; valB = b.stock ?? 0; }
+      if (valA < valB) return this.sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    this.items.set(sorted);
+  }
+
+  async delete(id: string, name: string): Promise<void> {
+    const confirmed = await this.confirm.confirm({
+      title: 'Xóa sản phẩm',
+      message: `Bạn có chắc muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      danger: true,
+    });
+    if (!confirmed) return;
     this.api.deleteProduct(id).subscribe({
-      next: () => this.load(),
-      error: (err) => this.error.set(err?.error?.error || 'Xóa thất bại'),
+      next: () => {
+        this.toast.success('Đã xóa sản phẩm');
+        this.load();
+      },
+      error: (err) => this.toast.error(err?.error?.error || 'Xóa thất bại'),
     });
   }
 
@@ -102,35 +138,29 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   categoryName(p: Product): string {
-    const cat = (p as { category?: { name?: string } }).category;
-    return (cat && typeof cat === 'object' && cat.name) ? cat.name : 'Khác';
+    const cat = p.category;
+    if (cat && typeof cat === 'object' && 'name' in cat) return cat.name;
+    return 'Khác';
   }
 
   getProductImage(p: Product): string {
     if (p.images && Array.isArray(p.images) && p.images.length > 0) {
       const img = p.images[0];
       if (typeof img === 'string') return img;
-      if (img && typeof img === 'object' && 'url' in img) return (img as any).url;
+      if (img && typeof img === 'object' && 'url' in img) return img.url;
     }
     return '';
   }
 
   getStockStatus(p: Product): string {
-    const stock = p.stock ?? 0;
-    if (stock === 0) return 'out-of-stock';
-    if (stock < 5) return 'low-stock';
-    return 'active';
+    return getStockStatus(p.stock ?? 0);
   }
 
   getStockPercent(p: Product): number {
-    return Math.min(100, ((p.stock ?? 0) / 50) * 100);
+    return getStockPercent(p.stock ?? 0);
   }
 
   getStockLabel(p: Product): string {
-    const stock = p.stock ?? 0;
-    if (stock === 0) return 'Hết hàng';
-    if (stock < 5) return 'Sắp hết';
-    if (p.active === false) return 'Ẩn';
-    return 'Đang bán';
+    return getStockLabel(p.stock ?? 0, p.active);
   }
 }

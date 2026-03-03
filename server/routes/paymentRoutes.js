@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const axios = require('axios');
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const { requireAuth } = require('../middleware/auth');
 const momoUtils = require('../utils/momo');
 
@@ -31,20 +33,40 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        // Prepare order details
+        // === SERVER-SIDE PRICE VERIFICATION ===
+        const productIds = items
+            .map(i => i.product)
+            .filter(id => id && mongoose.Types.ObjectId.isValid(id));
+
+        if (productIds.length === 0) {
+            return res.status(400).json({ success: false, message: 'No valid product IDs' });
+        }
+
+        const products = await Product.find({ _id: { $in: productIds } })
+            .select('_id name price salePrice')
+            .lean();
+
+        const productMap = new Map();
+        products.forEach(p => productMap.set(String(p._id), p));
+
         const orderNumber = generateOrderNumber();
         let originalTotal = 0;
-        const orderItems = items.map((i) => {
-            const price = Number(i.price) || 0;
-            const qty = Number(i.qty) || 1;
-            originalTotal += price * qty;
-            return {
+        const orderItems = [];
+        for (const i of items) {
+            const dbProduct = productMap.get(String(i.product));
+            if (!dbProduct) {
+                return res.status(400).json({ success: false, message: `Product not found: ${i.product}` });
+            }
+            const qty = Math.max(1, Number(i.qty) || 1);
+            const verifiedPrice = dbProduct.price ?? 0;
+            originalTotal += verifiedPrice * qty;
+            orderItems.push({
                 product: i.product,
-                name: i.name,
-                price,
+                name: dbProduct.name || i.name,
+                price: verifiedPrice,
                 quantity: qty,
-            };
-        });
+            });
+        }
 
         const discountAmount = Number(directDiscount) || 0;
         const finalTotal = Math.max(0, originalTotal - discountAmount);

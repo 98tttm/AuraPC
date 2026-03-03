@@ -2,62 +2,59 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar__header">
-      <div class="sidebar__logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-      </div>
+      <img
+        [src]="themeService.theme() === 'dark' ? 'assets/WEBSOURCE/LogoWhite.png' : 'assets/WEBSOURCE/logo152238.png'"
+        alt="AuraPC"
+        class="sidebar__logo-img"
+      />
       <span class="sidebar__logo-text">AuraPC</span>
     </div>
 
     <nav class="sidebar__nav">
-      <a routerLink="/" [class.active]="router.url === '/'" class="sidebar__link">
+      <a routerLink="/" [class.active]="router.url === '/'" class="sidebar__link" title="Trang chủ">
         <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M4 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5z"/>
           <path d="M14 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5z"/>
           <path d="M4 16a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3z"/>
           <path d="M14 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-6z"/>
         </svg>
-        <span>Trang chủ</span>
+        <span class="sidebar__link-text">Trang chủ</span>
       </a>
 
-      <a routerLink="/products" routerLinkActive="active" class="sidebar__link">
+      <a routerLink="/products" routerLinkActive="active" class="sidebar__link" title="Sản phẩm">
         <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
           <line x1="7" y1="7" x2="7.01" y2="7"/>
         </svg>
-        <span>Sản phẩm</span>
+        <span class="sidebar__link-text">Sản phẩm</span>
       </a>
 
-      <a routerLink="/orders" routerLinkActive="active" class="sidebar__link">
+      <a routerLink="/orders" routerLinkActive="active" class="sidebar__link" title="Đơn hàng">
         <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="2" y="3" width="20" height="18" rx="2"/>
           <path d="M8 7h8"/>
           <path d="M8 11h6"/>
           <path d="M8 15h4"/>
         </svg>
-        <span>Đơn hàng</span>
+        <span class="sidebar__link-text">Đơn hàng</span>
       </a>
 
-      <a routerLink="/users" routerLinkActive="active" class="sidebar__link">
+      <a routerLink="/users" routerLinkActive="active" class="sidebar__link" title="Khách hàng">
         <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
           <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
-        <span>Khách hàng</span>
+        <span class="sidebar__link-text">Khách hàng</span>
       </a>
 
-      <a routerLink="/blogs" routerLinkActive="active" class="sidebar__link">
+      <a routerLink="/blogs" routerLinkActive="active" class="sidebar__link" title="Bài viết">
         <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M12 20h9"/>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
         </svg>
-        <span>Bài viết</span>
+        <span class="sidebar__link-text">Bài viết</span>
       </a>
     </nav>
 
@@ -146,3 +143,6 @@
     </main>
   </div>
 </div>
+
+<app-toast />
+<app-confirm-dialog />
