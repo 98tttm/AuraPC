@@ -1,5 +1,5 @@
 import { Component, inject, computed, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
@@ -17,7 +17,7 @@ interface PendingPayload {
 @Component({
   selector: 'app-checkout-momo-return',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './checkout-momo-return.component.html',
   styleUrls: ['./checkout-momo-return.component.css'],
 })

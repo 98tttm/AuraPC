@@ -1,13 +1,100 @@
-.form { max-width: 600px; }
-.field { margin-bottom: 1rem; }
-.field label { display: block; margin-bottom: 0.35rem; color: rgba(255,255,255,0.8); }
-.field input, .field textarea, .field select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; box-sizing: border-box; }
-.row { display: flex; gap: 1rem; }
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.back-link {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--text-primary); }
+
+.form {
+  max-width: 680px;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--text-secondary);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+}
 .row .field { flex: 1; }
-.check { align-items: center; gap: 1.5rem; }
-.actions { margin-top: 1.5rem; display: flex; gap: 0.75rem; }
-.alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
-.alert-error { background: rgba(229,57,53,0.2); color: #ffcdd2; }
-.btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9rem; background: rgba(255,255,255,0.1); color: #e0e0e0; }
-.btn-primary { background: #ff6d2d; color: #fff; }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.check label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.alert-error {
+  background: var(--accent-red-light);
+  color: var(--accent-red);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 640px) {
+  .row { flex-direction: column; gap: 0; }
+}

@@ -1,20 +1,23 @@
 .back-link {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: var(--text-secondary);
-  display: inline-block;
-  margin-bottom: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.35rem;
+  transition: color 0.15s;
 }
-.back-link:hover { color: var(--accent); }
+.back-link:hover { color: var(--text-primary); }
 
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .card__title {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 1rem;
   color: var(--text-primary);
 }
@@ -22,9 +25,11 @@
 .info-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   padding: 0.6rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.875rem;
+  gap: 1rem;
 }
 
 .info-row:last-child { border-bottom: none; }
@@ -32,6 +37,7 @@
 .info-label {
   color: var(--text-secondary);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .status-update {
@@ -41,7 +47,7 @@
 }
 
 .totals {
-  border-top: 2px solid var(--border);
+  border-top: 1px solid var(--border);
   margin-top: 1rem;
   padding-top: 1rem;
 }
@@ -50,15 +56,15 @@
   display: flex;
   justify-content: space-between;
   padding: 0.4rem 0;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .totals__row--total {
   font-size: 1.1rem;
   font-weight: 700;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border);
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 .text-bold { font-weight: 600; }

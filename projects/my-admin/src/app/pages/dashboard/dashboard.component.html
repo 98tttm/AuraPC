@@ -1,80 +1,168 @@
 @if (loading()) {
   <div class="loading">Đang tải dữ liệu...</div>
 } @else {
-  <!-- Stat Cards -->
-  <div class="stat-cards">
-    <div class="stat-card stat-card--blue">
-      <div class="stat-card__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
-      </div>
-      <div class="stat-card__info">
-        <span class="stat-card__value">{{ totalRevenue() | number:'1.0-0' }}đ</span>
-        <span class="stat-card__label">Doanh thu</span>
-      </div>
-      <div class="stat-card__change" [class.positive]="getPercentChange(revenueThisMonth(), revenueLastMonth()) >= 0"
-           [class.negative]="getPercentChange(revenueThisMonth(), revenueLastMonth()) < 0">
-        {{ getPercentChange(revenueThisMonth(), revenueLastMonth()) >= 0 ? '+' : '' }}{{ getPercentChange(revenueThisMonth(), revenueLastMonth()) }}%
-      </div>
+  <!-- Welcome Header -->
+  <div class="welcome-header">
+    <div>
+      <h2 class="welcome-header__title">Trang chủ</h2>
+      <p class="welcome-header__sub">Xin chào! Đây là tình hình cửa hàng hôm nay.</p>
     </div>
-
-    <div class="stat-card stat-card--green">
-      <div class="stat-card__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
-      </div>
-      <div class="stat-card__info">
-        <span class="stat-card__value">{{ totalOrders() | number }}</span>
-        <span class="stat-card__label">Tổng đơn hàng</span>
-      </div>
-      <div class="stat-card__change" [class.positive]="getPercentChange(ordersThisMonth(), ordersLastMonth()) >= 0"
-           [class.negative]="getPercentChange(ordersThisMonth(), ordersLastMonth()) < 0">
-        {{ getPercentChange(ordersThisMonth(), ordersLastMonth()) >= 0 ? '+' : '' }}{{ getPercentChange(ordersThisMonth(), ordersLastMonth()) }}%
-      </div>
-    </div>
-
-    <div class="stat-card stat-card--purple">
-      <div class="stat-card__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <div class="stat-card__info">
-        <span class="stat-card__value">{{ totalUsers() | number }}</span>
-        <span class="stat-card__label">Khách hàng</span>
-      </div>
-    </div>
-
-    <div class="stat-card stat-card--orange">
-      <div class="stat-card__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-        </svg>
-      </div>
-      <div class="stat-card__info">
-        <span class="stat-card__value">{{ totalProducts() | number }}</span>
-        <span class="stat-card__label">Sản phẩm</span>
-      </div>
+    <div class="welcome-header__date">
+      <span class="welcome-header__date-label">Hôm nay</span>
+      <span class="welcome-header__date-value">{{ today | date:'EEEE, dd/MM/yyyy':'':'vi' }}</span>
     </div>
   </div>
 
-  <!-- Charts Row -->
-  <div class="charts-row">
-    <div class="card chart-card chart-card--wide">
-      <h3 class="card__title">Đơn hàng tuần</h3>
-      <div class="chart-wrapper">
+  <!-- Stat Cards -->
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        @if (getPercentChange(revenueThisMonth(), revenueLastMonth()); as pct) {
+          <span class="stat-card__trend" [class.stat-card__trend--up]="pct >= 0" [class.stat-card__trend--down]="pct < 0">
+            <svg class="trend-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              @if (pct >= 0) {
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              } @else {
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+              }
+            </svg>
+            {{ pct >= 0 ? '+' : '' }}{{ pct }}%
+          </span>
+        }
+      </div>
+      <span class="stat-card__label">Doanh thu</span>
+      <span class="stat-card__value">{{ totalRevenue() | number:'1.0-0' }}đ</span>
+      <span class="stat-card__sub">tổng doanh thu</span>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+            <rect x="2" y="3" width="20" height="18" rx="2"/>
+            <path d="M8 7h8"/><path d="M8 11h6"/><path d="M8 15h4"/>
+          </svg>
+        </div>
+        @if (getPercentChange(ordersThisMonth(), ordersLastMonth()); as pct) {
+          <span class="stat-card__trend" [class.stat-card__trend--up]="pct >= 0" [class.stat-card__trend--down]="pct < 0">
+            <svg class="trend-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              @if (pct >= 0) {
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              } @else {
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+              }
+            </svg>
+            {{ pct >= 0 ? '+' : '' }}{{ pct }}%
+          </span>
+        }
+      </div>
+      <span class="stat-card__label">Đơn hàng</span>
+      <span class="stat-card__value">{{ totalOrders() | number }}</span>
+      <span class="stat-card__sub">tổng đơn hàng</span>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+      </div>
+      <span class="stat-card__label">Khách hàng</span>
+      <span class="stat-card__value">{{ totalUsers() | number }}</span>
+      <span class="stat-card__sub">đã đăng ký</span>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
+      </div>
+      <span class="stat-card__label">Sản phẩm</span>
+      <span class="stat-card__value">{{ totalProducts() | number }}</span>
+      <span class="stat-card__sub">đang hoạt động</span>
+    </div>
+  </div>
+
+  <!-- Sales Analytics + Monthly Target -->
+  <div class="dashboard-grid">
+    <div class="chart-card chart-card--main">
+      <div class="chart-card__title">Phân tích doanh thu</div>
+      <div class="chart-card__subtitle">Doanh thu theo tháng</div>
+      <div class="chart-wrapper chart-wrapper--lg">
         <canvas baseChart
-          type="bar"
-          [data]="barChartData()"
-          [options]="barChartOptions">
+          type="line"
+          [data]="areaChartData()"
+          [options]="areaChartOptions">
         </canvas>
       </div>
     </div>
 
-    <div class="card chart-card">
-      <h3 class="card__title">Trạng thái đơn hàng</h3>
+    <div class="dashboard-side">
+      <!-- Monthly Target -->
+      <div class="target-card">
+        <div class="target-card__label">Mục tiêu tháng</div>
+        <div class="target-card__value">
+          {{ revenueThisMonth() | number:'1.0-0' }}<span class="target-card__total"> / {{ getRevenueTarget() | number:'1.0-0' }}đ</span>
+        </div>
+        <div class="target-card__bar">
+          <div class="target-card__bar-fill" [style.width.%]="getRevenueProgress()"></div>
+        </div>
+        <div class="target-card__pct">{{ 100 - getRevenueProgress() }}% còn lại để đạt mục tiêu</div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="quick-stat">
+          <span class="quick-stat__label">Giá trị TB đơn hàng</span>
+          <span class="quick-stat__value">{{ getAvgOrderValue() | number:'1.0-0' }}đ</span>
+        </div>
+        <div class="quick-stat">
+          <span class="quick-stat__label">Đơn chờ xử lý</span>
+          <span class="quick-stat__value">{{ ordersByStatus()['pending'] || 0 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: Top Products + Order Status + Recent Orders -->
+  <div class="bottom-grid">
+    <!-- Top Products -->
+    <div class="chart-card">
+      <div class="chart-card__title">Sản phẩm bán chạy</div>
+      <div class="chart-card__subtitle">Sản phẩm bán nhiều nhất</div>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          type="bar"
+          [data]="topBarChartData()"
+          [options]="topBarChartOptions">
+        </canvas>
+      </div>
+      @for (p of topProducts(); track p._id; let i = $index) {
+        <div class="top-product-row">
+          <span class="top-product-row__name">{{ p._id }}</span>
+          <span class="top-product-row__qty">{{ p.totalQty }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Order Status Doughnut -->
+    <div class="chart-card">
+      <div class="chart-card__title">Trạng thái đơn hàng</div>
+      <div class="chart-card__subtitle">Phân bổ theo trạng thái</div>
       <div class="chart-wrapper">
         <canvas baseChart
           type="doughnut"
@@ -85,55 +173,43 @@
     </div>
   </div>
 
-  <!-- Bottom Row -->
-  <div class="bottom-row">
-    <!-- Recent Orders -->
-    <div class="card recent-orders">
-      <div class="card__header">
-        <h3 class="card__title">Đơn hàng gần đây</h3>
-        <a routerLink="/orders" class="card__link">Xem tất cả</a>
+  <!-- Recent Orders -->
+  <div class="card recent-orders">
+    <div class="card-header">
+      <div>
+        <div class="chart-card__title">Đơn hàng gần đây</div>
+        <div class="chart-card__subtitle">Giao dịch mới nhất</div>
       </div>
-      <table class="data-table">
-        <thead>
+      <a routerLink="/orders" class="btn btn--outline btn--sm">Xem tất cả</a>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Khách hàng</th>
+          <th>Tổng</th>
+          <th>Trạng thái</th>
+          <th>Ngày</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of recentOrders(); track order._id) {
           <tr>
-            <th>Mã đơn</th>
-            <th>Khách hàng</th>
-            <th>Tổng</th>
-            <th>Trạng thái</th>
+            <td><a [routerLink]="['/orders', order.orderNumber]" class="link">#{{ order.orderNumber }}</a></td>
+            <td>
+              <div class="user-cell">
+                <div class="avatar avatar--sm">{{ (getCustomerName(order)).charAt(0).toUpperCase() }}</div>
+                <span>{{ getCustomerName(order) }}</span>
+              </div>
+            </td>
+            <td>{{ order.total | number:'1.0-0' }}đ</td>
+            <td><span class="badge" [class]="'badge--' + order.status">{{ getStatusLabel(order.status) }}</span></td>
+            <td class="text-muted">{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
           </tr>
-        </thead>
-        <tbody>
-          @for (order of recentOrders(); track order._id) {
-            <tr>
-              <td><a [routerLink]="['/orders', order.orderNumber]" class="link">{{ order.orderNumber }}</a></td>
-              <td>{{ getCustomerName(order) }}</td>
-              <td>{{ order.total | number:'1.0-0' }}đ</td>
-              <td><span class="badge" [class]="'badge--' + order.status">{{ getStatusLabel(order.status) }}</span></td>
-            </tr>
-          } @empty {
-            <tr><td colspan="4" style="text-align: center; color: var(--text-muted)">Chưa có đơn hàng</td></tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Revenue Trend -->
-    <div class="card chart-card">
-      <h3 class="card__title">Xu hướng doanh thu</h3>
-      <div class="chart-wrapper">
-        <canvas baseChart
-          type="line"
-          [data]="lineChartData()"
-          [options]="lineChartOptions">
-        </canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <a routerLink="/products/new" class="btn btn--primary">+ Thêm sản phẩm</a>
-    <a routerLink="/orders" class="btn btn--outline">Xem đơn hàng</a>
-    <a routerLink="/users" class="btn btn--outline">Quản lý khách hàng</a>
+        } @empty {
+          <tr><td colspan="5" class="text-center text-muted">Chưa có đơn hàng</td></tr>
+        }
+      </tbody>
+    </table>
   </div>
 }

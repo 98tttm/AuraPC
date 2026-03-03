@@ -4,12 +4,13 @@ import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { ChatbotWidgetComponent } from './components/chatbot-widget/chatbot-widget.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent, ChatbotWidgetComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: { '[class.route-aura-builder]': 'hideFooter()' },
   template: `
@@ -21,6 +22,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     @if (!hideFooter()) {
       <app-footer></app-footer>
     }
+    <app-chatbot-widget></app-chatbot-widget>
   `,
   styles: [`
     main {

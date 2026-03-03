@@ -1,47 +1,44 @@
-.filters {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+.page-header {
+  margin-bottom: 1.5rem;
 }
 
-.filters__group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
-.filters__count {
-  font-size: 0.85rem;
+.page-header p {
   color: var(--text-secondary);
-  font-weight: 500;
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
 }
 
+/* user cell in table */
 .user-cell {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   color: var(--text-primary);
+  text-decoration: none;
 }
-.user-cell:hover .user-name { color: var(--accent); }
+.user-cell:hover .user-cell__name { color: var(--accent-orange); }
 
-.user-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--accent-light);
-  color: var(--accent);
+.user-cell__info {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
-.user-name { font-weight: 500; }
+.user-cell__name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: color 0.15s;
+}
+
+.user-cell__sub {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
 
 .text-muted { color: var(--text-secondary); }
 .text-center { text-align: center; }
@@ -49,5 +46,5 @@
 .loading {
   text-align: center;
   padding: 2rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }

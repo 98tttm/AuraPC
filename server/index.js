@@ -23,6 +23,7 @@ const builderRoutes = require('./routes/builderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const hubRoutes = require('./routes/hubRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 connectDB();
 
@@ -71,6 +72,7 @@ app.use('/api/builders', builderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/hub', hubRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));

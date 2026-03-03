@@ -1,25 +1,100 @@
+<!-- Page Header -->
 <div class="page-header">
-  <h2>Quản lý khách hàng</h2>
-</div>
-
-<!-- Search -->
-<div class="filters card">
-  <div class="filters__group">
-    <input
-      type="text"
-      class="input"
-      placeholder="Tìm theo tên, SĐT, email..."
-      [(ngModel)]="searchQuery"
-      (keyup.enter)="onSearch()"
-      style="max-width: 300px"
-    />
-    <button class="btn btn--primary" (click)="onSearch()">Tìm</button>
+  <div>
+    <h2>Khách hàng</h2>
+    <p>Quản lý khách hàng và phân tích</p>
   </div>
-  <span class="filters__count">{{ total() }} khách hàng</span>
 </div>
 
-<!-- Table -->
+<!-- Stat Cards -->
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Tổng khách hàng</span>
+    <span class="stat-card__value">{{ totalUsers() | number }}</span>
+    <span class="stat-card__sub">đã đăng ký</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h6"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Tổng đơn hàng</span>
+    <span class="stat-card__value">{{ totalOrders() | number }}</span>
+    <span class="stat-card__sub">từ khách hàng</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Hiển thị</span>
+    <span class="stat-card__value">{{ total() }}</span>
+    <span class="stat-card__sub">trong danh sách</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">TB đơn/người</span>
+    <span class="stat-card__value">{{ totalUsers() > 0 ? (totalOrders() / totalUsers()).toFixed(1) : '0' }}</span>
+    <span class="stat-card__sub">đơn hàng</span>
+  </div>
+</div>
+
+<!-- Segments Chart -->
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-card__title">Phân khúc khách hàng</div>
+    <div class="chart-card__subtitle">Phân bổ theo giá trị</div>
+    <div class="chart-wrapper">
+      <canvas baseChart type="doughnut" [data]="segmentChartData()" [options]="segmentChartOptions"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Directory -->
 <div class="card">
+  <div class="card-header">
+    <div>
+      <h3 class="card-title">Danh sách khách hàng</h3>
+      <p class="card-subtitle">Quản lý hồ sơ khách hàng</p>
+    </div>
+    <div class="card-header__actions">
+      <div class="search-box">
+        <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-box__input" placeholder="Tìm khách hàng..."
+          [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" />
+      </div>
+    </div>
+  </div>
+
   @if (loading()) {
     <div class="loading">Đang tải...</div>
   } @else {
@@ -27,8 +102,7 @@
       <thead>
         <tr>
           <th>Khách hàng</th>
-          <th>SĐT</th>
-          <th>Email</th>
+          <th>Phân khúc</th>
           <th>Đơn hàng</th>
           <th>Đăng nhập gần nhất</th>
           <th>Ngày tham gia</th>
@@ -39,18 +113,25 @@
           <tr>
             <td>
               <a [routerLink]="['/users', user._id]" class="user-cell">
-                <div class="user-avatar">{{ getInitial(user) }}</div>
-                <span class="user-name">{{ getUserName(user) }}</span>
+                <div class="avatar">{{ getInitial(user) }}</div>
+                <div class="user-cell__info">
+                  <span class="user-cell__name">{{ getUserName(user) }}</span>
+                  <span class="user-cell__sub">
+                    @if (user.email) { {{ user.email }} }
+                    @if (getUserLocation(user); as loc) {
+                      @if (user.email) { · } {{ loc }}
+                    }
+                  </span>
+                </div>
               </a>
             </td>
-            <td>{{ user.phoneNumber }}</td>
-            <td class="text-muted">{{ user.email || '-' }}</td>
+            <td><span class="badge" [class]="'badge--' + getSegment(user)">{{ getSegmentLabel(user) }}</span></td>
             <td>{{ user.orderCount || 0 }}</td>
             <td class="text-muted">{{ user.lastLogin ? (user.lastLogin | date:'dd/MM/yyyy') : 'Chưa' }}</td>
             <td class="text-muted">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="6" class="text-center text-muted">Không có khách hàng nào</td></tr>
+          <tr><td colspan="5" class="text-center text-muted">Không có khách hàng nào</td></tr>
         }
       </tbody>
     </table>

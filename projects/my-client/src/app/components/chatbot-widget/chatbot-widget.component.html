@@ -1,0 +1,76 @@
+<div class="aru-chatbot">
+  <!-- Floating button -->
+  <button class="aru-chatbot-toggle" type="button" (click)="toggleOpen()">
+    <img src="assets/Bot/AruBot.png" alt="AruBot" class="aru-avatar" />
+  </button>
+
+  <!-- Panel -->
+  @if (isOpen()) {
+  <div class="aru-chatbot-panel">
+    <div class="aru-chatbot-header">
+      <div class="aru-chatbot-header-left">
+        <img src="assets/Bot/AruBot.png" alt="AruBot" class="aru-avatar aru-avatar--sm" />
+        <div>
+          <div class="aru-title">AruBot</div>
+          <div class="aru-subtitle">Trợ lý build PC Aura</div>
+        </div>
+      </div>
+      <button type="button" class="aru-close" (click)="toggleOpen()">×</button>
+    </div>
+
+    <div class="aru-chatbot-body">
+      @if (!hasMessages()) {
+      <div class="aru-empty">
+        Hỏi AruBot về cấu hình PC, tư vấn linh kiện hoặc thông tin sản phẩm nhé.
+      </div>
+      }
+      <div class="aru-messages">
+        @for (m of messages(); track m) {
+        <div class="aru-message" [class.aru-message--user]="m.role === 'user'">
+          <div class="aru-message-bubble">
+            {{ m.content }}
+          </div>
+        </div>
+        @if (m.role === 'assistant' && m.products && m.products.length > 0) {
+        <div class="aru-products">
+          @for (p of m.products; track p.id) {
+          <button type="button" class="aru-product-card" (click)="openProduct(p)">
+            <div class="aru-product-thumb" *ngIf="p.image">
+              <img [src]="p.image" [alt]="p.name" />
+            </div>
+            <div class="aru-product-info">
+              <div class="aru-product-name">{{ p.name }}</div>
+              @if (p.price != null && p.price > 0) {
+                <div class="aru-product-price">
+                  {{ p.price | number:'1.0-0' }}₫
+                </div>
+                @if (p.old_price && p.old_price > p.price) {
+                <div class="aru-product-old">{{ p.old_price | number:'1.0-0' }}₫</div>
+                }
+              }
+              <div class="aru-product-cta">Xem chi tiết</div>
+            </div>
+          </button>
+          }
+        </div>
+        }
+        }
+      </div>
+    </div>
+
+    <form class="aru-chatbot-input" (ngSubmit)="send()">
+      <textarea
+        [(ngModel)]="inputTextValue"
+        name="message"
+        rows="2"
+        placeholder="Nhập câu hỏi của bạn..."
+        (keydown.enter)="onEnter($event)"
+      ></textarea>
+      <button type="submit" [disabled]="isSending() || !inputTextValue.trim()">
+        Gửi
+      </button>
+    </form>
+  </div>
+  }
+</div>
+

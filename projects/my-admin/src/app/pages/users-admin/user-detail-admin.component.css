@@ -1,10 +1,20 @@
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 .back-link {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: var(--text-secondary);
   display: inline-block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  transition: color 0.15s;
 }
-.back-link:hover { color: var(--accent); }
+.back-link:hover { color: var(--text-primary); }
 
 .detail-grid {
   display: grid;
@@ -25,7 +35,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--accent);
-  color: #fff;
+  color: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,7 +119,7 @@
   font-size: 0.85rem;
 }
 
-.link { color: var(--accent); font-weight: 500; }
+.link { color: var(--accent-orange); font-weight: 500; }
 .link:hover { text-decoration: underline; }
 
 .text-bold { font-weight: 600; }
@@ -119,7 +129,7 @@
 .loading {
   text-align: center;
   padding: 2rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {

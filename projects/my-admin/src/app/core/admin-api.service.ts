@@ -50,6 +50,7 @@ export interface BlogPost {
   author?: string;
   published?: boolean;
   publishedAt?: string;
+  createdAt?: string;
 }
 
 export interface BlogsListResponse {
@@ -153,6 +154,12 @@ export class AdminApiService {
   getRevenueChart(months = 6): Observable<any[]> {
     return this.http.get<any[]>(`${BASE}/admin/dashboard/chart/revenue`, {
       params: { months: months.toString() },
+    });
+  }
+
+  getTopProducts(limit = 5): Observable<any[]> {
+    return this.http.get<any[]>(`${BASE}/admin/dashboard/top-products`, {
+      params: { limit: limit.toString() },
     });
   }
 

@@ -1157,17 +1157,19 @@
   background: #e55a1a;
 }
 
-/* Nút xanh tròn như giao diện mẫu */
+/* Nút tròn màu đen cho các action (Gửi đánh giá / Gửi bình luận) */
 .pd-btn-review--blue {
   padding: 0.6rem 1.5rem;
-  background: #2563eb;
+  background: #000;
   border-radius: 9999px;
   font-size: 0.95rem;
   font-weight: 500;
+  border: 1px solid #000;
 }
 
 .pd-btn-review--blue:hover {
-  background: #1d4ed8;
+  background: #111;
+  border-color: #111;
 }
 
 /* Hỏi đáp: nút + separator + lọc */

@@ -122,4 +122,28 @@ router.get('/chart/revenue', async (req, res) => {
   }
 });
 
+/** GET /top-products — sản phẩm bán chạy nhất */
+router.get('/top-products', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const data = await Order.aggregate([
+      { $match: { status: { $in: ['delivered', 'shipped', 'processing', 'confirmed'] } } },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.name',
+          totalQty: { $sum: '$items.qty' },
+          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
+        },
+      },
+      { $sort: { totalQty: -1 } },
+      { $limit: limit },
+    ]);
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

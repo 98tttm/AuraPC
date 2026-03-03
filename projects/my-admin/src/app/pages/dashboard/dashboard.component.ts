@@ -1,20 +1,26 @@
-import { Component, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { AdminApiService } from '../../core/admin-api.service';
+import { AdminAuthService } from '../../core/auth/admin-auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, BaseChartDirective],
+  imports: [RouterLink, DecimalPipe, DatePipe, BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
+  private api = inject(AdminApiService);
+  private auth = inject(AdminAuthService);
+
   loading = signal(true);
+  admin = this.auth.currentAdmin;
+  today = new Date();
 
   totalRevenue = signal(0);
   totalOrders = signal(0);
@@ -25,19 +31,29 @@ export class DashboardComponent implements OnInit {
   revenueThisMonth = signal(0);
   revenueLastMonth = signal(0);
   recentOrders = signal<any[]>([]);
+  ordersByStatus = signal<Record<string, number>>({});
+  topProducts = signal<any[]>([]);
 
-  // Bar chart — weekly orders
-  barChartData = signal<ChartConfiguration<'bar'>['data']>({
+  // Area chart — revenue trend (12 months)
+  areaChartData = signal<ChartConfiguration<'line'>['data']>({
     labels: [],
     datasets: [],
   });
-  barChartOptions: ChartConfiguration<'bar'>['options'] = {
+  areaChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
+    interaction: { intersect: false, mode: 'index' },
     scales: {
-      y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { precision: 0 } },
-      x: { grid: { display: false } },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'var(--chart-grid)' },
+        ticks: { color: 'var(--chart-text)' },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: 'var(--chart-text)' },
+      },
     },
   };
 
@@ -49,30 +65,32 @@ export class DashboardComponent implements OnInit {
   doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' } },
-  };
-
-  // Line chart — revenue trend
-  lineChartData = signal<ChartConfiguration<'line'>['data']>({
-    labels: [],
-    datasets: [],
-  });
-  lineChartOptions: ChartConfiguration<'line'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false } },
+    cutout: '70%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } },
     },
   };
 
-  constructor(private api: AdminApiService) {}
+  // Bar chart — top products
+  topBarChartData = signal<ChartConfiguration<'bar'>['data']>({
+    labels: [],
+    datasets: [],
+  });
+  topBarChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, grid: { color: 'var(--chart-grid)' }, ticks: { color: 'var(--chart-text)' } },
+      y: { grid: { display: false }, ticks: { color: 'var(--chart-text)', font: { size: 11 } } },
+    },
+  };
 
   ngOnInit(): void {
     this.loadStats();
-    this.loadOrderChart();
     this.loadRevenueChart();
+    this.loadTopProducts();
   }
 
   private loadStats(): void {
@@ -87,12 +105,12 @@ export class DashboardComponent implements OnInit {
         this.revenueThisMonth.set(stats.revenueThisMonth);
         this.revenueLastMonth.set(stats.revenueLastMonth);
         this.recentOrders.set(stats.recentOrders || []);
+        this.ordersByStatus.set(stats.ordersByStatus || {});
 
-        // Doughnut chart data
         const statusMap = stats.ordersByStatus || {};
         const statusLabels = ['Chờ xử lý', 'Đã xác nhận', 'Đang xử lý', 'Đang giao', 'Hoàn thành', 'Đã huỷ'];
         const statusKeys = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
-        const statusColors = ['#FFBB38', '#0284C7', '#7C3AED', '#2563EB', '#16A34A', '#DC2626'];
+        const statusColors = ['#eab308', '#2563eb', '#7c3aed', '#0d9488', '#16a34a', '#dc2626'];
         this.doughnutChartData.set({
           labels: statusLabels,
           datasets: [{
@@ -108,43 +126,43 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private loadOrderChart(): void {
-    this.api.getOrderChart().subscribe({
-      next: (data) => {
-        const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-        this.barChartData.set({
-          labels: data.map((d: any) => {
-            const date = new Date(d._id);
-            return days[date.getDay()];
-          }),
-          datasets: [{
-            data: data.map((d: any) => d.count),
-            backgroundColor: '#396AFF',
-            borderRadius: 6,
-            barThickness: 28,
-          }],
-        });
-      },
-    });
-  }
-
   private loadRevenueChart(): void {
-    this.api.getRevenueChart().subscribe({
+    this.api.getRevenueChart(12).subscribe({
       next: (data) => {
-        const monthNames = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-        this.lineChartData.set({
+        const monthNames = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
+        this.areaChartData.set({
           labels: data.map((d: any) => {
             const month = parseInt(d._id.split('-')[1], 10);
             return monthNames[month - 1];
           }),
           datasets: [{
             data: data.map((d: any) => d.revenue),
-            borderColor: '#396AFF',
-            backgroundColor: 'rgba(57, 106, 255, 0.1)',
+            borderColor: '#1a1a2e',
+            backgroundColor: 'rgba(26, 26, 46, 0.08)',
             fill: true,
             tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#396AFF',
+            pointRadius: 5,
+            pointBackgroundColor: '#1a1a2e',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointHoverRadius: 7,
+          }],
+        });
+      },
+    });
+  }
+
+  private loadTopProducts(): void {
+    this.api.getTopProducts(5).subscribe({
+      next: (data) => {
+        this.topProducts.set(data);
+        this.topBarChartData.set({
+          labels: data.map((d: any) => d._id?.substring(0, 25) || 'N/A'),
+          datasets: [{
+            data: data.map((d: any) => d.totalQty),
+            backgroundColor: ['#1a1a2e', '#374151', '#4b5563', '#6b7280', '#9ca3af'],
+            borderRadius: 4,
+            barThickness: 20,
           }],
         });
       },
@@ -170,5 +188,20 @@ export class DashboardComponent implements OnInit {
 
   getCustomerName(order: any): string {
     return order.user?.profile?.fullName || order.shippingAddress?.fullName || order.user?.phoneNumber || 'N/A';
+  }
+
+  getAvgOrderValue(): number {
+    if (this.totalOrders() === 0) return 0;
+    return Math.round(this.totalRevenue() / this.totalOrders());
+  }
+
+  getRevenueTarget(): number {
+    return 100000000; // 100M VND target
+  }
+
+  getRevenueProgress(): number {
+    const target = this.getRevenueTarget();
+    if (target === 0) return 0;
+    return Math.min(100, Math.round((this.revenueThisMonth() / target) * 100));
   }
 }

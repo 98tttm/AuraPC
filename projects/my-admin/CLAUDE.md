@@ -121,3 +121,74 @@ Completely restyle the admin panel to match **Shopify Polaris** design system wi
 - SEO management for client site
 - Banner/slide management
 - Marketing poster management
+
+
+---                                                                                                                    Security Audit Report — AuraPC                                                                                       
+                                                                                                                         CRITICAL (Fix Immediately)                                                                                                                                                                                                                    ┌─────┬────────────────────────────────────────────────────────┬──────────────────────────────────┬──────────────┐     │  #  │                         Issue                          │             Location             │     Risk     │     ├─────┼────────────────────────────────────────────────────────┼──────────────────────────────────┼──────────────┤     │ 1   │ .env committed to git — MongoDB password, JWT secret,  │ server/.env                      │ Data breach  │   
+  │     │ Gmail credentials, MoMo keys all exposed               │                                  │              │
+  ├─────┼────────────────────────────────────────────────────────┼──────────────────────────────────┼──────────────┤   
+  │ 2   │ OTP code logged to console — console.log('[AuraPC      │ server/routes/authRoutes.js:61   │ OTP theft    │   
+  │     │ Auth] OTP cho', stored, ':', code)                     │                                  │ from logs    │   
+  ├─────┼────────────────────────────────────────────────────────┼──────────────────────────────────┼──────────────┤   
+  │     │ No rate limiting on auth endpoints —                   │ authRoutes.js,                   │ Account      │   
+  │ 3   │ express-rate-limit is installed but never used.        │ admin/authRoutes.js              │ takeover     │   
+  │     │ Login/OTP can be brute-forced                          │                                  │              │   
+  ├─────┼────────────────────────────────────────────────────────┼──────────────────────────────────┼──────────────┤   
+  │ 4   │ XSS via bypassSecurityTrustHtml() — Product            │ product-detail.component.ts:421  │ Script       │   
+  │     │ descriptions bypass Angular sanitization               │                                  │ injection    │   
+  └─────┴────────────────────────────────────────────────────────┴──────────────────────────────────┴──────────────┘   
+
+  HIGH
+
+  ┌─────┬───────────────────────────────────────────────────┬─────────────────────────────────┬────────────────────┐   
+  │  #  │                       Issue                       │            Location             │        Risk        │   
+  ├─────┼───────────────────────────────────────────────────┼─────────────────────────────────┼────────────────────┤   
+  │ 5   │ Weak JWT secret — fallback                        │ server/middleware/auth.js:3     │ Token forgery      │   
+  │     │ 'aurapc-default-secret-change-me' is guessable    │                                 │                    │   
+  ├─────┼───────────────────────────────────────────────────┼─────────────────────────────────┼────────────────────┤   
+  │ 6   │ JWT in localStorage — XSS can steal tokens (both  │ auth.service.ts,                │ Session hijack     │   
+  │     │ client + admin)                                   │ admin-auth.service.ts           │                    │   
+  ├─────┼───────────────────────────────────────────────────┼─────────────────────────────────┼────────────────────┤   
+  │ 7   │ File uploads have no MIME type validation — can   │ authRoutes.js (avatar),         │ Remote code exec   │   
+  │     │ upload .exe, .sh, malicious SVG                   │ hubRoutes.js                    │                    │   
+  ├─────┼───────────────────────────────────────────────────┼─────────────────────────────────┼────────────────────┤   
+  │ 8   │ Admin seed endpoint publicly accessible — no      │ admin/authRoutes.js:51          │ Unauthorized admin │   
+  │     │ requireAdmin, only env secret                     │                                 │  creation          │   
+  ├─────┼───────────────────────────────────────────────────┼─────────────────────────────────┼────────────────────┤   
+  │ 9   │ No security headers — no helmet.js, missing       │ server/index.js                 │ Clickjacking, XSS  │   
+  │     │ X-Frame-Options, CSP, HSTS                        │                                 │                    │   
+  └─────┴───────────────────────────────────────────────────┴─────────────────────────────────┴────────────────────┘   
+
+  MEDIUM
+
+  ┌─────┬─────────────────────────────────────────────────────────┬─────────────────────────────┬──────────────────┐   
+  │  #  │                          Issue                          │          Location           │       Risk       │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 10  │ Blog content rendered with [innerHTML] without          │ blog-detail.component.ts:31 │ Stored XSS       │   
+  │     │ sanitization                                            │                             │                  │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 11  │ Checkout data in sessionStorage — prices, addresses     │ checkout.component.ts:117   │ Price            │   
+  │     │ modifiable by XSS                                       │                             │ manipulation     │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 12  │ No input validation on admin CRUD — new                 │ All admin routes            │ Bad data,        │   
+  │     │ Product(req.body) directly                              │                             │ injection        │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 13  │ Builder routes missing ownership checks — any user can  │ builderRoutes.js            │ Data access      │   
+  │     │ view/modify any builder                                 │                             │                  │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 14  │ Console.log throughout server — 30+ locations, some     │ Multiple route files        │ Info leakage     │   
+  │     │ with sensitive data                                     │                             │                  │   
+  ├─────┼─────────────────────────────────────────────────────────┼─────────────────────────────┼──────────────────┤   
+  │ 15  │ Missing phone/email validation on forms (client only    │ account-page.component.ts   │ Invalid data     │   
+  │     │ checks emptiness)                                       │                             │                  │   
+  └─────┴─────────────────────────────────────────────────────────┴─────────────────────────────┴──────────────────┘   
+
+  What's Already Good
+
+  - Auth interceptor only attaches token to API requests (no third-party leakage)
+  - Logout properly clears all tokens and user data
+  - No hardcoded secrets in frontend source code
+  - Regex user input is properly escaped in search queries
+  - MoMo IPN signature verification is correctly implemented
+  - CORS uses explicit whitelist (not *)
+  - Error handler returns generic message for 500 errors

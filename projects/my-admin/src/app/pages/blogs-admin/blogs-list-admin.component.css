@@ -1,11 +1,73 @@
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.page-header h1 { margin: 0; font-size: 1.5rem; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.table th { color: rgba(255,255,255,0.8); font-weight: 600; }
-.alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
-.alert-error { background: rgba(229,57,53,0.2); color: #ffcdd2; }
-.btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9rem; }
-.btn-primary { background: #ff6d2d; color: #fff; }
-.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; margin-right: 0.5rem; }
-.btn-danger { background: rgba(229,57,53,0.8); color: #fff; }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.page-header p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.alert-error {
+  background: var(--accent-red-light);
+  color: var(--accent-red);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  margin-bottom: 1rem;
+}
+
+/* Blog cell */
+.blog-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.blog-cell__img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.blog-cell__placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.blog-cell__title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: block;
+}
+
+.blog-cell__slug {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.text-muted { color: var(--text-secondary); }
+.text-center { text-align: center; }
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
