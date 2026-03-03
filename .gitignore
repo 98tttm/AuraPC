@@ -46,5 +46,3 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Scrapers (may contain credentials)
-scrapers/
