@@ -1,12 +1,19 @@
 const crypto = require('crypto');
 
+// Helper to safely read and trim env values (trailing spaces/newlines can phá vỡ chữ ký)
+function env(name, fallback) {
+    const v = process.env[name];
+    if (typeof v === 'string' && v.trim() !== '') return v.trim();
+    return fallback;
+}
+
 const config = {
-    partnerCode: process.env.MOMO_PARTNER_CODE || 'MOMOBKUN20180529',
-    accessKey: process.env.MOMO_ACCESS_KEY || 'klm05TvNCpe7cgrv',
-    secretKey: process.env.MOMO_SECRET_KEY || 'at67qH6mk8g5HI1JT10ZKd9T7k9m2g3P',
-    endpoint: process.env.MOMO_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/create',
-    redirectUrl: process.env.MOMO_REDIRECT_URL || 'http://localhost:4200/checkout-momo-return',
-    ipnUrl: process.env.MOMO_IPN_URL || 'http://localhost:3000/api/payment/momo/ipn',
+    partnerCode: env('MOMO_PARTNER_CODE', 'MOMOBKUN20180529'),
+    accessKey: env('MOMO_ACCESS_KEY', 'klm05TvNCpe7cgrv'),
+    secretKey: env('MOMO_SECRET_KEY', 'at67qH6mk8g5HI1JT10ZKd9T7k9m2g3P'),
+    endpoint: env('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create'),
+    redirectUrl: env('MOMO_REDIRECT_URL', 'http://localhost:4200/checkout-momo-return'),
+    ipnUrl: env('MOMO_IPN_URL', 'http://localhost:3000/api/payment/momo/ipn'),
 };
 
 const createSignature = (data) => {
