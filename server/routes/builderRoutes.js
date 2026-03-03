@@ -2,10 +2,24 @@ const express = require('express');
 const Builder = require('../models/Builder');
 const { buildConfigPdf } = require('../utils/buildPdf');
 const { getEmailTransporter } = require('../utils/email');
+const { requireAuth, requireUserOrAdmin, verifyToken } = require('../middleware/auth');
 
 const router = express.Router();
 
 const STEPS = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
+
+function isObjectIdLike(value) {
+  return /^[a-f\d]{24}$/i.test(value);
+}
+
+function canAccessBuilder(builder, req) {
+  if (req.adminId) return true;
+  return !!req.userId && !!builder.user && String(builder.user) === String(req.userId);
+}
+
+function resolveBuilderQuery(id) {
+  return isObjectIdLike(id) ? { _id: id } : { shareId: id };
+}
 
 function toComponent(product) {
   if (!product) return null;
@@ -21,123 +35,122 @@ function toComponent(product) {
   };
 }
 
-/** Lấy chi tiết builder theo shareId hoặc _id */
+function requireBuilderOwnerOrAdmin(builder, req, res, action) {
+  if (canAccessBuilder(builder, req)) return true;
+  res.status(403).json({ error: `You do not have permission to ${action} this builder` });
+  return false;
+}
+
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const isObjectId = /^[a-f\d]{24}$/i.test(id);
-    const query = isObjectId ? { _id: id } : { shareId: id };
+    const query = resolveBuilderQuery(id);
     const builder = await Builder.findOne(query).lean();
-    if (!builder) return res.status(404).json({ error: 'Cấu hình không tồn tại' });
-    res.json(builder);
+    if (!builder) return res.status(404).json({ error: 'Builder not found' });
+
+    if (isObjectIdLike(id)) {
+      const decoded = verifyToken(req);
+      if (!decoded) return res.status(401).json({ error: 'Unauthorized' });
+      if (decoded.isAdmin && decoded.adminId) req.adminId = decoded.adminId;
+      else if (decoded.userId) req.userId = decoded.userId;
+      else return res.status(401).json({ error: 'Unauthorized' });
+
+      if (!requireBuilderOwnerOrAdmin(builder, req, res, 'view')) return;
+      return res.json(builder);
+    }
+
+    const { user, ...sharedBuilder } = builder;
+    return res.json(sharedBuilder);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
-/** Tạo mới builder */
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
-    const { components, user } = req.body;
+    const { components } = req.body || {};
     const builder = new Builder({
       components: components || {},
-      user: user || null,
+      user: req.userId,
     });
     await builder.save();
-    res.status(201).json({ _id: builder._id, shareId: builder.shareId });
+    return res.status(201).json({ _id: builder._id, shareId: builder.shareId });
   } catch (err) {
-    console.error('[Builder] POST error:', err.message, err);
-    const msg = err.code === 11000 ? 'ShareId trùng, thử lại' : err.message;
-    res.status(400).json({ error: msg });
+    const message = err.code === 11000 ? 'ShareId collision, try again' : err.message;
+    return res.status(400).json({ error: message });
   }
 });
 
-/** Cập nhật component của builder (thêm/sửa 1 bước) */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireUserOrAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { step, product } = req.body;
+    const { step, product } = req.body || {};
     if (!step || !STEPS.includes(step) || !product) {
-      return res.status(400).json({ error: 'Thiếu step hoặc product' });
+      return res.status(400).json({ error: 'Missing step or product' });
     }
 
     const comp = toComponent(product);
-    if (!comp) return res.status(400).json({ error: 'Product phải có _id' });
+    if (!comp) return res.status(400).json({ error: 'Product must include _id' });
 
-    const isObjectId = /^[a-f\d]{24}$/i.test(id);
-    const query = isObjectId ? { _id: id } : { shareId: id };
-    const builder = await Builder.findOne(query);
-    if (!builder) return res.status(404).json({ error: 'Cấu hình không tồn tại' });
+    const builder = await Builder.findOne(resolveBuilderQuery(id));
+    if (!builder) return res.status(404).json({ error: 'Builder not found' });
+    if (!requireBuilderOwnerOrAdmin(builder, req, res, 'modify')) return;
 
     builder.components = builder.components || {};
     builder.components[step] = comp;
     builder.markModified('components');
     await builder.save();
 
-    console.log(`[Builder] Đã lưu ${step}: ${comp.name} vào builder ${builder._id}`);
-    res.json({ _id: builder._id, shareId: builder.shareId, components: builder.components });
+    return res.json({ _id: builder._id, shareId: builder.shareId, components: builder.components });
   } catch (err) {
-    console.error('[Builder] Lỗi PUT:', err);
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 });
 
-/** Lưu kết quả hình ảnh AuraVisual vào builder */
-router.put('/:id/auravisual', async (req, res) => {
+router.put('/:id/auravisual', requireUserOrAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { imageUrl } = req.body;
+    const { imageUrl } = req.body || {};
 
-    const isObjectId = /^[a-f\d]{24}$/i.test(id);
-    const query = isObjectId ? { _id: id } : { shareId: id };
-    const builder = await Builder.findOne(query);
-
-    if (!builder) return res.status(404).json({ error: 'Cấu hình không tồn tại' });
+    const builder = await Builder.findOne(resolveBuilderQuery(id));
+    if (!builder) return res.status(404).json({ error: 'Builder not found' });
+    if (!requireBuilderOwnerOrAdmin(builder, req, res, 'modify')) return;
 
     builder.auraVisualImage = imageUrl;
     await builder.save();
 
-    console.log(`[Builder] Đã lưu ảnh AuraVisual vào builder ${builder._id}`);
-    res.json({ success: true, auraVisualImage: builder.auraVisualImage });
+    return res.json({ success: true, auraVisualImage: builder.auraVisualImage });
   } catch (err) {
-    console.error('[Builder] Lỗi lưu AuraVisual:', err);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
-
-/** Gửi PDF cấu hình qua email */
-router.post('/:id/email-pdf', async (req, res) => {
+router.post('/:id/email-pdf', requireUserOrAdmin, async (req, res) => {
   try {
-    console.log('[Builder] email-pdf được gọi, id:', req.params.id);
     const { id } = req.params;
-    const { email } = req.body;
+    const { email } = req.body || {};
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return res.status(400).json({ error: 'Email không hợp lệ' });
+      return res.status(400).json({ error: 'Invalid email' });
     }
 
     const transporter = getEmailTransporter();
     if (!transporter) {
-      return res.status(503).json({
-        error: 'Chưa cấu hình email. Thêm EMAIL_USER và EMAIL_PASS vào file .env',
-      });
+      return res.status(503).json({ error: 'Email is not configured on the server' });
     }
 
-    const isObjectId = /^[a-f\d]{24}$/i.test(id);
-    const query = isObjectId ? { _id: id } : { shareId: id };
-    const builder = await Builder.findOne(query).lean();
-    if (!builder) return res.status(404).json({ error: 'Cấu hình không tồn tại' });
+    const builder = await Builder.findOne(resolveBuilderQuery(id)).lean();
+    if (!builder) return res.status(404).json({ error: 'Builder not found' });
+    if (!requireBuilderOwnerOrAdmin(builder, req, res, 'email')) return;
 
     const pdfBuffer = await buildConfigPdf(builder);
     const shareId = builder.shareId || builder._id;
-
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
     const viewUrl = `${frontendUrl}/aura-builder/${shareId}`;
 
     await transporter.sendMail({
       from: `"AuraPC" <${process.env.EMAIL_USER || process.env.GMAIL_USER}>`,
       to: email.trim(),
-      subject: 'Thông tin cấu hình PC - AuraPC',
+      subject: 'AuraPC builder configuration',
       html: `
 <!DOCTYPE html>
 <html>
@@ -148,15 +161,15 @@ router.post('/:id/email-pdf', async (req, res) => {
       <span style="font-size:1.2rem;font-weight:800;letter-spacing:2px;">AURA PC</span>
     </div>
     <div style="padding:32px 24px;">
-      <h2 style="margin:0 0 8px;font-size:1.1rem;color:#ffb81c;text-transform:uppercase;letter-spacing:1px;">CẤU HÌNH PC CỦA BẠN</h2>
-      <p style="margin:0 0 20px;color:#ccc;font-size:0.95rem;line-height:1.5;">Cảm ơn bạn đã sử dụng Aura Builder. File PDF thông tin cấu hình được đính kèm bên dưới.</p>
+      <h2 style="margin:0 0 8px;font-size:1.1rem;color:#ffb81c;text-transform:uppercase;letter-spacing:1px;">YOUR PC CONFIGURATION</h2>
+      <p style="margin:0 0 20px;color:#ccc;font-size:0.95rem;line-height:1.5;">Thanks for using Aura Builder. Your PDF is attached below.</p>
       <div style="margin:24px 0;">
-        <a href="${viewUrl}" style="display:inline-block;padding:14px 28px;background:#ffb81c;color:#000;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:4px;">XEM CẤU HÌNH ONLINE ›</a>
+        <a href="${viewUrl}" style="display:inline-block;padding:14px 28px;background:#ffb81c;color:#000;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:4px;">VIEW ONLINE</a>
       </div>
-      <p style="margin:16px 0 0;font-size:0.8rem;color:#888;">Link cấu hình: ${viewUrl}</p>
+      <p style="margin:16px 0 0;font-size:0.8rem;color:#888;">Link: ${viewUrl}</p>
     </div>
     <div style="padding:20px 24px;border-top:1px solid #333;text-align:center;">
-      <p style="margin:0;font-size:0.85rem;color:#999;">Trân trọng,<br><strong style="color:#fff;">AuraPC</strong></p>
+      <p style="margin:0;font-size:0.85rem;color:#999;">AuraPC</p>
     </div>
   </div>
 </body>
@@ -170,15 +183,13 @@ router.post('/:id/email-pdf', async (req, res) => {
       ],
     });
 
-    console.log(`[Builder] Đã gửi PDF cấu hình đến ${email}`);
-    res.json({ success: true, message: 'Đã gửi thông tin cấu hình đến email của bạn' });
+    return res.json({ success: true, message: 'Builder PDF sent successfully' });
   } catch (err) {
-    console.error('[Builder] Email PDF error:', err.message, err.code || '');
-    let msg = err.message || 'Không gửi được email';
-    if (err.code === 'EAUTH' || (msg && msg.toLowerCase().includes('invalid login'))) {
-      msg = 'Sai thông tin đăng nhập Gmail. Kiểm tra EMAIL_USER và EMAIL_PASS (dùng App Password) trong .env.';
+    let message = err.message || 'Unable to send email';
+    if (err.code === 'EAUTH' || String(message).toLowerCase().includes('invalid login')) {
+      message = 'Invalid Gmail credentials. Check EMAIL_USER and EMAIL_PASS.';
     }
-    res.status(500).json({ error: msg });
+    return res.status(500).json({ error: message });
   }
 });
 

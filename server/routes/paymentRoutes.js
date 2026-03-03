@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
 const axios = require('axios');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
@@ -64,7 +63,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
                 product: i.product,
                 name: dbProduct.name || i.name,
                 price: verifiedPrice,
-                quantity: qty,
+                qty,
             });
         }
 
@@ -76,11 +75,13 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             orderNumber,
             user: userId,
             items: orderItems,
-            totalAmount: finalTotal,
+            total: finalTotal,
+            discount: discountAmount,
+            shippingFee: 0,
             shippingAddress,
             paymentMethod,
             isPaid: false,
-            status: 'pending_payment',
+            status: 'pending',
         });
         await order.save();
 
@@ -145,7 +146,7 @@ router.post('/momo/ipn', async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        if (resultCode === 0) {
+        if (Number(resultCode) === 0) {
             // Payment Successful
             order.isPaid = true;
             order.paidAt = new Date();

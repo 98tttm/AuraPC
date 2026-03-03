@@ -30,6 +30,13 @@ const orderSchema = new mongoose.Schema(
     total: { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
+    paymentMethod: {
+      type: String,
+      enum: ['cod', 'qr', 'momo', 'zalopay', 'atm'],
+      default: 'cod',
+    },
+    isPaid: { type: Boolean, default: false },
+    paidAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

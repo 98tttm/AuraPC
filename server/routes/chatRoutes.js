@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const Product = require('../models/Product');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -13,6 +14,34 @@ let supabase = null;
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
+
+router.post('/auravisual', requireAuth, async (req, res) => {
+  const webhookUrl = process.env.AURA_VISUAL_WEBHOOK_URL;
+  if (!webhookUrl) {
+    return res.status(503).json({ error: 'AURA_VISUAL_WEBHOOK_URL is not configured on the server.' });
+  }
+
+  const { components } = req.body || {};
+  if (!Array.isArray(components) || components.length === 0) {
+    return res.status(400).json({ error: 'components is required' });
+  }
+
+  try {
+    const upstream = await axios.post(
+      webhookUrl,
+      { components, userId: req.userId },
+      { timeout: 120000 }
+    );
+    return res.json(upstream.data);
+  } catch (err) {
+    const upstreamMessage =
+      err.response?.data?.error ||
+      err.response?.data?.message ||
+      err.message ||
+      'Unknown AuraVisual error';
+    return res.status(502).json({ error: `AuraVisual request failed: ${upstreamMessage}` });
+  }
+});
 
 /**
  * POST /api/chat

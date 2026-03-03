@@ -5,19 +5,10 @@ if (!JWT_SECRET) {
     throw new Error('FATAL: JWT_SECRET environment variable is not set. Server cannot start without it.');
 }
 
-/**
- * Ký JWT token cho user.
- * @param {{ userId: string, phoneNumber: string }} payload
- * @returns {string} signed JWT
- */
 function signToken(payload) {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 
-/**
- * Extract & verify JWT từ Authorization header.
- * Trả về decoded payload hoặc null.
- */
 function verifyToken(req) {
     const header = req.headers.authorization;
     if (!header || !header.startsWith('Bearer ')) return null;
@@ -28,24 +19,16 @@ function verifyToken(req) {
     }
 }
 
-/**
- * Middleware: BẮT BUỘC đăng nhập.
- * Nếu không có token hoặc token không hợp lệ → 401.
- */
 function requireAuth(req, res, next) {
     const decoded = verifyToken(req);
     if (!decoded || !decoded.userId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized — token missing or invalid' });
+        return res.status(401).json({ success: false, message: 'Unauthorized - token missing or invalid' });
     }
     req.userId = decoded.userId;
     req.phoneNumber = decoded.phoneNumber;
     next();
 }
 
-/**
- * Middleware: TUỲ CHỌN đăng nhập.
- * Có token → gắn req.userId; không có → bỏ qua (req.userId = undefined).
- */
 function optionalAuth(req, res, next) {
     const decoded = verifyToken(req);
     if (decoded && decoded.userId) {
@@ -55,17 +38,32 @@ function optionalAuth(req, res, next) {
     next();
 }
 
-/**
- * Middleware: BẮT BUỘC admin.
- * Verify JWT với isAdmin claim, tìm Admin theo adminId.
- */
 function requireAdmin(req, res, next) {
     const decoded = verifyToken(req);
     if (!decoded || !decoded.isAdmin || !decoded.adminId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized — admin access required' });
+        return res.status(401).json({ success: false, message: 'Unauthorized - admin access required' });
     }
     req.adminId = decoded.adminId;
     next();
 }
 
-module.exports = { signToken, requireAuth, optionalAuth, requireAdmin };
+function requireUserOrAdmin(req, res, next) {
+    const decoded = verifyToken(req);
+    if (!decoded) {
+        return res.status(401).json({ success: false, message: 'Unauthorized - token missing or invalid' });
+    }
+    if (decoded.isAdmin && decoded.adminId) {
+        req.adminId = decoded.adminId;
+        req.isAdmin = true;
+        return next();
+    }
+    if (decoded.userId) {
+        req.userId = decoded.userId;
+        req.phoneNumber = decoded.phoneNumber;
+        req.isAdmin = false;
+        return next();
+    }
+    return res.status(401).json({ success: false, message: 'Unauthorized - token missing or invalid' });
+}
+
+module.exports = { signToken, verifyToken, requireAuth, optionalAuth, requireAdmin, requireUserOrAdmin };

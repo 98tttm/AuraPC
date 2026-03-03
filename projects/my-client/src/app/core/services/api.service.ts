@@ -464,6 +464,12 @@ export class ApiService {
     ).pipe(timeout(120000));
   }
 
+  triggerAuraVisual(payload: {
+    components: { type: string; name: string; image: string }[];
+  }): Observable<any> {
+    return this.http.post<any>(`${BASE}/chat/auravisual`, payload).pipe(timeout(120000));
+  }
+
   // ─── AURAHUB API ──────────────────────────────────────
 
   getHubPosts(params: { page?: number; limit?: number; topic?: string; sort?: string } = {}): Observable<{

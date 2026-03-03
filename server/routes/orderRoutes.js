@@ -4,7 +4,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
-const { requireAuth, optionalAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -157,12 +157,18 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
-router.get('/:orderNumber', async (req, res) => {
+router.get('/:orderNumber', requireUserOrAdmin, async (req, res) => {
   try {
     const order = await Order.findOne({ orderNumber: req.params.orderNumber })
+      .populate('user', 'phoneNumber profile.fullName email avatar')
       .populate('items.product', 'name slug images')
       .lean();
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!req.adminId) {
+      if (!order.user || String(order.user._id || order.user) !== String(req.userId)) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+    }
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });

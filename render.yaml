@@ -10,6 +10,10 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: AURA_VISUAL_WEBHOOK_URL
+        sync: false
       - key: PORT
         value: 10000
     autoDeploy: true

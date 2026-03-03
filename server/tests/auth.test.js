@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 // Set test secret
 process.env.JWT_SECRET = 'test-secret-for-unit-tests';
-const { signToken, requireAuth, optionalAuth } = require('../middleware/auth');
+const { signToken, requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware/auth');
 
 describe('signToken', () => {
     it('should generate a valid JWT token', () => {
@@ -106,5 +106,47 @@ describe('optionalAuth middleware', () => {
         optionalAuth(req, res, mockNext);
         expect(mockNext).toHaveBeenCalled();
         expect(req.userId).toBeUndefined();
+    });
+});
+
+describe('requireUserOrAdmin middleware', () => {
+    const mockRes = () => {
+        const res = {};
+        res.status = jest.fn().mockReturnValue(res);
+        res.json = jest.fn().mockReturnValue(res);
+        return res;
+    };
+    const mockNext = jest.fn();
+
+    beforeEach(() => {
+        mockNext.mockClear();
+    });
+
+    it('should accept valid user JWT and set req.userId', () => {
+        const token = signToken({ userId: 'user999', phoneNumber: '84999888777' });
+        const req = { headers: { authorization: `Bearer ${token}` } };
+        const res = mockRes();
+        requireUserOrAdmin(req, res, mockNext);
+        expect(mockNext).toHaveBeenCalled();
+        expect(req.userId).toBe('user999');
+        expect(req.adminId).toBeUndefined();
+    });
+
+    it('should accept valid admin JWT and set req.adminId', () => {
+        const token = signToken({ adminId: 'admin123', isAdmin: true });
+        const req = { headers: { authorization: `Bearer ${token}` } };
+        const res = mockRes();
+        requireUserOrAdmin(req, res, mockNext);
+        expect(mockNext).toHaveBeenCalled();
+        expect(req.adminId).toBe('admin123');
+        expect(req.userId).toBeUndefined();
+    });
+
+    it('should reject requests without a valid user or admin token', () => {
+        const req = { headers: {} };
+        const res = mockRes();
+        requireUserOrAdmin(req, res, mockNext);
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(mockNext).not.toHaveBeenCalled();
     });
 });

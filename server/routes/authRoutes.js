@@ -301,6 +301,9 @@ router.get('/following/:userId', requireAuth, async (req, res) => {
 /** GET /api/auth/addresses/:userId — list all addresses */
 router.get('/addresses/:userId', requireAuth, async (req, res) => {
   try {
+    if (req.params.userId !== req.userId) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
     const user = await User.findById(req.params.userId).lean();
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, addresses: user.addresses || [] });

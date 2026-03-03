@@ -1,6 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Product, FilterOptionsResponse, productMainImage } from '../../core/services/api.service';
@@ -76,7 +75,6 @@ export class AuraBuilderComponent {
     private router = inject(Router);
     private cart = inject(CartService);
     private auth = inject(AuthService);
-    private http = inject(HttpClient);
 
     readonly steps = ['GPU', 'CPU', 'MB', 'CASE', 'COOLING', 'MEMORY', 'STORAGE', 'PSU', 'FANS', 'MONITOR', 'KEYBOARD', 'MOUSE', 'HEADSET'];
 
@@ -505,8 +503,8 @@ export class AuraBuilderComponent {
         console.log('[AuraVisual] Final payload to n8n Webhook:', payload);
 
 
-        // Gọi tới n8n webhook thực tế
-        this.http.post<any>('http://localhost:5678/webhook/auravisual-trigger', payload).subscribe({
+        // Gọi AuraVisual qua backend proxy để production không phụ thuộc localhost
+        this.api.triggerAuraVisual(payload).subscribe({
             next: (res) => {
                 console.log('[AuraVisual] Response from n8n:', res);
                 if (res && res.imageUrl) {
