@@ -27,6 +27,12 @@ const chatRoutes = require('./routes/chatRoutes');
 
 connectDB();
 
+// Log Mongoose connection events for monitoring
+const mongoose = require('mongoose');
+mongoose.connection.on('disconnected', () => logger.warn('MongoDB disconnected'));
+mongoose.connection.on('reconnected', () => logger.info('MongoDB reconnected'));
+mongoose.connection.on('error', (err) => logger.error({ err }, 'MongoDB connection error'));
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -54,6 +60,16 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('AuraPC Server is running...'));
+
+// Health check cho Render
+app.get('/health', (req, res) => {
+  const dbState = require('mongoose').connection.readyState;
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  if (dbState === 1) {
+    return res.json({ status: 'ok', db: 'connected' });
+  }
+  res.status(503).json({ status: 'degraded', db: dbState === 2 ? 'connecting' : 'disconnected' });
+});
 
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
@@ -89,3 +105,14 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => logger.info(`Server đang chạy trên cổng ${PORT}`));
+
+// Graceful shutdown & crash prevention
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason }, 'Unhandled promise rejection');
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error({ err }, 'Uncaught exception');
+  // Cho server thời gian flush logs rồi thoát
+  setTimeout(() => process.exit(1), 1000);
+});

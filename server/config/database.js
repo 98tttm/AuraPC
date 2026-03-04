@@ -1,17 +1,27 @@
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
+
+const MAX_RETRIES = 5;
+const BASE_DELAY_MS = 3000;
 
 const connectDB = async () => {
-    try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            // Mongoose 6+ has these as default, but explicitly setting generic reliable options if needed.
-            // In newer versions, useNewUrlParser and useUnifiedTopology are deprecated/default.
-            // We can leave them out for Mongoose 7+.
-        });
-
-        console.log(`Kết nối Database AuraPC thành công: ${conn.connection.host}`);
-    } catch (error) {
-        console.error(`Lỗi kết nối Database: ${error.message}`);
-        process.exit(1);
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const conn = await mongoose.connect(process.env.MONGODB_URI, {
+                serverSelectionTimeoutMS: 10000,
+            });
+            logger.info(`Kết nối Database AuraPC thành công: ${conn.connection.host}`);
+            return;
+        } catch (error) {
+            logger.error(`Lỗi kết nối Database (lần ${attempt}/${MAX_RETRIES}): ${error.message}`);
+            if (attempt === MAX_RETRIES) {
+                logger.error('Không thể kết nối Database sau nhiều lần thử. Thoát.');
+                process.exit(1);
+            }
+            const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+            logger.info(`Thử lại sau ${delay / 1000}s...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
     }
 };
 
