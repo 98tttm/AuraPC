@@ -65,6 +65,15 @@ cd server && npm run update-brands  # Extract brands from products into categori
 ### AuraBuilder
 Interactive PC configurator with component selection. Configs are saved with a `shareId` (7-day TTL) and can be exported as PDF or emailed.
 
+### AruBot (Chatbot)
+- **Frontend**: Floating widget component at `projects/my-client/src/app/components/chatbot-widget/`
+- **Backend**: `server/routes/chatRoutes.js` — POST `/api/chat`
+- **AI Model**: Qwen 3 235B via Replicate API (`REPLICATE_API_TOKEN` required)
+- **Product catalog injection**: The system prompt includes a cached dump of all categories + products (name, slug, price) from MongoDB, refreshed every 10 minutes. This ensures the AI only suggests real products from the store.
+- **Product matching flow**: AI returns exact slugs → backend looks up by slug → fallback by name → fallback by keywords → fallback featured products
+- **Click behavior**: Products with slug navigate to `/san-pham/:slug`; products without slug search on `/san-pham?search=<name>`
+- **Chat logging**: Optional Supabase integration for conversation history
+
 ## Code Conventions
 
 - **2-space indentation**, single quotes in TypeScript (`.editorconfig`)

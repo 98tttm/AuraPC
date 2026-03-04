@@ -18,43 +18,90 @@
       <button type="button" class="aru-close" (click)="toggleOpen()">×</button>
     </div>
 
-    <div class="aru-chatbot-body">
-      @if (!hasMessages()) {
+    <div class="aru-chatbot-body" #messagesContainer>
+      @if (!hasMessages() && !isSending()) {
       <div class="aru-empty">
         Hỏi AruBot về cấu hình PC, tư vấn linh kiện hoặc thông tin sản phẩm nhé.
       </div>
       }
       <div class="aru-messages">
-        @for (m of messages(); track m) {
-        <div class="aru-message" [class.aru-message--user]="m.role === 'user'">
+        @for (m of messages(); track $index; let last = $last) {
+
+        <!-- User message -->
+        @if (m.role === 'user') {
+        <div class="aru-message aru-message--user" [attr.data-idx]="$index">
           <div class="aru-message-bubble">
             {{ m.content }}
           </div>
         </div>
-        @if (m.role === 'assistant' && m.products && m.products.length > 0) {
+        }
+
+        <!-- Assistant message -->
+        @if (m.role === 'assistant') {
+        <div class="aru-message aru-message--bot" [attr.data-idx]="$index">
+          <img src="assets/Bot/AruBot.png" alt="AruBot" class="aru-msg-avatar" />
+          <div class="aru-message-bubble">
+            {{ m.content }}
+          </div>
+        </div>
+        @if (m.products && m.products.length > 0) {
         <div class="aru-products">
-          @for (p of m.products; track p.id) {
+          @for (p of m.products; track p.id || $index) {
           <button type="button" class="aru-product-card" (click)="openProduct(p)">
-            <div class="aru-product-thumb" *ngIf="p.image">
-              <img [src]="p.image" [alt]="p.name" />
+            @if (p.image) {
+            <div class="aru-product-thumb">
+              <img [src]="p.image" [alt]="p.name" loading="lazy" />
             </div>
+            } @else {
+            <div class="aru-product-thumb aru-product-thumb--empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+            </div>
+            }
             <div class="aru-product-info">
               <div class="aru-product-name">{{ p.name }}</div>
               @if (p.price != null && p.price > 0) {
-                <div class="aru-product-price">
-                  {{ p.price | number:'1.0-0' }}₫
-                </div>
+              <div class="aru-product-pricing">
+                <span class="aru-product-price">{{ p.price | number:'1.0-0' }}₫</span>
                 @if (p.old_price && p.old_price > p.price) {
-                <div class="aru-product-old">{{ p.old_price | number:'1.0-0' }}₫</div>
+                <span class="aru-product-old">{{ p.old_price | number:'1.0-0' }}₫</span>
+                <span class="aru-product-discount">-{{ discountPercent(p.old_price, p.price) }}%</span>
                 }
+              </div>
+              } @else {
+              <div class="aru-product-cta">Tìm sản phẩm →</div>
               }
-              <div class="aru-product-cta">Xem chi tiết</div>
+            </div>
+            <div class="aru-product-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
             </div>
           </button>
           }
         </div>
         }
         }
+
+        }
+
+        <!-- Typing indicator -->
+        @if (isSending()) {
+        <div class="aru-message aru-message--bot" #scrollAnchor>
+          <img src="assets/Bot/AruBot.png" alt="AruBot" class="aru-msg-avatar" />
+          <div class="aru-message-bubble aru-typing">
+            <span class="aru-typing-dot"></span>
+            <span class="aru-typing-dot"></span>
+            <span class="aru-typing-dot"></span>
+          </div>
+        </div>
+        }
+
+        <!-- Invisible scroll anchor -->
+        <div #scrollAnchor></div>
       </div>
     </div>
 
@@ -73,4 +120,3 @@
   </div>
   }
 </div>
-
