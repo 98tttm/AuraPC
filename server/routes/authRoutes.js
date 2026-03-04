@@ -62,10 +62,8 @@ router.post('/request-otp', async (req, res) => {
       console.log('[AuraPC Auth] OTP cho', stored, ':', code, '(hiệu lực 5 phút)');
     }
     const payload = { success: true, message: 'Mã OTP đã được gửi.' };
-    // Only expose devOtp in development mode (never in production)
-    if (process.env.NODE_ENV === 'development') {
-      payload.devOtp = code;
-    }
+    // Expose OTP in response for demo purposes (no SMS provider configured)
+    payload.devOtp = code;
     res.json(payload);
   } catch (err) {
     console.error('[POST /api/auth/request-otp]', err);
