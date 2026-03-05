@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatbotService, ChatMessage, ChatProduct } from '../../core/services/chatbot.service';
@@ -17,6 +18,7 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
   private chat = inject(ChatbotService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   @ViewChild('messagesContainer') private messagesEl!: ElementRef<HTMLDivElement>;
   @ViewChild('scrollAnchor') private scrollAnchor!: ElementRef<HTMLDivElement>;
@@ -117,6 +119,19 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
         this.scrollTarget = 'last-message';
       },
     });
+  }
+
+  /** Render reply text: escape HTML, convert **bold** and newlines for bot bubble. */
+  formatReply(content: string): SafeHtml {
+    if (!content || typeof content !== 'string') return this.sanitizer.bypassSecurityTrustHtml('');
+    let s = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\n/g, '<br>');
+    return this.sanitizer.bypassSecurityTrustHtml(s);
   }
 
   discountPercent(oldPrice: number, price: number): number {

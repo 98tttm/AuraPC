@@ -6,6 +6,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { requireAuth } = require('../middleware/auth');
 const momoUtils = require('../utils/momo');
+const { createAdminNotification } = require('../utils/adminNotifications');
 
 // Generate a random order number
 function generateOrderNumber() {
@@ -150,8 +151,22 @@ router.post('/momo/ipn', async (req, res) => {
             // Payment Successful
             order.isPaid = true;
             order.paidAt = new Date();
-            order.status = 'processing';
+            order.status = 'pending';
             await order.save();
+
+            await createAdminNotification({
+                type: 'order_new',
+                order: order._id,
+                orderNumber: order.orderNumber,
+                title: 'Có đơn hàng mới',
+                message: `Đơn #${order.orderNumber} đã thanh toán và đang chờ xác nhận`,
+                metadata: {
+                    status: order.status,
+                    total: order.total,
+                    isPaid: order.isPaid,
+                    paymentMethod: order.paymentMethod,
+                },
+            });
             console.log(`Order ${orderId} marked as paid from MoMo IPN`);
         } else {
             // Payment failed or canceled

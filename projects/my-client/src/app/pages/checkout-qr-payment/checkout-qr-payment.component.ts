@@ -98,6 +98,8 @@ export class CheckoutQrPaymentComponent implements OnInit {
     this.api.createOrder({
       items: pending.items,
       shippingAddress: pending.shippingAddress,
+      paymentMethod: 'qr',
+      isPaid: true,
       user: userId ?? undefined,
     }).subscribe({
       next: (res) => {

@@ -251,11 +251,15 @@
         <h2 class="section-title section-title--left">HƯỚNG DẪN &amp; MẸO HAY</h2>
         <a routerLink="/blog" class="blog__explore">Khám phá ngay &rarr;</a>
       </div>
-      <div class="blog__grid stagger-children">
-        @for (post of apiBlogs(); track post._id) {
-        <a [routerLink]="['/blog', post.slug]" class="blog__card fade-in">
-          <div class="blog__card-image"><img [src]="blogCoverUrl(post)" [alt]="post.title" /></div>
-          <div class="blog__card-body">
+      <div class="blog__grid blog__grid--bento stagger-children">
+        @for (post of apiBlogs(); track post._id; let i = $index) {
+        <a [routerLink]="['/blog', post.slug]" class="blog__card blog__card--bento fade-in"
+          [class.blog__card--featured]="i === 0">
+          <div class="blog__card-media">
+            <img class="blog__card-media-img" [src]="blogCoverUrl(post)" [alt]="post.title" loading="lazy" />
+            <div class="blog__card-gradient"></div>
+          </div>
+          <div class="blog__card-content">
             <span class="blog__card-tag">BLOG</span>
             <h3 class="blog__card-title">{{ post.title }}</h3>
           </div>

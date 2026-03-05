@@ -4,9 +4,12 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
+const { createAdminNotification } = require('../utils/adminNotifications');
 const { requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
+const DELIVERY_CONFIRM_DELAY_MS = 30 * 60 * 1000;
+const ALLOWED_PAYMENT_METHODS = ['cod', 'qr', 'momo', 'zalopay', 'atm'];
 
 function generateOrderNumber() {
   const now = new Date();
@@ -15,6 +18,20 @@ function generateOrderNumber() {
   const d = String(now.getDate()).padStart(2, '0');
   const r = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `AP${y}${m}${d}${r}`;
+}
+
+function isOrderOwnedByUser(order, userId) {
+  if (!order || !order.user || !userId) return false;
+  return String(order.user) === String(userId);
+}
+
+function canUserConfirmDelivery(order) {
+  if (!order || order.status !== 'shipped') return false;
+  const baseTime = order.shippedAt || order.updatedAt || order.createdAt;
+  if (!baseTime) return false;
+  const shippedAt = new Date(baseTime).getTime();
+  if (Number.isNaN(shippedAt)) return false;
+  return Date.now() - shippedAt >= DELIVERY_CONFIRM_DELAY_MS;
 }
 
 /** GET /api/orders?status=... - list orders for logged-in user (optional status filter) */
@@ -45,6 +62,8 @@ router.post('/', optionalAuth, async (req, res) => {
       shippingAddress,
       shippingFee = 0,
       discount = 0,
+      paymentMethod = 'cod',
+      isPaid = false,
       user: userId,
       requestInvoice,
       invoiceEmail,
@@ -85,6 +104,11 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
+    if (!ALLOWED_PAYMENT_METHODS.includes(paymentMethod)) {
+      return res.status(400).json({ error: `Invalid paymentMethod. Must be one of: ${ALLOWED_PAYMENT_METHODS.join(', ')}` });
+    }
+
+    const paidFlag = isPaid === true || isPaid === 'true' || isPaid === 1 || isPaid === '1';
     const total = verifiedItems.reduce((sum, i) => sum + i.price * i.qty, 0) + (Number(shippingFee) || 0) - (Number(discount) || 0);
     // Ưu tiên userId từ JWT token nếu có, fallback sang body
     const resolvedUserId = req.userId || userId;
@@ -97,9 +121,26 @@ router.post('/', optionalAuth, async (req, res) => {
       total: Math.max(0, total),
       shippingFee: Number(shippingFee) || 0,
       discount: Number(discount) || 0,
+      paymentMethod,
+      isPaid: paidFlag,
+      paidAt: paidFlag ? new Date() : null,
       status: 'pending',
     });
     await order.save();
+
+    await createAdminNotification({
+      type: 'order_new',
+      order: order._id,
+      orderNumber: order.orderNumber,
+      title: 'Có đơn hàng mới',
+      message: `Đơn #${order.orderNumber} đang chờ xác nhận`,
+      metadata: {
+        status: order.status,
+        total: order.total,
+        isPaid: order.isPaid,
+        paymentMethod: order.paymentMethod,
+      },
+    });
 
     // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
     const shouldSendInvoice = requestInvoice && invoiceEmail && typeof invoiceEmail === 'string' && invoiceEmail.trim().includes('@');
@@ -154,6 +195,124 @@ router.post('/', optionalAuth, async (req, res) => {
     res.status(201).json(order);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+/** POST /api/orders/:orderNumber/cancel-request - user requests cancellation while order is being processed */
+router.post('/:orderNumber/cancel-request', requireAuth, async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order || !isOrderOwnedByUser(order, req.userId)) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (!['pending', 'confirmed', 'processing'].includes(order.status)) {
+      return res.status(400).json({ error: 'Order can only be cancelled while waiting for confirmation/processing' });
+    }
+
+    if (order.cancelRequest?.status === 'pending') {
+      return res.status(400).json({ error: 'Cancellation request is already pending' });
+    }
+
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 300) : '';
+    order.cancelRequest = {
+      status: 'pending',
+      reason,
+      requestedAt: new Date(),
+      resolvedAt: null,
+      resolvedBy: null,
+      note: '',
+    };
+
+    await order.save();
+
+    await createAdminNotification({
+      type: 'order_cancel_request',
+      order: order._id,
+      orderNumber: order.orderNumber,
+      title: 'Yêu cầu hủy đơn',
+      message: `Khách hàng yêu cầu hủy đơn #${order.orderNumber}`,
+      metadata: { status: order.status, reason },
+    });
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** POST /api/orders/:orderNumber/confirm-received - user confirms order received after shipping window */
+router.post('/:orderNumber/confirm-received', requireAuth, async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order || !isOrderOwnedByUser(order, req.userId)) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (order.status !== 'shipped') {
+      return res.status(400).json({ error: 'Order is not in shipped status' });
+    }
+
+    if (order.returnRequest?.status === 'pending') {
+      return res.status(400).json({ error: 'Cannot confirm delivery while return request is pending' });
+    }
+
+    if (!canUserConfirmDelivery(order)) {
+      return res.status(400).json({ error: 'Please wait until shipping confirmation window is available' });
+    }
+
+    order.status = 'delivered';
+    order.deliveredAt = new Date();
+    await order.save();
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** POST /api/orders/:orderNumber/return-request - user requests return/refund after shipping window */
+router.post('/:orderNumber/return-request', requireAuth, async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order || !isOrderOwnedByUser(order, req.userId)) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (order.status !== 'shipped') {
+      return res.status(400).json({ error: 'Return request is only available for shipped orders' });
+    }
+
+    if (!canUserConfirmDelivery(order)) {
+      return res.status(400).json({ error: 'Return request will be available after shipping confirmation window' });
+    }
+
+    if (order.returnRequest?.status === 'pending') {
+      return res.status(400).json({ error: 'Return request is already pending' });
+    }
+
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 300) : '';
+    order.returnRequest = {
+      status: 'pending',
+      reason,
+      requestedAt: new Date(),
+      resolvedAt: null,
+      resolvedBy: null,
+      note: '',
+    };
+    await order.save();
+
+    await createAdminNotification({
+      type: 'order_return_request',
+      order: order._id,
+      orderNumber: order.orderNumber,
+      title: 'Yêu cầu hoàn trả',
+      message: `Khách hàng yêu cầu hoàn trả đơn #${order.orderNumber}`,
+      metadata: { status: order.status, reason },
+    });
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

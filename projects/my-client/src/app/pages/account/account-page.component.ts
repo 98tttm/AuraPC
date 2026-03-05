@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './account-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountPageComponent implements OnInit {
+export class AccountPageComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -42,6 +42,8 @@ export class AccountPageComponent implements OnInit {
   orderStatusTab = signal<'all' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return'>('all');
   orderSearch = signal('');
   selectedOrderNumber = signal<string | null>(null);
+  nowTick = signal(Date.now());
+  private ordersPollTimer: ReturnType<typeof setInterval> | null = null;
 
   // Address modal
   showAddressModal = signal(false);
@@ -49,7 +51,7 @@ export class AccountPageComponent implements OnInit {
   editingAddressId = '';
 
   // Address form fields
-  addrLabel = 'Nhà riêng';
+  addrLabel = 'NhÃ  riÃªng';
   addrFullName = '';
   addrPhone = '';
   addrCity = '';
@@ -82,7 +84,7 @@ export class AccountPageComponent implements OnInit {
 
   hubLoading = signal(false);
 
-  // Tên tùy chỉnh đơn hàng (key = orderId), lưu localStorage
+  // TÃªn tÃ¹y chá»‰nh Ä‘Æ¡n hÃ ng (key = orderId), lÆ°u localStorage
   orderDisplayNames = signal<Record<string, string>>({});
   editingOrderNameId = signal<string | null>(null);
   editingOrderNameValue = '';
@@ -97,11 +99,15 @@ export class AccountPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrderDisplayNames();
-    // Đọc tab từ URL ngay khi load (direct link hoặc refresh)
+    // Äá»c tab tá»« URL ngay khi load (direct link hoáº·c refresh)
     this.syncTabFromUrl(this.route.snapshot.queryParams);
-    // Theo dõi thay đổi query params (khi click link hoặc navigate)
+    // Theo dÃµi thay Ä‘á»•i query params (khi click link hoáº·c navigate)
     this.route.queryParams.subscribe((params) => this.syncTabFromUrl(params));
     this.loadSocialCounts(); // Load ALWAYS
+  }
+
+  ngOnDestroy(): void {
+    this.stopOrdersPolling();
   }
 
   private syncTabFromUrl(params: Record<string, string | undefined>): void {
@@ -110,13 +116,32 @@ export class AccountPageComponent implements OnInit {
       this.activeTab.set(tab as any);
       this.editMode.set(false);
       if (tab === 'address') this.addressService.load();
-      if (tab === 'orders') this.loadOrders();
+      if (tab === 'orders') {
+        this.loadOrders();
+        this.startOrdersPolling();
+      } else {
+        this.stopOrdersPolling();
+      }
       if (tab === 'hub') {
         this.loadSocialCounts();
-        // luôn load Threads lần đầu khi vào tab Hoạt động AuraHub
+        // luÃ´n load Threads láº§n Ä‘áº§u khi vÃ o tab Hoáº¡t Ä‘á»™ng AuraHub
         this.setHubTab(this.hubTab());
       }
     }
+  }
+
+  private startOrdersPolling(): void {
+    if (this.ordersPollTimer) return;
+    this.ordersPollTimer = setInterval(() => {
+      this.nowTick.set(Date.now());
+      if (this.activeTab() === 'orders') this.loadOrders(true);
+    }, 15000);
+  }
+
+  private stopOrdersPolling(): void {
+    if (!this.ordersPollTimer) return;
+    clearInterval(this.ordersPollTimer);
+    this.ordersPollTimer = null;
   }
 
   displayName = computed(() => {
@@ -135,7 +160,7 @@ export class AccountPageComponent implements OnInit {
     const u = this.user();
     const g = u?.profile?.gender?.trim();
     if (!g) return null;
-    const map: Record<string, string> = { male: 'Nam', female: 'Nữ', other: 'Khác' };
+    const map: Record<string, string> = { male: 'Nam', female: 'Ná»¯', other: 'KhÃ¡c' };
     return map[g.toLowerCase()] || g;
   });
 
@@ -159,7 +184,7 @@ export class AccountPageComponent implements OnInit {
   }
 
   formatPrice(price: number): string {
-    return price.toLocaleString('vi-VN') + '₫';
+    return price.toLocaleString('vi-VN') + 'â‚«';
   }
 
   switchTab(tab: 'profile' | 'orders' | 'address' | 'hub') {
@@ -169,7 +194,12 @@ export class AccountPageComponent implements OnInit {
     if (tab === 'address') {
       this.addressService.load();
     }
-    if (tab === 'orders') this.loadOrders();
+    if (tab === 'orders') {
+      this.loadOrders();
+      this.startOrdersPolling();
+    } else {
+      this.stopOrdersPolling();
+    }
     if (tab === 'hub') {
       this.setHubTab(this.hubTab());
     }
@@ -206,7 +236,7 @@ export class AccountPageComponent implements OnInit {
   }
 
   getUserDisplayName(u: any): string {
-    return u?.profile?.fullName || u?.username || u?.phoneNumber || 'Người dùng';
+    return u?.profile?.fullName || u?.username || u?.phoneNumber || 'NgÆ°á»i dÃ¹ng';
   }
 
   getUserAvatarUrl(u: any): string {
@@ -227,17 +257,17 @@ export class AccountPageComponent implements OnInit {
     this.api.toggleFollow(targetUserId).subscribe({
       next: (res) => {
         this.followingCount.set(res.followingCount);
-        // Cần reload lại danh sách để modal update chính xác
+        // Cáº§n reload láº¡i danh sÃ¡ch Ä‘á»ƒ modal update chÃ­nh xÃ¡c
         this.loadSocialCounts();
       },
       error: (err) => {
-        const msg = err?.error?.message || 'Không thể thực hiện Follow';
+        const msg = err?.error?.message || 'KhÃ´ng thá»ƒ thá»±c hiá»‡n Follow';
         alert(msg);
       }
     });
   }
 
-  // Hoạt động AuraHub
+  // Hoáº¡t Ä‘á»™ng AuraHub
   setHubTab(tab: 'threads' | 'replies' | 'media'): void {
     this.hubTab.set(tab);
     this.loadHubActivity(tab);
@@ -274,19 +304,19 @@ export class AccountPageComponent implements OnInit {
     });
   }
 
-  loadOrders(): void {
+  loadOrders(silent = false): void {
     const user = this.user();
     const userId = user?._id ?? (user as { id?: string })?.id;
     if (!userId) return;
-    this.ordersLoading.set(true);
+    if (!silent) this.ordersLoading.set(true);
     this.api.getOrdersByUser(userId).subscribe({
       next: (list) => {
         this.orders.set(list);
-        this.ordersLoading.set(false);
+        if (!silent) this.ordersLoading.set(false);
       },
       error: () => {
         this.orders.set([]);
-        this.ordersLoading.set(false);
+        if (!silent) this.ordersLoading.set(false);
       },
     });
   }
@@ -295,7 +325,7 @@ export class AccountPageComponent implements OnInit {
   readonly orderStatusFilter = (order: OrderListItem): boolean => {
     const tab = this.orderStatusTab();
     if (tab === 'all') return true;
-    if (tab === 'return') return false; // no status in schema yet
+    if (tab === 'return') return this.hasReturnRequest(order);
     if (tab === 'processing') return ['pending', 'confirmed', 'processing'].includes(order.status);
     return order.status === tab;
   };
@@ -314,33 +344,84 @@ export class AccountPageComponent implements OnInit {
     return filtered;
   });
 
+  hasReturnRequest(order: OrderListItem): boolean {
+    const s = order.returnRequest?.status;
+    return !!s && s !== 'none';
+  }
+
+  hasPendingCancelRequest(order: OrderListItem): boolean {
+    return order.cancelRequest?.status === 'pending';
+  }
+
+  hasPendingReturnRequest(order: OrderListItem): boolean {
+    return order.returnRequest?.status === 'pending';
+  }
+
+  isShippingActionReady(order: OrderListItem): boolean {
+    if (order.status !== 'shipped') return false;
+    const baseTime = order.shippedAt || order.updatedAt || order.createdAt;
+    if (!baseTime) return false;
+    const shippedAtMs = new Date(baseTime).getTime();
+    if (isNaN(shippedAtMs)) return false;
+    return this.nowTick() - shippedAtMs >= 30 * 60 * 1000;
+  }
+
+  canCancelOrder(order: OrderListItem): boolean {
+    if (!['pending', 'confirmed', 'processing'].includes(order.status)) return false;
+    return !this.hasPendingCancelRequest(order);
+  }
+
+  canShowDeliveryActions(order: OrderListItem): boolean {
+    if (order.status !== 'shipped') return false;
+    if (!this.isShippingActionReady(order)) return false;
+    return !this.hasPendingReturnRequest(order);
+  }
+
+  minutesUntilShippingAction(order: OrderListItem): number {
+    if (order.status !== 'shipped') return 0;
+    const baseTime = order.shippedAt || order.updatedAt || order.createdAt;
+    if (!baseTime) return 0;
+    const shippedAtMs = new Date(baseTime).getTime();
+    if (isNaN(shippedAtMs)) return 0;
+    const remainMs = 30 * 60 * 1000 - (this.nowTick() - shippedAtMs);
+    if (remainMs <= 0) return 0;
+    return Math.ceil(remainMs / 60_000);
+  }
+
   setOrderStatusTab(tab: 'all' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return'): void {
     this.orderStatusTab.set(tab);
   }
 
-  orderStatusLabel(status: string): string {
+  orderStatusLabel(order: OrderListItem): string {
+    if (order.cancelRequest?.status === 'pending') return 'YÃƒÂªu cÃ¡ÂºÂ§u hÃ¡Â»Â§y';
+    if (order.returnRequest?.status === 'pending') return 'YÃƒÂªu cÃ¡ÂºÂ§u hoÃƒÂ n trÃ¡ÂºÂ£';
+    if (order.returnRequest?.status === 'approved') return 'Ã„ÂÃƒÂ£ duyÃ¡Â»â€¡t hoÃƒÂ n trÃ¡ÂºÂ£';
+    if (order.returnRequest?.status === 'rejected') return 'TÃ¡Â»Â« chÃ¡Â»â€˜i hoÃƒÂ n trÃ¡ÂºÂ£';
+
     const map: Record<string, string> = {
-      pending: 'Đang xử lý',
-      confirmed: 'Đang xử lý',
-      processing: 'Đang xử lý',
-      shipped: 'Đang vận chuyển',
-      delivered: 'Đã giao',
-      cancelled: 'Đã hủy',
+      pending: 'Äang xá»­ lÃ½',
+      confirmed: 'Äang xá»­ lÃ½',
+      processing: 'Äang xá»­ lÃ½',
+      shipped: 'Äang váº­n chuyá»ƒn',
+      delivered: 'ÄÃ£ giao',
+      cancelled: 'ÄÃ£ há»§y',
     };
-    return map[status] ?? status;
+    return map[order.status] ?? order.status;
   }
 
-  orderStatusClass(status: string): string {
-    if (status === 'delivered') return 'status--delivered';
-    if (status === 'shipped') return 'status--shipping';
-    if (status === 'cancelled') return 'status--cancelled';
+  orderStatusClass(order: OrderListItem): string {
+    if (order.returnRequest?.status === 'approved') return 'status--cancelled';
+    if (order.cancelRequest?.status === 'pending' || order.returnRequest?.status === 'pending') return 'status--pending';
+    if (order.status === 'delivered') return 'status--delivered';
+    if (order.status === 'shipped') return 'status--shipping';
+    if (order.status === 'cancelled') return 'status--cancelled';
     return 'status--pending';
   }
 
   formatOrderDate(createdAt: string | undefined): string {
-    if (!createdAt) return '—';
+    if (!createdAt) return 'â€”';
     const d = new Date(createdAt);
-    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return isNaN(d.getTime()) ? 'â€”' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   orderItemCount(order: OrderListItem): number {
@@ -352,9 +433,47 @@ export class AccountPageComponent implements OnInit {
   }
 
   cancelOrder(order: OrderListItem): void {
-    if (!confirm('Bạn có chắc muốn hủy đơn hàng #ORD-' + order.orderNumber + '?')) return;
-    // TODO: gọi API hủy đơn khi backend có endpoint
-    alert('Chức năng hủy đơn đang được cập nhật. Vui lòng liên hệ hỗ trợ.');
+    if (!this.canCancelOrder(order)) return;
+    if (!confirm('Báº¡n cÃ³ cháº¯c muá»‘n gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
+    const reason = prompt('LÃ½ do há»§y Ä‘Æ¡n (khÃ´ng báº¯t buá»™c):', '') || '';
+    this.api.requestOrderCancellation(order.orderNumber, reason).subscribe({
+      next: () => {
+        alert('ÄÃ£ gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n. Vui lÃ²ng chá» admin xá»­ lÃ½.');
+        this.loadOrders();
+      },
+      error: (err) => {
+        alert(err?.error?.error || 'KhÃ´ng thá»ƒ gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n');
+      },
+    });
+  }
+
+  confirmOrderReceived(order: OrderListItem): void {
+    if (!this.canShowDeliveryActions(order)) return;
+    if (!confirm('XÃ¡c nháº­n báº¡n Ä‘Ã£ nháº­n Ä‘Æ°á»£c hÃ ng cho Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
+    this.api.confirmOrderReceived(order.orderNumber).subscribe({
+      next: () => {
+        alert('Cáº£m Æ¡n báº¡n! ÄÆ¡n hÃ ng Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c nháº­n Ä‘Ã£ giao.');
+        this.loadOrders();
+      },
+      error: (err) => {
+        alert(err?.error?.error || 'KhÃ´ng thá»ƒ xÃ¡c nháº­n nháº­n hÃ ng');
+      },
+    });
+  }
+
+  requestOrderReturn(order: OrderListItem): void {
+    if (!this.canShowDeliveryActions(order)) return;
+    const reason = prompt('Nháº­p lÃ½ do hoÃ n tráº£ (khÃ´ng báº¯t buá»™c):', '') || '';
+    if (!confirm('Gá»­i yÃªu cáº§u hoÃ n tráº£ cho Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
+    this.api.requestOrderReturn(order.orderNumber, reason).subscribe({
+      next: () => {
+        alert('ÄÃ£ gá»­i yÃªu cáº§u hoÃ n tráº£. Vui lÃ²ng chá» admin xá»­ lÃ½.');
+        this.loadOrders();
+      },
+      error: (err) => {
+        alert(err?.error?.error || 'KhÃ´ng thá»ƒ gá»­i yÃªu cáº§u hoÃ n tráº£');
+      },
+    });
   }
 
   repurchaseOrder(order: OrderListItem): void {
@@ -379,10 +498,10 @@ export class AccountPageComponent implements OnInit {
     return this.orders().find((o) => o.orderNumber === num) ?? null;
   });
 
-  /** Tên đơn hàng mặc định: "Đơn hàng ngày DD/MM/YYYY" */
+  /** TÃªn Ä‘Æ¡n hÃ ng máº·c Ä‘á»‹nh: "ÄÆ¡n hÃ ng ngÃ y DD/MM/YYYY" */
   getOrderDisplayNameDefault(createdAt: string | undefined): string {
     const d = this.formatOrderDate(createdAt);
-    return d === '—' ? 'Đơn hàng' : `Đơn hàng ngày ${d}`;
+    return d === 'â€”' ? 'ÄÆ¡n hÃ ng' : `ÄÆ¡n hÃ ng ngÃ y ${d}`;
   }
 
   getOrderDisplayName(orderId: string, createdAt: string | undefined): string {
@@ -426,7 +545,7 @@ export class AccountPageComponent implements OnInit {
     this.editingOrderNameId.set(null);
   }
 
-  /** Ảnh sản phẩm trong đơn (item.product.images), trả về URL đầy đủ nếu là path */
+  /** áº¢nh sáº£n pháº©m trong Ä‘Æ¡n (item.product.images), tráº£ vá» URL Ä‘áº§y Ä‘á»§ náº¿u lÃ  path */
   orderItemImage(item: OrderListItem['items'][0]): string {
     const p = item.product as { images?: unknown[] } | undefined;
     if (!p?.images?.length) return '';
@@ -461,7 +580,7 @@ export class AccountPageComponent implements OnInit {
             // Success - updated automatically in signal
           }
         },
-        error: (err) => alert('Lỗi upload ảnh: ' + (err.message || 'Không xác định'))
+        error: (err) => alert('Lá»—i upload áº£nh: ' + (err.message || 'KhÃ´ng xÃ¡c Ä‘á»‹nh'))
       });
     }
   }
@@ -477,7 +596,7 @@ export class AccountPageComponent implements OnInit {
           this.editMode.set(false);
         }
       },
-      error: (err) => alert('Lỗi cập nhật: ' + (err.message || 'Không xác định'))
+      error: (err) => alert('Lá»—i cáº­p nháº­t: ' + (err.message || 'KhÃ´ng xÃ¡c Ä‘á»‹nh'))
     });
   }
 
@@ -501,9 +620,9 @@ export class AccountPageComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    if (status === 'Đã giao') return 'status--delivered';
-    if (status === 'Đang vận chuyển') return 'status--shipping';
-    if (status === 'Đã hủy') return 'status--cancelled';
+    if (status === 'ÄÃ£ giao') return 'status--delivered';
+    if (status === 'Äang váº­n chuyá»ƒn') return 'status--shipping';
+    if (status === 'ÄÃ£ há»§y') return 'status--cancelled';
     return 'status--pending';
   }
 
@@ -519,7 +638,7 @@ export class AccountPageComponent implements OnInit {
   openAddAddress() {
     this.addressModalMode.set('add');
     this.editingAddressId = '';
-    this.addrLabel = 'Nhà riêng';
+    this.addrLabel = 'NhÃ  riÃªng';
     this.addrFullName = '';
     this.addrPhone = '';
     this.addrCity = '';
@@ -607,7 +726,7 @@ export class AccountPageComponent implements OnInit {
 
   saveAddress() {
     if (!this.addrFullName.trim() || !this.addrPhone.trim()) {
-      alert('Vui lòng nhập họ tên và số điện thoại.');
+      alert('Vui lÃ²ng nháº­p há» tÃªn vÃ  sá»‘ Ä‘iá»‡n thoáº¡i.');
       return;
     }
 
@@ -662,7 +781,7 @@ export class AccountPageComponent implements OnInit {
     this.addressService.setDefault(addressId);
   }
 
-  // ─── AuraHub Activity Helpers ───
+  // â”€â”€â”€ AuraHub Activity Helpers â”€â”€â”€
   timeAgo(date: string): string {
     const now = Date.now();
     const d = new Date(date).getTime();
@@ -686,7 +805,7 @@ export class AccountPageComponent implements OnInit {
   }
 
   getHubDisplayName(user: any): string {
-    if (!user) return 'Ẩn danh';
+    if (!user) return 'áº¨n danh';
     if (user.profile?.fullName) return user.profile.fullName;
     if (user.username) return user.username;
     if (user.phoneNumber) {
@@ -694,7 +813,7 @@ export class AccountPageComponent implements OnInit {
       if (d.length === 11 && d.startsWith('84')) return '0' + d.slice(2);
       return user.phoneNumber;
     }
-    return 'Ẩn danh';
+    return 'áº¨n danh';
   }
 
   getHubAvatarUrl(user: any): string {
@@ -704,3 +823,4 @@ export class AccountPageComponent implements OnInit {
     return `${base}${user.avatar}`;
   }
 }
+

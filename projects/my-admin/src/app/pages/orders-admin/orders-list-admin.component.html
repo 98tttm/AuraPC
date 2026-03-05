@@ -176,8 +176,12 @@
       </thead>
       <tbody>
         @for (order of orders(); track order._id) {
-          <tr>
-            <td><a [routerLink]="['/orders', order.orderNumber]" class="link">#{{ order.orderNumber }}</a></td>
+          <tr class="order-row" (click)="openOrderDetail(order.orderNumber)">
+            <td>
+              <a [routerLink]="['/orders', order.orderNumber]" class="link" (click)="$event.stopPropagation()">
+                #{{ order.orderNumber }}
+              </a>
+            </td>
             <td>
               <div class="user-cell">
                 <div class="avatar avatar--sm">{{ (getCustomerName(order)).charAt(0).toUpperCase() }}</div>

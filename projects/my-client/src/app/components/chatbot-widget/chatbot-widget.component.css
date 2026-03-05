@@ -141,6 +141,14 @@
   color: #111111;
 }
 
+.aru-message-bubble strong {
+  font-weight: 600;
+}
+
+.aru-message-bubble br + * {
+  margin-top: 0.35em;
+}
+
 .aru-message--bot .aru-message-bubble {
   border-top-left-radius: 4px;
 }

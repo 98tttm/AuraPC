@@ -5,6 +5,29 @@ const { requireAdmin } = require('../../middleware/auth');
 const router = express.Router();
 router.use(requireAdmin);
 
+const VALID_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+const STATUS_TRANSITIONS = {
+  pending: ['confirmed', 'processing', 'shipped', 'cancelled'],
+  confirmed: ['processing', 'shipped', 'cancelled'],
+  processing: ['shipped', 'cancelled'],
+  shipped: ['delivered'],
+  delivered: [],
+  cancelled: [],
+};
+
+function canTransitionOrderStatus(current, next) {
+  if (current === next) return true;
+  const nextList = STATUS_TRANSITIONS[current] || [];
+  return nextList.includes(next);
+}
+
+async function getOrderDetail(orderNumber) {
+  return Order.findOne({ orderNumber })
+    .populate('user', 'phoneNumber profile.fullName email avatar')
+    .populate('items.product', 'name slug images price')
+    .lean();
+}
+
 /** GET / — danh sách tất cả đơn hàng (phân trang, lọc) */
 router.get('/', async (req, res) => {
   try {
@@ -46,10 +69,7 @@ router.get('/', async (req, res) => {
 /** GET /:orderNumber — chi tiết đơn hàng */
 router.get('/:orderNumber', async (req, res) => {
   try {
-    const order = await Order.findOne({ orderNumber: req.params.orderNumber })
-      .populate('user', 'phoneNumber profile.fullName email avatar')
-      .populate('items.product', 'name slug images price')
-      .lean();
+    const order = await getOrderDetail(req.params.orderNumber);
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
@@ -61,19 +81,111 @@ router.get('/:orderNumber', async (req, res) => {
 router.put('/:orderNumber/status', async (req, res) => {
   try {
     const { status } = req.body;
-    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
     }
 
-    const order = await Order.findOneAndUpdate(
-      { orderNumber: req.params.orderNumber },
-      { status },
-      { new: true }
-    ).lean();
-
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json(order);
+
+    if (!canTransitionOrderStatus(order.status, status)) {
+      return res.status(400).json({ error: `Cannot change status from "${order.status}" to "${status}"` });
+    }
+
+    if (status === 'shipped' && order.cancelRequest?.status === 'pending') {
+      return res.status(400).json({ error: 'Cannot ship order while cancellation request is pending' });
+    }
+
+    if (status === 'delivered' && order.returnRequest?.status === 'pending') {
+      return res.status(400).json({ error: 'Cannot complete order while return request is pending' });
+    }
+
+    order.status = status;
+    if (status === 'shipped' && !order.shippedAt) order.shippedAt = new Date();
+    if (status === 'delivered') {
+      if (!order.shippedAt) order.shippedAt = new Date();
+      order.deliveredAt = new Date();
+    }
+    if (status === 'cancelled') order.cancelledAt = new Date();
+
+    await order.save();
+
+    const updated = await getOrderDetail(req.params.orderNumber);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** PUT /:orderNumber/cancel-request — approve/reject cancellation request */
+router.put('/:orderNumber/cancel-request', async (req, res) => {
+  try {
+    const { action, note } = req.body || {};
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action. Must be "approve" or "reject"' });
+    }
+
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.cancelRequest?.status !== 'pending') {
+      return res.status(400).json({ error: 'No pending cancellation request for this order' });
+    }
+
+    const adminNote = typeof note === 'string' ? note.trim().slice(0, 300) : '';
+    const now = new Date();
+
+    if (action === 'approve') {
+      order.status = 'cancelled';
+      order.cancelledAt = now;
+      order.cancelRequest.status = 'approved';
+    } else {
+      order.cancelRequest.status = 'rejected';
+    }
+
+    order.cancelRequest.resolvedAt = now;
+    order.cancelRequest.resolvedBy = req.adminId;
+    order.cancelRequest.note = adminNote;
+    await order.save();
+
+    const updated = await getOrderDetail(req.params.orderNumber);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** PUT /:orderNumber/return-request — approve/reject return request */
+router.put('/:orderNumber/return-request', async (req, res) => {
+  try {
+    const { action, note } = req.body || {};
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action. Must be "approve" or "reject"' });
+    }
+
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.returnRequest?.status !== 'pending') {
+      return res.status(400).json({ error: 'No pending return request for this order' });
+    }
+
+    const adminNote = typeof note === 'string' ? note.trim().slice(0, 300) : '';
+    const now = new Date();
+
+    if (action === 'approve') {
+      order.status = 'cancelled';
+      order.cancelledAt = now;
+      order.returnRequest.status = 'approved';
+    } else {
+      order.returnRequest.status = 'rejected';
+    }
+
+    order.returnRequest.resolvedAt = now;
+    order.returnRequest.resolvedBy = req.adminId;
+    order.returnRequest.note = adminNote;
+    await order.save();
+
+    const updated = await getOrderDetail(req.params.orderNumber);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

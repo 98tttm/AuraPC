@@ -99,6 +99,12 @@
                 <a [routerLink]="item.route" (click)="setActiveMenu(item.id); closeProductsDropdown()">{{ item.label
                   }}</a>
               </li>
+              } @else if (item.id === 'news') {
+              <li class="nav-item nav-item--news"
+                (mouseenter)="openNewsDropdown(); onNavItemHover($event, item.id)"
+                (mouseleave)="closeNewsDropdown(); clearNavHover()">
+                <a [routerLink]="item.route" (click)="setActiveMenu(item.id); closeNewsDropdown()">{{ item.label }}</a>
+              </li>
               } @else {
               <li class="nav-item" (mouseenter)="onNavItemHover($event, item.id)" (mouseleave)="clearNavHover()">
                 <a [routerLink]="item.route" (click)="setActiveMenu(item.id)">{{ item.label }}</a>
@@ -249,7 +255,7 @@
       <div class="nav-overlay" (click)="closeMenu()" role="button" tabindex="0" aria-label="Đóng menu"></div>
       }
 
-      <!-- Megamenu dropdown: luôn có trong DOM để transition mượt, hiện/ẩn bằng class -->
+      <!-- Megamenu dropdown Sản phẩm -->
       @if (megamenuColumns().length) {
       <div class="megamenu" [class.megamenu--visible]="productsDropdownOpen()" (mouseenter)="openProductsDropdown()"
         (mouseleave)="closeProductsDropdown()" role="navigation" aria-label="Danh mục sản phẩm">
@@ -277,6 +283,31 @@
         </div>
       </div>
       }
+
+      <!-- Megamenu dropdown Bản tin: 5 danh mục, ảnh từ assets/cateblog -->
+      <div class="megamenu megamenu--news" [class.megamenu--visible]="newsDropdownOpen()"
+        (mouseenter)="openNewsDropdown()" (mouseleave)="closeNewsDropdown()" role="navigation" aria-label="Danh mục bản tin">
+        <div class="megamenu__inner">
+          @for (col of newsMegamenuColumns; track col.title) {
+          <div class="megamenu__column">
+            <a [routerLink]="['/blog']" [queryParams]="{ category: col.categoryId }"
+              (click)="closeNewsDropdown(); setActiveMenu('news')" class="megamenu__icon-link">
+              <img [src]="col.icon" [alt]="col.title" class="megamenu__icon" />
+            </a>
+            <a [routerLink]="['/blog']" [queryParams]="{ category: col.categoryId }"
+              (click)="closeNewsDropdown(); setActiveMenu('news')" class="megamenu__title-link">{{ col.title }}</a>
+            <ul class="megamenu__list">
+              @for (link of col.items; track link.label) {
+              <li>
+                <a [routerLink]="link.route" [queryParams]="link.queryParams ?? null"
+                  (click)="closeNewsDropdown(); setActiveMenu('news')" class="megamenu__link">{{ link.label }}</a>
+              </li>
+              }
+            </ul>
+          </div>
+          }
+        </div>
+      </div>
     </header>
   </div>
 </div>

@@ -77,6 +77,26 @@ export interface OrderListItem {
   items: { product?: { _id: string; name?: string; slug?: string; images?: ProductImage[] }; name: string; price: number; qty: number }[];
   shippingAddress?: Record<string, string>;
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentMethod?: 'cod' | 'qr' | 'momo' | 'zalopay' | 'atm';
+  isPaid?: boolean;
+  paidAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  cancelRequest?: {
+    status?: 'none' | 'pending' | 'approved' | 'rejected';
+    reason?: string;
+    requestedAt?: string;
+    resolvedAt?: string;
+    note?: string;
+  };
+  returnRequest?: {
+    status?: 'none' | 'pending' | 'approved' | 'rejected';
+    reason?: string;
+    requestedAt?: string;
+    resolvedAt?: string;
+    note?: string;
+  };
   total: number;
   shippingFee?: number;
   discount?: number;
@@ -109,6 +129,8 @@ export interface BlogPost {
   _id: string;
   title: string;
   slug: string;
+  /** Slug danh mục bài viết, ví dụ: 'huong-dan-thu-thuat', 'tin-tuc-cong-nghe' */
+  category?: string;
   excerpt?: string;
   content?: string;
   coverImage?: string;
@@ -329,6 +351,8 @@ export class ApiService {
     shippingAddress?: Record<string, string>;
     shippingFee?: number;
     discount?: number;
+    paymentMethod?: 'cod' | 'qr' | 'momo' | 'zalopay' | 'atm';
+    isPaid?: boolean;
     user?: string;
     requestInvoice?: boolean;
     invoiceEmail?: string;
@@ -365,8 +389,24 @@ export class ApiService {
     );
   }
 
-  getOrder(orderNumber: string): Observable<unknown> {
-    return this.http.get(`${BASE}/orders/${encodeURIComponent(orderNumber)}`);
+  getOrder(orderNumber: string): Observable<OrderListItem> {
+    return this.http.get<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}`);
+  }
+
+  requestOrderCancellation(orderNumber: string, reason?: string): Observable<OrderListItem> {
+    return this.http.post<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}/cancel-request`, {
+      reason: reason || '',
+    });
+  }
+
+  confirmOrderReceived(orderNumber: string): Observable<OrderListItem> {
+    return this.http.post<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}/confirm-received`, {});
+  }
+
+  requestOrderReturn(orderNumber: string, reason?: string): Observable<OrderListItem> {
+    return this.http.post<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}/return-request`, {
+      reason: reason || '',
+    });
   }
 
   /** Builder PC - lấy cấu hình theo id (ObjectId) hoặc shareId */

@@ -101,8 +101,28 @@ export interface Order {
   };
   status: string;
   total: number;
+  paymentMethod?: 'cod' | 'qr' | 'momo' | 'zalopay' | 'atm';
+  isPaid?: boolean;
+  paidAt?: string;
   shippingFee?: number;
   discount?: number;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  cancelRequest?: {
+    status?: 'none' | 'pending' | 'approved' | 'rejected';
+    reason?: string;
+    requestedAt?: string;
+    resolvedAt?: string;
+    note?: string;
+  };
+  returnRequest?: {
+    status?: 'none' | 'pending' | 'approved' | 'rejected';
+    reason?: string;
+    requestedAt?: string;
+    resolvedAt?: string;
+    note?: string;
+  };
   createdAt?: string;
 }
 
@@ -135,6 +155,24 @@ export interface UsersListResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface AdminNotification {
+  _id: string;
+  type: 'order_new' | 'order_cancel_request' | 'order_return_request';
+  order?: string;
+  orderNumber: string;
+  title: string;
+  message: string;
+  metadata?: Record<string, unknown>;
+  readBy?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminNotificationsResponse {
+  items: AdminNotification[];
+  unreadCount: number;
 }
 
 // === Dashboard interfaces ===
@@ -284,6 +322,14 @@ export class AdminApiService {
     return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/status`, { status });
   }
 
+  resolveCancelRequest(orderNumber: string, action: 'approve' | 'reject', note?: string): Observable<Order> {
+    return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/cancel-request`, { action, note });
+  }
+
+  resolveReturnRequest(orderNumber: string, action: 'approve' | 'reject', note?: string): Observable<Order> {
+    return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/return-request`, { action, note });
+  }
+
   // ======== Users ========
   getUsers(params?: { page?: number; limit?: number; search?: string }): Observable<UsersListResponse> {
     let p = new HttpParams();
@@ -295,5 +341,20 @@ export class AdminApiService {
 
   getUser(id: string): Observable<User> {
     return this.http.get<User>(`${BASE}/admin/users/${id}`);
+  }
+
+  // ======== Notifications ========
+  getNotifications(limit = 20, unreadOnly = false): Observable<AdminNotificationsResponse> {
+    return this.http.get<AdminNotificationsResponse>(`${BASE}/admin/notifications`, {
+      params: { limit: limit.toString(), unreadOnly: unreadOnly ? 'true' : 'false' },
+    });
+  }
+
+  markNotificationRead(id: string): Observable<AdminNotification> {
+    return this.http.patch<AdminNotification>(`${BASE}/admin/notifications/${id}/read`, {});
+  }
+
+  markAllNotificationsRead(): Observable<{ success: boolean; modifiedCount: number }> {
+    return this.http.patch<{ success: boolean; modifiedCount: number }>(`${BASE}/admin/notifications/read-all`, {});
   }
 }

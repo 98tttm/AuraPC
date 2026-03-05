@@ -120,6 +120,7 @@ export class HeaderComponent implements OnDestroy {
 
   readonly menuItems = [
     { id: 'products', label: 'SẢN PHẨM', route: '/san-pham' },
+    { id: 'news', label: 'BẢN TIN', route: '/blog' },
     { id: 'guide', label: 'HƯỚNG DẪN', route: '/' },
     { id: 'aura-builder', label: 'AURA BUILDER', route: '/aura-builder' },
     { id: 'aurahub', label: 'AURAHUB', route: '/aura-hub' },
@@ -140,6 +141,17 @@ export class HeaderComponent implements OnDestroy {
   megamenuColumns = signal<MegamenuColumn[]>([]);
   productsDropdownOpen = signal(false);
   private closeProductsTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Dropdown Bản tin: 5 danh mục blog, layout giống Sản phẩm */
+  readonly newsMegamenuColumns: MegamenuColumn[] = [
+    { icon: 'assets/cateblog/huongdan_thuthuat.png', title: 'Hướng dẫn - Thủ Thuật', categoryId: 'huong-dan-thu-thuat', items: [{ label: 'Xem bài viết', route: '/blog', queryParams: { category: 'huong-dan-thu-thuat' } }] },
+    { icon: 'assets/cateblog/reviewcongnghe.png', title: 'Review Công Nghệ', categoryId: 'review-cong-nghe', items: [{ label: 'Xem bài viết', route: '/blog', queryParams: { category: 'review-cong-nghe' } }] },
+    { icon: 'assets/cateblog/giaitrigame.png', title: 'Giải trí - Game', categoryId: 'giai-tri-game', items: [{ label: 'Xem bài viết', route: '/blog', queryParams: { category: 'giai-tri-game' } }] },
+    { icon: 'assets/cateblog/tintuc.png', title: 'Tin tức', categoryId: 'tin-tuc', items: [{ label: 'Xem bài viết', route: '/blog', queryParams: { category: 'tin-tuc' } }] },
+    { icon: 'assets/cateblog/tintuccongnghe.png', title: 'Tin tức công nghệ', categoryId: 'tin-tuc-cong-nghe', items: [{ label: 'Xem bài viết', route: '/blog', queryParams: { category: 'tin-tuc-cong-nghe' } }] },
+  ];
+  newsDropdownOpen = signal(false);
+  private closeNewsTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly partnerLinks: PartnerLink[] = [
     { img: 'assets/ba2a506d58ea6a7e6fa0192d6e841831806c3981.png', url: 'https://drop.com/home', alt: 'Drop' },
@@ -310,6 +322,18 @@ export class HeaderComponent implements OnDestroy {
 
   closeProductsDropdown(): void {
     this.closeProductsTimer = setTimeout(() => this.productsDropdownOpen.set(false), 120);
+  }
+
+  openNewsDropdown(): void {
+    if (this.closeNewsTimer) {
+      clearTimeout(this.closeNewsTimer);
+      this.closeNewsTimer = null;
+    }
+    this.newsDropdownOpen.set(true);
+  }
+
+  closeNewsDropdown(): void {
+    this.closeNewsTimer = setTimeout(() => this.newsDropdownOpen.set(false), 120);
   }
 
   // --- User Dropdown ---

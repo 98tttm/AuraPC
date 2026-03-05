@@ -7,6 +7,22 @@ const orderItemSchema = new mongoose.Schema({
   qty: { type: Number, required: true, min: 1 },
 });
 
+const requestStateSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'rejected'],
+      default: 'none',
+    },
+    reason: { type: String, default: '' },
+    requestedAt: { type: Date, default: null },
+    resolvedAt: { type: Date, default: null },
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+    note: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true },
@@ -37,6 +53,11 @@ const orderSchema = new mongoose.Schema(
     },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date, default: null },
+    shippedAt: { type: Date, default: null },
+    deliveredAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
+    cancelRequest: { type: requestStateSchema, default: () => ({}) },
+    returnRequest: { type: requestStateSchema, default: () => ({}) },
   },
   { timestamps: true }
 );
@@ -44,5 +65,7 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ 'cancelRequest.status': 1 });
+orderSchema.index({ 'returnRequest.status': 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

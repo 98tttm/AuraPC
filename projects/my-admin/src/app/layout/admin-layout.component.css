@@ -341,6 +341,122 @@
   line-height: 1;
 }
 
+.topbar__notif-wrap {
+  position: relative;
+}
+
+.topbar__notif-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 340px;
+  max-height: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 80;
+}
+
+.topbar__notif-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.topbar__notif-mark-all {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.topbar__notif-mark-all:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.topbar__notif-list {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.topbar__notif-empty {
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.topbar__notif-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+}
+
+.topbar__notif-item:last-child {
+  border-bottom: none;
+}
+
+.topbar__notif-item:hover {
+  background: var(--accent-light);
+}
+
+.topbar__notif-item--unread {
+  background: rgba(255, 109, 45, 0.08);
+}
+
+.topbar__notif-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.topbar__notif-type {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.topbar__notif-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.topbar__notif-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.topbar__notif-message {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+  line-height: 1.35;
+}
+
+.topbar__notif-order {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
 .topbar__avatar {
   width: 36px;
   height: 36px;
@@ -404,5 +520,10 @@
 
   .main-content {
     padding: 1rem;
+  }
+
+  .topbar__notif-menu {
+    width: 300px;
+    right: -48px;
   }
 }

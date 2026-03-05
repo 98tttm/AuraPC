@@ -96,6 +96,8 @@ export class CheckoutAtmPaymentComponent implements OnInit {
     this.api.createOrder({
       items: pending.items,
       shippingAddress: pending.shippingAddress,
+      paymentMethod: 'atm',
+      isPaid: true,
       user: userId ?? undefined,
     }).subscribe({
       next: (res) => {

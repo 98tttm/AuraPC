@@ -40,9 +40,7 @@
         @if (m.role === 'assistant') {
         <div class="aru-message aru-message--bot" [attr.data-idx]="$index">
           <img src="assets/Bot/AruBot.png" alt="AruBot" class="aru-msg-avatar" />
-          <div class="aru-message-bubble">
-            {{ m.content }}
-          </div>
+          <div class="aru-message-bubble" [innerHTML]="formatReply(m.content)"></div>
         </div>
         @if (m.products && m.products.length > 0) {
         <div class="aru-products">

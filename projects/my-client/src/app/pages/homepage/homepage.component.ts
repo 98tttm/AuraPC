@@ -253,7 +253,12 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     return url || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
   }
   productPrice(p: Product): number { return p.salePrice ?? p.price; }
-  blogCoverUrl(b: BlogPost): string { return b.coverImage || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png'; }
+
+  /** Ảnh bìa blog: chỉ dùng coverImage từ DB hoặc placeholder (đã bỏ lấy ảnh từ content để cấu hình lại). */
+  blogCoverUrl(b: BlogPost): string {
+    const cover = b?.coverImage?.trim();
+    return cover || 'assets/c8c67b26bfbd0df3a88be06bec886fd8bd006e7d.png';
+  }
 
   constructor(
     private ngZone: NgZone,
@@ -274,8 +279,16 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (list) => this.apiCategories.set(list),
       error: () => {},
     });
-    this.api.getBlogs(1, 6).subscribe({
-      next: (res) => this.apiBlogs.set(res.items || []),
+    this.api.getBlogs(1, 20).subscribe({
+      next: (res) => {
+        const items = Array.isArray(res.items) ? [...res.items] : [];
+        // Random 5 bài viết mỗi lần load trang
+        for (let i = items.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [items[i], items[j]] = [items[j], items[i]];
+        }
+        this.apiBlogs.set(items.slice(0, 5));
+      },
       error: () => {},
     });
   }

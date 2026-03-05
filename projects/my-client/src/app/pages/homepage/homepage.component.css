@@ -876,52 +876,182 @@ a.featured__card {
 
 .blog__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-.blog__card {
-  background: var(--bg-card);
-  border-radius: 0;
+/* Bento grid: mobile 1 cột, tablet 2 cột, desktop 3–4 cột với ô nổi bật */
+.blog__grid--bento {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .blog__grid--bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .blog__grid--bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .blog__grid--bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+a.blog__card {
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog__card--bento {
+  position: relative;
   overflow: hidden;
+  border-radius: 1.5rem;
+  background: radial-gradient(circle at top left, #1b1b2b, #05050a);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
-  transition: transform 0.4s;
+  isolation: isolate;
+  min-height: 220px;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-color 0.45s ease;
 }
 
-a.blog__card { text-decoration: none; color: inherit; }
-.blog__card:hover {
-  transform: translateY(-6px);
+/* Featured card: bài viết mới nhất, chiếm 2x2 trên desktop */
+@media (min-width: 1024px) {
+  .blog__card--featured {
+    grid-column: span 2;
+    grid-row: span 2;
+    min-height: 360px;
+  }
 }
 
-.blog__card-image {
-  width: 100%;
-  height: 260px;
-  background: linear-gradient(135deg, #111, #1a1a2e);
+@media (min-width: 1440px) {
+  .blog__card--featured {
+    grid-column: span 2;
+    grid-row: span 2;
+    min-height: 380px;
+  }
+}
+
+.blog__card-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   overflow: hidden;
 }
-.blog__card-image img {
+
+.blog__card-media-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: center;
+  filter: contrast(1.02) saturate(1.06);
+  image-rendering: -webkit-optimize-contrast;
+  transition: transform 0.6s ease, filter 0.6s ease;
 }
 
-.blog__card-body {
-  padding: 1.5rem;
+/* Linear gradient overlay giúp text luôn đọc được */
+.blog__card-gradient {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.96) 0%,
+    rgba(0, 0, 0, 0.78) 35%,
+    rgba(0, 0, 0, 0.45) 70%,
+    rgba(0, 0, 0, 0.0) 100%
+  );
+  z-index: 0;
 }
 
+.blog__card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 1.5rem 1.5rem 1.75rem;
+  height: 100%;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .blog__card-content {
+    padding: 1.75rem 1.75rem 2rem;
+  }
+}
+
+/* Glassmorphism tag floating */
 .blog__card-tag {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .blog__card-title {
   font-size: 1.1rem;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.5;
-  color: var(--text-primary);
+  color: #f9fafb;
+  text-wrap: balance;
+  max-width: 30ch;
+  transition: color 0.35s ease;
+}
+
+@media (min-width: 1024px) {
+  .blog__card-title {
+    font-size: 1.15rem;
+  }
+
+  .blog__card--featured .blog__card-title {
+    font-size: 1.35rem;
+    max-width: 34ch;
+  }
+}
+
+/* Hover interactions: zoom ảnh, glow viền, đổi màu tiêu đề */
+.blog__card--bento:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 109, 45, 0.4);
+}
+
+.blog__card--bento:hover .blog__card-media-img {
+  /* Giảm zoom để tránh phóng to ảnh nguồn thấp */
+  transform: scale(1.02);
+  filter: contrast(1.05) saturate(1.08);
+}
+
+.blog__card--bento:hover .blog__card-title {
+  color: var(--accent-orange);
 }
 
 /* ============================================

@@ -96,6 +96,8 @@ export class CheckoutZalopayPaymentComponent implements OnInit {
     this.api.createOrder({
       items: pending.items,
       shippingAddress: pending.shippingAddress,
+      paymentMethod: 'zalopay',
+      isPaid: true,
       user: userId ?? undefined,
     }).subscribe({
       next: (res) => {

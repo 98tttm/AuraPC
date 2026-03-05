@@ -1,15 +1,15 @@
 @if (loading()) {
   <div class="loading-container">
-    <div class="skeleton skeleton--title" style="width: 200px"></div>
-    <div class="skeleton skeleton--text" style="width: 120px; margin-top: 0.5rem"></div>
+    <div class="skeleton skeleton--title" style="width: 220px"></div>
+    <div class="skeleton skeleton--text" style="width: 160px; margin-top: 0.5rem"></div>
     <div class="detail-grid" style="margin-top: 1.5rem">
       <div class="card">
-        <div class="skeleton skeleton--text" style="width: 60%"></div>
-        <div class="skeleton skeleton--text" style="width: 40%; margin-top: 1rem"></div>
+        <div class="skeleton skeleton--text" style="width: 65%"></div>
+        <div class="skeleton skeleton--text" style="width: 50%; margin-top: 1rem"></div>
         <div class="skeleton skeleton--text" style="width: 80%; margin-top: 1rem"></div>
       </div>
       <div class="card">
-        <div class="skeleton skeleton--text" style="width: 60%"></div>
+        <div class="skeleton skeleton--text" style="width: 55%"></div>
         <div class="skeleton skeleton--text" style="width: 40%; margin-top: 1rem"></div>
       </div>
     </div>
@@ -17,142 +17,225 @@
 } @else if (error()) {
   <div class="alert-error">{{ error() }}</div>
 } @else if (order(); as o) {
-  <div class="page-header">
-    <div>
-      <a routerLink="/orders" class="back-link">&larr; Quay lại</a>
-      <h2>Đơn hàng #{{ o.orderNumber }}</h2>
-    </div>
-    <span class="badge" [class]="'badge--' + o.status" style="font-size: 0.85rem; padding: 0.35rem 1rem;">
-      {{ getStatusLabel(o.status) }}
-    </span>
-  </div>
-
-  <!-- Status Stepper -->
-  @if (o.status !== 'cancelled') {
-    <div class="stepper">
-      @for (step of stepperSteps; track step; let i = $index) {
-        <div class="stepper__step" [class.stepper__step--complete]="isStepComplete(step)" [class.stepper__step--current]="isStepCurrent(step)">
-          <div class="stepper__circle">
-            @if (isStepComplete(step) && !isStepCurrent(step)) {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            } @else {
-              {{ i + 1 }}
-            }
-          </div>
-          <span class="stepper__label">{{ getStatusLabel(step) }}</span>
-        </div>
-        @if (i < stepperSteps.length - 1) {
-          <div class="stepper__line" [class.stepper__line--complete]="isStepComplete(stepperSteps[i + 1])"></div>
-        }
-      }
-    </div>
-  } @else {
-    <div class="cancelled-banner">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
-        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-      </svg>
-      Đơn hàng đã bị huỷ
-    </div>
-  }
-
-  <div class="detail-grid">
-    <!-- Order Info -->
-    <div class="card">
-      <h3 class="card__title">Thông tin đơn hàng</h3>
-      <div class="info-row">
-        <span class="info-label">Ngày tạo</span>
-        <span>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+  <div class="order-detail">
+    <div class="page-header order-detail__header">
+      <div>
+        <a routerLink="/orders" class="back-link">&larr; Quay lại danh sách đơn hàng</a>
+        <h2>Đơn hàng #{{ o.orderNumber }}</h2>
+        <p>Khách hàng: {{ getCustomerName() }}</p>
       </div>
-      <div class="info-row">
-        <span class="info-label">Trạng thái</span>
-        <div class="status-update">
-          <select class="select" [(ngModel)]="newStatus">
-            @for (s of statuses; track s.value) {
-              <option [value]="s.value">{{ s.label }}</option>
-            }
-          </select>
-          <button class="btn btn--primary" (click)="updateStatus()" [disabled]="updating() || newStatus === o.status">
-            @if (updating()) { Đang cập nhật... } @else { Cập nhật }
+
+      <div class="order-detail__actions">
+        <span class="badge" [class]="'badge--' + o.status">{{ getStatusLabel(o.status) }}</span>
+        @if (isPendingOrder()) {
+          <button class="btn btn--success" (click)="approvePendingOrder()" [disabled]="updating() || processingRequest()">
+            @if (updating()) { Đang duyệt... } @else { Duyệt đơn hàng }
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (o.status !== 'cancelled') {
+      <div class="stepper">
+        @for (step of stepperSteps; track step; let i = $index) {
+          <div class="stepper__step" [class.stepper__step--complete]="isStepComplete(step)" [class.stepper__step--current]="isStepCurrent(step)">
+            <div class="stepper__circle">
+              @if (isStepComplete(step) && !isStepCurrent(step)) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              } @else {
+                {{ i + 1 }}
+              }
+            </div>
+            <span class="stepper__label">{{ getStatusLabel(step) }}</span>
+          </div>
+          @if (i < stepperSteps.length - 1) {
+            <div class="stepper__line" [class.stepper__line--complete]="isStepComplete(stepperSteps[i + 1])"></div>
+          }
+        }
+      </div>
+    } @else {
+      <div class="cancelled-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        Đơn hàng đã bị huỷ
+      </div>
+    }
+
+    <div class="quick-stats">
+      <div class="quick-stats__card">
+        <span class="quick-stats__label">Tổng tiền</span>
+        <span class="quick-stats__value">{{ o.total | number:'1.0-0' }}đ</span>
+      </div>
+      <div class="quick-stats__card">
+        <span class="quick-stats__label">Thanh toán</span>
+        <span class="quick-stats__value quick-stats__value--small">{{ getPaymentMethodLabel(o.paymentMethod) }}</span>
+      </div>
+      <div class="quick-stats__card">
+        <span class="quick-stats__label">Ngày tạo</span>
+        <span class="quick-stats__value quick-stats__value--small">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="quick-stats__card">
+        <span class="quick-stats__label">Sản phẩm</span>
+        <span class="quick-stats__value">{{ o.items.length || 0 }}</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <section class="card card--stretch">
+        <h3 class="card__title">Thông tin đơn hàng</h3>
+
+        <div class="info-row">
+          <span class="info-label">Trạng thái</span>
+          <div class="status-update">
+            <select class="select" [(ngModel)]="newStatus" [disabled]="updating() || processingRequest()">
+              @for (s of statuses; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+            <button class="btn btn--primary" (click)="updateStatus()" [disabled]="updating() || processingRequest() || newStatus === o.status">
+              @if (updating()) { Đang cập nhật... } @else { Cập nhật }
+            </button>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Đã thanh toán</span>
+          <span>{{ o.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán' }}</span>
+        </div>
+
+        @if (o.paidAt) {
+          <div class="info-row">
+            <span class="info-label">Thời gian thanh toán</span>
+            <span>{{ o.paidAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        }
+
+        @if (o.shippedAt) {
+          <div class="info-row">
+            <span class="info-label">Bắt đầu giao</span>
+            <span>{{ o.shippedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        }
+
+        @if (o.deliveredAt) {
+          <div class="info-row">
+            <span class="info-label">Khách đã nhận</span>
+            <span>{{ o.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        }
+      </section>
+
+      <section class="card card--stretch">
+        <h3 class="card__title">Thông tin khách hàng</h3>
+        <div class="info-row">
+          <span class="info-label">Họ tên</span>
+          <span>{{ getCustomerName() }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">SĐT</span>
+          <span>{{ getCustomerPhone() }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span>{{ getCustomerEmail() }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Địa chỉ</span>
+          <span>{{ getShippingAddress() }}</span>
+        </div>
+        @if (o.shippingAddress?.note) {
+          <div class="info-row">
+            <span class="info-label">Ghi chú</span>
+            <span>{{ o.shippingAddress?.note }}</span>
+          </div>
+        }
+      </section>
+    </div>
+
+    @if (hasPendingCancelRequest()) {
+      <div class="card request-card request-card--danger">
+        <div class="request-card__head">
+          <h3 class="card__title">Yêu cầu hủy đơn</h3>
+          <span class="badge badge--pending">Chờ xử lý</span>
+        </div>
+        <p class="request-card__reason">Lý do: {{ o.cancelRequest?.reason || 'Khách hàng không cung cấp' }}</p>
+        <div class="request-card__actions">
+          <button class="btn btn--danger" (click)="resolveCancelRequest('approve')" [disabled]="processingRequest() || updating()">
+            Duyệt hủy
+          </button>
+          <button class="btn btn--outline" (click)="resolveCancelRequest('reject')" [disabled]="processingRequest() || updating()">
+            Từ chối
           </button>
         </div>
       </div>
-    </div>
+    }
 
-    <!-- Customer Info -->
-    <div class="card">
-      <h3 class="card__title">Thông tin khách hàng</h3>
-      <div class="info-row">
-        <span class="info-label">Họ tên</span>
-        <span>{{ o.shippingAddress?.fullName || 'N/A' }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">SĐT</span>
-        <span>{{ o.shippingAddress?.phone || o.user?.phoneNumber || 'N/A' }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Email</span>
-        <span>{{ o.shippingAddress?.email || 'N/A' }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Địa chỉ</span>
-        <span>
-          {{ o.shippingAddress?.address }}
-          @if (o.shippingAddress?.ward) { , {{ o.shippingAddress?.ward }} }
-          @if (o.shippingAddress?.district) { , {{ o.shippingAddress?.district }} }
-          @if (o.shippingAddress?.city) { , {{ o.shippingAddress?.city }} }
-        </span>
-      </div>
-      @if (o.shippingAddress?.note) {
-        <div class="info-row">
-          <span class="info-label">Ghi chú</span>
-          <span>{{ o.shippingAddress?.note }}</span>
+    @if (hasPendingReturnRequest()) {
+      <div class="card request-card request-card--info">
+        <div class="request-card__head">
+          <h3 class="card__title">Yêu cầu hoàn trả</h3>
+          <span class="badge badge--pending">Chờ xử lý</span>
         </div>
-      }
-    </div>
-  </div>
+        <p class="request-card__reason">Lý do: {{ o.returnRequest?.reason || 'Khách hàng không cung cấp' }}</p>
+        <div class="request-card__actions">
+          <button class="btn btn--primary" (click)="resolveReturnRequest('approve')" [disabled]="processingRequest() || updating()">
+            Duyệt hoàn trả
+          </button>
+          <button class="btn btn--outline" (click)="resolveReturnRequest('reject')" [disabled]="processingRequest() || updating()">
+            Từ chối
+          </button>
+        </div>
+      </div>
+    }
 
-  <!-- Items -->
-  <div class="card" style="margin-top: 1.25rem">
-    <h3 class="card__title">Sản phẩm ({{ o.items?.length || 0 }})</h3>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Sản phẩm</th>
-          <th>Đơn giá</th>
-          <th>Số lượng</th>
-          <th>Thành tiền</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of o.items; track item._id) {
-          <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.price | number:'1.0-0' }}đ</td>
-            <td>{{ item.qty }}</td>
-            <td class="text-bold">{{ item.price * item.qty | number:'1.0-0' }}đ</td>
-          </tr>
+    <div class="card card--items">
+      <h3 class="card__title">Sản phẩm ({{ o.items.length || 0 }})</h3>
+
+      <div class="items-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Đơn giá</th>
+              <th>Số lượng</th>
+              <th>Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of o.items; track item._id) {
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price | number:'1.0-0' }}đ</td>
+                <td>{{ item.qty }}</td>
+                <td class="text-bold">{{ item.price * item.qty | number:'1.0-0' }}đ</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals">
+        @if (o.shippingFee && o.shippingFee > 0) {
+          <div class="totals__row">
+            <span>Phí vận chuyển</span>
+            <span>{{ o.shippingFee | number:'1.0-0' }}đ</span>
+          </div>
         }
-      </tbody>
-    </table>
-
-    <div class="totals">
-      @if (o.shippingFee) {
-        <div class="totals__row">
-          <span>Phí vận chuyển</span>
-          <span>{{ o.shippingFee | number:'1.0-0' }}đ</span>
+        @if (o.discount && o.discount > 0) {
+          <div class="totals__row">
+            <span>Giảm giá</span>
+            <span class="text-red">-{{ o.discount | number:'1.0-0' }}đ</span>
+          </div>
+        }
+        <div class="totals__row totals__row--total">
+          <span>Tổng cộng</span>
+          <span>{{ o.total | number:'1.0-0' }}đ</span>
         </div>
-      }
-      @if (o.discount) {
-        <div class="totals__row">
-          <span>Giảm giá</span>
-          <span class="text-red">-{{ o.discount | number:'1.0-0' }}đ</span>
-        </div>
-      }
-      <div class="totals__row totals__row--total">
-        <span>Tổng cộng</span>
-        <span>{{ o.total | number:'1.0-0' }}đ</span>
       </div>
     </div>
   </div>

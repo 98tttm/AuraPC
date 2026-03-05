@@ -482,6 +482,8 @@ export class CheckoutComponent implements OnInit {
     this.api.createOrder({
       items,
       shippingAddress,
+      paymentMethod: 'cod',
+      isPaid: false,
       user: userId ?? undefined,
       ...(requestInvoice && invoiceEmail ? { requestInvoice: true, invoiceEmail, invoiceType } : {}),
     }).subscribe({

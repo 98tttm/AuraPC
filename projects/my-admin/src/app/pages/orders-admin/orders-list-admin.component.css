@@ -131,6 +131,14 @@
 }
 .link:hover { text-decoration: underline; }
 
+.order-row {
+  cursor: pointer;
+}
+
+.order-row td {
+  transition: background-color 0.15s;
+}
+
 .loading {
   text-align: center;
   padding: 2rem;

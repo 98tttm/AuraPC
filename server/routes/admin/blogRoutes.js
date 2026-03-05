@@ -5,6 +5,38 @@ const { requireAdmin } = require('../../middleware/auth');
 const router = express.Router();
 router.use(requireAdmin);
 
+function extractCoverImageFromContent(html) {
+  if (!html || typeof html !== 'string') return '';
+
+  // Ưu tiên: tìm block nội dung chính (article__content / article-content / article-body)
+  const contentPatterns = [
+    /<div[^>]+class=["'][^"']*article__content[^"']*["'][^>]*>/i,
+    /<div[^>]+class=["'][^"']*article-content[^"']*["'][^>]*>/i,
+    /<div[^>]+class=["'][^"']*article-body[^"']*["'][^>]*>/i,
+    /<div[^>]+class=["'][^"']*content_style_list[^"']*["'][^>]*>/i,
+  ];
+
+  let searchHtml = html;
+  for (const re of contentPatterns) {
+    const m = html.match(re);
+    if (m) {
+      const idx = html.indexOf(m[0]);
+      if (idx >= 0) {
+        searchHtml = html.slice(idx);
+        break;
+      }
+    }
+  }
+
+  // Lấy ảnh <img> đầu tiên kể từ block nội dung trở xuống
+  const firstImg = searchHtml.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+  if (firstImg && firstImg[1]) {
+    return firstImg[1];
+  }
+
+  return '';
+}
+
 router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
@@ -31,7 +63,12 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const post = new Blog(req.body);
+    const body = { ...req.body };
+    if (!body.coverImage && body.content) {
+      const cover = extractCoverImageFromContent(body.content);
+      if (cover) body.coverImage = cover;
+    }
+    const post = new Blog(body);
     await post.save();
     res.status(201).json(post);
   } catch (err) {
@@ -41,7 +78,12 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const post = await Blog.findByIdAndUpdate(req.params.id, req.body, {
+    const body = { ...req.body };
+    if (!body.coverImage && body.content) {
+      const cover = extractCoverImageFromContent(body.content);
+      if (cover) body.coverImage = cover;
+    }
+    const post = await Blog.findByIdAndUpdate(req.params.id, body, {
       new: true,
       runValidators: true,
     });
@@ -49,6 +91,28 @@ router.put('/:id', async (req, res) => {
     res.json(post);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/backfill-covers', async (req, res) => {
+  try {
+    const posts = await Blog.find({}).lean();
+    let updated = 0;
+
+    for (const doc of posts) {
+      const html = doc.content || '';
+      const current = (doc.coverImage || '').trim();
+      const extracted = extractCoverImageFromContent(html);
+
+      if (extracted && extracted !== current) {
+        await Blog.updateOne({ _id: doc._id }, { $set: { coverImage: extracted } });
+        updated += 1;
+      }
+    }
+
+    res.json({ updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

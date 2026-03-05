@@ -1,5 +1,4 @@
 <div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar__header">
       <img
@@ -58,7 +57,6 @@
       </a>
     </nav>
 
-    <!-- Admin user info at bottom -->
     <div class="sidebar__footer">
       <div class="sidebar__user">
         <div class="sidebar__user-avatar">
@@ -72,9 +70,7 @@
     </div>
   </aside>
 
-  <!-- Main content -->
   <div class="main-wrapper">
-    <!-- Top bar -->
     <header class="topbar">
       <div class="topbar__left">
         <button class="topbar__menu-btn" (click)="toggleSidebar()" title="Toggle sidebar">
@@ -104,7 +100,6 @@
           Thêm sản phẩm
         </a>
 
-        <!-- Theme toggle -->
         <button class="topbar__icon-btn" (click)="toggleTheme()" [title]="themeService.theme() === 'light' ? 'Chế độ tối' : 'Chế độ sáng'">
           @if (themeService.theme() === 'light') {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
@@ -113,31 +108,74 @@
           } @else {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
               <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
             </svg>
           }
         </button>
 
-        <!-- Notifications -->
-        <button class="topbar__icon-btn topbar__notif-btn" title="Thông báo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span class="topbar__notif-badge">3</span>
-        </button>
+        <div class="topbar__notif-wrap">
+          <button #notifButton class="topbar__icon-btn topbar__notif-btn" title="Thông báo" (click)="toggleNotifications($event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            @if (unreadCount() > 0) {
+              <span class="topbar__notif-badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
+            }
+          </button>
 
-        <!-- User avatar -->
+          @if (notifOpen()) {
+            <div #notifMenu class="topbar__notif-menu" (click)="$event.stopPropagation()">
+              <div class="topbar__notif-menu-header">
+                <span>Thông báo</span>
+                @if (unreadCount() > 0) {
+                  <button type="button" class="topbar__notif-mark-all" (click)="markAllNotificationsRead()">
+                    Đánh dấu đã đọc
+                  </button>
+                }
+              </div>
+
+              @if (notifLoading()) {
+                <div class="topbar__notif-empty">Đang tải...</div>
+              } @else if (notifications().length === 0) {
+                <div class="topbar__notif-empty">Chưa có thông báo nào</div>
+              } @else {
+                <div class="topbar__notif-list">
+                  @for (item of notifications(); track item._id) {
+                    <button
+                      type="button"
+                      class="topbar__notif-item"
+                      [class.topbar__notif-item--unread]="isNotificationUnread(item)"
+                      (click)="openNotification(item)"
+                    >
+                      <div class="topbar__notif-item-head">
+                        <span class="topbar__notif-type">{{ notificationTypeLabel(item.type) }}</span>
+                        <span class="topbar__notif-time">{{ notificationTimeAgo(item.createdAt) }}</span>
+                      </div>
+                      <div class="topbar__notif-title">{{ item.title }}</div>
+                      <div class="topbar__notif-message">{{ item.message }}</div>
+                      <div class="topbar__notif-order">#{{ item.orderNumber }}</div>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
         <div class="topbar__avatar" (click)="logout()" title="Đăng xuất">
           {{ (admin()?.name || 'A').charAt(0).toUpperCase() }}
         </div>
       </div>
     </header>
 
-    <!-- Page content -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>

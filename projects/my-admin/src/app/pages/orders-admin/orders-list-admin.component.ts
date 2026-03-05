@@ -1,5 +1,5 @@
 import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
@@ -17,6 +17,7 @@ import { ORDER_STATUS_LABELS } from '../../core/constants';
 })
 export class OrdersListAdminComponent implements OnInit {
   private api = inject(AdminApiService);
+  private router = inject(Router);
 
   orders = signal<Order[]>([]);
   total = signal(0);
@@ -176,6 +177,10 @@ export class OrdersListAdminComponent implements OnInit {
   goToPage(p: number): void {
     this.page = p;
     this.loadOrders();
+  }
+
+  openOrderDetail(orderNumber: string): void {
+    this.router.navigate(['/orders', orderNumber]);
   }
 
   get totalPages(): number {

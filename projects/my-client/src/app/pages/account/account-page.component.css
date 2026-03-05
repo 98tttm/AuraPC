@@ -1112,6 +1112,16 @@ a.account__nav-link {
   transition: all 0.2s;
 }
 
+.account__order-card-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.account__order-card-wait {
+  font-size: 0.8rem;
+  color: #666;
+}
+
 .account__order-card-btn--cancel {
   background: transparent;
   border: 1px solid #ef4444;
