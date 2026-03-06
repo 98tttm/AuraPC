@@ -40,6 +40,8 @@ const PORT = process.env.PORT || 3000;
 // CORS: cho phép origin Vercel và localhost để tránh status 0 khi POST từ frontend deploy
 const allowedOrigins = [
   'https://aura-pc-client.vercel.app',
+  'https://aura-pc-admin.vercel.app',
+  'https://aurapc-admin.vercel.app',
   'http://localhost:4200',
   'http://localhost:4201',
   'http://localhost:3000',
@@ -50,9 +52,17 @@ if (process.env.FRONTEND_URL) {
     if (!allowedOrigins.includes(u.origin)) allowedOrigins.push(u.origin);
   } catch (_) { }
 }
+if (process.env.ADMIN_URL) {
+  try {
+    const u = new URL(process.env.ADMIN_URL);
+    if (!allowedOrigins.includes(u.origin)) allowedOrigins.push(u.origin);
+  } catch (_) { }
+}
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (origin.endsWith('.vercel.app')) return cb(null, true);
     return cb(null, false);
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
