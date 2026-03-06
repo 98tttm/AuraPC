@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build -- my-client --configuration=production && node scripts/copy-vercel-output.cjs",
-  "outputDirectory": "dist/my-client",
+  "buildCommand": "node scripts/vercel-build.cjs",
+  "outputDirectory": "dist/vercel-output",
   "framework": null,
   "installCommand": "npm install",
   "rewrites": [
