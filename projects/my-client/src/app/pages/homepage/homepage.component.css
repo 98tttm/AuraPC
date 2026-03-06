@@ -19,6 +19,11 @@
   text-align: left;
 }
 
+.section-title--blog {
+  font-family: 'UTM Nokia', var(--font-heading);
+  text-align: center;
+}
+
 /* ============================================
    INTRO: Logo + universe background + loading bar
    ============================================ */
@@ -114,6 +119,12 @@
   animation: barOut 0.6s ease forwards;
 }
 
+/* Main content sits above fixed background video */
+.main-reveal {
+  position: relative;
+  z-index: 1;
+}
+
 
 @keyframes introOut {
   0% { opacity: 1; }
@@ -153,6 +164,7 @@
    ============================================ */
 .hero {
   position: relative;
+  z-index: 2;
   height: 100vh;
   min-height: 700px;
   overflow: hidden;
@@ -565,9 +577,35 @@
    ============================================ */
 .icon-strip {
   position: relative;
+  z-index: 2;
   background: #000000;
   padding: 2.5rem 0;
   overflow: hidden;
+}
+
+/* Scroll-synced video background for sections 3–6 */
+.scroll-video-zone {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+.scroll-video-zone > section {
+  position: relative;
+  z-index: 1;
+}
+
+.scroll-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  background: #000;
+  pointer-events: none;
+  opacity: 1;
+  z-index: 0;
 }
 
 .icon-strip__video {
@@ -742,11 +780,15 @@ a.featured__card {
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
+  position: relative;
+  aspect-ratio: 4 / 3;
 }
 .featured__banner img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  display: block;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.5s ease;
 }
 .featured__banner:hover img {
@@ -857,8 +899,8 @@ a.featured__card {
 
 .blog__header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 3rem;
 }
 
@@ -1431,7 +1473,7 @@ a.blog__card {
 
   .blog__header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
   }
 

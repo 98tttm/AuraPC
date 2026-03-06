@@ -353,7 +353,7 @@ import { ApiService, BlogPost, Product } from '../../core/services/api.service';
     .article__tag {
       display: inline-block;
       padding: 4px 12px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      background: #000000;
       color: #ffffff;
       font-size: 0.75rem;
       font-weight: 600;
@@ -431,8 +431,9 @@ import { ApiService, BlogPost, Product } from '../../core/services/api.service';
       display: inline-block;
       margin-top: 2rem;
       font-size: 0.9rem;
-      color: #2563eb;
+      color: #ff6d2d;
       text-decoration: none;
+      font-weight: 600;
     }
     .back-link:hover {
       text-decoration: underline;
@@ -445,7 +446,7 @@ import { ApiService, BlogPost, Product } from '../../core/services/api.service';
       text-decoration: none;
     }
     .btn--primary {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      background: #ff6d2d;
       color: #ffffff;
     }
   `]

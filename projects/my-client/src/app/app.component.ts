@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
@@ -35,7 +35,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     }
   `],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   hideFooter = toSignal(
     this.router.events.pipe(
       startWith(null),
@@ -44,5 +44,38 @@ export class AppComponent {
     { initialValue: false }
   );
 
+  private scrollObserver: IntersectionObserver | null = null;
+  private mutationObs: MutationObserver | null = null;
+  private observedEls = new WeakSet<Element>();
+
   constructor(private router: Router) { }
+
+  ngOnInit(): void {
+    this.initScrollAnimations();
+  }
+
+  ngOnDestroy(): void {
+    this.scrollObserver?.disconnect();
+    this.mutationObs?.disconnect();
+  }
+
+  private initScrollAnimations(): void {
+    this.scrollObserver = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
+    );
+    this.observeNewFadeElements();
+    this.mutationObs = new MutationObserver(() => this.observeNewFadeElements());
+    this.mutationObs.observe(document.body, { childList: true, subtree: true });
+  }
+
+  private observeNewFadeElements(): void {
+    if (!this.scrollObserver) return;
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in').forEach((el) => {
+      if (!this.observedEls.has(el)) {
+        this.observedEls.add(el);
+        this.scrollObserver!.observe(el);
+      }
+    });
+  }
 }

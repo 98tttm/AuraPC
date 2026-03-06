@@ -148,7 +148,7 @@ const CATEGORY_LABELS: Record<string, string> = {
                             {{ cleanExcerpt(post.excerpt) }}
                           </p>
                         }
-                        <span class="post-more">Xem thêm →</span>
+                        <span class="post-more">Xem thêm ></span>
                       </div>
                     </a>
                   </article>
@@ -510,13 +510,13 @@ const CATEGORY_LABELS: Record<string, string> = {
     .post-more {
       margin-top: 0.35rem;
       font-size: 0.82rem;
-      color: #2563eb;
+      color: #ff6d2d;
       font-weight: 600;
     }
     .post-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-      border-color: rgba(37, 99, 235, 0.9);
+      border-color: rgba(255, 109, 45, 0.9);
     }
   `]
 })

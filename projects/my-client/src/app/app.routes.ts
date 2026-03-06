@@ -64,5 +64,10 @@ export const routes: Routes = [
     path: 'aura-hub/:postId',
     loadComponent: () => import('./pages/aura-hub/aura-hub.component').then(m => m.AuraHubComponent),
   },
+  {
+    path: 'collabs/minecraft',
+    loadComponent: () =>
+      import('./pages/collabs-minecraft/collabs-minecraft.component').then((m) => m.CollabsMinecraftComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -105,7 +105,6 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   private controls!: OrbitControls;
   private animationId = 0;
   private model: THREE.Object3D | null = null;
-  private observer: IntersectionObserver | null = null;
   private isBrowser: boolean;
   private particles: THREE.Points | null = null;
   private clock = new THREE.Clock();
@@ -301,7 +300,6 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.initThreeJS();
-    this.initScrollAnimations();
   }
 
   /* ============================== THREE.JS ============================== */
@@ -348,6 +346,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('resize', this.onResize);
     this.ngZone.runOutsideAngular(() => this.animate());
   }
+
 
   private setupLights(): void {
     this.scene.add(new THREE.AmbientLight(0xe0e4f0, 1.0));
@@ -687,31 +686,6 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.setSize(c.clientWidth, c.clientHeight);
   };
 
-  private mutationObs: MutationObserver | null = null;
-  private observedEls = new WeakSet<Element>();
-
-  private initScrollAnimations(): void {
-    this.observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
-    );
-    this.observeNewFadeElements();
-
-    this.mutationObs = new MutationObserver(() => this.observeNewFadeElements());
-    this.mutationObs.observe(document.body, { childList: true, subtree: true });
-  }
-
-  private observeNewFadeElements(): void {
-    if (!this.observer) return;
-    const els = document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in');
-    els.forEach(el => {
-      if (!this.observedEls.has(el)) {
-        this.observedEls.add(el);
-        this.observer!.observe(el);
-      }
-    });
-  }
-
   /** Sau khi 2 dòng header gõ xong (~2.1s), đợi 2s rồi đổi sang bộ chữ kia; xong lại đợi 2s rồi đổi lại – lặp mãi */
   private startHeaderCycle(): void {
     if (!this.isBrowser) return;
@@ -733,8 +707,6 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.headerCycleIntervalId != null) clearInterval(this.headerCycleIntervalId);
     if (this.animationId) cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.onResize);
-    this.observer?.disconnect();
-    this.mutationObs?.disconnect();
     this.renderer?.dispose();
     this.controls?.dispose();
   }

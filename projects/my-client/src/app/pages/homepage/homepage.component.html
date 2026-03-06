@@ -146,8 +146,11 @@
   </section>
 
   <!-- ============================================
-     SECTION 3: FEATURED PRODUCTS
+     SECTION 3: FEATURED PRODUCTS + BACKGROUND VIDEO START
      ============================================ -->
+  <div class="scroll-video-zone">
+    <video class="scroll-video" autoplay muted loop playsinline src="assets/video/universe.mp4"></video>
+
   <section class="featured">
     <div class="container">
       @if (featuredProducts().length > 0) {
@@ -168,11 +171,11 @@
       </div>
       } @else {
       <div class="featured__static">
-        <a routerLink="/san-pham" class="featured__banner fade-in-left">
-          <img src="assets/images/feat-sabre.jpg" alt="SABRE v2 PRO CF" />
+        <a routerLink="/collabs/minecraft" class="featured__banner fade-in-left">
+          <img src="assets/thumbnail/minecraft.png" alt="Minecraft Collection" />
         </a>
         <a routerLink="/san-pham" class="featured__banner fade-in-right">
-          <img src="assets/images/feat-vengeance.jpg" alt="VENGEANCE a7500" />
+          <img src="https://cdn.hstatic.net/products/200000837185/z7049726315218_d0bebb98d1012105fcdb43e541a93628_828e23027d604fbd82160758a63c353c.jpg" alt="VENGEANCE a7500" />
         </a>
       </div>
       }
@@ -248,8 +251,7 @@
   <section class="blog">
     <div class="container">
       <div class="blog__header fade-in">
-        <h2 class="section-title section-title--left">HƯỚNG DẪN &amp; MẸO HAY</h2>
-        <a routerLink="/blog" class="blog__explore">Khám phá ngay &rarr;</a>
+        <h2 class="section-title section-title--blog">BẢN TIN CÔNG NGHỆ</h2>
       </div>
       <div class="blog__grid blog__grid--bento stagger-children">
         @for (post of apiBlogs(); track post._id; let i = $index) {
@@ -291,6 +293,8 @@
       </div>
     </div>
   </section>
+
+  </div> <!-- end .scroll-video-zone -->
 
   <!-- ============================================
      SECTION 7: AURA HUB + DEALS
