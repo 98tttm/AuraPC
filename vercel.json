@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build -- my-client --configuration=production && cp -r dist/my-client/browser/* dist/my-client/ && rm -rf dist/my-client/browser",
+  "buildCommand": "npm run build -- my-client --configuration=production && node scripts/copy-vercel-output.cjs",
   "outputDirectory": "dist/my-client",
   "framework": null,
   "installCommand": "npm install",
