@@ -70,12 +70,11 @@ export class OrdersListAdminComponent implements OnInit {
   // Status filter pills
   statusOptions = [
     { value: '', label: 'Tất cả' },
-    { value: 'pending', label: 'Chờ xử lý' },
-    { value: 'confirmed', label: 'Đã xác nhận' },
-    { value: 'processing', label: 'Đang xử lý' },
-    { value: 'shipped', label: 'Đang giao' },
-    { value: 'delivered', label: 'Hoàn thành' },
-    { value: 'cancelled', label: 'Đã huỷ' },
+    { value: 'pending', label: ORDER_STATUS_LABELS['pending'] },
+    { value: 'processing', label: ORDER_STATUS_LABELS['processing'] },
+    { value: 'shipped', label: ORDER_STATUS_LABELS['shipped'] },
+    { value: 'delivered', label: ORDER_STATUS_LABELS['delivered'] },
+    { value: 'cancelled', label: ORDER_STATUS_LABELS['cancelled'] },
   ];
 
   ngOnInit(): void {
@@ -121,11 +120,10 @@ export class OrdersListAdminComponent implements OnInit {
         this.ordersByStatus.set(stats.ordersByStatus || {});
 
         const statusMap = stats.ordersByStatus || {};
-        const labels = ['Hoàn thành', 'Đang giao', 'Đang xử lý', 'Chờ xử lý', 'Đã huỷ'];
         const keys = ['delivered', 'shipped', 'processing', 'pending', 'cancelled'];
         const colors = ['#16a34a', '#0d9488', '#7c3aed', '#eab308', '#dc2626'];
         this.statusChartData.set({
-          labels,
+          labels: keys.map((key) => this.getStatusLabel(key)),
           datasets: [{ data: keys.map(k => statusMap[k] || 0), backgroundColor: colors, borderRadius: 4, barThickness: 18 }],
         });
       },

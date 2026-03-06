@@ -27,7 +27,7 @@
 
       <div class="order-detail__actions">
         <span class="badge" [class]="'badge--' + o.status">{{ getStatusLabel(o.status) }}</span>
-        @if (isPendingOrder()) {
+        @if (canApproveOrder()) {
           <button class="btn btn--success" (click)="approvePendingOrder()" [disabled]="updating() || processingRequest()">
             @if (updating()) { Đang duyệt... } @else { Duyệt đơn hàng }
           </button>
@@ -91,15 +91,25 @@
 
         <div class="info-row">
           <span class="info-label">Trạng thái</span>
-          <div class="status-update">
-            <select class="select" [(ngModel)]="newStatus" [disabled]="updating() || processingRequest()">
-              @for (s of statuses; track s.value) {
-                <option [value]="s.value">{{ s.label }}</option>
-              }
-            </select>
-            <button class="btn btn--primary" (click)="updateStatus()" [disabled]="updating() || processingRequest() || newStatus === o.status">
-              @if (updating()) { Đang cập nhật... } @else { Cập nhật }
-            </button>
+          <div class="status-panel">
+            @if (canUpdateStatus()) {
+              <div class="status-update">
+                <select class="select" [(ngModel)]="newStatus" [disabled]="updating() || processingRequest() || hasPendingCancelRequest()">
+                  @for (s of statuses(); track s.value) {
+                    <option [value]="s.value">{{ s.label }}</option>
+                  }
+                </select>
+                <button class="btn btn--primary" (click)="updateStatus()" [disabled]="updating() || processingRequest() || hasPendingCancelRequest() || newStatus === o.status">
+                  @if (updating()) { Đang cập nhật... } @else { Cập nhật }
+                </button>
+              </div>
+            } @else {
+              <span class="status-static">{{ getStatusLabel(o.status) }}</span>
+            }
+
+            @if (getStatusHint()) {
+              <p class="status-hint">{{ getStatusHint() }}</p>
+            }
           </div>
         </div>
 

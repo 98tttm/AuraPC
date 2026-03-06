@@ -1,16 +1,16 @@
 ﻿@if (user(); as u) {
 <div class="account">
   <nav class="account__breadcrumb">
-    <a routerLink="/">Trang chá»§</a>
+    <a routerLink="/">Trang chủ</a>
     <span class="account__breadcrumb-sep">/</span>
-    <a routerLink="/tai-khoan">CÃ¡ nhÃ¢n</a>
+    <a routerLink="/tai-khoan">Cá nhân</a>
     <span class="account__breadcrumb-sep">/</span>
     <span class="account__breadcrumb-current">
       @switch (activeTab()) {
-      @case ('profile') { ThÃ´ng tin cÃ¡ nhÃ¢n }
-      @case ('orders') { ÄÆ¡n hÃ ng cá»§a tÃ´i }
-      @case ('address') { Sá»• Ä‘á»‹a chá»‰ }
-      @case ('hub') { Hoáº¡t Ä‘á»™ng AuraHub }
+      @case ('profile') { Thông tin cá nhân }
+      @case ('orders') { Đơn hàng của tôi }
+      @case ('address') { Sổ địa chỉ }
+      @case ('hub') { Hoạt động AuraHub }
       }
     </span>
   </nav>
@@ -29,7 +29,7 @@
           </div>
           <div class="account__hub-stat" (click)="openFollowsModal('following')" style="cursor: pointer;">
             <span class="account__hub-stat-number">{{ followingCount() }}</span>
-            <span class="account__hub-stat-label">Äang theo dÃµi</span>
+            <span class="account__hub-stat-label">Đang theo dõi</span>
           </div>
         </div>
       </div>
@@ -37,31 +37,31 @@
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'profile'">
           <a routerLink="/tai-khoan" [queryParams]="{ tab: 'profile' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--user"></span>
-            <span>ThÃ´ng tin cÃ¡ nhÃ¢n</span>
+            <span>Thông tin cá nhân</span>
           </a>
         </li>
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'orders'">
           <a routerLink="/tai-khoan" [queryParams]="{ tab: 'orders' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--order"></span>
-            <span>ÄÆ¡n hÃ ng cá»§a tÃ´i</span>
+            <span>Đơn hàng của tôi</span>
           </a>
         </li>
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'address'">
           <a routerLink="/tai-khoan" [queryParams]="{ tab: 'address' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--address"></span>
-            <span>Quáº£n lÃ½ sá»• Ä‘á»‹a chá»‰</span>
+            <span>Quản lý sổ địa chỉ</span>
           </a>
         </li>
         <li class="account__nav-item" [class.account__nav-item--active]="activeTab() === 'hub'">
           <a routerLink="/tai-khoan" [queryParams]="{ tab: 'hub' }" class="account__nav-link">
             <span class="account__nav-icon account__nav-icon--hub"></span>
-            <span>Hoáº¡t Ä‘á»™ng AuraHub</span>
+            <span>Hoạt động AuraHub</span>
           </a>
         </li>
         <li class="account__nav-item">
           <button type="button" class="account__nav-link account__nav-link--logout" (click)="openLogoutConfirm()">
             <span class="account__nav-icon account__nav-icon--logout"></span>
-            <span>ÄÄƒng xuáº¥t</span>
+            <span>Đăng xuất</span>
           </button>
         </li>
       </ul>
@@ -71,13 +71,13 @@
       <!-- Profile Tab -->
       @if (activeTab() === 'profile') {
       <div class="account__card">
-        <h1 class="account__title">ThÃ´ng tin cÃ¡ nhÃ¢n</h1>
+        <h1 class="account__title">Thông tin cá nhân</h1>
 
         <div class="account__avatar-main">
           <div class="account__avatar-wrapper">
             <img [src]="getAvatarUrl(u.avatar)" alt="" class="account__avatar-img" />
             @if (editMode()) {
-            <label class="account__avatar-upload-btn" title="Äá»•i áº£nh Ä‘áº¡i diá»‡n">
+            <label class="account__avatar-upload-btn" title="Đổi ảnh đại diện">
               <input type="file" hidden (change)="onFileSelected($event)" accept="image/*">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -92,65 +92,65 @@
         <!-- Edit Mode -->
         <div class="account__edit-form">
           <div class="account__form-group">
-            <label>Há» vÃ  tÃªn</label>
-            <input type="text" [(ngModel)]="editName" placeholder="Nháº­p há» vÃ  tÃªn" />
+            <label>Họ và tên</label>
+            <input type="text" [(ngModel)]="editName" placeholder="Nhập họ và tên" />
           </div>
           <div class="account__form-group">
-            <label>Sá»‘ Ä‘iá»‡n thoáº¡i</label>
+            <label>Số điện thoại</label>
             <input type="text" [value]="displayPhone()" readonly class="input--readonly" />
           </div>
           <div class="account__form-group">
-            <label>Giá»›i tÃ­nh</label>
+            <label>Giới tính</label>
             <select [(ngModel)]="editGender">
-              <option value="">Chá»n giá»›i tÃ­nh</option>
+              <option value="">Chọn giới tính</option>
               <option value="male">Nam</option>
-              <option value="female">Ná»¯</option>
-              <option value="other">KhÃ¡c</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
             </select>
           </div>
           <div class="account__form-group">
-            <label>NgÃ y sinh</label>
+            <label>Ngày sinh</label>
             <input type="date" [(ngModel)]="editDob" />
           </div>
           <!-- Removed URL input as requested -->
           <div class="account__form-actions">
-            <button type="button" class="account__save-btn" (click)="saveProfile()">LÆ°u thay Ä‘á»•i</button>
-            <button type="button" class="account__cancel-btn" (click)="cancelEdit()">Há»§y</button>
+            <button type="button" class="account__save-btn" (click)="saveProfile()">Lưu thay đổi</button>
+            <button type="button" class="account__cancel-btn" (click)="cancelEdit()">Hủy</button>
           </div>
         </div>
         } @else {
         <!-- View Mode -->
         <dl class="account__fields">
           <div class="account__field">
-            <dt>Há» vÃ  tÃªn</dt>
+            <dt>Họ và tên</dt>
             <dd>{{ displayName() }}</dd>
           </div>
           <div class="account__field">
-            <dt>Sá»‘ Ä‘iá»‡n thoáº¡i</dt>
+            <dt>Số điện thoại</dt>
             <dd>{{ displayPhone() }}</dd>
           </div>
           <div class="account__field">
-            <dt>Giá»›i tÃ­nh</dt>
+            <dt>Giới tính</dt>
             <dd>
               @if (displayGender(); as gender) {
               {{ gender }}
               } @else {
-              <span class="account__add-info">ChÆ°a cáº­p nháº­t</span>
+              <span class="account__add-info">Chưa cập nhật</span>
               }
             </dd>
           </div>
           <div class="account__field">
-            <dt>NgÃ y sinh</dt>
+            <dt>Ngày sinh</dt>
             <dd>
               @if (displayDob(); as dob) {
               {{ formatDate(dob) }}
               } @else {
-              <a href="#" class="account__add-link" (click)="$event.preventDefault(); startEdit()">ThÃªm thÃ´ng tin</a>
+              <a href="#" class="account__add-link" (click)="$event.preventDefault(); startEdit()">Thêm thông tin</a>
               }
             </dd>
           </div>
         </dl>
-        <button type="button" class="account__edit-btn" (click)="startEdit()">Chá»‰nh sá»­a thÃ´ng tin</button>
+        <button type="button" class="account__edit-btn" (click)="startEdit()">Chỉnh sửa thông tin</button>
         }
       </div>
       }
@@ -159,10 +159,10 @@
       @if (activeTab() === 'orders') {
       <div class="account__card account__card--orders">
         <div class="account__orders-header">
-          <h1 class="account__title">ÄÆ¡n hÃ ng cá»§a tÃ´i</h1>
+          <h1 class="account__title">Đơn hàng của tôi</h1>
           <div class="account__orders-search">
             <input type="text" class="account__search-input"
-              placeholder="TÃ¬m theo tÃªn Ä‘Æ¡n, mÃ£ Ä‘Æ¡n, hoáº·c tÃªn sáº£n pháº©m..." [value]="orderSearch()"
+              placeholder="Tìm theo tên đơn, mã đơn, hoặc tên sản phẩm..." [value]="orderSearch()"
               (input)="orderSearch.set($any($event.target).value)" />
             <span class="account__search-icon" aria-hidden="true">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -174,26 +174,26 @@
         </div>
         <nav class="account__order-tabs">
           <button type="button" class="account__order-tab"
-            [class.account__order-tab--active]="orderStatusTab() === 'all'" (click)="setOrderStatusTab('all')">Táº¥t
-            cáº£</button>
+            [class.account__order-tab--active]="orderStatusTab() === 'all'" (click)="setOrderStatusTab('all')">Tất
+            cả</button>
           <button type="button" class="account__order-tab"
             [class.account__order-tab--active]="orderStatusTab() === 'processing'"
-            (click)="setOrderStatusTab('processing')">Äang xá»­ lÃ½</button>
+            (click)="setOrderStatusTab('processing')">Đang xử lý</button>
           <button type="button" class="account__order-tab"
             [class.account__order-tab--active]="orderStatusTab() === 'shipped'"
-            (click)="setOrderStatusTab('shipped')">Äang giao</button>
+            (click)="setOrderStatusTab('shipped')">Đang giao</button>
           <button type="button" class="account__order-tab"
             [class.account__order-tab--active]="orderStatusTab() === 'delivered'"
-            (click)="setOrderStatusTab('delivered')">ÄÃ£ giao</button>
+            (click)="setOrderStatusTab('delivered')">Đã giao</button>
           <button type="button" class="account__order-tab"
             [class.account__order-tab--active]="orderStatusTab() === 'cancelled'"
-            (click)="setOrderStatusTab('cancelled')">ÄÃ£ há»§y</button>
+            (click)="setOrderStatusTab('cancelled')">Đã hủy</button>
           <button type="button" class="account__order-tab"
-            [class.account__order-tab--active]="orderStatusTab() === 'return'" (click)="setOrderStatusTab('return')">Tráº£
-            hÃ ng</button>
+            [class.account__order-tab--active]="orderStatusTab() === 'return'" (click)="setOrderStatusTab('return')">Trả
+            hàng</button>
         </nav>
         @if (ordersLoading()) {
-        <div class="account__orders-loading">Äang táº£i...</div>
+        <div class="account__orders-loading">Đang tải...</div>
         } @else if (filteredOrders().length === 0) {
         <div class="account__empty account__empty--orders">
           <div class="account__empty-illus">
@@ -206,9 +206,9 @@
               <circle cx="78" cy="52" r="3" fill="#FF6D2D" opacity="0.6" />
             </svg>
           </div>
-          <p class="account__empty-title">Báº¡n chÆ°a cÃ³ Ä‘Æ¡n hÃ ng nÃ o.</p>
-          <p class="account__empty-desc">CÃ¹ng khÃ¡m phÃ¡ hÃ ng ngÃ n sáº£n pháº©m táº¡i AuraPC nhÃ©!</p>
-          <a routerLink="/san-pham" class="account__shop-link account__shop-link--primary">KhÃ¡m phÃ¡ ngay</a>
+          <p class="account__empty-title">Bạn chưa có đơn hàng nào.</p>
+          <p class="account__empty-desc">Cùng khám phá hàng ngàn sản phẩm tại AuraPC nhé!</p>
+          <a routerLink="/san-pham" class="account__shop-link account__shop-link--primary">Khám phá ngay</a>
         </div>
         } @else {
         <div class="account__orders-list account__orders-list--new">
@@ -219,21 +219,21 @@
                 @if (editingOrderNameId() === order._id) {
                 <div class="account__order-name-edit account__order-name-edit--card">
                   <input type="text" class="account__order-name-input" [(ngModel)]="editingOrderNameValue"
-                    (keydown.enter)="saveOrderName(order._id)" placeholder="TÃªn Ä‘Æ¡n hÃ ng" />
-                  <button type="button" class="account__order-name-btn" (click)="saveOrderName(order._id)">LÆ°u</button>
+                    (keydown.enter)="saveOrderName(order._id)" placeholder="Tên đơn hàng" />
+                  <button type="button" class="account__order-name-btn" (click)="saveOrderName(order._id)">Lưu</button>
                   <button type="button" class="account__order-name-btn account__order-name-btn--cancel"
-                    (click)="cancelEditOrderName()">Há»§y</button>
+                    (click)="cancelEditOrderName()">Hủy</button>
                 </div>
                 } @else {
                 <h3 class="account__order-card-title">{{ getOrderDisplayName(order._id, order.createdAt) }}</h3>
                 <button type="button" class="account__order-card-edit" (click)="startEditOrderName(order)"
-                  aria-label="Äá»•i tÃªn Ä‘Æ¡n hÃ ng">
+                  aria-label="Đổi tên đơn hàng">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                   </svg>
                 </button>
                 }
-                <p class="account__order-card-meta">Giao hÃ ng táº­n nÆ¡i Â· #ORD-{{ order.orderNumber }}</p>
+                <p class="account__order-card-meta">Giao hàng tận nơi · #ORD-{{ order.orderNumber }}</p>
               </div>
               <span class="account__order-card-status" [class]="orderStatusClass(order)">{{
                 orderStatusLabel(order) }}</span>
@@ -251,42 +251,42 @@
                 <p class="account__order-card-product-name">{{ order.items[0].name }}</p>
                 <p class="account__order-card-product-meta">{{ formatPrice(order.items[0].price || 0) }} <span
                     class="account__order-card-product-qty">x{{ order.items[0].qty }} {{ len > 1 ? '(+' + (len - 1) + '
-                    SP khÃ¡c)' : '' }}</span></p>
+                    SP khác)' : '' }}</span></p>
               </div>
               }
             </div>
             <div class="account__order-card-footer">
               <a href="#" class="account__order-card-detail-link"
-                (click)="$event.preventDefault(); openOrderDetail(order.orderNumber)">Xem chi tiáº¿t</a>
+                (click)="$event.preventDefault(); openOrderDetail(order.orderNumber)">Xem chi tiết</a>
               <div class="account__order-card-actions">
-                <span class="account__order-card-total">ThÃ nh tiá»n: <strong>{{ formatPrice(order.total)
+                <span class="account__order-card-total">Thành tiền: <strong>{{ formatPrice(order.total)
                     }}</strong></span>
                 @if (canCancelOrder(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel"
-                  (click)="cancelOrder(order)">Há»§y Ä‘Æ¡n</button>
+                  (click)="cancelOrder(order)">Hủy đơn</button>
                 } @else if (hasPendingCancelRequest(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel" disabled>
-                  Äang chá» duyá»‡t hủy
+                  Đang chờ duyệt hủy
                 </button>
                 }
 
                 @if (order.status === 'shipped' && !isShippingActionReady(order)) {
-                <span class="account__order-card-wait">Mở xÃ¡c nháº­n sau {{ minutesUntilShippingAction(order) }} phÃºt</span>
+                <span class="account__order-card-wait">Mở xác nhận sau {{ minutesUntilShippingAction(order) }} phút</span>
                 }
 
                 @if (canShowDeliveryActions(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--repurchase"
-                  (click)="confirmOrderReceived(order)">ÄÃ£ nháº­n hÃ ng</button>
+                  (click)="confirmOrderReceived(order)">Đã nhận hàng</button>
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel"
-                  (click)="requestOrderReturn(order)">HoÃ n tráº£</button>
+                  (click)="requestOrderReturn(order)">Hoàn trả</button>
                 } @else if (hasPendingReturnRequest(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel" disabled>
-                  Äang chá» duyá»‡t hoÃ n tráº£
+                  Đang chờ duyệt hoàn trả
                 </button>
                 }
 
                 <button type="button" class="account__order-card-btn account__order-card-btn--repurchase"
-                  (click)="repurchaseOrder(order)">Mua láº¡i</button>
+                  (click)="repurchaseOrder(order)">Mua lại</button>
               </div>
             </div>
           </div>
@@ -304,56 +304,56 @@
             @if (editingOrderNameId() === detail._id) {
             <div class="account__order-name-edit">
               <input type="text" class="account__order-name-input" [(ngModel)]="editingOrderNameValue"
-                (keydown.enter)="saveOrderName(detail._id)" placeholder="TÃªn Ä‘Æ¡n hÃ ng" />
-              <button type="button" class="account__order-name-btn" (click)="saveOrderName(detail._id)">LÆ°u</button>
+                (keydown.enter)="saveOrderName(detail._id)" placeholder="Tên đơn hàng" />
+              <button type="button" class="account__order-name-btn" (click)="saveOrderName(detail._id)">Lưu</button>
               <button type="button" class="account__order-name-btn account__order-name-btn--cancel"
-                (click)="cancelEditOrderName()">Há»§y</button>
+                (click)="cancelEditOrderName()">Hủy</button>
             </div>
             } @else {
             <h2 class="account__modal-title account__modal-title--name">{{ getOrderDisplayName(detail._id,
               detail.createdAt) }}</h2>
             <button type="button" class="account__modal-edit-name" (click)="startEditOrderName(detail)"
-              aria-label="Äá»•i tÃªn Ä‘Æ¡n hÃ ng">
+              aria-label="Đổi tên đơn hàng">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
               </svg>
             </button>
             }
-            <p class="account__modal-order-code">Giao hÃ ng táº­n nÆ¡i Â· #ORD-{{ detail.orderNumber }}</p>
+            <p class="account__modal-order-code">Giao hàng tận nơi · #ORD-{{ detail.orderNumber }}</p>
           </div>
           <div class="account__modal-header-right">
             <span class="account__order-status-badge" [class]="orderStatusClass(detail)">{{
               orderStatusLabel(detail) }}</span>
             <button type="button" class="account__modal-close" (click)="closeOrderDetail()"
-              aria-label="ÄÃ³ng">&times;</button>
+              aria-label="Đóng">&times;</button>
           </div>
         </div>
         <div class="account__modal-body account__modal-body--sections">
           <div class="account__order-section">
-            <h3 class="account__order-section-title">ThÃ´ng tin ngÆ°á»i nháº­n</h3>
+            <h3 class="account__order-section-title">Thông tin người nhận</h3>
             @if (detail.shippingAddress) {
-            <p class="account__order-text">{{ detail.shippingAddress['fullName'] || 'â€”' }}</p>
-            <p class="account__order-text">{{ detail.shippingAddress['phone'] || 'â€”' }}</p>
+            <p class="account__order-text">{{ detail.shippingAddress['fullName'] || '—' }}</p>
+            <p class="account__order-text">{{ detail.shippingAddress['phone'] || '—' }}</p>
             @if (detail.shippingAddress['email']) {
             <p class="account__order-text">{{ detail.shippingAddress['email'] }}</p>
             }
             } @else {
-            <p class="account__order-text">â€”</p>
+            <p class="account__order-text">—</p>
             }
           </div>
           <div class="account__order-section">
-            <h3 class="account__order-section-title">Nháº­n hÃ ng táº¡i</h3>
+            <h3 class="account__order-section-title">Nhận hàng tại</h3>
             @if (detail.shippingAddress?.['address'] || detail.shippingAddress?.['ward'] ||
             detail.shippingAddress?.['district'] || detail.shippingAddress?.['city']) {
             <p class="account__order-text">{{ detail.shippingAddress?.['address'] }}, {{
               detail.shippingAddress?.['ward'] }}, {{ detail.shippingAddress?.['district'] }}, {{
               detail.shippingAddress?.['city'] }}</p>
             } @else {
-            <p class="account__order-text">â€”</p>
+            <p class="account__order-text">—</p>
             }
           </div>
           <div class="account__order-section">
-            <h3 class="account__order-section-title">Danh sÃ¡ch sáº£n pháº©m</h3>
+            <h3 class="account__order-section-title">Danh sách sản phẩm</h3>
             <div class="account__order-products">
               @for (item of detail.items; track item.product || item.name) {
               <div class="account__order-product-row">
@@ -374,24 +374,24 @@
             </div>
           </div>
           <div class="account__order-section account__order-section--payment">
-            <h3 class="account__order-section-title">ThÃ´ng tin thanh toÃ¡n</h3>
+            <h3 class="account__order-section-title">Thông tin thanh toán</h3>
             <div class="account__order-payment-rows">
               <div class="account__order-payment-row">
-                <span>Tá»•ng tiá»n hÃ ng</span>
+                <span>Tổng tiền hàng</span>
                 <span>{{ formatPrice(detail.total - (detail.shippingFee || 0) + (detail.discount || 0)) }}</span>
               </div>
               <div class="account__order-payment-row">
-                <span>PhÃ­ váº­n chuyá»ƒn</span>
+                <span>Phí vận chuyển</span>
                 <span>{{ formatPrice(detail.shippingFee || 0) }}</span>
               </div>
               @if ((detail.discount || 0) > 0) {
               <div class="account__order-payment-row">
-                <span>Giáº£m giÃ¡</span>
+                <span>Giảm giá</span>
                 <span>-{{ formatPrice(detail.discount || 0) }}</span>
               </div>
               }
               <div class="account__order-payment-row account__order-payment-row--total">
-                <span>ThÃ nh tiá»n</span>
+                <span>Thành tiền</span>
                 <span class="order-total">{{ formatPrice(detail.total) }}</span>
               </div>
             </div>
@@ -405,12 +405,12 @@
       @if (activeTab() === 'address') {
       <div class="account__card">
         <div class="account__title-row">
-          <h1 class="account__title">Sá»• Ä‘á»‹a chá»‰</h1>
-          <button class="account__add-addr-btn" (click)="openAddAddress()">+ ThÃªm Ä‘á»‹a chá»‰ má»›i</button>
+          <h1 class="account__title">Sổ địa chỉ</h1>
+          <button class="account__add-addr-btn" (click)="openAddAddress()">+ Thêm địa chỉ mới</button>
         </div>
         @if (addressService.addresses().length === 0) {
         <div class="account__empty">
-          <p>Báº¡n chÆ°a cÃ³ Ä‘á»‹a chá»‰ nÃ o</p>
+          <p>Bạn chưa có địa chỉ nào</p>
         </div>
         } @else {
         <div class="account__address-list">
@@ -428,7 +428,7 @@
 
               <div class="address-badges">
                 @if (addr.isDefault) {
-                <span class="address-default-badge">Máº·c Ä‘á»‹nh</span>
+                <span class="address-default-badge">Mặc định</span>
                 }
                 @if (addr.label) {
                 <span class="address-label-badge">
@@ -439,9 +439,9 @@
             </div>
 
             <div class="address-actions">
-              <button class="address-edit-btn" (click)="openEditAddress(addr)">Sá»­a</button>
+              <button class="address-edit-btn" (click)="openEditAddress(addr)">Sửa</button>
               <span class="address-actions-sep">|</span>
-              <button class="address-delete-btn" (click)="deleteAddress(addr._id)">XÃ³a</button>
+              <button class="address-delete-btn" (click)="deleteAddress(addr._id)">Xóa</button>
             </div>
 
           </div>
@@ -451,7 +451,7 @@
       </div>
       }
 
-      <!-- AuraHub Activity Tab â€” Threads-style -->
+      <!-- AuraHub Activity Tab — Threads-style -->
       @if (activeTab() === 'hub') {
       <div class="account__card account__card--hub">
         <!-- Hub activity tabs -->
@@ -469,8 +469,8 @@
         @if (hubTab() === 'threads') {
         <div class="hub-act__compose" (click)="openHubPost('')">
           <img [src]="getAvatarUrl(u.avatar)" class="hub-act__compose-avatar" alt="" />
-          <span class="hub-act__compose-placeholder">CÃ³ gÃ¬ má»›i?</span>
-          <button class="hub-act__compose-btn">ÄÄƒng</button>
+          <span class="hub-act__compose-placeholder">Có gì mới?</span>
+          <button class="hub-act__compose-btn">Đăng</button>
         </div>
         }
 
@@ -484,8 +484,8 @@
           @if (hubTab() === 'threads') {
           @if (hubThreads().length === 0) {
           <div class="hub-act__empty">
-            <p>ChÆ°a cÃ³ thread nÃ o.</p>
-            <span>Táº¡o thread Ä‘áº§u tiÃªn trÃªn AuraHub!</span>
+            <p>Chưa có thread nào.</p>
+            <span>Tạo thread đầu tiên trên AuraHub!</span>
           </div>
           } @else {
           @for (item of hubThreads(); track item._id) {
@@ -555,7 +555,7 @@
           @if (hubTab() === 'replies') {
           @if (hubReplies().length === 0) {
           <div class="hub-act__empty">
-            <p>ChÆ°a cÃ³ pháº£n há»“i nÃ o.</p>
+            <p>Chưa có phản hồi nào.</p>
           </div>
           } @else {
           @for (reply of hubReplies(); track reply._id) {
@@ -580,7 +580,7 @@
           @if (hubTab() === 'media') {
           @if (hubMedia().length === 0) {
           <div class="hub-act__empty">
-            <p>ChÆ°a cÃ³ bÃ i Media.</p>
+            <p>Chưa có bài Media.</p>
           </div>
           } @else {
           @for (item of hubMedia(); track item._id) {
@@ -670,7 +670,7 @@
             </div>
             }
             @if (!followersList().length) {
-            <div class="account__follows-empty">ChÆ°a cÃ³ follower nÃ o</div>
+            <div class="account__follows-empty">Chưa có follower nào</div>
             }
             } @else {
             @for (item of followingList(); track item._id) {
@@ -688,7 +688,7 @@
             </div>
             }
             @if (!followingList().length) {
-            <div class="account__follows-empty">Báº¡n chÆ°a theo dÃµi ai.</div>
+            <div class="account__follows-empty">Bạn chưa theo dõi ai.</div>
             }
             }
           </div>
@@ -701,32 +701,32 @@
       <div class="modal-overlay" (click)="closeAddressModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h2 class="modal-title">{{ addressModalMode() === 'add' ? 'ThÃªm Ä‘á»‹a chá»‰ má»›i' : 'Sá»­a Ä‘á»‹a chá»‰' }}</h2>
+            <h2 class="modal-title">{{ addressModalMode() === 'add' ? 'Thêm địa chỉ mới' : 'Sửa địa chỉ' }}</h2>
             <button class="modal-close" (click)="closeAddressModal()">&times;</button>
           </div>
           <div class="modal-body">
             <div class="account__form-group">
-              <label>Loáº¡i Ä‘á»‹a chá»‰</label>
+              <label>Loại địa chỉ</label>
               <select [(ngModel)]="addrLabel">
-                <option value="NhÃ  riÃªng">NhÃ  riÃªng</option>
-                <option value="CÃ´ng ty">CÃ´ng ty</option>
-                <option value="KhÃ¡c">KhÃ¡c</option>
+                <option value="Nhà riêng">Nhà riêng</option>
+                <option value="Công ty">Công ty</option>
+                <option value="Khác">Khác</option>
               </select>
             </div>
             <div class="account__form-row">
               <div class="account__form-group">
-                <label>Há» vÃ  tÃªn <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="addrFullName" placeholder="Nháº­p há» tÃªn ngÆ°á»i nháº­n" />
+                <label>Họ và tên <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="addrFullName" placeholder="Nhập họ tên người nhận" />
               </div>
               <div class="account__form-group">
-                <label>Sá»‘ Ä‘iá»‡n thoáº¡i <span class="required">*</span></label>
-                <input type="tel" [(ngModel)]="addrPhone" placeholder="Nháº­p sá»‘ Ä‘iá»‡n thoáº¡i" />
+                <label>Số điện thoại <span class="required">*</span></label>
+                <input type="tel" [(ngModel)]="addrPhone" placeholder="Nhập số điện thoại" />
               </div>
             </div>
             <div class="account__form-group">
-              <label>Tá»‰nh / ThÃ nh phá»‘</label>
+              <label>Tỉnh / Thành phố</label>
               <select [(ngModel)]="addrCity" (change)="onProvinceChange()">
-                <option value="">Chá»n Tá»‰nh / ThÃ nh phá»‘</option>
+                <option value="">Chọn Tỉnh / Thành phố</option>
                 @for (p of addressService.provinces(); track p.code) {
                 <option [value]="p.name">{{ p.name }}</option>
                 }
@@ -734,18 +734,18 @@
             </div>
             <div class="account__form-row">
               <div class="account__form-group">
-                <label>Quáº­n / Huyá»‡n</label>
+                <label>Quận / Huyện</label>
                 <select [(ngModel)]="addrDistrict" (change)="onDistrictChange()" [disabled]="!addrCity">
-                  <option value="">Chá»n Quáº­n / Huyá»‡n</option>
+                  <option value="">Chọn Quận / Huyện</option>
                   @for (d of districts(); track d.code) {
                   <option [value]="d.name">{{ d.name }}</option>
                   }
                 </select>
               </div>
               <div class="account__form-group">
-                <label>PhÆ°á»ng / XÃ£</label>
+                <label>Phường / Xã</label>
                 <select [(ngModel)]="addrWard" [disabled]="!addrDistrict">
-                  <option value="">Chá»n PhÆ°á»ng / XÃ£</option>
+                  <option value="">Chọn Phường / Xã</option>
                   @for (w of wards(); track w.code) {
                   <option [value]="w.name">{{ w.name }}</option>
                   }
@@ -753,11 +753,11 @@
               </div>
             </div>
             <div class="account__form-group">
-              <label>Äá»‹a chá»‰ cá»¥ thá»ƒ</label>
-              <input type="text" [(ngModel)]="addrAddress" placeholder="Sá»‘ nhÃ , tÃªn Ä‘Æ°á»ng..." />
+              <label>Địa chỉ cụ thể</label>
+              <input type="text" [(ngModel)]="addrAddress" placeholder="Số nhà, tên đường..." />
             </div>
             <div class="modal-settings-row">
-              <span class="modal-settings-label">Äáº·t lÃ m Ä‘á»‹a chá»‰ máº·c Ä‘á»‹nh</span>
+              <span class="modal-settings-label">Đặt làm địa chỉ mặc định</span>
               <label class="toggle-switch">
                 <input type="checkbox" [(ngModel)]="addrIsDefault" />
                 <span class="toggle-slider"></span>
@@ -767,11 +767,11 @@
           <div class="modal-footer">
             @if (addressModalMode() === 'edit') {
             <div class="modal-delete-row">
-              <button class="account__delete-modal-btn" (click)="deleteAddress(editingAddressId)">XÃ³a Ä‘á»‹a chá»‰</button>
+              <button class="account__delete-modal-btn" (click)="deleteAddress(editingAddressId)">Xóa địa chỉ</button>
             </div>
             }
             <button class="account__save-btn" (click)="saveAddress()">
-              {{ addressModalMode() === 'add' ? 'ThÃªm' : 'Cáº­p nháº­t' }}
+              {{ addressModalMode() === 'add' ? 'Thêm' : 'Cập nhật' }}
             </button>
           </div>
         </div>
@@ -781,13 +781,13 @@
       @if (showDeleteModal()) {
       <div class="delete-popup-overlay" (click)="cancelDeleteAddress()">
         <div class="delete-popup" (click)="$event.stopPropagation()">
-          <h3 class="delete-popup__title">XÃ¡c nháº­n xÃ³a</h3>
+          <h3 class="delete-popup__title">Xác nhận xóa</h3>
           <p class="delete-popup__msg">
-            Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a Ä‘á»‹a chá»‰ nÃ y khá»i sá»• Ä‘á»‹a chá»‰ khÃ´ng?
+            Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ không?
           </p>
           <div class="delete-popup__actions">
-            <button class="delete-popup__btn delete-popup__btn--cancel" (click)="cancelDeleteAddress()">Há»§y</button>
-            <button class="delete-popup__btn delete-popup__btn--confirm" (click)="confirmDeleteAddress()">XÃ³a</button>
+            <button class="delete-popup__btn delete-popup__btn--cancel" (click)="cancelDeleteAddress()">Hủy</button>
+            <button class="delete-popup__btn delete-popup__btn--confirm" (click)="confirmDeleteAddress()">Xóa</button>
           </div>
         </div>
       </div>
@@ -799,13 +799,13 @@
   @if (showLogoutModal()) {
   <div class="account__logout-overlay" (click)="closeLogoutConfirm()" role="button" tabindex="0">
     <div class="account__logout-popup" (click)="$event.stopPropagation()">
-      <h3 class="account__logout-title">XÃ¡c nháº­n Ä‘Äƒng xuáº¥t</h3>
-      <p class="account__logout-msg">Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n Ä‘Äƒng xuáº¥t khá»i tÃ i khoáº£n?</p>
+      <h3 class="account__logout-title">Xác nhận đăng xuất</h3>
+      <p class="account__logout-msg">Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?</p>
       <div class="account__logout-actions">
         <button type="button" class="account__logout-btn account__logout-btn--cancel"
-          (click)="closeLogoutConfirm()">Há»§y</button>
-        <button type="button" class="account__logout-btn account__logout-btn--confirm" (click)="confirmLogout()">ÄÄƒng
-          xuáº¥t</button>
+          (click)="closeLogoutConfirm()">Hủy</button>
+        <button type="button" class="account__logout-btn account__logout-btn--confirm" (click)="confirmLogout()">Đăng
+          xuất</button>
       </div>
     </div>
   </div>

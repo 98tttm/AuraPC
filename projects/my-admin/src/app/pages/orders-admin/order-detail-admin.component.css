@@ -197,6 +197,27 @@
   justify-content: flex-end;
 }
 
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 26rem;
+  text-align: right;
+}
+
+.status-static {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.status-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .status-update .select {
   min-width: 160px;
 }
@@ -301,6 +322,12 @@
   .order-detail__actions .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .status-panel {
+    align-items: flex-start;
+    max-width: none;
+    text-align: left;
   }
 
   .stepper {

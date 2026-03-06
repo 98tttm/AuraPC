@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build -- my-admin --configuration=production",
+  "outputDirectory": "dist/my-admin/browser",
+  "framework": null,
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

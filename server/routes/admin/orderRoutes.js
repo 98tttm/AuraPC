@@ -6,11 +6,12 @@ const router = express.Router();
 router.use(requireAdmin);
 
 const VALID_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+const ADMIN_MANUAL_STATUSES = ['processing', 'shipped'];
 const STATUS_TRANSITIONS = {
-  pending: ['confirmed', 'processing', 'shipped', 'cancelled'],
-  confirmed: ['processing', 'shipped', 'cancelled'],
-  processing: ['shipped', 'cancelled'],
-  shipped: ['delivered'],
+  pending: ['processing'],
+  confirmed: ['shipped'],
+  processing: ['shipped'],
+  shipped: [],
   delivered: [],
   cancelled: [],
 };
@@ -84,29 +85,23 @@ router.put('/:orderNumber/status', async (req, res) => {
     if (!VALID_STATUSES.includes(status)) {
       return res.status(400).json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
     }
+    if (!ADMIN_MANUAL_STATUSES.includes(status)) {
+      return res.status(400).json({ error: 'Admin can only update orders to "processing" or "shipped"' });
+    }
 
     const order = await Order.findOne({ orderNumber: req.params.orderNumber });
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
     if (!canTransitionOrderStatus(order.status, status)) {
-      return res.status(400).json({ error: `Cannot change status from "${order.status}" to "${status}"` });
+      return res.status(400).json({ error: `Cannot change status from "${order.status}" to "${status}" in admin flow` });
     }
 
     if (status === 'shipped' && order.cancelRequest?.status === 'pending') {
       return res.status(400).json({ error: 'Cannot ship order while cancellation request is pending' });
     }
 
-    if (status === 'delivered' && order.returnRequest?.status === 'pending') {
-      return res.status(400).json({ error: 'Cannot complete order while return request is pending' });
-    }
-
     order.status = status;
     if (status === 'shipped' && !order.shippedAt) order.shippedAt = new Date();
-    if (status === 'delivered') {
-      if (!order.shippedAt) order.shippedAt = new Date();
-      order.deliveredAt = new Date();
-    }
-    if (status === 'cancelled') order.cancelledAt = new Date();
 
     await order.save();
 

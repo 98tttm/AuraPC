@@ -51,7 +51,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   editingAddressId = '';
 
   // Address form fields
-  addrLabel = 'NhÃ  riÃªng';
+  addrLabel = 'Nhà riêng';
   addrFullName = '';
   addrPhone = '';
   addrCity = '';
@@ -84,7 +84,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   hubLoading = signal(false);
 
-  // TÃªn tÃ¹y chá»‰nh Ä‘Æ¡n hÃ ng (key = orderId), lÆ°u localStorage
+  // Tên tùy chỉnh đơn hàng (key = orderId), lưu localStorage
   orderDisplayNames = signal<Record<string, string>>({});
   editingOrderNameId = signal<string | null>(null);
   editingOrderNameValue = '';
@@ -99,9 +99,9 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadOrderDisplayNames();
-    // Äá»c tab tá»« URL ngay khi load (direct link hoáº·c refresh)
+    // Đọc tab từ URL ngay khi load (direct link hoặc refresh)
     this.syncTabFromUrl(this.route.snapshot.queryParams);
-    // Theo dÃµi thay Ä‘á»•i query params (khi click link hoáº·c navigate)
+    // Theo dõi thay đổi query params (khi click link hoặc navigate)
     this.route.queryParams.subscribe((params) => this.syncTabFromUrl(params));
     this.loadSocialCounts(); // Load ALWAYS
   }
@@ -124,7 +124,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       }
       if (tab === 'hub') {
         this.loadSocialCounts();
-        // luÃ´n load Threads láº§n Ä‘áº§u khi vÃ o tab Hoáº¡t Ä‘á»™ng AuraHub
+        // luôn load Threads lần đầu khi vào tab Hoạt động AuraHub
         this.setHubTab(this.hubTab());
       }
     }
@@ -160,7 +160,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     const u = this.user();
     const g = u?.profile?.gender?.trim();
     if (!g) return null;
-    const map: Record<string, string> = { male: 'Nam', female: 'Ná»¯', other: 'KhÃ¡c' };
+    const map: Record<string, string> = { male: 'Nam', female: 'Nữ', other: 'Khác' };
     return map[g.toLowerCase()] || g;
   });
 
@@ -184,7 +184,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   formatPrice(price: number): string {
-    return price.toLocaleString('vi-VN') + 'â‚«';
+    return price.toLocaleString('vi-VN') + '₫';
   }
 
   switchTab(tab: 'profile' | 'orders' | 'address' | 'hub') {
@@ -236,7 +236,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   getUserDisplayName(u: any): string {
-    return u?.profile?.fullName || u?.username || u?.phoneNumber || 'NgÆ°á»i dÃ¹ng';
+    return u?.profile?.fullName || u?.username || u?.phoneNumber || 'Người dùng';
   }
 
   getUserAvatarUrl(u: any): string {
@@ -257,17 +257,17 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.api.toggleFollow(targetUserId).subscribe({
       next: (res) => {
         this.followingCount.set(res.followingCount);
-        // Cáº§n reload láº¡i danh sÃ¡ch Ä‘á»ƒ modal update chÃ­nh xÃ¡c
+        // Cần reload lại danh sách để modal update chính xác
         this.loadSocialCounts();
       },
       error: (err) => {
-        const msg = err?.error?.message || 'KhÃ´ng thá»ƒ thá»±c hiá»‡n Follow';
+        const msg = err?.error?.message || 'Không thể thực hiện Follow';
         alert(msg);
       }
     });
   }
 
-  // Hoáº¡t Ä‘á»™ng AuraHub
+  // Hoạt động AuraHub
   setHubTab(tab: 'threads' | 'replies' | 'media'): void {
     this.hubTab.set(tab);
     this.loadHubActivity(tab);
@@ -393,18 +393,18 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   orderStatusLabel(order: OrderListItem): string {
-    if (order.cancelRequest?.status === 'pending') return 'YÃƒÂªu cÃ¡ÂºÂ§u hÃ¡Â»Â§y';
-    if (order.returnRequest?.status === 'pending') return 'YÃƒÂªu cÃ¡ÂºÂ§u hoÃƒÂ n trÃ¡ÂºÂ£';
-    if (order.returnRequest?.status === 'approved') return 'Ã„ÂÃƒÂ£ duyÃ¡Â»â€¡t hoÃƒÂ n trÃ¡ÂºÂ£';
-    if (order.returnRequest?.status === 'rejected') return 'TÃ¡Â»Â« chÃ¡Â»â€˜i hoÃƒÂ n trÃ¡ÂºÂ£';
+    if (order.cancelRequest?.status === 'pending') return 'Yêu cầu hủy';
+    if (order.returnRequest?.status === 'pending') return 'Yêu cầu hoàn trả';
+    if (order.returnRequest?.status === 'approved') return 'Đã duyệt hoàn trả';
+    if (order.returnRequest?.status === 'rejected') return 'Từ chối hoàn trả';
 
     const map: Record<string, string> = {
-      pending: 'Äang xá»­ lÃ½',
-      confirmed: 'Äang xá»­ lÃ½',
-      processing: 'Äang xá»­ lÃ½',
-      shipped: 'Äang váº­n chuyá»ƒn',
-      delivered: 'ÄÃ£ giao',
-      cancelled: 'ÄÃ£ há»§y',
+      pending: 'Đang xử lý',
+      confirmed: 'Đang xử lý',
+      processing: 'Đang xử lý',
+      shipped: 'Đang vận chuyển',
+      delivered: 'Đã giao',
+      cancelled: 'Đã hủy',
     };
     return map[order.status] ?? order.status;
   }
@@ -419,9 +419,9 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   formatOrderDate(createdAt: string | undefined): string {
-    if (!createdAt) return 'â€”';
+    if (!createdAt) return '—';
     const d = new Date(createdAt);
-    return isNaN(d.getTime()) ? 'â€”' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   orderItemCount(order: OrderListItem): number {
@@ -434,44 +434,44 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   cancelOrder(order: OrderListItem): void {
     if (!this.canCancelOrder(order)) return;
-    if (!confirm('Báº¡n cÃ³ cháº¯c muá»‘n gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
-    const reason = prompt('LÃ½ do há»§y Ä‘Æ¡n (khÃ´ng báº¯t buá»™c):', '') || '';
+    if (!confirm('Bạn có chắc muốn gửi yêu cầu hủy đơn #ORD-' + order.orderNumber + '?')) return;
+    const reason = prompt('Lý do hủy đơn (không bắt buộc):', '') || '';
     this.api.requestOrderCancellation(order.orderNumber, reason).subscribe({
       next: () => {
-        alert('ÄÃ£ gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n. Vui lÃ²ng chá» admin xá»­ lÃ½.');
+        alert('Đã gửi yêu cầu hủy đơn. Vui lòng chờ admin xử lý.');
         this.loadOrders();
       },
       error: (err) => {
-        alert(err?.error?.error || 'KhÃ´ng thá»ƒ gá»­i yÃªu cáº§u há»§y Ä‘Æ¡n');
+        alert(err?.error?.error || 'Không thể gửi yêu cầu hủy đơn');
       },
     });
   }
 
   confirmOrderReceived(order: OrderListItem): void {
     if (!this.canShowDeliveryActions(order)) return;
-    if (!confirm('XÃ¡c nháº­n báº¡n Ä‘Ã£ nháº­n Ä‘Æ°á»£c hÃ ng cho Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
+    if (!confirm('Xác nhận bạn đã nhận được hàng cho đơn #ORD-' + order.orderNumber + '?')) return;
     this.api.confirmOrderReceived(order.orderNumber).subscribe({
       next: () => {
-        alert('Cáº£m Æ¡n báº¡n! ÄÆ¡n hÃ ng Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c nháº­n Ä‘Ã£ giao.');
+        alert('Cảm ơn bạn! Đơn hàng đã được xác nhận đã giao.');
         this.loadOrders();
       },
       error: (err) => {
-        alert(err?.error?.error || 'KhÃ´ng thá»ƒ xÃ¡c nháº­n nháº­n hÃ ng');
+        alert(err?.error?.error || 'Không thể xác nhận nhận hàng');
       },
     });
   }
 
   requestOrderReturn(order: OrderListItem): void {
     if (!this.canShowDeliveryActions(order)) return;
-    const reason = prompt('Nháº­p lÃ½ do hoÃ n tráº£ (khÃ´ng báº¯t buá»™c):', '') || '';
-    if (!confirm('Gá»­i yÃªu cáº§u hoÃ n tráº£ cho Ä‘Æ¡n #ORD-' + order.orderNumber + '?')) return;
+    const reason = prompt('Nhập lý do hoàn trả (không bắt buộc):', '') || '';
+    if (!confirm('Gửi yêu cầu hoàn trả cho đơn #ORD-' + order.orderNumber + '?')) return;
     this.api.requestOrderReturn(order.orderNumber, reason).subscribe({
       next: () => {
-        alert('ÄÃ£ gá»­i yÃªu cáº§u hoÃ n tráº£. Vui lÃ²ng chá» admin xá»­ lÃ½.');
+        alert('Đã gửi yêu cầu hoàn trả. Vui lòng chờ admin xử lý.');
         this.loadOrders();
       },
       error: (err) => {
-        alert(err?.error?.error || 'KhÃ´ng thá»ƒ gá»­i yÃªu cáº§u hoÃ n tráº£');
+        alert(err?.error?.error || 'Không thể gửi yêu cầu hoàn trả');
       },
     });
   }
@@ -498,10 +498,10 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     return this.orders().find((o) => o.orderNumber === num) ?? null;
   });
 
-  /** TÃªn Ä‘Æ¡n hÃ ng máº·c Ä‘á»‹nh: "ÄÆ¡n hÃ ng ngÃ y DD/MM/YYYY" */
+  /** Tên đơn hàng mặc định: "Đơn hàng ngày DD/MM/YYYY" */
   getOrderDisplayNameDefault(createdAt: string | undefined): string {
     const d = this.formatOrderDate(createdAt);
-    return d === 'â€”' ? 'ÄÆ¡n hÃ ng' : `ÄÆ¡n hÃ ng ngÃ y ${d}`;
+    return d === '—' ? 'Đơn hàng' : `Đơn hàng ngày ${d}`;
   }
 
   getOrderDisplayName(orderId: string, createdAt: string | undefined): string {
@@ -545,7 +545,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.editingOrderNameId.set(null);
   }
 
-  /** áº¢nh sáº£n pháº©m trong Ä‘Æ¡n (item.product.images), tráº£ vá» URL Ä‘áº§y Ä‘á»§ náº¿u lÃ  path */
+  /** Ảnh sản phẩm trong đơn (item.product.images), trả về URL đầy đủ nếu là path */
   orderItemImage(item: OrderListItem['items'][0]): string {
     const p = item.product as { images?: unknown[] } | undefined;
     if (!p?.images?.length) return '';
@@ -580,7 +580,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
             // Success - updated automatically in signal
           }
         },
-        error: (err) => alert('Lá»—i upload áº£nh: ' + (err.message || 'KhÃ´ng xÃ¡c Ä‘á»‹nh'))
+        error: (err) => alert('Lỗi upload ảnh: ' + (err.message || 'Không xác định'))
       });
     }
   }
@@ -596,7 +596,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
           this.editMode.set(false);
         }
       },
-      error: (err) => alert('Lá»—i cáº­p nháº­t: ' + (err.message || 'KhÃ´ng xÃ¡c Ä‘á»‹nh'))
+      error: (err) => alert('Lỗi cập nhật: ' + (err.message || 'Không xác định'))
     });
   }
 
@@ -620,9 +620,9 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: string): string {
-    if (status === 'ÄÃ£ giao') return 'status--delivered';
-    if (status === 'Äang váº­n chuyá»ƒn') return 'status--shipping';
-    if (status === 'ÄÃ£ há»§y') return 'status--cancelled';
+    if (status === 'Đã giao') return 'status--delivered';
+    if (status === 'Đang vận chuyển') return 'status--shipping';
+    if (status === 'Đã hủy') return 'status--cancelled';
     return 'status--pending';
   }
 
@@ -638,7 +638,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   openAddAddress() {
     this.addressModalMode.set('add');
     this.editingAddressId = '';
-    this.addrLabel = 'NhÃ  riÃªng';
+    this.addrLabel = 'Nhà riêng';
     this.addrFullName = '';
     this.addrPhone = '';
     this.addrCity = '';
@@ -726,7 +726,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   saveAddress() {
     if (!this.addrFullName.trim() || !this.addrPhone.trim()) {
-      alert('Vui lÃ²ng nháº­p há» tÃªn vÃ  sá»‘ Ä‘iá»‡n thoáº¡i.');
+      alert('Vui lòng nhập họ tên và số điện thoại.');
       return;
     }
 
@@ -781,7 +781,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.addressService.setDefault(addressId);
   }
 
-  // â”€â”€â”€ AuraHub Activity Helpers â”€â”€â”€
+  // ─── AuraHub Activity Helpers ───
   timeAgo(date: string): string {
     const now = Date.now();
     const d = new Date(date).getTime();
@@ -805,7 +805,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   getHubDisplayName(user: any): string {
-    if (!user) return 'áº¨n danh';
+    if (!user) return 'Ẩn danh';
     if (user.profile?.fullName) return user.profile.fullName;
     if (user.username) return user.username;
     if (user.phoneNumber) {
@@ -813,7 +813,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       if (d.length === 11 && d.startsWith('84')) return '0' + d.slice(2);
       return user.phoneNumber;
     }
-    return 'áº¨n danh';
+    return 'Ẩn danh';
   }
 
   getHubAvatarUrl(user: any): string {

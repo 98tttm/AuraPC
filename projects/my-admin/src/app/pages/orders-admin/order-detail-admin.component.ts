@@ -1,11 +1,25 @@
-﻿import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { AdminApiService, Order } from '../../core/admin-api.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm-dialog.component';
-import { ORDER_STATUS_LABELS, ORDER_STATUS_KEYS } from '../../core/constants';
+import { ORDER_STATUS_LABELS } from '../../core/constants';
+
+type StatusOption = {
+  value: string;
+  label: string;
+};
+
+const ADMIN_STATUS_OPTIONS: Record<string, string[]> = {
+  pending: [],
+  confirmed: ['shipped'],
+  processing: ['shipped'],
+  shipped: [],
+  delivered: [],
+  cancelled: [],
+};
 
 @Component({
   selector: 'app-order-detail-admin',
@@ -26,25 +40,23 @@ export class OrderDetailAdminComponent implements OnInit {
   error = signal('');
   updating = signal(false);
   processingRequest = signal(false);
+  statuses = signal<StatusOption[]>([]);
   newStatus = '';
   orderNumber = '';
 
-  statuses = ORDER_STATUS_KEYS.map(k => ({ value: k, label: ORDER_STATUS_LABELS[k] }));
-
   // Stepper steps (excluding cancelled)
-  stepperSteps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+  stepperSteps = ['pending', 'processing', 'shipped', 'delivered'];
 
   ngOnInit(): void {
     this.orderNumber = this.route.snapshot.paramMap.get('orderNumber') || '';
     if (this.orderNumber) this.loadOrder(this.orderNumber);
   }
 
-  private loadOrder(orderNumber: string, keepLoading = false): void {
-    if (!keepLoading) this.loading.set(true);
+  private loadOrder(orderNumber: string): void {
+    this.loading.set(true);
     this.api.getOrder(orderNumber).subscribe({
       next: (order) => {
-        this.order.set(order);
-        this.newStatus = order.status;
+        this.syncOrderState(order);
         this.loading.set(false);
       },
       error: (err) => {
@@ -56,7 +68,7 @@ export class OrderDetailAdminComponent implements OnInit {
 
   async updateStatus(): Promise<void> {
     const o = this.order();
-    if (!o || this.newStatus === o.status) return;
+    if (!o || !this.canUpdateStatus() || this.newStatus === o.status) return;
 
     const confirmed = await this.confirm.confirm({
       title: 'Cập nhật trạng thái',
@@ -68,8 +80,7 @@ export class OrderDetailAdminComponent implements OnInit {
     this.updating.set(true);
     this.api.updateOrderStatus(o.orderNumber, this.newStatus).subscribe({
       next: (updated) => {
-        this.order.set(updated);
-        this.newStatus = updated.status;
+        this.syncOrderState(updated);
         this.updating.set(false);
         this.toast.success('Đã cập nhật trạng thái');
       },
@@ -80,8 +91,12 @@ export class OrderDetailAdminComponent implements OnInit {
     });
   }
 
-  isPendingOrder(): boolean {
+  canApproveOrder(): boolean {
     return this.order()?.status === 'pending';
+  }
+
+  canUpdateStatus(): boolean {
+    return this.statuses().length > 0;
   }
 
   async approvePendingOrder(): Promise<void> {
@@ -90,18 +105,17 @@ export class OrderDetailAdminComponent implements OnInit {
 
     const confirmed = await this.confirm.confirm({
       title: 'Duyệt đơn hàng',
-      message: `Xác nhận duyệt đơn #${o.orderNumber}? Trạng thái sẽ chuyển sang "${this.getStatusLabel('confirmed')}".`,
+      message: `Xác nhận duyệt đơn #${o.orderNumber}? Trạng thái sẽ chuyển sang "${this.getStatusLabel('processing')}".`,
       confirmText: 'Duyệt đơn',
     });
     if (!confirmed) return;
 
     this.updating.set(true);
-    this.api.updateOrderStatus(o.orderNumber, 'confirmed').subscribe({
+    this.api.updateOrderStatus(o.orderNumber, 'processing').subscribe({
       next: (updated) => {
-        this.order.set(updated);
-        this.newStatus = updated.status;
+        this.syncOrderState(updated);
         this.updating.set(false);
-        this.toast.success('Đã duyệt đơn hàng');
+        this.toast.success('Đã duyệt đơn hàng và chuyển sang Đang xử lý');
       },
       error: (err) => {
         this.updating.set(false);
@@ -127,8 +141,7 @@ export class OrderDetailAdminComponent implements OnInit {
     this.processingRequest.set(true);
     this.api.resolveCancelRequest(o.orderNumber, action).subscribe({
       next: (updated) => {
-        this.order.set(updated);
-        this.newStatus = updated.status;
+        this.syncOrderState(updated);
         this.processingRequest.set(false);
         this.toast.success(action === 'approve' ? 'Đã duyệt yêu cầu hủy' : 'Đã từ chối yêu cầu hủy');
       },
@@ -156,8 +169,7 @@ export class OrderDetailAdminComponent implements OnInit {
     this.processingRequest.set(true);
     this.api.resolveReturnRequest(o.orderNumber, action).subscribe({
       next: (updated) => {
-        this.order.set(updated);
-        this.newStatus = updated.status;
+        this.syncOrderState(updated);
         this.processingRequest.set(false);
         this.toast.success(action === 'approve' ? 'Đã duyệt yêu cầu hoàn trả' : 'Đã từ chối yêu cầu hoàn trả');
       },
@@ -209,6 +221,32 @@ export class OrderDetailAdminComponent implements OnInit {
       .join(', ') || 'N/A';
   }
 
+  getStatusHint(): string {
+    const o = this.order();
+    if (!o) return '';
+
+    if (o.cancelRequest?.status === 'pending') {
+      return 'Đơn đang có yêu cầu hủy chờ xử lý. Admin cần xử lý yêu cầu này trước khi tiếp tục giao hàng.';
+    }
+
+    switch (o.status) {
+      case 'pending':
+        return 'Admin chỉ có thể duyệt đơn. Sau khi duyệt, đơn sẽ chuyển sang "Đang xử lý".';
+      case 'confirmed':
+        return 'Đơn đang ở trạng thái cũ "Đã xác nhận". Admin có thể chuyển tiếp sang "Đang giao".';
+      case 'processing':
+        return 'Khi xử lý xong, admin chuyển đơn sang "Đang giao".';
+      case 'shipped':
+        return 'Khách hàng sẽ xác nhận "Đã nhận hàng" để đơn chuyển sang "Đã giao".';
+      case 'delivered':
+        return 'Đơn đã được khách hàng xác nhận nhận hàng.';
+      case 'cancelled':
+        return 'Đơn đã hủy. Trạng thái này chỉ được cập nhật qua yêu cầu hủy hoặc hoàn trả.';
+      default:
+        return '';
+    }
+  }
+
   hasPendingCancelRequest(): boolean {
     return this.order()?.cancelRequest?.status === 'pending';
   }
@@ -218,7 +256,7 @@ export class OrderDetailAdminComponent implements OnInit {
   }
 
   getStepIndex(status: string): number {
-    return this.stepperSteps.indexOf(status);
+    return this.stepperSteps.indexOf(this.normalizeStepperStatus(status));
   }
 
   isStepComplete(step: string): boolean {
@@ -228,6 +266,25 @@ export class OrderDetailAdminComponent implements OnInit {
   }
 
   isStepCurrent(step: string): boolean {
-    return this.order()?.status === step;
+    return this.normalizeStepperStatus(this.order()?.status || '') === step;
+  }
+
+  private syncOrderState(order: Order): void {
+    const statuses = this.getStatusOptions(order.status);
+    this.order.set(order);
+    this.statuses.set(statuses);
+    this.newStatus = statuses[0]?.value || order.status;
+  }
+
+  private getStatusOptions(status: string): StatusOption[] {
+    const nextStatuses = ADMIN_STATUS_OPTIONS[status] || [];
+    return nextStatuses.map((value) => ({
+      value,
+      label: this.getStatusLabel(value),
+    }));
+  }
+
+  private normalizeStepperStatus(status: string): string {
+    return status === 'confirmed' ? 'processing' : status;
   }
 }

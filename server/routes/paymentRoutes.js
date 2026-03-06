@@ -8,7 +8,6 @@ const { requireAuth } = require('../middleware/auth');
 const momoUtils = require('../utils/momo');
 const { createAdminNotification } = require('../utils/adminNotifications');
 
-// Generate a random order number
 function generateOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = 'MOMO';
@@ -18,12 +17,44 @@ function generateOrderNumber() {
     return result;
 }
 
+function buildMockPayUrl(orderNumber, paymentMethod) {
+    const url = new URL(momoUtils.config.redirectUrl);
+    const message = paymentMethod === 'atm'
+        ? 'Thanh toán ATM MoMo giả lập thành công.'
+        : 'Thanh toán MoMo giả lập thành công.';
+
+    url.searchParams.set('resultCode', '0');
+    url.searchParams.set('orderId', orderNumber);
+    url.searchParams.set('message', message);
+    url.searchParams.set('mock', '1');
+    return url.toString();
+}
+
+async function notifyPaidOrder(order) {
+    await createAdminNotification({
+        type: 'order_new',
+        order: order._id,
+        orderNumber: order.orderNumber,
+        title: 'Có đơn hàng mới',
+        message: `Đơn #${order.orderNumber} đã thanh toán và đang chờ xác nhận`,
+        metadata: {
+            status: order.status,
+            total: order.total,
+            isPaid: order.isPaid,
+            paymentMethod: order.paymentMethod,
+        },
+    });
+}
+
 // POST /api/payment/momo/create
-// Creates pending order and generates MoMo payUrl
+// Creates a pending order and generates the MoMo payUrl.
 router.post('/momo/create', requireAuth, async (req, res) => {
+    let paymentMethod = req.body?.paymentMethod;
+    let finalTotal = 0;
+
     try {
         const userId = req.userId;
-        const { items, shippingAddress, paymentMethod, directDiscount } = req.body;
+        const { items, shippingAddress, directDiscount } = req.body;
 
         if (!['momo', 'atm'].includes(paymentMethod)) {
             return res.status(400).json({ success: false, message: 'Invalid payment method' });
@@ -33,10 +64,9 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        // === SERVER-SIDE PRICE VERIFICATION ===
         const productIds = items
-            .map(i => i.product)
-            .filter(id => id && mongoose.Types.ObjectId.isValid(id));
+            .map((item) => item.product)
+            .filter((id) => id && mongoose.Types.ObjectId.isValid(id));
 
         if (productIds.length === 0) {
             return res.status(400).json({ success: false, message: 'No valid product IDs' });
@@ -47,31 +77,102 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             .lean();
 
         const productMap = new Map();
-        products.forEach(p => productMap.set(String(p._id), p));
+        products.forEach((product) => productMap.set(String(product._id), product));
 
         const orderNumber = generateOrderNumber();
         let originalTotal = 0;
         const orderItems = [];
-        for (const i of items) {
-            const dbProduct = productMap.get(String(i.product));
+
+        for (const item of items) {
+            const dbProduct = productMap.get(String(item.product));
             if (!dbProduct) {
-                return res.status(400).json({ success: false, message: `Product not found: ${i.product}` });
+                return res.status(400).json({ success: false, message: `Product not found: ${item.product}` });
             }
-            const qty = Math.max(1, Number(i.qty) || 1);
+
+            const qty = Math.max(1, Number(item.qty) || 1);
             const verifiedPrice = dbProduct.price ?? 0;
             originalTotal += verifiedPrice * qty;
+
             orderItems.push({
-                product: i.product,
-                name: dbProduct.name || i.name,
+                product: item.product,
+                name: dbProduct.name || item.name,
                 price: verifiedPrice,
                 qty,
             });
         }
 
         const discountAmount = Number(directDiscount) || 0;
-        const finalTotal = Math.max(0, originalTotal - discountAmount);
+        finalTotal = Math.max(0, originalTotal - discountAmount);
 
-        // Save pending order
+        const configIssues = momoUtils.getCreateConfigIssues({
+            paymentMethod,
+            amount: finalTotal,
+        });
+
+        if (configIssues.length) {
+            return res.status(400).json({
+                success: false,
+                message: configIssues[0],
+                issues: configIssues,
+            });
+        }
+
+        const requestId = `${orderNumber}_${Date.now()}`;
+        const orderInfo = `Thanh toan don hang ${orderNumber} tai AuraPC`;
+        const amount = String(finalTotal);
+        const requestType = paymentMethod === 'atm' ? 'payWithATM' : 'captureWallet';
+
+        const payload = momoUtils.buildCreatePayload({
+            requestId,
+            amount,
+            orderId: orderNumber,
+            orderInfo,
+            requestType,
+        });
+
+        if (momoUtils.config.mockMode) {
+            const order = new Order({
+                orderNumber,
+                user: userId,
+                items: orderItems,
+                total: finalTotal,
+                discount: discountAmount,
+                shippingFee: 0,
+                shippingAddress,
+                paymentMethod,
+                isPaid: true,
+                paidAt: new Date(),
+                status: 'pending',
+            });
+            await order.save();
+            await notifyPaidOrder(order);
+
+            return res.json({
+                success: true,
+                payUrl: buildMockPayUrl(orderNumber, paymentMethod),
+                mock: true,
+            });
+        }
+
+        payload.signature = momoUtils.createSignature(payload);
+
+        const momoResponse = await axios.post(momoUtils.config.endpoint, payload, {
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+            },
+            timeout: 30000,
+        });
+
+        if (Number(momoResponse.data?.resultCode) !== 0 || !momoResponse.data?.payUrl) {
+            console.error('MoMo Create Error:', momoResponse.data);
+            return res.status(400).json({
+                success: false,
+                message: momoResponse.data?.message || 'MoMo từ chối khởi tạo giao dịch.',
+                resultCode: momoResponse.data?.resultCode,
+                momo: momoResponse.data,
+            });
+        }
+
         const order = new Order({
             orderNumber,
             user: userId,
@@ -86,59 +187,50 @@ router.post('/momo/create', requireAuth, async (req, res) => {
         });
         await order.save();
 
-        // Prepare MoMo Payload
-        const requestId = orderNumber + '_' + Date.now();
-        const orderInfo = `Thanh toan don hang ${orderNumber} tai AuraPC`;
-        const amount = String(finalTotal);
-
-        // Select request type based on standard MoMo docs
-        const requestType = paymentMethod === 'atm' ? 'payWithATM' : 'captureWallet';
-
-        const payload = {
-            partnerCode: momoUtils.config.partnerCode,
-            requestId,
-            amount,
-            orderId: orderNumber,
-            orderInfo,
-            redirectUrl: momoUtils.config.redirectUrl,
-            ipnUrl: momoUtils.config.ipnUrl,
-            extraData: '',
-            requestType,
-            lang: 'vi',
-        };
-
-        // Create signature
-        payload.signature = momoUtils.createSignature(payload);
-
-        // Make request to MoMo
-        const response = await axios.post(momoUtils.config.endpoint, payload);
-
-        if (response.data && response.data.payUrl) {
-            return res.json({ success: true, payUrl: response.data.payUrl });
-        } else {
-            console.error('MoMo Create Error:', response.data);
-            return res.status(400).json({ success: false, message: 'Lỗi khởi tạo thanh toán MoMo.' });
-        }
+        return res.json({ success: true, payUrl: momoResponse.data.payUrl });
     } catch (error) {
+        if (error.response?.data) {
+            const momoError = error.response.data;
+            const issues = momoUtils.getCreateConfigIssues({
+                paymentMethod,
+                amount: finalTotal,
+            });
+
+            if (Number(momoError.resultCode) === 11007) {
+                issues.unshift('Chữ ký HMAC không hợp lệ. Hãy kiểm tra MOMO_PARTNER_CODE / MOMO_ACCESS_KEY / MOMO_SECRET_KEY có thuộc cùng một merchant sandbox.');
+            }
+
+            console.error('MoMo Create Rejected:', momoError);
+            return res.status(400).json({
+                success: false,
+                message: momoError.message || 'MoMo từ chối request tạo thanh toán.',
+                resultCode: momoError.resultCode,
+                momo: momoError,
+                issues,
+            });
+        }
+
         console.error('MoMo Create Exception:', error);
-        res.status(500).json({ success: false, message: 'Lỗi server khi tạo thanh toán MoMo' });
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi tạo thanh toán MoMo',
+            code: error.code || undefined,
+        });
     }
 });
 
 // POST /api/payment/momo/ipn
-// MoMo Server-to-Server callback
+// MoMo server-to-server callback.
 router.post('/momo/ipn', async (req, res) => {
     try {
         const data = req.body;
 
-        // 1. Verify Signature
         const isValid = momoUtils.verifyIpnSignature(data);
         if (!isValid) {
             console.error('Invalid MoMo IPN Signature:', data);
             return res.status(400).json({ message: 'Invalid signature' });
         }
 
-        // 2. Process Result
         const { orderId, resultCode } = data;
         const order = await Order.findOne({ orderNumber: orderId });
 
@@ -148,37 +240,20 @@ router.post('/momo/ipn', async (req, res) => {
         }
 
         if (Number(resultCode) === 0) {
-            // Payment Successful
             order.isPaid = true;
             order.paidAt = new Date();
             order.status = 'pending';
             await order.save();
-
-            await createAdminNotification({
-                type: 'order_new',
-                order: order._id,
-                orderNumber: order.orderNumber,
-                title: 'Có đơn hàng mới',
-                message: `Đơn #${order.orderNumber} đã thanh toán và đang chờ xác nhận`,
-                metadata: {
-                    status: order.status,
-                    total: order.total,
-                    isPaid: order.isPaid,
-                    paymentMethod: order.paymentMethod,
-                },
-            });
+            await notifyPaidOrder(order);
             console.log(`Order ${orderId} marked as paid from MoMo IPN`);
         } else {
-            // Payment failed or canceled
-            // Do nothing or mark as canceled. For now we just log it.
             console.log(`Order ${orderId} MoMo IPN: Status ${resultCode}`);
         }
 
-        // 3. Return 204 No Content to MoMo as acknowledgment
         return res.status(204).send();
     } catch (error) {
         console.error('MoMo IPN Exception:', error);
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 });
 
