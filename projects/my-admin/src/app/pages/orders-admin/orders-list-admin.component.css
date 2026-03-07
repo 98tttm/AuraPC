@@ -40,14 +40,21 @@
 /* ── Charts Row ── */
 .charts-row {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.charts-row .chart-card {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .chart-wrapper {
   height: 220px;
   position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* ── Status List ── */
