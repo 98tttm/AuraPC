@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged, switchMap, map, tap, catchError } f
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { ApiService, Category, Product, productMainImage } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
 
@@ -59,6 +60,7 @@ export class HeaderComponent implements OnDestroy {
   // Dropdowns
   userDropdownOpen = signal<boolean>(false);
   cartDropdownOpen = signal<boolean>(false);
+  notifOpen = signal<boolean>(false);
 
   showLoginPopup = signal<boolean>(false);
   loginPhone = signal<string>('');
@@ -102,6 +104,7 @@ export class HeaderComponent implements OnDestroy {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private api = inject(ApiService);
+  notif = inject(NotificationService);
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private searchSubject = new Subject<string>();
   private searchSub: Subscription | null = null;
@@ -345,6 +348,22 @@ export class HeaderComponent implements OnDestroy {
     this.userDropdownTimer = setTimeout(() => {
       this.userDropdownOpen.set(false);
     }, 200);
+  }
+
+  toggleNotifications(event?: Event): void {
+    event?.stopPropagation();
+    const open = !this.notifOpen();
+    this.notifOpen.set(open);
+    if (open) {
+      this.notif.loadNotifications(true);
+      setTimeout(() => {
+        document.addEventListener('click', () => this.closeNotifDropdown(), { once: true });
+      }, 0);
+    }
+  }
+
+  closeNotifDropdown(): void {
+    this.notifOpen.set(false);
   }
 
   // --- Logout Modal ---

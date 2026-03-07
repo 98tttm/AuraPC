@@ -1,4 +1,4 @@
-﻿import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -373,7 +373,6 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   canShowDeliveryActions(order: OrderListItem): boolean {
     if (order.status !== 'shipped') return false;
-    if (!this.isShippingActionReady(order)) return false;
     return !this.hasPendingReturnRequest(order);
   }
 

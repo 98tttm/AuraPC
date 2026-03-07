@@ -199,6 +199,12 @@
           <button class="btn btn--outline" (click)="resolveReturnRequest('reject')" [disabled]="processingRequest() || updating()">
             Từ chối
           </button>
+          @if (contactPhone() || contactEmail()) {
+          <a [href]="contactPhone() ? ('tel:' + contactPhone()) : ('mailto:' + contactEmail())"
+             class="btn btn--outline" target="_blank" rel="noopener noreferrer">
+            Liên hệ khách
+          </a>
+          }
         </div>
       </div>
     }

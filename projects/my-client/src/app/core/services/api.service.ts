@@ -595,4 +595,29 @@ export class ApiService {
       `${BASE}/hub/user/${encodeURIComponent(userId)}/replies`
     );
   }
+
+  // ─── User notifications (client) ──────────────────────
+  getNotifications(limit = 20, unreadOnly = false): Observable<{ items: UserNotification[]; unreadCount: number }> {
+    let params = new HttpParams().set('limit', String(limit));
+    if (unreadOnly) params = params.set('unreadOnly', 'true');
+    return this.http.get<{ items: UserNotification[]; unreadCount: number }>(`${BASE}/notifications`, { params });
+  }
+
+  markNotificationRead(id: string): Observable<UserNotification> {
+    return this.http.patch<UserNotification>(`${BASE}/notifications/${encodeURIComponent(id)}/read`, {});
+  }
+
+  markAllNotificationsRead(): Observable<{ success: boolean; modifiedCount: number }> {
+    return this.http.patch<{ success: boolean; modifiedCount: number }>(`${BASE}/notifications/read-all`, {});
+  }
+}
+
+export interface UserNotification {
+  _id: string;
+  type: string;
+  title: string;
+  message: string;
+  metadata?: { orderNumber?: string };
+  readAt?: string | null;
+  createdAt?: string;
 }

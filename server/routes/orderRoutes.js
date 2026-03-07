@@ -5,6 +5,7 @@ const Product = require('../models/Product');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
 const { createAdminNotification } = require('../utils/adminNotifications');
+const { createUserNotification } = require('../utils/userNotifications');
 const { requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -257,13 +258,21 @@ router.post('/:orderNumber/confirm-received', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Cannot confirm delivery while return request is pending' });
     }
 
-    if (!canUserConfirmDelivery(order)) {
-      return res.status(400).json({ error: 'Please wait until shipping confirmation window is available' });
-    }
-
     order.status = 'delivered';
     order.deliveredAt = new Date();
     await order.save();
+
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    if (userId) {
+      await createUserNotification({
+        userId,
+        type: 'order_delivered',
+        title: 'Đơn hàng đã giao',
+        message: `Đơn #${order.orderNumber} đã được xác nhận đã giao. Cảm ơn bạn đã mua sắm!`,
+        metadata: { orderNumber: order.orderNumber },
+      });
+    }
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -280,10 +289,6 @@ router.post('/:orderNumber/return-request', requireAuth, async (req, res) => {
 
     if (order.status !== 'shipped') {
       return res.status(400).json({ error: 'Return request is only available for shipped orders' });
-    }
-
-    if (!canUserConfirmDelivery(order)) {
-      return res.status(400).json({ error: 'Return request will be available after shipping confirmation window' });
     }
 
     if (order.returnRequest?.status === 'pending') {

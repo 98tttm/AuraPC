@@ -1,6 +1,7 @@
 const express = require('express');
 const Order = require('../../models/Order');
 const { requireAdmin } = require('../../middleware/auth');
+const { createUserNotification } = require('../../utils/userNotifications');
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -105,6 +106,22 @@ router.put('/:orderNumber/status', async (req, res) => {
 
     await order.save();
 
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    if (userId) {
+      const titles = { processing: 'Đơn đang xử lý', shipped: 'Đơn đang giao' };
+      const messages = {
+        processing: `Đơn #${order.orderNumber} đang được xử lý.`,
+        shipped: `Đơn #${order.orderNumber} đã được gửi đi. Bạn có thể xác nhận đã nhận khi nhận được hàng.`,
+      };
+      await createUserNotification({
+        userId,
+        type: status === 'shipped' ? 'order_shipped' : 'order_processing',
+        title: titles[status] || 'Cập nhật đơn hàng',
+        message: messages[status] || `Đơn #${order.orderNumber} đã cập nhật.`,
+        metadata: { orderNumber: order.orderNumber },
+      });
+    }
+
     const updated = await getOrderDetail(req.params.orderNumber);
     res.json(updated);
   } catch (err) {
@@ -142,6 +159,19 @@ router.put('/:orderNumber/cancel-request', async (req, res) => {
     order.cancelRequest.note = adminNote;
     await order.save();
 
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    if (userId) {
+      await createUserNotification({
+        userId,
+        type: action === 'approve' ? 'order_cancel_approved' : 'order_cancel_rejected',
+        title: action === 'approve' ? 'Đơn đã được hủy' : 'Yêu cầu hủy đơn không được duyệt',
+        message: action === 'approve'
+          ? `Đơn #${order.orderNumber} đã được hủy theo yêu cầu.`
+          : `Yêu cầu hủy đơn #${order.orderNumber} không được duyệt.`,
+        metadata: { orderNumber: order.orderNumber },
+      });
+    }
+
     const updated = await getOrderDetail(req.params.orderNumber);
     res.json(updated);
   } catch (err) {
@@ -178,6 +208,19 @@ router.put('/:orderNumber/return-request', async (req, res) => {
     order.returnRequest.resolvedBy = req.adminId;
     order.returnRequest.note = adminNote;
     await order.save();
+
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    if (userId) {
+      await createUserNotification({
+        userId,
+        type: action === 'approve' ? 'order_return_approved' : 'order_return_rejected',
+        title: action === 'approve' ? 'Yêu cầu hoàn trả đã được duyệt' : 'Yêu cầu hoàn trả không được duyệt',
+        message: action === 'approve'
+          ? `Đơn #${order.orderNumber} đã được duyệt hoàn trả.`
+          : `Yêu cầu hoàn trả đơn #${order.orderNumber} không được duyệt.`,
+        metadata: { orderNumber: order.orderNumber },
+      });
+    }
 
     const updated = await getOrderDetail(req.params.orderNumber);
     res.json(updated);

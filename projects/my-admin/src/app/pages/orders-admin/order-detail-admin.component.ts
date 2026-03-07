@@ -211,6 +211,20 @@ export class OrderDetailAdminComponent implements OnInit {
     return o?.shippingAddress?.email || o?.user?.email || 'N/A';
   }
 
+  /** SĐT để link tel: (Liên hệ khách). Trả về undefined nếu không có. */
+  contactPhone(): string | undefined {
+    const o = this.order();
+    const v = o?.shippingAddress?.phone || o?.user?.phoneNumber;
+    return v && v !== 'N/A' ? v : undefined;
+  }
+
+  /** Email để link mailto: (Liên hệ khách). Trả về undefined nếu không có. */
+  contactEmail(): string | undefined {
+    const o = this.order();
+    const v = o?.shippingAddress?.email || o?.user?.email;
+    return v && v !== 'N/A' ? v : undefined;
+  }
+
   getShippingAddress(): string {
     const o = this.order();
     const address = o?.shippingAddress;

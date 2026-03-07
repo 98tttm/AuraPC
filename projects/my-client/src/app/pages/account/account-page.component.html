@@ -1,4 +1,4 @@
-﻿@if (user(); as u) {
+@if (user(); as u) {
 <div class="account">
   <nav class="account__breadcrumb">
     <a routerLink="/">Trang chủ</a>
@@ -270,23 +270,21 @@
                 </button>
                 }
 
-                @if (order.status === 'shipped' && !isShippingActionReady(order)) {
-                <span class="account__order-card-wait">Mở xác nhận sau {{ minutesUntilShippingAction(order) }} phút</span>
-                }
-
                 @if (canShowDeliveryActions(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--repurchase"
-                  (click)="confirmOrderReceived(order)">Đã nhận hàng</button>
+                  (click)="confirmOrderReceived(order)">Đã nhận</button>
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel"
-                  (click)="requestOrderReturn(order)">Hoàn trả</button>
+                  (click)="requestOrderReturn(order)">Hoàn trả đơn hàng</button>
                 } @else if (hasPendingReturnRequest(order)) {
                 <button type="button" class="account__order-card-btn account__order-card-btn--cancel" disabled>
                   Đang chờ duyệt hoàn trả
                 </button>
                 }
 
+                @if (order.status !== 'shipped') {
                 <button type="button" class="account__order-card-btn account__order-card-btn--repurchase"
                   (click)="repurchaseOrder(order)">Mua lại</button>
+                }
               </div>
             </div>
           </div>

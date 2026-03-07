@@ -762,6 +762,144 @@
   color: #b91c1c;
 }
 
+/* Notification dropdown */
+.header-notif-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-orange, #ff6d2d);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-notif-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  z-index: 1005;
+  animation: dropdownPop 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.header-notif-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.header-notif-mark-all {
+  background: none;
+  border: none;
+  color: var(--accent-orange, #ff6d2d);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.header-notif-mark-all:hover {
+  text-decoration: underline;
+}
+
+.header-notif-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+.header-notif-list {
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.header-notif-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.header-notif-item:hover {
+  background: #f5f5f5;
+}
+
+.header-notif-item--unread {
+  background: #fff8f5;
+}
+
+.header-notif-item--unread:hover {
+  background: #ffefe8;
+}
+
+.header-notif-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.header-notif-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-orange, #ff6d2d);
+  text-transform: uppercase;
+}
+
+.header-notif-time {
+  font-size: 11px;
+  color: #888;
+}
+
+.header-notif-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.header-notif-message {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-notif-order {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
 /* Cart Dropdown */
 .cart-dropdown {
   position: absolute;
