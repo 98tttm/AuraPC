@@ -159,8 +159,22 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     return topLevel.length > 0 ? topLevel.slice(0, 7) : all.slice(0, 7);
   });
   readonly benefits = [
-    { icon: '🚚', title: 'GIAO HÀNG\nNHANH' }, { icon: '⚙️', title: 'CẤU HÌNH\nĐỘC QUYỀN' },
-    { icon: '💬', title: 'TƯ VẤN\nTRỰC TIẾP' }, { icon: '🛡️', title: 'BẢO HÀNH\nAN TÂM' },
+    {
+      imageUrl: 'https://assets.corsair.com/image/upload/f_auto,q_auto/akamai/hybris/homepage/refresh/hp-icon-why-buy-shipping.png',
+      title: 'GIAO HÀNG\nNHANH',
+    },
+    {
+      imageUrl: 'https://assets.corsair.com/image/upload/f_auto,q_auto/akamai/hybris/homepage/refresh/hp-icon-why-buy-exclusives.png',
+      title: 'CẤU HÌNH\nĐỘC QUYỀN',
+    },
+    {
+      imageUrl: 'https://assets.corsair.com/image/upload/f_auto,q_auto/akamai/hybris/homepage/refresh/hp-icon-why-buy-live-chat.png',
+      title: 'TƯ VẤN\nTRỰC TIẾP',
+    },
+    {
+      imageUrl: 'https://assets.corsair.com/image/upload/f_auto,q_auto/akamai/hybris/homepage/refresh/hp-icons-why-buy-returns.png',
+      title: '60 NGÀY ĐỔI TRẢ\nMIỄN PHÍ',
+    },
   ];
 
   private readonly categoryImages = [

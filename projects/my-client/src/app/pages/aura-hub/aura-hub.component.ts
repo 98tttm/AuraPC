@@ -84,9 +84,10 @@ export class AuraHubComponent implements OnInit, OnDestroy {
             });
         }
 
-        // Check if we have a postId route param
+        // Check if we have a postId route param (direct link e.g. /aura-hub/123)
         const postId = this.route.snapshot.paramMap.get('postId');
         if (postId) {
+            this.loadPosts();
             this.openPostDetail(postId);
         } else {
             this.loadPosts();
@@ -342,13 +343,12 @@ export class AuraHubComponent implements OnInit, OnDestroy {
         this.moreMenuPostId.set(null);
     }
 
-    // ─── Post Detail ───
+    // ─── Post Detail (overlay only — không đổi URL khi mở từ feed, giữ trang và vị trí cuộn) ───
     openPostDetail(postId: string): void {
         this.api.getHubPost(postId).subscribe({
             next: (post) => {
                 this.detailPost.set(post);
                 this.loadComments(postId);
-                this.router.navigate(['/aura-hub', postId], { replaceUrl: true });
             },
         });
     }
@@ -359,7 +359,10 @@ export class AuraHubComponent implements OnInit, OnDestroy {
         this.commentText.set('');
         this.replyingTo.set(null);
         this.replyText.set('');
-        this.router.navigate(['/aura-hub'], { replaceUrl: true });
+        // Chỉ navigate khi vào từ link trực tiếp (/aura-hub/123) để về feed
+        if (this.route.snapshot.paramMap.get('postId')) {
+            this.router.navigate(['/aura-hub'], { replaceUrl: true });
+        }
     }
 
     loadComments(postId: string): void {
