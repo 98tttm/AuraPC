@@ -144,7 +144,7 @@ export class OrdersListAdminComponent implements OnInit, OnDestroy {
   }
 
   private applyThemeToCharts(): void {
-    const colors = getChartThemeColors();
+    const colors = getChartThemeColors(this.themeService.theme());
     this.trendChartOptions.set(this.buildTrendChartOptions());
     this.statusChartOptions.set(this.buildStatusChartOptions());
     if (this.lastTrendLabels.length === 0 && this.lastTrendCounts.length === 0 && this.lastStatusKeys.length === 0) return;
