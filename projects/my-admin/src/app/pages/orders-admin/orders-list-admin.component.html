@@ -89,7 +89,7 @@
     <div class="chart-card__title">Xu hướng đơn hàng</div>
     <div class="chart-card__subtitle">Đơn hàng hàng ngày trong 30 ngày</div>
     <div class="chart-wrapper">
-      <canvas baseChart type="line" [data]="trendChartData()" [options]="trendChartOptions"></canvas>
+      <canvas baseChart type="line" [data]="trendChartData()" [options]="trendChartOptions()"></canvas>
     </div>
   </div>
 
@@ -97,7 +97,7 @@
     <div class="chart-card__title">Trạng thái đơn hàng</div>
     <div class="chart-card__subtitle">Phân bổ hiện tại</div>
     <div class="chart-wrapper">
-      <canvas baseChart type="bar" [data]="statusChartData()" [options]="statusChartOptions"></canvas>
+      <canvas baseChart type="bar" [data]="statusChartData()" [options]="statusChartOptions()"></canvas>
     </div>
     <div class="status-list">
       @for (entry of ['delivered', 'shipped', 'processing', 'pending', 'cancelled']; track entry) {

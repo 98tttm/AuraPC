@@ -65,7 +65,7 @@
 }
 
 .status-list__label { color: var(--text-secondary); }
-.status-list__value { font-weight: 700; }
+.status-list__value { font-weight: 700; color: var(--text-primary); }
 
 /* ── Card Header ── */
 .card-header {

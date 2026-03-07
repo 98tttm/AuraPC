@@ -1,10 +1,12 @@
 import { Component, signal, ChangeDetectionStrategy, inject, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AdminAuthService } from '../core/auth/admin-auth.service';
 import { ThemeService } from '../core/theme.service';
+import { AdminApiService, AdminNotification } from '../core/admin-api.service';
+import { AdminRealtimeService } from '../core/services/realtime.service';
 import { ToastComponent } from '../shared/toast.component';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
-import { AdminApiService, AdminNotification } from '../core/admin-api.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -23,6 +25,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   notifOpen = signal(false);
   notifLoading = signal(false);
   private notifPollTimer: ReturnType<typeof setInterval> | null = null;
+  private orderUpdatedSub: Subscription | null = null;
 
   @ViewChild('notifMenu') notifMenu?: ElementRef<HTMLElement>;
   @ViewChild('notifButton') notifButton?: ElementRef<HTMLButtonElement>;
@@ -30,17 +33,22 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   constructor(
     public router: Router,
     private auth: AdminAuthService,
-    private api: AdminApiService
+    private api: AdminApiService,
+    private realtime: AdminRealtimeService,
   ) {}
 
   ngOnInit(): void {
     this.loadNotifications();
     this.notifPollTimer = setInterval(() => {
       this.loadNotifications(true);
-    }, 10000);
+    }, 30000);
+    this.orderUpdatedSub = this.realtime.orderUpdated$.subscribe(() => {
+      this.loadNotifications(true);
+    });
   }
 
   ngOnDestroy(): void {
+    this.orderUpdatedSub?.unsubscribe();
     if (this.notifPollTimer) {
       clearInterval(this.notifPollTimer);
       this.notifPollTimer = null;
@@ -133,6 +141,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     if (type === 'order_new') return 'Đơn mới';
     if (type === 'order_cancel_request') return 'Yêu cầu hủy';
     if (type === 'order_return_request') return 'Yêu cầu hoàn trả';
+    if (type === 'order_delivered') return 'Đơn hoàn tất';
     return 'Thông báo';
   }
 

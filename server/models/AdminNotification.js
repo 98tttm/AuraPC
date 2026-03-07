@@ -4,7 +4,7 @@ const adminNotificationSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['order_new', 'order_cancel_request', 'order_return_request'],
+      enum: ['order_new', 'order_cancel_request', 'order_return_request', 'order_delivered'],
       required: true,
     },
     order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },

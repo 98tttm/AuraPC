@@ -1,10 +1,12 @@
 import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { AddressService, Address, VNLocation } from '../../core/services/address.service';
 import { ApiService, OrderListItem, Product } from '../../core/services/api.service';
 import { CartService } from '../../core/services/cart.service';
+import { RealtimeService } from '../../core/services/realtime.service';
 import { environment } from '../../../environments/environment';
 
 const ORDER_NAME_STORAGE_PREFIX = 'aurapc_order_name_';
@@ -24,7 +26,10 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
   private cart = inject(CartService);
+  private realtime = inject(RealtimeService);
   readonly addressService = inject(AddressService);
+
+  private orderUpdatedSub: Subscription | null = null;
 
   readonly user = this.auth.currentUser;
   activeTab = signal<'profile' | 'orders' | 'address' | 'hub'>('profile');
@@ -104,9 +109,14 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     // Theo dõi thay đổi query params (khi click link hoặc navigate)
     this.route.queryParams.subscribe((params) => this.syncTabFromUrl(params));
     this.loadSocialCounts(); // Load ALWAYS
+    // Realtime: khi đơn thay đổi (admin/khách) → refresh danh sách đơn
+    this.orderUpdatedSub = this.realtime.orderUpdated$.subscribe(() => {
+      if (this.activeTab() === 'orders') this.loadOrders(true);
+    });
   }
 
   ngOnDestroy(): void {
+    this.orderUpdatedSub?.unsubscribe();
     this.stopOrdersPolling();
   }
 

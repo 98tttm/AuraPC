@@ -159,7 +159,7 @@ export interface UsersListResponse {
 
 export interface AdminNotification {
   _id: string;
-  type: 'order_new' | 'order_cancel_request' | 'order_return_request';
+  type: 'order_new' | 'order_cancel_request' | 'order_return_request' | 'order_delivered';
   order?: string;
   orderNumber: string;
   title: string;

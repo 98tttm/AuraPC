@@ -2,10 +2,12 @@ require('dotenv').config();
 // Ép DNS ưu tiên IPv4 (tránh ENETUNREACH khi Render kết nối Gmail SMTP qua IPv6)
 require('dns').setDefaultResultOrder('ipv4first');
 
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
+const { initSocket } = require('./socket');
 
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -118,7 +120,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => logger.info(`Server đang chạy trên cổng ${PORT}`));
+const httpServer = http.createServer(app);
+initSocket(httpServer);
+httpServer.listen(PORT, () => logger.info(`Server đang chạy trên cổng ${PORT}`));
 
 // Graceful shutdown & crash prevention
 process.on('unhandledRejection', (reason) => {

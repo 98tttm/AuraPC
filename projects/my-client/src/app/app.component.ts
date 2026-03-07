@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, inject } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
@@ -6,6 +6,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ChatbotWidgetComponent } from './components/chatbot-widget/chatbot-widget.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RealtimeService } from './core/services/realtime.service';
 
 @Component({
   selector: 'app-root',
@@ -48,7 +49,11 @@ export class AppComponent implements OnInit, OnDestroy {
   private mutationObs: MutationObserver | null = null;
   private observedEls = new WeakSet<Element>();
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    /** Khởi tạo realtime socket khi app load (kết nối khi user đã đăng nhập). */
+    _realtime: RealtimeService,
+  ) {}
 
   ngOnInit(): void {
     this.initScrollAnimations();

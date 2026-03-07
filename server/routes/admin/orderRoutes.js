@@ -2,6 +2,7 @@ const express = require('express');
 const Order = require('../../models/Order');
 const { requireAdmin } = require('../../middleware/auth');
 const { createUserNotification } = require('../../utils/userNotifications');
+const { emitOrderUpdated } = require('../../socket');
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -123,6 +124,8 @@ router.put('/:orderNumber/status', async (req, res) => {
     }
 
     const updated = await getOrderDetail(req.params.orderNumber);
+    const userIdStatus = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userIdStatus || undefined });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -173,6 +176,8 @@ router.put('/:orderNumber/cancel-request', async (req, res) => {
     }
 
     const updated = await getOrderDetail(req.params.orderNumber);
+    const userIdCancel = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userIdCancel || undefined });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -223,6 +228,8 @@ router.put('/:orderNumber/return-request', async (req, res) => {
     }
 
     const updated = await getOrderDetail(req.params.orderNumber);
+    const userIdReturn = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userIdReturn || undefined });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

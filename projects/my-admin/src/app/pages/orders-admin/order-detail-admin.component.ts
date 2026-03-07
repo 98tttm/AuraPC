@@ -1,8 +1,10 @@
-import { Component, signal, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { AdminApiService, Order } from '../../core/admin-api.service';
+import { AdminRealtimeService } from '../../core/services/realtime.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm-dialog.component';
 import { ORDER_STATUS_LABELS } from '../../core/constants';
@@ -29,11 +31,14 @@ const ADMIN_STATUS_OPTIONS: Record<string, string[]> = {
   templateUrl: './order-detail-admin.component.html',
   styleUrl: './order-detail-admin.component.css',
 })
-export class OrderDetailAdminComponent implements OnInit {
+export class OrderDetailAdminComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private api = inject(AdminApiService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
+  private realtime = inject(AdminRealtimeService);
+
+  private orderUpdatedSub: Subscription | null = null;
 
   order = signal<Order | null>(null);
   loading = signal(true);
@@ -50,6 +55,13 @@ export class OrderDetailAdminComponent implements OnInit {
   ngOnInit(): void {
     this.orderNumber = this.route.snapshot.paramMap.get('orderNumber') || '';
     if (this.orderNumber) this.loadOrder(this.orderNumber);
+    this.orderUpdatedSub = this.realtime.orderUpdated$.subscribe((data) => {
+      if (data.orderNumber === this.orderNumber) this.loadOrder(this.orderNumber);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.orderUpdatedSub?.unsubscribe();
   }
 
   private loadOrder(orderNumber: string): void {

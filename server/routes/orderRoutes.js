@@ -6,6 +6,7 @@ const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
 const { createAdminNotification } = require('../utils/adminNotifications');
 const { createUserNotification } = require('../utils/userNotifications');
+const { emitOrderUpdated } = require('../socket');
 const { requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -143,6 +144,9 @@ router.post('/', optionalAuth, async (req, res) => {
       },
     });
 
+    const userIdNew = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: 'pending', userId: userIdNew || undefined });
+
     // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
     const shouldSendInvoice = requestInvoice && invoiceEmail && typeof invoiceEmail === 'string' && invoiceEmail.trim().includes('@');
     if (shouldSendInvoice) {
@@ -236,6 +240,8 @@ router.post('/:orderNumber/cancel-request', requireAuth, async (req, res) => {
       metadata: { status: order.status, reason },
     });
 
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userId || undefined });
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -273,6 +279,16 @@ router.post('/:orderNumber/confirm-received', requireAuth, async (req, res) => {
       });
     }
 
+    await createAdminNotification({
+      type: 'order_delivered',
+      order: order._id,
+      orderNumber: order.orderNumber,
+      title: 'Đơn hàng hoàn tất',
+      message: `Khách đã xác nhận nhận hàng đơn #${order.orderNumber}`,
+      metadata: { status: 'delivered' },
+    });
+
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: 'delivered', userId: userId || undefined });
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -315,6 +331,8 @@ router.post('/:orderNumber/return-request', requireAuth, async (req, res) => {
       metadata: { status: order.status, reason },
     });
 
+    const userIdReturn = order.user && order.user.toString ? order.user.toString() : order.user;
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userIdReturn || undefined });
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });

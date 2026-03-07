@@ -79,6 +79,16 @@
 
 ---
 
+## Realtime (Socket.IO) – Cập nhật hai chiều
+
+- **Backend:** Socket.IO gắn vào HTTP server; auth bằng JWT (user → room `user:${userId}`, admin → room `admin`). Khi đơn thay đổi (confirm-received, return-request, admin đổi trạng thái, v.v.) gọi `emitOrderUpdated({ orderNumber, status, userId })` → push tới admin và user đó.
+- **Client (my-client):** `RealtimeService` kết nối khi đã đăng nhập; nhận `order:updated` → refresh thông báo (chuông) và (nếu đang ở tab Đơn hàng) danh sách đơn.
+- **Admin (my-admin):** `AdminRealtimeService` kết nối khi admin đã đăng nhập; nhận `order:updated` → refresh thông báo (chuông), danh sách đơn và (nếu đang xem đơn đó) chi tiết đơn. Polling thông báo giảm còn 30s (fallback).
+
+**Files:** `server/socket.js`, `server/index.js`, `server/routes/orderRoutes.js`, `server/routes/admin/orderRoutes.js`; `projects/my-client/.../realtime.service.ts`, `projects/my-admin/.../realtime.service.ts`; account-page, admin-layout, orders-list-admin, order-detail-admin.
+
+---
+
 ## Chấp nhận plan
 
 Nếu bạn đồng ý với plan này, reply **"accept"** hoặc **"bắt đầu"** để triển khai theo thứ tự trên. Có thể chỉ làm Phase 1 trước rồi làm Phase 2–3 sau.

@@ -37,6 +37,9 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
   --chart-grid: #f0f0f0;
   --chart-text: #9ca3af;
+  --chart-line: #1a1a2e;
+  --chart-area: rgba(26, 26, 46, 0.12);
+  --chart-point-border: #ffffff;
 }
 
 /* ── CommerceHub Dark Theme ── */
@@ -72,6 +75,9 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --chart-grid: #2a2d37;
   --chart-text: #6b7280;
+  --chart-line: #ffffff;
+  --chart-area: rgba(255, 255, 255, 0.12);
+  --chart-point-border: #1a1d27;
 }
 
 * {
