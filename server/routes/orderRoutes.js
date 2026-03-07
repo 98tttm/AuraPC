@@ -57,6 +57,23 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
+/** GET /api/orders/track/:orderNumber - tra cứu đơn theo mã đơn (không cần đăng nhập), trả về đầy đủ thông tin đơn + product slug/images */
+router.get('/track/:orderNumber', async (req, res) => {
+  try {
+    const orderNumber = (req.params.orderNumber || '').trim().toUpperCase();
+    if (!orderNumber) return res.status(400).json({ error: 'Vui lòng nhập mã đơn hàng' });
+    const order = await Order.findOne({ orderNumber })
+      .populate('items.product', 'name slug images')
+      .lean();
+    if (!order) return res.status(404).json({ error: 'Không tìm thấy đơn hàng với mã này' });
+    delete order.user;
+    if (!Array.isArray(order.items)) order.items = [];
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/', optionalAuth, async (req, res) => {
   try {
     const {

@@ -127,7 +127,7 @@ export class HeaderComponent implements OnDestroy {
     { id: 'guide', label: 'HƯỚNG DẪN', route: '/' },
     { id: 'aura-builder', label: 'AURA BUILDER', route: '/aura-builder' },
     { id: 'aurahub', label: 'AURAHUB', route: '/aura-hub' },
-    { id: 'support', label: 'HỖ TRỢ', route: '/' },
+    { id: 'support', label: 'HỖ TRỢ', route: '/ho-tro' },
   ];
 
   /** Megamenu: 7 cột – Laptop, PC, Màn hình, Linh Kiện, Gaming Gear, Phụ kiện, Bàn - Ghế. */

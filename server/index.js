@@ -28,6 +28,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const hubRoutes = require('./routes/hubRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const faqRoutes = require('./routes/faqRoutes');
 
 connectDB();
 
@@ -105,6 +106,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/hub', hubRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/faqs', faqRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));

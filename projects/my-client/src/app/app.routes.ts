@@ -69,5 +69,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/collabs-minecraft/collabs-minecraft.component').then((m) => m.CollabsMinecraftComponent),
   },
+  {
+    path: 've-aurapc',
+    loadComponent: () =>
+      import('./pages/ve-aurapc/ve-aurapc.component').then((m) => m.VeAurapcComponent),
+  },
+  {
+    path: 've-aurapc/:slug',
+    loadComponent: () =>
+      import('./pages/ve-aurapc/ve-aurapc.component').then((m) => m.VeAurapcComponent),
+  },
+  {
+    path: 'ho-tro',
+    loadComponent: () =>
+      import('./pages/support/support.component').then((m) => m.SupportComponent),
+  },
+  {
+    path: 'tra-cuu-don-hang',
+    loadComponent: () =>
+      import('./pages/track-order/track-order.component').then((m) => m.TrackOrderComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

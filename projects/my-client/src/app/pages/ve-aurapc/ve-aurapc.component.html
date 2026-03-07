@@ -1,0 +1,42 @@
+<div class="ve-page">
+  <nav class="ve-breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span class="ve-breadcrumb__sep">/</span>
+    <span class="ve-breadcrumb__current">{{ getPageTitle() }}</span>
+  </nav>
+
+  <div class="ve-container">
+    <aside class="ve-sidebar">
+      <h3 class="ve-sidebar__title">Bài viết trong danh mục</h3>
+      <ul class="ve-sidebar__list">
+        @for (item of sidebarItems; track item.slug) {
+          <li>
+            <a
+              [routerLink]="item.slug === 'gioi-thieu' ? ['/ve-aurapc'] : ['/ve-aurapc', item.slug]"
+              [class.ve-sidebar__link--active]="isActive(item.slug)"
+              class="ve-sidebar__link"
+            >
+              {{ item.title }}
+            </a>
+          </li>
+        }
+      </ul>
+    </aside>
+
+    <main class="ve-main">
+      <h1 class="ve-main__title">{{ getPageTitle() }}</h1>
+      <div class="ve-main__content">
+        @for (block of getPageContent(); track $index) {
+          @if (block.type === 'section' && block.title) {
+            <div class="ve-section">
+              <h2 class="ve-section__title">{{ block.title }}</h2>
+              <p class="ve-section__text">{{ block.text }}</p>
+            </div>
+          } @else {
+            <p class="ve-paragraph">{{ block.text }}</p>
+          }
+        }
+      </div>
+    </main>
+  </div>
+</div>

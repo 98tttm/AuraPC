@@ -104,6 +104,9 @@ export interface OrderListItem {
   updatedAt?: string;
 }
 
+/** Kết quả tra cứu đơn (GET /api/orders/track/:orderNumber) - đầy đủ thông tin */
+export type TrackOrderResult = Omit<OrderListItem, 'user'>;
+
 export interface ProductsResponse {
   items: Product[];
   total: number;
@@ -393,6 +396,12 @@ export class ApiService {
     return this.http.get<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}`);
   }
 
+  /** Tra cứu đơn theo mã đơn (không cần đăng nhập), trả về đầy đủ thông tin đơn */
+  trackOrder(orderNumber: string): Observable<Omit<OrderListItem, 'user'>> {
+    const num = orderNumber.trim().replace(/^ORD\-/i, '').toUpperCase();
+    return this.http.get<Omit<OrderListItem, 'user'>>(`${BASE}/orders/track/${encodeURIComponent(num)}`);
+  }
+
   requestOrderCancellation(orderNumber: string, reason?: string): Observable<OrderListItem> {
     return this.http.post<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}/cancel-request`, {
       reason: reason || '',
@@ -610,6 +619,21 @@ export class ApiService {
   markAllNotificationsRead(): Observable<{ success: boolean; modifiedCount: number }> {
     return this.http.patch<{ success: boolean; modifiedCount: number }>(`${BASE}/notifications/read-all`, {});
   }
+
+  /** Danh sách FAQ (trang Hỗ trợ) */
+  getFaqs(category?: string): Observable<FaqItem[]> {
+    let url = `${BASE}/faqs`;
+    if (category) url += `?category=${encodeURIComponent(category)}`;
+    return this.http.get<FaqItem[]>(url);
+  }
+}
+
+export interface FaqItem {
+  _id: string;
+  question: string;
+  answer: string;
+  category?: string;
+  order?: number;
 }
 
 export interface UserNotification {

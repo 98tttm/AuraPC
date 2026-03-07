@@ -1,0 +1,144 @@
+<div class="track-page">
+  <nav class="track-breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span class="track-breadcrumb__sep">/</span>
+    <a routerLink="/ho-tro">Hỗ trợ</a>
+    <span class="track-breadcrumb__sep">/</span>
+    <span class="track-breadcrumb__current">Tra cứu đơn hàng</span>
+  </nav>
+
+  <div class="track-search">
+    <div class="track-search__box">
+      <svg class="track-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        class="track-search__input"
+        placeholder="Nhập mã đơn hàng (ví dụ: AP250307XXXX)"
+        [ngModel]="orderNumber()"
+        (ngModelChange)="orderNumber.set($event)"
+        (keydown.enter)="track()"
+      />
+      <button
+        type="button"
+        class="track-search__btn"
+        [disabled]="loading() || !orderNumber().trim()"
+        (click)="track()"
+      >
+        {{ loading() ? 'Đang tra...' : 'Tra cứu' }}
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="track-error">{{ error() }}</p>
+  }
+
+  @if (result(); as order) {
+    <div class="track-result">
+      <h2 class="track-result__title">Đơn hàng #{{ order.orderNumber }}</h2>
+      <div class="track-result__status" [class]="'track-result__status--' + order.status">
+        {{ getStatusLabel(order.status) }}
+      </div>
+
+      <section class="track-section">
+        <h3 class="track-section__title">Thông tin đơn hàng</h3>
+        <dl class="track-dl">
+          <dt>Ngày đặt</dt>
+          <dd>{{ formatDate(order.createdAt) }}</dd>
+          <dt>Phương thức thanh toán</dt>
+          <dd>{{ getPaymentLabel(order.paymentMethod || '') }}</dd>
+          <dt>Trạng thái thanh toán</dt>
+          <dd>{{ order.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán' }}</dd>
+          @if (order.shippedAt) {
+            <dt>Ngày giao vận</dt>
+            <dd>{{ formatDate(order.shippedAt) }}</dd>
+          }
+          @if (order.deliveredAt) {
+            <dt>Ngày giao hàng</dt>
+            <dd>{{ formatDate(order.deliveredAt) }}</dd>
+          }
+        </dl>
+      </section>
+
+      <section class="track-section">
+        <h3 class="track-section__title">Sản phẩm</h3>
+        @if ((order.items ?? []).length === 0) {
+          <p class="track-items-empty">Đơn hàng này không có dữ liệu sản phẩm. Nếu đơn của bạn có sản phẩm, vui lòng liên hệ bộ phận chăm sóc khách hàng.</p>
+        } @else {
+          <ul class="track-items">
+            @for (item of (order.items ?? []); track $index) {
+              <li class="track-item">
+                <div class="track-item__img-wrap">
+                  @if (getItemImage(item); as imgUrl) {
+                    <img [src]="imgUrl" [alt]="item.name" class="track-item__img" />
+                  } @else {
+                    <div class="track-item__img track-item__img--placeholder">—</div>
+                  }
+                </div>
+                <div class="track-item__info">
+                  @if (item.product?.slug; as slug) {
+                    <a [routerLink]="['/san-pham', slug]" class="track-item__link">{{ item.name }}</a>
+                  } @else {
+                    <span class="track-item__name">{{ item.name }}</span>
+                  }
+                  <span class="track-item__qty">x{{ item.qty }}</span>
+                </div>
+                <span class="track-item__price">{{ (item.price * item.qty) | number:'1.0-0' }}₫</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      @if (order.shippingAddress && (order.shippingAddress['fullName'] || order.shippingAddress['address'])) {
+        <section class="track-section">
+          <h3 class="track-section__title">Địa chỉ giao hàng</h3>
+          <div class="track-address">
+            @if (order.shippingAddress['fullName']) {
+              <p><strong>{{ order.shippingAddress['fullName'] }}</strong></p>
+            }
+            @if (order.shippingAddress['phone']) {
+              <p>{{ order.shippingAddress['phone'] }}</p>
+            }
+            @if (order.shippingAddress['email']) {
+              <p>{{ order.shippingAddress['email'] }}</p>
+            }
+            @if (order.shippingAddress['address']) {
+              <p>
+                {{ order.shippingAddress['address'] }}
+                @if (order.shippingAddress['ward']) {, {{ order.shippingAddress['ward'] }}}
+                @if (order.shippingAddress['district']) {, {{ order.shippingAddress['district'] }}}
+                @if (order.shippingAddress['city']) {, {{ order.shippingAddress['city'] }}}
+              </p>
+            }
+            @if (order.shippingAddress['note']) {
+              <p class="track-address__note">Ghi chú: {{ order.shippingAddress['note'] }}</p>
+            }
+          </div>
+        </section>
+      }
+
+      <section class="track-section track-totals">
+        @if (order.shippingFee && order.shippingFee > 0) {
+          <div class="track-total-row">
+            <span>Phí vận chuyển</span>
+            <span>{{ order.shippingFee | number:'1.0-0' }}₫</span>
+          </div>
+        }
+        @if (order.discount && order.discount > 0) {
+          <div class="track-total-row">
+            <span>Giảm giá</span>
+            <span>-{{ order.discount | number:'1.0-0' }}₫</span>
+          </div>
+        }
+        <div class="track-total-row track-total-row--main">
+          <span class="track-total-label">Tổng cộng</span>
+          <span class="track-total-amount">{{ order.total | number:'1.0-0' }}₫</span>
+        </div>
+      </section>
+    </div>
+  }
+</div>

@@ -1,0 +1,85 @@
+<div class="support-page">
+  <nav class="support-breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span class="support-breadcrumb__sep">/</span>
+    <span class="support-breadcrumb__current">Hỗ trợ</span>
+  </nav>
+
+  <div class="support-search">
+    <div class="support-search__box">
+      <svg class="support-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        class="support-search__input"
+        placeholder="Tìm kiếm hoặc xem FAQ theo danh mục bên dưới"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+      <button type="button" class="support-search__btn">Tìm kiếm</button>
+    </div>
+  </div>
+
+  <h2 class="support-heading">Chủ đề phổ biến</h2>
+
+  <div class="support-grid">
+    <!-- Cột 1: FAQ -->
+    <section class="support-card">
+      <h3 class="support-card__title">FAQ</h3>
+      @if (loadingFaqs()) {
+        <p class="support-card__loading">Đang tải...</p>
+      } @else if (filteredFaqs.length === 0) {
+        <p class="support-card__empty">Chưa có câu hỏi nào.</p>
+      } @else {
+        <ul class="support-faq-list">
+          @for (faq of filteredFaqs; track faq._id) {
+            <li class="support-faq-item">
+              <button
+                type="button"
+                class="support-faq-item__q"
+                (click)="toggleFaq(faq._id)"
+                [attr.aria-expanded]="isExpanded(faq._id)"
+              >
+                {{ faq.question }}
+              </button>
+              @if (isExpanded(faq._id)) {
+                <div class="support-faq-item__a">{{ faq.answer }}</div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Cột 2: Tra mã đơn hàng -->
+    <section class="support-card">
+      <h3 class="support-card__title">Tra mã đơn hàng</h3>
+      <p class="support-track__hint">Nhập mã đơn (ví dụ: AP250307XXXX) để xem trạng thái và thông tin đầy đủ của đơn hàng.</p>
+      <input
+        type="text"
+        class="support-track__input"
+        placeholder="Mã đơn hàng"
+        [ngModel]="orderNumber()"
+        (ngModelChange)="orderNumber.set($event)"
+        (keydown.enter)="goTrackOrder()"
+      />
+      <button type="button" class="support-track__btn" (click)="goTrackOrder()">
+        Tra cứu đơn hàng
+      </button>
+    </section>
+
+    <!-- Cột 3: Dịch vụ khách hàng -->
+    <section class="support-card">
+      <h3 class="support-card__title">Dịch vụ khách hàng</h3>
+      <ul class="support-service-list">
+        @for (link of serviceLinks; track link.route) {
+          <li>
+            <a [routerLink]="link.route" class="support-service-link">{{ link.label }}</a>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+</div>
