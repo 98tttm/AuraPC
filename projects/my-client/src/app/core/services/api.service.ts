@@ -175,6 +175,11 @@ export interface ProductReviewsResponse {
   commentCount: number;
 }
 
+export interface CanReviewResponse {
+  canReview: boolean;
+  alreadyReviewed: boolean;
+}
+
 /** Response từ /api/products/filter-options */
 export interface FilterOptionsResponse {
   brands: string[];
@@ -475,8 +480,8 @@ export class ApiService {
   }
 
   /** Kiểm tra user có được đánh giá (đã mua + đã nhận hàng) */
-  canReview(productId: string): Observable<{ canReview: boolean }> {
-    return this.http.get<{ canReview: boolean }>(`${BASE}/reviews/can-review`, {
+  canReview(productId: string): Observable<CanReviewResponse> {
+    return this.http.get<CanReviewResponse>(`${BASE}/reviews/can-review`, {
       params: { productId },
     });
   }

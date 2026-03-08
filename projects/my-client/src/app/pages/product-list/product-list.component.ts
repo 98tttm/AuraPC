@@ -11,6 +11,7 @@ import {
   productHasSale,
   productSalePercent,
 } from '../../core/services/api.service';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
 const PRICE_RANGES: { id: string; label: string; min?: number; max?: number }[] = [
   { id: 'all', label: 'Tất Cả' },
@@ -175,7 +176,7 @@ import { CartService } from '../../core/services/cart.service';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RecentlyViewedSectionComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

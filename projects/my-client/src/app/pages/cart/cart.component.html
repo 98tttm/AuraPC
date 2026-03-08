@@ -157,6 +157,8 @@
         }
     </div>
 
+    <app-recently-viewed-section title="Sản phẩm vừa xem" [limit]="4"></app-recently-viewed-section>
+
     <!-- Delete Confirmation Popup -->
     @if (showDeletePopup()) {
     <div class="delete-popup-overlay" (click)="cancelDelete()">

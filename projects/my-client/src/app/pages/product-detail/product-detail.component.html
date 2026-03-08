@@ -191,7 +191,7 @@
       <h2 class="pd-section-title">SẢN PHẨM LIÊN QUAN</h2>
       <div class="pd-related-grid">
         @for (rp of relatedProducts(); track rp._id) {
-        <a class="pd-related-card" [routerLink]="['/san-pham', rp.slug || rp._id]">
+        <a class="pd-related-card" [routerLink]="productRoute(rp)" [queryParams]="productQueryParams(rp) || undefined">
           <div class="pd-related-img">
             <img [src]="mainImage(rp)" [alt]="rp.name" />
           </div>
@@ -218,7 +218,9 @@
             [disabled]="isLoggedIn() && !canReview() && !canReviewLoading()">
             Gửi đánh giá
           </button>
-          @if (!canReview() && isLoggedIn()) {
+          @if (alreadyReviewed() && isLoggedIn()) {
+          <span class="review-hint">Bạn đã đánh giá sản phẩm này rồi.</span>
+          } @else if (!canReview() && isLoggedIn()) {
           <span class="review-hint">Chỉ khách hàng đã mua và nhận hàng mới được đánh giá.</span>
           }
         </div>
@@ -373,9 +375,6 @@
           (click)="onQaSortChange('oldest')">
           Cũ nhất
         </button>
-        <button class="review-filter-btn review-filter-btn--qa" [class.active]="false" disabled title="Sắp có">
-          Hữu ích nhất
-        </button>
       </div>
 
       <!-- Popup bình luận -->
@@ -465,11 +464,12 @@
     </div>
 
     <!-- Recently Viewed -->
+    @if (recentlyViewedProducts().length) {
     <div class="pd-related">
       <h2 class="pd-section-title">SẢN PHẨM VỪA XEM</h2>
       <div class="pd-related-grid">
-        @for (rp of relatedProducts(); track rp._id) {
-        <a class="pd-related-card" [routerLink]="['/san-pham', rp.slug || rp._id]">
+        @for (rp of recentlyViewedProducts(); track rp._id) {
+        <a class="pd-related-card" [routerLink]="productRoute(rp)" [queryParams]="productQueryParams(rp) || undefined">
           <div class="pd-related-img">
             <img [src]="mainImage(rp)" [alt]="rp.name" />
           </div>
@@ -479,6 +479,7 @@
         }
       </div>
     </div>
+    }
     }
   </div>
 </div>

@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe, NgIf } from '@angular/common';
 import { ApiService, BlogPost, Product } from '../../core/services/api.service';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
 type BlogCategorySlug =
   | 'tin-tuc'
@@ -22,7 +23,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, NgIf],
+  imports: [RouterLink, DecimalPipe, NgIf, RecentlyViewedSectionComponent],
   template: `
     <section class="blog-page">
       <nav class="pl-breadcrumb">
@@ -158,6 +159,8 @@ const CATEGORY_LABELS: Record<string, string> = {
           </div>
         }
       </div>
+
+      <app-recently-viewed-section title="Sản phẩm vừa xem" [limit]="4"></app-recently-viewed-section>
     </section>
   `,
   styles: [`

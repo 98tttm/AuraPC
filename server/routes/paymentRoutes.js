@@ -30,6 +30,63 @@ function buildMockPayUrl(orderNumber, paymentMethod) {
     return url.toString();
 }
 
+function orderAddressFingerprint(shippingAddress = {}) {
+    return [
+        shippingAddress.fullName,
+        shippingAddress.phone,
+        shippingAddress.address,
+        shippingAddress.ward,
+        shippingAddress.district,
+        shippingAddress.city,
+    ]
+        .map((value) => String(value || '').trim().toLowerCase())
+        .join('|');
+}
+
+function orderItemsFingerprint(items = []) {
+    return items
+        .map((item) => {
+            const productId = item?.product?._id || item?.product || item?.name || '';
+            const qty = Math.max(1, Number(item?.qty) || 1);
+            const price = Number(item?.price) || 0;
+            return `${String(productId)}:${qty}:${price}`;
+        })
+        .sort()
+        .join('|');
+}
+
+function buildDuplicateFingerprint({ items, shippingAddress, total, paymentMethod }) {
+    return [
+        paymentMethod || '',
+        Number(total) || 0,
+        orderAddressFingerprint(shippingAddress),
+        orderItemsFingerprint(items),
+    ].join('||');
+}
+
+async function findRecentDuplicateOrder({ userId, items, shippingAddress, total, paymentMethod, windowMs = 15 * 60 * 1000 }) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return null;
+
+    const since = new Date(Date.now() - windowMs);
+    const candidates = await Order.find({
+        user: new mongoose.Types.ObjectId(userId),
+        paymentMethod,
+        total: Number(total) || 0,
+        status: { $in: ['pending', 'confirmed', 'processing', 'shipped', 'delivered'] },
+        createdAt: { $gte: since },
+    }).lean();
+
+    const target = buildDuplicateFingerprint({ items, shippingAddress, total, paymentMethod });
+    return candidates.find((order) => (
+        buildDuplicateFingerprint({
+            items: order.items || [],
+            shippingAddress: order.shippingAddress || {},
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+        }) === target
+    )) || null;
+}
+
 async function notifyPaidOrder(order) {
     await createAdminNotification({
         type: 'order_new',
@@ -103,6 +160,30 @@ router.post('/momo/create', requireAuth, async (req, res) => {
 
         const discountAmount = Number(directDiscount) || 0;
         finalTotal = Math.max(0, originalTotal - discountAmount);
+        const duplicateOrder = await findRecentDuplicateOrder({
+            userId,
+            items: orderItems,
+            shippingAddress: shippingAddress || {},
+            total: finalTotal,
+            paymentMethod,
+        });
+        if (duplicateOrder) {
+            if (momoUtils.config.mockMode) {
+                return res.json({
+                    success: true,
+                    payUrl: buildMockPayUrl(duplicateOrder.orderNumber, paymentMethod),
+                    mock: true,
+                    deduped: true,
+                });
+            }
+
+            return res.status(409).json({
+                success: false,
+                message: `Bạn vừa tạo một đơn tương tự gần đây. Vui lòng kiểm tra đơn #${duplicateOrder.orderNumber}.`,
+                orderNumber: duplicateOrder.orderNumber,
+                deduped: true,
+            });
+        }
 
         const configIssues = momoUtils.getCreateConfigIssues({
             paymentMethod,

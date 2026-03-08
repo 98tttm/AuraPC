@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService, FaqItem } from '../../core/services/api.service';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
 export interface SupportServiceLink {
   label: string;
@@ -12,7 +13,7 @@ export interface SupportServiceLink {
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RecentlyViewedSectionComponent],
   templateUrl: './support.component.html',
   styleUrl: './support.component.css',
 })

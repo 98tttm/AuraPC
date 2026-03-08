@@ -36,6 +36,63 @@ function canUserConfirmDelivery(order) {
   return Date.now() - shippedAt >= DELIVERY_CONFIRM_DELAY_MS;
 }
 
+function orderAddressFingerprint(shippingAddress = {}) {
+  return [
+    shippingAddress.fullName,
+    shippingAddress.phone,
+    shippingAddress.address,
+    shippingAddress.ward,
+    shippingAddress.district,
+    shippingAddress.city,
+  ]
+    .map((value) => String(value || '').trim().toLowerCase())
+    .join('|');
+}
+
+function orderItemsFingerprint(items = []) {
+  return items
+    .map((item) => {
+      const productId = item?.product?._id || item?.product || item?.name || '';
+      const qty = Math.max(1, Number(item?.qty) || 1);
+      const price = Number(item?.price) || 0;
+      return `${String(productId)}:${qty}:${price}`;
+    })
+    .sort()
+    .join('|');
+}
+
+function buildDuplicateFingerprint({ items, shippingAddress, total, paymentMethod }) {
+  return [
+    paymentMethod || '',
+    Number(total) || 0,
+    orderAddressFingerprint(shippingAddress),
+    orderItemsFingerprint(items),
+  ].join('||');
+}
+
+async function findRecentDuplicateOrder({ userId, items, shippingAddress, total, paymentMethod, windowMs = 15 * 60 * 1000 }) {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return null;
+
+  const since = new Date(Date.now() - windowMs);
+  const candidates = await Order.find({
+    user: new mongoose.Types.ObjectId(userId),
+    paymentMethod,
+    total: Number(total) || 0,
+    status: { $in: ['pending', 'confirmed', 'processing', 'shipped', 'delivered'] },
+    createdAt: { $gte: since },
+  }).lean();
+
+  const target = buildDuplicateFingerprint({ items, shippingAddress, total, paymentMethod });
+  return candidates.find((order) => (
+    buildDuplicateFingerprint({
+      items: order.items || [],
+      shippingAddress: order.shippingAddress || {},
+      total: order.total,
+      paymentMethod: order.paymentMethod,
+    }) === target
+  )) || null;
+}
+
 /** GET /api/orders?status=... - list orders for logged-in user (optional status filter) */
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -129,9 +186,24 @@ router.post('/', optionalAuth, async (req, res) => {
 
     const paidFlag = isPaid === true || isPaid === 'true' || isPaid === 1 || isPaid === '1';
     const total = verifiedItems.reduce((sum, i) => sum + i.price * i.qty, 0) + (Number(shippingFee) || 0) - (Number(discount) || 0);
-    // Ưu tiên userId từ JWT token nếu có, fallback sang body
     const resolvedUserId = req.userId || userId;
     const userObjectId = resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId) ? new mongoose.Types.ObjectId(resolvedUserId) : null;
+    const duplicateOrder = await findRecentDuplicateOrder({
+      userId: resolvedUserId,
+      items: verifiedItems,
+      shippingAddress: shippingAddress || {},
+      total: Math.max(0, total),
+      paymentMethod,
+    });
+    if (duplicateOrder) {
+      return res.json({
+        _id: duplicateOrder._id,
+        orderNumber: duplicateOrder.orderNumber,
+        total: duplicateOrder.total,
+        deduped: true,
+      });
+    }
+
     const order = new Order({
       orderNumber: generateOrderNumber(),
       user: userObjectId,
@@ -291,7 +363,7 @@ router.post('/:orderNumber/confirm-received', requireAuth, async (req, res) => {
         userId,
         type: 'order_delivered',
         title: 'Đơn hàng đã giao',
-        message: `Đơn #${order.orderNumber} đã được xác nhận đã giao. Cảm ơn bạn đã mua sắm!`,
+        message: `Đơn #${order.orderNumber} đã được xác nhận đã giao. Bạn có thể vào đơn hàng để đánh giá từng sản phẩm đã mua.`,
         metadata: { orderNumber: order.orderNumber },
       });
     }
@@ -320,8 +392,8 @@ router.post('/:orderNumber/return-request', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    if (order.status !== 'shipped') {
-      return res.status(400).json({ error: 'Return request is only available for shipped orders' });
+    if (order.status !== 'shipped' && order.status !== 'delivered') {
+      return res.status(400).json({ error: 'Return request is only available for shipped or delivered orders' });
     }
 
     if (order.returnRequest?.status === 'pending') {

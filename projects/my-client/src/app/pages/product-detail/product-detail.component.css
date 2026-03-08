@@ -1157,19 +1157,19 @@
   background: #e55a1a;
 }
 
-/* Nút tròn màu đen cho các action (Gửi đánh giá / Gửi bình luận) */
+/* Nút tròn màu cam cho các action (Gửi đánh giá / Gửi bình luận) */
 .pd-btn-review--blue {
   padding: 0.6rem 1.5rem;
-  background: #000;
+  background: #FF6D2D;
   border-radius: 9999px;
   font-size: 0.95rem;
   font-weight: 500;
-  border: 1px solid #000;
+  border: 1px solid #FF6D2D;
 }
 
 .pd-btn-review--blue:hover {
-  background: #111;
-  border-color: #111;
+  background: #e55a1a;
+  border-color: #e55a1a;
 }
 
 /* Hỏi đáp: nút + separator + lọc */
@@ -1196,9 +1196,9 @@
 }
 
 .review-filters--qa .review-filter-btn--qa.active {
-  background: #2563eb;
+  background: #FF6D2D;
   color: #fff;
-  border-color: #2563eb;
+  border-color: #FF6D2D;
 }
 
 .review-hint {

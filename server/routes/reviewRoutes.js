@@ -22,6 +22,21 @@ async function userCanReview(userId, productId) {
   return !!order;
 }
 
+async function hasUserReviewedProduct(userId, productId) {
+  if (!userId || !productId || !mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(productId)) {
+    return false;
+  }
+  const existing = await ProductReview.findOne({
+    product: new mongoose.Types.ObjectId(productId),
+    user: new mongoose.Types.ObjectId(userId),
+    type: 'review',
+    parent: null,
+  })
+    .select('_id')
+    .lean();
+  return !!existing;
+}
+
 /** GET /api/reviews?productId=...&filter=all|newest|with_photo&type=all|review|comment
  *  Trả về danh sách review/comment của sản phẩm (chỉ bài gốc, không bao gồm replies trong list chính).
  *  Replies được populate riêng hoặc trả kèm trong từng item.
@@ -95,8 +110,14 @@ router.get('/can-review', requireAuth, async (req, res) => {
     if (!productId) {
       return res.status(400).json({ error: 'productId required' });
     }
-    const can = await userCanReview(userId, productId);
-    res.json({ canReview: can });
+    const [eligibleByOrder, alreadyReviewed] = await Promise.all([
+      userCanReview(userId, productId),
+      hasUserReviewedProduct(userId, productId),
+    ]);
+    res.json({
+      canReview: eligibleByOrder && !alreadyReviewed,
+      alreadyReviewed,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

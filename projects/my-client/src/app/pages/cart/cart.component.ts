@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../core/services/cart.service';
 import { productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [RouterLink, FormsModule, CheckoutStepperComponent],
+  imports: [RouterLink, FormsModule, CheckoutStepperComponent, RecentlyViewedSectionComponent],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })

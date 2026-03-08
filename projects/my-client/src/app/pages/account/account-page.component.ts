@@ -7,15 +7,52 @@ import { AddressService, Address, VNLocation } from '../../core/services/address
 import { ApiService, OrderListItem, Product } from '../../core/services/api.service';
 import { CartService } from '../../core/services/cart.service';
 import { RealtimeService } from '../../core/services/realtime.service';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 import { environment } from '../../../environments/environment';
 
 const ORDER_NAME_STORAGE_PREFIX = 'aurapc_order_name_';
 import { CommonModule } from '@angular/common';
 
+type OrderActionModalState =
+  | { type: 'confirm-received'; order: OrderListItem }
+  | { type: 'return-request'; order: OrderListItem }
+  | null;
+
+type OrderReviewItemState = {
+  key: string;
+  productId: string | null;
+  slug: string | null;
+  name: string;
+  qty: number;
+  price: number;
+  imageUrl: string;
+  canReview: boolean;
+  alreadyReviewed: boolean;
+  loading: boolean;
+  submitting: boolean;
+  expanded: boolean;
+  rating: number;
+  content: string;
+  error: string | null;
+};
+
+type OrderReviewModalState = {
+  orderId: string;
+  orderNumber: string;
+  orderTitle: string;
+  items: OrderReviewItemState[];
+} | null;
+
+type ProductReviewLookupState = {
+  loading: boolean;
+  canReview: boolean;
+  alreadyReviewed: boolean;
+};
+
 @Component({
   selector: 'app-account-page',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [RouterLink, FormsModule, CommonModule, RecentlyViewedSectionComponent],
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +86,11 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   selectedOrderNumber = signal<string | null>(null);
   nowTick = signal(Date.now());
   private ordersPollTimer: ReturnType<typeof setInterval> | null = null;
+  orderActionModal = signal<OrderActionModalState>(null);
+  orderActionLoading = signal(false);
+  orderActionReason = '';
+  orderReviewModal = signal<OrderReviewModalState>(null);
+  productReviewLookup = signal<Record<string, ProductReviewLookupState>>({});
 
   // Address modal
   showAddressModal = signal(false);
@@ -321,11 +363,14 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     if (!silent) this.ordersLoading.set(true);
     this.api.getOrdersByUser(userId).subscribe({
       next: (list) => {
-        this.orders.set(list);
+        const normalizedList = Array.isArray(list) ? list : [];
+        this.orders.set(normalizedList);
+        this.preloadDeliveredOrderReviewStates(normalizedList);
         if (!silent) this.ordersLoading.set(false);
       },
       error: () => {
         this.orders.set([]);
+        this.productReviewLookup.set({});
         if (!silent) this.ordersLoading.set(false);
       },
     });
@@ -340,8 +385,36 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     return order.status === tab;
   };
 
+  readonly visibleOrders = computed(() => {
+    const list = [...this.orders()];
+    if (list.length <= 1) return list;
+
+    list.sort((a, b) => this.orderCreatedAtMs(b) - this.orderCreatedAtMs(a));
+
+    const visible: OrderListItem[] = [];
+    const groups = new Map<string, OrderListItem[]>();
+
+    list.forEach((order) => {
+      const groupKey = this.accidentalDuplicateGroupKey(order);
+      if (!groupKey) {
+        visible.push(order);
+        return;
+      }
+
+      const existingOrders = groups.get(groupKey) ?? [];
+      const isDuplicate = existingOrders.some((entry) => this.isAccidentalDuplicateOrder(order, entry));
+      if (isDuplicate) return;
+
+      existingOrders.push(order);
+      groups.set(groupKey, existingOrders);
+      visible.push(order);
+    });
+
+    return visible;
+  });
+
   readonly filteredOrders = computed(() => {
-    const list = this.orders();
+    const list = this.visibleOrders();
     const q = this.orderSearch().trim().toLowerCase();
     let filtered = list.filter((o) => this.orderStatusFilter(o));
     if (q) {
@@ -383,7 +456,29 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   canShowDeliveryActions(order: OrderListItem): boolean {
     if (order.status !== 'shipped') return false;
-    return !this.hasPendingReturnRequest(order);
+    if (this.hasPendingReturnRequest(order)) return false;
+    return this.isShippingActionReady(order);
+  }
+
+  canRequestReturn(order: OrderListItem): boolean {
+    if (this.hasPendingReturnRequest(order)) return false;
+    if (order.status === 'delivered') return true;
+    if (order.status === 'shipped') return this.isShippingActionReady(order);
+    return false;
+  }
+
+  canOpenOrderReview(order: OrderListItem): boolean {
+    return this.orderReviewCardState(order) === 'actionable';
+  }
+
+  showOrderReviewButton(order: OrderListItem): boolean {
+    return order.status === 'delivered' && this.getOrderReviewProductIds(order).length > 0;
+  }
+
+  isWaitingForDeliveryActions(order: OrderListItem): boolean {
+    if (order.status !== 'shipped') return false;
+    if (this.hasPendingReturnRequest(order)) return false;
+    return !this.isShippingActionReady(order);
   }
 
   minutesUntilShippingAction(order: OrderListItem): number {
@@ -458,29 +553,190 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   confirmOrderReceived(order: OrderListItem): void {
     if (!this.canShowDeliveryActions(order)) return;
-    if (!confirm('Xác nhận bạn đã nhận được hàng cho đơn #ORD-' + order.orderNumber + '?')) return;
-    this.api.confirmOrderReceived(order.orderNumber).subscribe({
-      next: () => {
-        alert('Cảm ơn bạn! Đơn hàng đã được xác nhận đã giao.');
-        this.loadOrders();
-      },
-      error: (err) => {
-        alert(err?.error?.error || 'Không thể xác nhận nhận hàng');
-      },
-    });
+    this.orderActionReason = '';
+    this.orderActionModal.set({ type: 'confirm-received', order });
   }
 
   requestOrderReturn(order: OrderListItem): void {
-    if (!this.canShowDeliveryActions(order)) return;
-    const reason = prompt('Nhập lý do hoàn trả (không bắt buộc):', '') || '';
-    if (!confirm('Gửi yêu cầu hoàn trả cho đơn #ORD-' + order.orderNumber + '?')) return;
-    this.api.requestOrderReturn(order.orderNumber, reason).subscribe({
+    if (!this.canRequestReturn(order)) return;
+    this.orderActionReason = '';
+    this.orderActionModal.set({ type: 'return-request', order });
+  }
+
+  closeOrderActionModal(): void {
+    if (this.orderActionLoading()) return;
+    this.orderActionModal.set(null);
+    this.orderActionReason = '';
+  }
+
+  submitOrderAction(): void {
+    const modal = this.orderActionModal();
+    if (!modal || this.orderActionLoading()) return;
+
+    this.orderActionLoading.set(true);
+
+    if (modal.type === 'confirm-received') {
+      this.api.confirmOrderReceived(modal.order.orderNumber).subscribe({
+        next: () => {
+          this.orderActionLoading.set(false);
+          this.closeOrderActionModal();
+          alert('Cảm ơn bạn! Đơn hàng đã được xác nhận đã giao.');
+          this.loadOrders();
+        },
+        error: (err) => {
+          this.orderActionLoading.set(false);
+          alert(err?.error?.error || 'Không thể xác nhận nhận hàng');
+        },
+      });
+      return;
+    }
+
+    this.api.requestOrderReturn(modal.order.orderNumber, this.orderActionReason.trim()).subscribe({
       next: () => {
+        this.orderActionLoading.set(false);
+        this.closeOrderActionModal();
         alert('Đã gửi yêu cầu hoàn trả. Vui lòng chờ admin xử lý.');
         this.loadOrders();
       },
       error: (err) => {
+        this.orderActionLoading.set(false);
         alert(err?.error?.error || 'Không thể gửi yêu cầu hoàn trả');
+      },
+    });
+  }
+
+  openOrderReview(order: OrderListItem): void {
+    if (!this.canOpenOrderReview(order)) return;
+
+    const items: OrderReviewItemState[] = order.items.map((item, index) => ({
+      key: `${order._id}-${this.getOrderItemProductId(item) || item.name}-${index}`,
+      productId: this.getOrderItemProductId(item),
+      slug: this.getOrderItemSlug(item),
+      name: item.name,
+      qty: Math.max(1, Number(item.qty) || 1),
+      price: Number(item.price) || 0,
+      imageUrl: this.orderItemImage(item),
+      canReview: false,
+      alreadyReviewed: false,
+      loading: !!this.getOrderItemProductId(item),
+      submitting: false,
+      expanded: false,
+      rating: 5,
+      content: '',
+      error: this.getOrderItemProductId(item) ? null : 'Sản phẩm này hiện không còn liên kết để đánh giá.',
+    }));
+
+    this.orderReviewModal.set({
+      orderId: order._id,
+      orderNumber: order.orderNumber,
+      orderTitle: this.getOrderDisplayName(order._id, order.createdAt),
+      items,
+    });
+
+    items.forEach((item) => {
+      if (!item.productId) return;
+      this.api.canReview(item.productId).subscribe({
+        next: (res) => {
+          this.patchOrderReviewItem(item.key, {
+            canReview: res.canReview,
+            alreadyReviewed: !!res.alreadyReviewed,
+            loading: false,
+            error: null,
+          });
+        },
+        error: () => {
+          this.patchOrderReviewItem(item.key, {
+            canReview: false,
+            alreadyReviewed: false,
+            loading: false,
+            error: 'Không thể kiểm tra trạng thái đánh giá lúc này.',
+          });
+        },
+      });
+    });
+  }
+
+  closeOrderReviewModal(): void {
+    const modal = this.orderReviewModal();
+    if (!modal) return;
+    if (modal.items.some((item) => item.submitting)) return;
+    this.orderReviewModal.set(null);
+  }
+
+  toggleOrderReviewComposer(itemKey: string): void {
+    const modal = this.orderReviewModal();
+    if (!modal) return;
+    this.orderReviewModal.set({
+      ...modal,
+      items: modal.items.map((item) => ({
+        ...item,
+        expanded: item.key === itemKey ? !item.expanded : false,
+        error: item.key === itemKey ? item.error : null,
+      })),
+    });
+  }
+
+  updateOrderReviewRating(itemKey: string, rating: number): void {
+    this.patchOrderReviewItem(itemKey, { rating, error: null });
+  }
+
+  updateOrderReviewContent(itemKey: string, content: string): void {
+    this.patchOrderReviewItem(itemKey, { content, error: null });
+  }
+
+  submitOrderProductReview(itemKey: string): void {
+    const modal = this.orderReviewModal();
+    const item = modal?.items.find((entry) => entry.key === itemKey);
+    if (!modal || !item || !item.productId || item.submitting || !item.canReview || item.alreadyReviewed) return;
+
+    const content = item.content.trim();
+    if (!content) {
+      this.patchOrderReviewItem(itemKey, { error: 'Vui lòng nhập nội dung đánh giá.' });
+      return;
+    }
+
+    this.patchOrderReviewItem(itemKey, { submitting: true, error: null });
+    this.api.createReviewComment({
+      productId: item.productId,
+      type: 'review',
+      content,
+      rating: item.rating,
+    }).subscribe({
+      next: () => {
+        this.patchProductReviewLookup(item.productId, {
+          loading: false,
+          canReview: false,
+          alreadyReviewed: true,
+        });
+        this.patchOrderReviewItem(itemKey, {
+          submitting: false,
+          canReview: false,
+          alreadyReviewed: true,
+          expanded: false,
+          content: '',
+          rating: 5,
+          error: null,
+        });
+      },
+      error: (err) => {
+        if (err?.status === 409) {
+          this.patchProductReviewLookup(item.productId, {
+            loading: false,
+            canReview: false,
+            alreadyReviewed: true,
+          });
+        }
+        const message = err?.error?.error || 'Không thể gửi đánh giá sản phẩm.';
+        this.patchOrderReviewItem(itemKey, {
+          submitting: false,
+          canReview: err?.status === 409 ? false : item.canReview,
+          alreadyReviewed: err?.status === 409 ? true : item.alreadyReviewed,
+          expanded: err?.status === 409 ? false : item.expanded,
+          error: err?.status === 409 ? null : message,
+        });
+        if (err?.status === 409) {
+          alert('Bạn đã đánh giá sản phẩm này rồi.');
+        }
       },
     });
   }
@@ -504,7 +760,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   readonly selectedOrderDetail = computed(() => {
     const num = this.selectedOrderNumber();
     if (!num) return null;
-    return this.orders().find((o) => o.orderNumber === num) ?? null;
+    return this.visibleOrders().find((o) => o.orderNumber === num) ?? null;
   });
 
   /** Tên đơn hàng mặc định: "Đơn hàng ngày DD/MM/YYYY" */
@@ -564,6 +820,214 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     if (url.startsWith('http')) return url;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
     return base + (url.startsWith('/') ? url : '/' + url);
+  }
+
+  getOrderItemProductId(item: OrderListItem['items'][0]): string | null {
+    const product = item.product as { _id?: string } | undefined;
+    return product?._id ? String(product._id) : null;
+  }
+
+  getOrderItemSlug(item: OrderListItem['items'][0]): string | null {
+    const product = item.product as { slug?: string } | undefined;
+    return product?.slug ? String(product.slug) : null;
+  }
+
+  canOpenOrderedProduct(item: OrderListItem['items'][0]): boolean {
+    return !!this.getOrderItemSlug(item) || !!item.name;
+  }
+
+  openOrderedProduct(item: OrderListItem['items'][0]): void {
+    if (!this.canOpenOrderedProduct(item)) return;
+    const slug = this.getOrderItemSlug(item);
+    this.selectedOrderNumber.set(null);
+    if (slug) {
+      this.router.navigate(['/san-pham', slug]);
+      return;
+    }
+    this.router.navigate(['/san-pham'], { queryParams: { search: item.name } });
+  }
+
+  orderReviewButtonLabel(item: OrderReviewItemState): string {
+    if (item.loading) return 'Đang kiểm tra...';
+    if (item.alreadyReviewed) return 'Đã đánh giá';
+    if (item.canReview) return item.expanded ? 'Thu gọn' : 'Đánh giá sản phẩm';
+    return 'Chưa thể đánh giá';
+  }
+
+  orderReviewCardLabel(order: OrderListItem): string {
+    const state = this.orderReviewCardState(order);
+    if (state === 'loading') return 'Đang kiểm tra...';
+    if (state === 'done') return 'Đã đánh giá';
+    if (state === 'locked') return 'Chưa thể đánh giá';
+    return 'Đánh giá đơn hàng';
+  }
+
+  isOrderReviewButtonDisabled(order: OrderListItem): boolean {
+    const state = this.orderReviewCardState(order);
+    return state === 'loading' || state === 'done' || state === 'locked';
+  }
+
+  isOrderReviewDone(order: OrderListItem): boolean {
+    return this.orderReviewCardState(order) === 'done';
+  }
+
+  orderReviewRatingLabel(rating: number): string {
+    const labels: Record<number, string> = {
+      1: 'Rất tệ',
+      2: 'Tệ',
+      3: 'Bình thường',
+      4: 'Tốt',
+      5: 'Tuyệt vời',
+    };
+    return labels[rating] || '';
+  }
+
+  private patchOrderReviewItem(itemKey: string, patch: Partial<OrderReviewItemState>): void {
+    const modal = this.orderReviewModal();
+    if (!modal) return;
+    this.orderReviewModal.set({
+      ...modal,
+      items: modal.items.map((item) => (item.key === itemKey ? { ...item, ...patch } : item)),
+    });
+  }
+
+  private patchProductReviewLookup(productId: string | null, patch: Partial<ProductReviewLookupState>): void {
+    if (!productId) return;
+    const current = this.productReviewLookup();
+    this.productReviewLookup.set({
+      ...current,
+      [productId]: {
+        ...(current[productId] ?? {}),
+        loading: false,
+        canReview: false,
+        alreadyReviewed: false,
+        ...patch,
+      },
+    });
+  }
+
+  private preloadDeliveredOrderReviewStates(orders: OrderListItem[]): void {
+    const deliveredProductIds = Array.from(
+      new Set(
+        orders
+          .filter((order) => order.status === 'delivered')
+          .flatMap((order) => this.getOrderReviewProductIds(order))
+      )
+    );
+
+    if (deliveredProductIds.length === 0) {
+      this.productReviewLookup.set({});
+      return;
+    }
+
+    const current = { ...this.productReviewLookup() };
+    deliveredProductIds.forEach((productId) => {
+      if (!current[productId]) {
+        current[productId] = {
+          loading: true,
+          canReview: false,
+          alreadyReviewed: false,
+        };
+      }
+    });
+    this.productReviewLookup.set(current);
+
+    deliveredProductIds.forEach((productId) => {
+      this.api.canReview(productId).subscribe({
+        next: (res) => {
+          this.patchProductReviewLookup(productId, {
+            loading: false,
+            canReview: res.canReview,
+            alreadyReviewed: !!res.alreadyReviewed,
+          });
+        },
+        error: () => {
+          this.patchProductReviewLookup(productId, {
+            loading: false,
+            canReview: false,
+            alreadyReviewed: false,
+          });
+        },
+      });
+    });
+  }
+
+  private getOrderReviewProductIds(order: OrderListItem): string[] {
+    return Array.from(
+      new Set(
+        (order.items ?? [])
+          .map((item) => this.getOrderItemProductId(item))
+          .filter((productId): productId is string => !!productId)
+      )
+    );
+  }
+
+  private orderReviewCardState(order: OrderListItem): 'loading' | 'done' | 'actionable' | 'locked' {
+    if (order.status !== 'delivered') return 'locked';
+
+    const productIds = this.getOrderReviewProductIds(order);
+    if (productIds.length === 0) return 'locked';
+
+    const lookup = this.productReviewLookup();
+    const states = productIds
+      .map((productId) => lookup[productId])
+      .filter((state): state is ProductReviewLookupState => !!state);
+
+    if (states.length !== productIds.length || states.some((state) => state.loading)) return 'loading';
+    if (states.every((state) => state.alreadyReviewed)) return 'done';
+    if (states.some((state) => state.canReview)) return 'actionable';
+    return 'locked';
+  }
+
+  private accidentalDuplicateGroupKey(order: OrderListItem): string {
+    const itemSignature = (order.items ?? [])
+      .map((item) => {
+        const productId = this.getOrderItemProductId(item) || item.name || '';
+        const qty = Math.max(1, Number(item.qty) || 1);
+        const price = Number(item.price) || 0;
+        return `${productId}:${qty}:${price}`;
+      })
+      .sort()
+      .join('|');
+
+    if (!itemSignature) return '';
+
+    const address = [
+      order.shippingAddress?.['fullName'],
+      order.shippingAddress?.['phone'],
+      order.shippingAddress?.['address'],
+      order.shippingAddress?.['ward'],
+      order.shippingAddress?.['district'],
+      order.shippingAddress?.['city'],
+    ]
+      .map((value) => String(value || '').trim().toLowerCase())
+      .join('|');
+
+    const createdDate = order.createdAt ? new Date(order.createdAt) : null;
+    const dayKey = createdDate && !Number.isNaN(createdDate.getTime())
+      ? `${createdDate.getFullYear()}-${createdDate.getMonth() + 1}-${createdDate.getDate()}`
+      : '';
+
+    return [
+      order.status,
+      order.paymentMethod || '',
+      Number(order.total) || 0,
+      itemSignature,
+      address,
+      dayKey,
+    ].join('||');
+  }
+
+  private isAccidentalDuplicateOrder(candidate: OrderListItem, existing: OrderListItem): boolean {
+    const candidateTime = this.orderCreatedAtMs(candidate);
+    const existingTime = this.orderCreatedAtMs(existing);
+    if (!candidateTime || !existingTime) return false;
+    return Math.abs(candidateTime - existingTime) <= 15 * 60 * 1000;
+  }
+
+  private orderCreatedAtMs(order: OrderListItem): number {
+    const time = order.createdAt ? new Date(order.createdAt).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
   }
 
   startEdit() {
@@ -832,4 +1296,3 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     return `${base}${user.avatar}`;
   }
 }
-

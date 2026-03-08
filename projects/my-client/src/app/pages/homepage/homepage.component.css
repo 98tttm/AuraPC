@@ -781,7 +781,8 @@ a.featured__card {
   overflow: hidden;
   text-decoration: none;
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 3.45;
+  min-height: 430px;
 }
 .featured__banner img {
   position: absolute;
@@ -1171,6 +1172,14 @@ a.blog__card {
   background: var(--bg-card);
 }
 
+.homepage-recently-viewed {
+  position: relative;
+  z-index: 4;
+  background: linear-gradient(180deg, rgba(243, 244, 246, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+  margin-top: -1.25rem;
+  padding: 0.75rem 0 0;
+}
+
 .auralab__grid {
   display: grid;
   grid-template-columns: 45% 1fr;
@@ -1424,6 +1433,10 @@ a.blog__card {
     grid-template-columns: 1fr;
   }
 
+  .featured__banner {
+    min-height: 360px;
+  }
+
   .categories__grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1486,6 +1499,10 @@ a.blog__card {
 
   .blog__grid {
     grid-template-columns: 1fr;
+  }
+
+  .featured__banner {
+    min-height: 300px;
   }
 
   .why-aura__benefits {

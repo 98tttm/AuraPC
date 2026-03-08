@@ -65,11 +65,11 @@
 
       <section class="track-section">
         <h3 class="track-section__title">Sản phẩm</h3>
-        @if ((order.items ?? []).length === 0) {
+        @if (order.items.length === 0) {
           <p class="track-items-empty">Đơn hàng này không có dữ liệu sản phẩm. Nếu đơn của bạn có sản phẩm, vui lòng liên hệ bộ phận chăm sóc khách hàng.</p>
         } @else {
           <ul class="track-items">
-            @for (item of (order.items ?? []); track $index) {
+            @for (item of order.items; track $index) {
               <li class="track-item">
                 <div class="track-item__img-wrap">
                   @if (getItemImage(item); as imgUrl) {

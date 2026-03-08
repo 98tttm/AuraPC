@@ -1,10 +1,12 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { ApiService, Product, ProductReviewItem, ProductReviewsResponse, productMainImage, productDisplayPrice, productHasSale, productSalePercent } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
+import { RecentlyViewedService } from '../../core/services/recently-viewed.service';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
@@ -15,14 +17,16 @@ import { ToastService } from '../../core/services/toast.service';
   styleUrl: './product-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductDetailComponent {
+export class ProductDetailComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private cart = inject(CartService);
+  private recentlyViewed = inject(RecentlyViewedService);
   private toast = inject(ToastService);
   private sanitizer = inject(DomSanitizer);
+  private routeSub: Subscription | null = null;
 
   product = signal<Product | null>(null);
   currentImage = signal<string>('');
@@ -31,6 +35,7 @@ export class ProductDetailComponent {
   showFullDesc = signal(false);
   showSpecsModal = signal(false);
   relatedProducts = signal<Product[]>([]);
+  recentlyViewedProducts = signal<Product[]>([]);
 
   // Đánh giá: lọc theo sao (null = tất cả)
   reviewStarFilter = signal<number | null>(null);
@@ -39,6 +44,7 @@ export class ProductDetailComponent {
   reviewsData = signal<ProductReviewsResponse | null>(null);
   reviewsLoading = signal(false);
   canReview = signal(false);
+  alreadyReviewed = signal(false);
   canReviewLoading = signal(false);
 
   // Form state
@@ -91,37 +97,15 @@ export class ProductDetailComponent {
   });
 
   constructor() {
-    const slug = this.route.snapshot.paramMap.get('slug');
-    if (!slug) {
-      this.loading.set(false);
-      this.error.set(true);
-      return;
-    }
-    this.api.getProductBySlug(slug).subscribe({
-      next: (p) => {
-        this.product.set(p);
-        this.currentImage.set(productMainImage(p));
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      const slug = params.get('slug');
+      if (!slug) {
+        this.product.set(null);
         this.loading.set(false);
-        const pid = p._id ?? (p as { id?: string })?.id;
-        if (pid) {
-          this.loadReviews(pid);
-          this.checkCanReview(pid);
-        }
-        if (p.category) {
-          const catSlug = p.category.slug || p.category.category_id;
-          this.api.getProducts({ category: catSlug, limit: 4 }).subscribe({
-            next: (res) => {
-              this.relatedProducts.set(
-                res.items.filter(rp => rp._id !== p._id).slice(0, 4)
-              );
-            }
-          });
-        }
-      },
-      error: () => {
         this.error.set(true);
-        this.loading.set(false);
-      },
+        return;
+      }
+      this.loadProduct(slug);
     });
 
     // Re-check canReview and reload reviews when user logs in/out
@@ -145,6 +129,82 @@ export class ProductDetailComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
+
+  private loadProduct(slug: string): void {
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'auto' });
+    this.loading.set(true);
+    this.error.set(false);
+    this.showFullDesc.set(false);
+    this.showSpecsModal.set(false);
+    this.showReviewForm.set(false);
+    this.showCommentForm.set(false);
+    this.replyTargetId.set(null);
+    this.submitError.set(null);
+    this.reviewsData.set(null);
+    this.canReview.set(false);
+    this.alreadyReviewed.set(false);
+    this.canReviewLoading.set(false);
+    this.relatedProducts.set([]);
+    this.recentlyViewedProducts.set([]);
+
+    this.api.getProductBySlug(slug).subscribe({
+      next: (p) => {
+        this.product.set(p);
+        this.currentImage.set(productMainImage(p));
+        this.loading.set(false);
+        this.recentlyViewed.track(p);
+        this.refreshRecentlyViewed(p);
+
+        const pid = p._id ?? (p as { id?: string })?.id;
+        if (pid) {
+          this.loadReviews(pid);
+          this.checkCanReview(pid);
+        } else {
+          this.reviewsData.set(null);
+          this.canReview.set(false);
+          this.alreadyReviewed.set(false);
+        }
+
+        this.loadRelatedProducts(p);
+      },
+      error: () => {
+        this.product.set(null);
+        this.error.set(true);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private loadRelatedProducts(product: Product): void {
+    if (!product.category) {
+      this.relatedProducts.set([]);
+      return;
+    }
+
+    const catSlug = product.category.slug || product.category.category_id;
+    this.api.getProducts({ category: catSlug, limit: 8 }).subscribe({
+      next: (res) => {
+        this.relatedProducts.set(
+          (res.items || [])
+            .filter((item) => this.productKey(item) !== this.productKey(product))
+            .slice(0, 4)
+        );
+      },
+      error: () => this.relatedProducts.set([]),
+    });
+  }
+
+  private refreshRecentlyViewed(current: Product): void {
+    this.recentlyViewedProducts.set(this.recentlyViewed.list(4, this.productKey(current)));
+  }
+
+  private productKey(product: Product | null | undefined): string {
+    return String(product?._id || product?.product_id || product?.slug || '').trim();
+  }
+
   private loadReviews(productId: string): void {
     this.reviewsLoading.set(true);
     this.api
@@ -161,6 +221,7 @@ export class ProductDetailComponent {
   private checkCanReview(productId: string): void {
     if (!this.auth.currentUser()) {
       this.canReview.set(false);
+      this.alreadyReviewed.set(false);
       this.canReviewLoading.set(false);
       return;
     }
@@ -168,10 +229,12 @@ export class ProductDetailComponent {
     this.api.canReview(productId).subscribe({
       next: (res) => {
         this.canReview.set(res.canReview);
+        this.alreadyReviewed.set(!!res.alreadyReviewed);
         this.canReviewLoading.set(false);
       },
       error: () => {
         this.canReview.set(false);
+        this.alreadyReviewed.set(false);
         this.canReviewLoading.set(false);
       },
     });
@@ -191,6 +254,10 @@ export class ProductDetailComponent {
   openReviewForm(): void {
     if (!this.isLoggedIn()) {
       this.auth.showLoginPopup$.next();
+      return;
+    }
+    if (this.alreadyReviewed()) {
+      this.toast.showInfo('Bạn đã đánh giá sản phẩm này rồi.');
       return;
     }
     if (!this.canReview()) {
@@ -236,6 +303,7 @@ export class ProductDetailComponent {
           this.reviewRating = 5;
           this.showReviewForm.set(false);
           this.submitLoading.set(false);
+          this.alreadyReviewed.set(true);
           this.loadReviews(pid);
           this.checkCanReview(pid);
         },
@@ -477,6 +545,16 @@ export class ProductDetailComponent {
 
   sku(p: Product): string {
     return p.product_id ?? p._id?.substring(0, 8).toUpperCase() ?? 'N/A';
+  }
+
+  productRoute(product: Product): string[] {
+    if (product.slug) return ['/san-pham', product.slug];
+    return ['/san-pham'];
+  }
+
+  productQueryParams(product: Product): Record<string, string> | null {
+    if (product.slug) return null;
+    return product.name ? { search: product.name } : null;
   }
 
   toggleDesc() {

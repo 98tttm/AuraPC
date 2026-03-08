@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
 import * as THREE from 'three';
 import { ApiService, Product, Category, BlogPost } from '../../core/services/api.service';
 import { IntroStateService } from '../../core/services/intro-state.service';
+import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -91,7 +92,7 @@ interface Hotspot {
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, UpperCasePipe],
+  imports: [RouterLink, DecimalPipe, UpperCasePipe, RecentlyViewedSectionComponent],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

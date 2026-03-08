@@ -1,0 +1,36 @@
+@if (items().length || showEmpty()) {
+<section class="recently-viewed">
+  <div class="recently-viewed__inner">
+    <div class="recently-viewed__header">
+      <h2 class="recently-viewed__title">{{ title() }}</h2>
+    </div>
+
+    @if (items().length) {
+    <div class="recently-viewed__grid">
+      @for (product of items(); track productKey(product)) {
+      <a class="recently-viewed__card" [routerLink]="productRoute(product)"
+        [queryParams]="productQueryParams(product) || undefined">
+        <div class="recently-viewed__image-wrap">
+          <img [src]="image(product)" [alt]="product.name" class="recently-viewed__image" />
+        </div>
+        <div class="recently-viewed__body">
+          <h3 class="recently-viewed__name">{{ product.name }}</h3>
+          <div class="recently-viewed__price-row">
+            <span class="recently-viewed__price">{{ price(product) }}</span>
+            @if (oldPrice(product); as previousPrice) {
+            <span class="recently-viewed__old-price">{{ previousPrice }}</span>
+            }
+          </div>
+        </div>
+      </a>
+      }
+    </div>
+    } @else {
+    <div class="recently-viewed__empty">
+      <p class="recently-viewed__empty-title">Chưa có sản phẩm vừa xem.</p>
+      <p class="recently-viewed__empty-text">Khi bạn mở trang chi tiết sản phẩm, danh sách này sẽ tự cập nhật tại đây.</p>
+    </div>
+    }
+  </div>
+</section>
+}
