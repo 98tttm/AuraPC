@@ -74,6 +74,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   // Edit form fields
   editName = '';
+  editEmail = '';
   editGender = '';
   editDob = '';
   editAvatar = '';
@@ -206,6 +207,11 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   displayPhone = computed(() => {
     const u = this.user();
     return u ? this.formatPhone(u.phoneNumber) : '';
+  });
+
+  displayEmail = computed(() => {
+    const email = this.user()?.email?.trim();
+    return email || null;
   });
 
   displayGender = computed(() => {
@@ -1033,6 +1039,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   startEdit() {
     const u = this.user();
     this.editName = u?.profile?.fullName || '';
+    this.editEmail = u?.email || '';
     this.editGender = u?.profile?.gender || '';
     this.editDob = u?.profile?.dateOfBirth || '';
     this.editAvatar = u?.avatar || '';
@@ -1059,10 +1066,19 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   saveProfile() {
+    const normalizedEmail = this.editEmail.trim().toLowerCase();
+    if (normalizedEmail && !this.isValidEmail(normalizedEmail)) {
+      alert('Email không hợp lệ.');
+      return;
+    }
+
     this.auth.updateProfile({
-      fullName: this.editName,
-      gender: this.editGender,
-      dateOfBirth: this.editDob
+      email: normalizedEmail,
+      profile: {
+        fullName: this.editName,
+        gender: this.editGender,
+        dateOfBirth: this.editDob,
+      },
     }).subscribe({
       next: (res) => {
         if (res.success) {
@@ -1071,6 +1087,10 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       },
       error: (err) => alert('Lỗi cập nhật: ' + (err.message || 'Không xác định'))
     });
+  }
+
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
   openLogoutConfirm(): void {

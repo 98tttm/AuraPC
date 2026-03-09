@@ -7,7 +7,8 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "jest --verbose",
-    "update-brands": "node scripts/update-brands.js"
+    "update-brands": "node scripts/update-brands.js",
+    "backfill-user-email": "node scripts/backfill-user-email.js"
   },
   "keywords": [],
   "author": "",

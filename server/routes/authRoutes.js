@@ -5,6 +5,8 @@ const { signToken, requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /** Chuẩn hóa SĐT: bỏ khoảng trắng/dấu, chỉ giữ số. */
 function normalizePhone(input) {
   if (typeof input !== 'string') return '';
@@ -128,9 +130,11 @@ router.post('/verify-otp', async (req, res) => {
       });
       user = user.toObject ? user.toObject() : user;
     } else {
+      const updateFields = { lastLogin: now };
+      if (typeof user.email !== 'string') updateFields.email = '';
       await User.updateOne(
         { phoneNumber: stored },
-        { $set: { lastLogin: now } }
+        { $set: updateFields }
       );
       user = await User.findOne({ phoneNumber: stored }).lean();
     }
@@ -172,12 +176,20 @@ const upload = multer({ storage: storage });
 router.put('/profile', requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { profile } = req.body; // profile: { fullName, gender, dateOfBirth }
+    const profile = req.body?.profile && typeof req.body.profile === 'object' ? req.body.profile : {};
+    const rawEmail = req.body?.email;
 
     const update = {};
     if (profile.fullName !== undefined) update['profile.fullName'] = profile.fullName;
     if (profile.gender !== undefined) update['profile.gender'] = profile.gender;
     if (profile.dateOfBirth !== undefined) update['profile.dateOfBirth'] = profile.dateOfBirth;
+    if (rawEmail !== undefined) {
+      const email = String(rawEmail || '').trim().toLowerCase();
+      if (email && !EMAIL_RE.test(email)) {
+        return res.status(400).json({ success: false, message: 'Email không hợp lệ.' });
+      }
+      update.email = email;
+    }
 
     await User.findByIdAndUpdate(userId, { $set: update });
     const user = await User.findById(userId).lean();

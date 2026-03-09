@@ -1,64 +1,196 @@
-<div class="page-header">
-  <div>
-    <a routerLink="/blogs" class="back-link">&larr; Quay lại</a>
-    <h2>{{ id() ? 'Sửa bài viết' : 'Thêm bài viết' }}</h2>
-  </div>
-</div>
-
-@if (error()) {
-  <div class="alert-error">{{ error() }}</div>
-}
-
-<form (ngSubmit)="submit()" class="form">
-  <div class="field" [class.field--error]="titleError">
-    <label>Tiêu đề <span class="required">*</span></label>
-    <input type="text" [(ngModel)]="model.title" name="title" (ngModelChange)="onTitleChange()" placeholder="Nhập tiêu đề bài viết" />
-    @if (titleError) {
-      <span class="field-error">{{ titleError }}</span>
-    }
-  </div>
-  <div class="field">
-    <label>Slug</label>
-    <input type="text" [(ngModel)]="model.slug" name="slug" placeholder="tu-dong-tao-tu-tieu-de" />
-  </div>
-  <div class="field">
-    <label>Mô tả ngắn</label>
-    <textarea [(ngModel)]="model.excerpt" name="excerpt" rows="2"></textarea>
-  </div>
-  <div class="field">
-    <div class="field-header">
-      <label>Nội dung</label>
-      <button type="button" class="btn btn--ghost btn--sm" (click)="togglePreview()">
-        {{ showPreview() ? 'Ẩn xem trước' : 'Xem trước' }}
-      </button>
+<div class="editor-page">
+  <div class="editor-hero">
+    <div class="editor-hero__main">
+      <a routerLink="/blogs" class="back-link">&larr; Quay lại</a>
+      <div class="editor-hero__copy">
+        <h1>{{ id() ? 'Cập nhật bài viết' : 'Thêm bài viết' }}</h1>
+        <p>Tập trung vào tiêu đề, nội dung và ảnh bìa để bài viết đủ hấp dẫn khi lên trang tin tức.</p>
+      </div>
     </div>
-    <textarea [(ngModel)]="model.content" name="content" rows="8"></textarea>
-    @if (showPreview() && model.content) {
-      <div class="content-preview" [innerHTML]="model.content"></div>
-    }
+
+    <div class="editor-hero__chips">
+      <span class="editor-chip" [class.editor-chip--success]="model.published" [class.editor-chip--muted]="!model.published">
+        {{ model.published ? 'Đã bật xuất bản' : 'Bản nháp' }}
+      </span>
+      <span class="editor-chip" [class.editor-chip--accent]="showPreview()" [class.editor-chip--muted]="!showPreview()">
+        {{ showPreview() ? 'Đang xem trước' : 'Đang soạn thảo' }}
+      </span>
+    </div>
   </div>
-  <div class="row">
-    <div class="field">
-      <label>Ảnh bìa (URL)</label>
-      <input type="text" [(ngModel)]="model.coverImage" name="coverImage" placeholder="https://..." />
-      @if (model.coverImage) {
-        <div class="cover-preview">
-          <img [src]="model.coverImage" alt="" class="cover-preview__img" />
+
+  @if (error()) {
+    <div class="alert-error">{{ error() }}</div>
+  }
+
+  <form (ngSubmit)="submit()" class="editor-layout">
+    <div class="editor-main">
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Thông tin bài viết</h2>
+            <p>Thiết lập tiêu đề, slug, tác giả và mô tả ngắn để phục vụ listing và SEO cơ bản.</p>
+          </div>
         </div>
-      }
+
+        <div class="field" [class.field--error]="titleError">
+          <label>Tiêu đề <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="model.title" name="title" (ngModelChange)="onTitleChange()" placeholder="Nhập tiêu đề bài viết" />
+          @if (titleError) {
+            <span class="field-error">{{ titleError }}</span>
+          }
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" [(ngModel)]="model.slug" name="slug" placeholder="tu-dong-tao-tu-tieu-de" />
+          </div>
+
+          <div class="field">
+            <label>Tác giả</label>
+            <input type="text" [(ngModel)]="model.author" name="author" placeholder="Tên tác giả hoặc nhóm biên tập" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mô tả ngắn</label>
+          <textarea [(ngModel)]="model.excerpt" name="excerpt" rows="3" placeholder="Tóm tắt ngắn gọn để hiển thị ở trang danh sách bài viết"></textarea>
+        </div>
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Ảnh bìa</h2>
+            <p>Dùng ảnh ngang, bố cục sạch và đủ sáng để tiêu đề bài viết nổi bật hơn.</p>
+          </div>
+        </div>
+
+        <div class="field field--tight">
+          <label>URL ảnh bìa</label>
+          <input type="text" [(ngModel)]="model.coverImage" name="coverImage" placeholder="https://..." />
+        </div>
+
+        @if (coverPreviewUrl()) {
+          <div class="cover-preview">
+            <img [src]="coverPreviewUrl()" alt="" class="cover-preview__img" />
+          </div>
+        } @else {
+          <div class="preview-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span>Chưa có ảnh bìa</span>
+          </div>
+        }
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Nội dung</h2>
+            <p>Soạn phần nội dung chính. Có thể bật xem trước để kiểm tra cấu trúc bài viết.</p>
+          </div>
+
+          <button type="button" class="btn btn--outline btn--sm" (click)="togglePreview()">
+            {{ showPreview() ? 'Ẩn xem trước' : 'Xem trước' }}
+          </button>
+        </div>
+
+        <div class="content-workspace" [class.content-workspace--preview]="showPreview()">
+          <div class="field field--tight content-workspace__editor">
+            <label>Editor</label>
+            <textarea [(ngModel)]="model.content" name="content" rows="14" placeholder="Nhập nội dung HTML hoặc rich content của bài viết"></textarea>
+          </div>
+
+          @if (showPreview()) {
+            <div class="content-workspace__preview">
+              <div class="content-preview" [innerHTML]="model.content || '<p>Chưa có nội dung để xem trước.</p>'"></div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Trạng thái</h2>
+            <p>Bài viết có thể lưu ở dạng nháp hoặc bật sẵn để xuất bản.</p>
+          </div>
+        </div>
+
+        <label class="toggle-card" [class.toggle-card--active]="model.published">
+          <input type="checkbox" [(ngModel)]="model.published" name="published" />
+          <span class="toggle-card__title">{{ publishStateLabel() }}</span>
+          <span class="toggle-card__desc">Khi bật, bài viết sẽ được xem là có thể hiển thị ở khu vực blog.</span>
+        </label>
+      </section>
+
+      <div class="editor-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="loading()">
+          @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật bài viết' : 'Tạo bài viết' }} }
+        </button>
+        <a routerLink="/blogs" class="btn btn--outline">Hủy</a>
+      </div>
     </div>
-    <div class="field">
-      <label>Tác giả</label>
-      <input type="text" [(ngModel)]="model.author" name="author" />
-    </div>
-  </div>
-  <div class="check">
-    <label><input type="checkbox" [(ngModel)]="model.published" name="published" /> Xuất bản</label>
-  </div>
-  <div class="actions">
-    <button type="submit" class="btn btn--primary" [disabled]="loading()">
-      @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật' : 'Tạo' }} }
-    </button>
-    <a routerLink="/blogs" class="btn btn--outline">Hủy</a>
-  </div>
-</form>
+
+    <aside class="editor-aside">
+      <section class="editor-card editor-card--sticky">
+        <div class="editor-card__header">
+          <div>
+            <h2>Tóm tắt bài viết</h2>
+            <p>Kiểm tra nhanh cấu trúc và metadata trước khi lưu.</p>
+          </div>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-item">
+            <span>Tiêu đề</span>
+            <strong>{{ model.title?.trim() || 'Chưa nhập tiêu đề' }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Tác giả</span>
+            <strong>{{ model.author?.trim() || 'Chưa nhập tác giả' }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Slug</span>
+            <strong>{{ model.slug?.trim() || 'Chưa tạo slug' }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Số từ</span>
+            <strong>{{ contentWordCount() }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Ước lượng đọc</span>
+            <strong>{{ estimatedReadMinutes() || 0 }} phút</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Độ dài mô tả ngắn</span>
+            <strong>{{ excerptLength() }} ký tự</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Gợi ý biên tập</h2>
+          </div>
+        </div>
+
+        <ul class="tip-list">
+          <li>Đặt tiêu đề ngắn, rõ trọng tâm và ưu tiên từ khóa chính ở đầu câu.</li>
+          <li>Mô tả ngắn nên đủ để người đọc hiểu bài viết nói về gì ngay từ listing.</li>
+          <li>Ảnh bìa và nội dung preview nên đồng bộ visual để trang blog nhìn chuyên nghiệp hơn.</li>
+        </ul>
+      </section>
+    </aside>
+  </form>
+</div>

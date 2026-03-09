@@ -75,6 +75,30 @@ export class BlogFormComponent implements OnInit {
     this.showPreview.update(v => !v);
   }
 
+  contentWordCount(): number {
+    const text = this.stripHtml(this.model.content || '');
+    if (!text) return 0;
+    return text.split(/\s+/).filter(Boolean).length;
+  }
+
+  excerptLength(): number {
+    return (this.model.excerpt || '').trim().length;
+  }
+
+  coverPreviewUrl(): string {
+    return (this.model.coverImage || '').trim();
+  }
+
+  publishStateLabel(): string {
+    return this.model.published ? 'Sẵn sàng xuất bản' : 'Đang là bản nháp';
+  }
+
+  estimatedReadMinutes(): number {
+    const words = this.contentWordCount();
+    if (words <= 0) return 0;
+    return Math.max(1, Math.ceil(words / 220));
+  }
+
   get titleError(): string {
     if (!this.touched()) return '';
     if (!this.model.title?.trim()) return 'Vui lòng nhập tiêu đề';
@@ -111,5 +135,9 @@ export class BlogFormComponent implements OnInit {
         },
       });
     }
+  }
+
+  private stripHtml(value: string): string {
+    return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 }

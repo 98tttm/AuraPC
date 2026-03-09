@@ -109,12 +109,13 @@ export class AuthService {
     this.persistUser(user);
   }
 
-  updateProfile(profile: Partial<UserProfile>): Observable<{ success: boolean; user: User }> {
+  updateProfile(payload: { email?: string; profile?: Partial<UserProfile> }): Observable<{ success: boolean; user: User }> {
     const user = this.currentUser();
     if (!user) throw new Error('User not logged in');
     return this.http.put<{ success: boolean; user: User }>(`${BASE}/profile`, {
       userId: user._id || user.id,
-      profile,
+      email: payload.email,
+      profile: payload.profile,
     }).pipe(
       tap((res) => {
         if (res.success && res.user) {

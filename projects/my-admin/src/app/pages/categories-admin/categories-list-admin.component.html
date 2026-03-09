@@ -1,39 +1,231 @@
-<div class="page">
-  <div class="page-header">
-    <h1>Danh mục</h1>
-    <a routerLink="/categories/new" class="btn btn-primary">Thêm danh mục</a>
+<div class="page-header">
+  <div>
+    <h2>Danh mục</h2>
+    <p>Quản lý cây danh mục sản phẩm theo đúng cấp cha - con</p>
   </div>
-  @if (error()) {
-    <div class="alert alert-error">{{ error() }}</div>
-  }
-  @if (loading()) {
-    <p>Đang tải...</p>
-  } @else {
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Tên</th>
-          <th>Slug</th>
-          <th>Thứ tự</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of items(); track c._id) {
-          <tr>
-            <td>{{ c.name }}</td>
-            <td>{{ c.slug || '-' }}</td>
-            <td>{{ c.order ?? '-' }}</td>
-            <td>
-              <a [routerLink]="['/categories', c._id, 'edit']" class="btn btn-sm">Sửa</a>
-              <button type="button" class="btn btn-sm btn-danger" (click)="delete(c._id!, c.name)">Xóa</button>
-            </td>
-          </tr>
+  <a routerLink="/categories/new" class="btn btn--primary">+ Thêm danh mục</a>
+</div>
+
+@if (error()) {
+  <div class="alert-error">{{ error() }}</div>
+}
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Tổng danh mục</span>
+    <span class="stat-card__value">{{ stats().total }}</span>
+    <span class="stat-card__sub">toàn bộ node trong cây</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M4 20V8" />
+          <path d="M4 8h8" />
+          <path d="M12 8v6" />
+          <path d="M12 14h8" />
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Danh mục gốc</span>
+    <span class="stat-card__value">{{ stats().roots }}</span>
+    <span class="stat-card__sub">cấp 0 của cây danh mục</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Đang ẩn</span>
+    <span class="stat-card__value">{{ stats().hidden }}</span>
+    <span class="stat-card__sub">node không hiển thị</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Lệch cấp độ</span>
+    <span class="stat-card__value">{{ stats().mismatch }}</span>
+    <span class="stat-card__sub">level lưu khác level tính theo cây</span>
+  </div>
+</div>
+
+<div class="card categories-card">
+  <div class="card-header categories-card__header">
+    <div>
+      <h3 class="card-title">Cây danh mục</h3>
+      <p class="card-subtitle">{{ matchedCount() }} mục phù hợp / {{ stats().total }} danh mục</p>
+    </div>
+
+    <div class="categories-card__controls">
+      <div class="search-box categories-card__search">
+        <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          class="search-box__input"
+          placeholder="Tìm theo tên, slug, mã hoặc đường dẫn..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+
+      <div class="filter-pills categories-card__filters">
+        @for (option of filterOptions; track option.value) {
+          <button
+            type="button"
+            class="filter-pill"
+            [class.filter-pill--active]="filter() === option.value"
+            (click)="setFilter(option.value)"
+          >
+            {{ option.label }}
+            <span class="filter-pill__count">{{ filterCount(option.value) }}</span>
+          </button>
         }
-      </tbody>
-    </table>
-    @if (items().length === 0) {
-      <p>Chưa có danh mục nào.</p>
-    }
+      </div>
+
+      <div class="categories-card__actions">
+        <button type="button" class="btn btn--outline btn--sm" (click)="expandAll()">Mở hết</button>
+        <button type="button" class="btn btn--outline btn--sm" (click)="collapseAll()">Thu gọn</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-table">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="skeleton-row">
+          <div style="flex: 1">
+            <div class="skeleton skeleton--text" style="width: 42%"></div>
+            <div class="skeleton skeleton--text" style="width: 24%; margin-top: 0.45rem"></div>
+          </div>
+          <div class="skeleton skeleton--text" style="width: 70px"></div>
+          <div class="skeleton skeleton--text" style="width: 52px"></div>
+          <div class="skeleton skeleton--text" style="width: 60px"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="tree-table">
+      <div class="tree-table__head">
+        <div>Danh mục</div>
+        <div>Slug</div>
+        <div>Cấp độ</div>
+        <div>Thứ tự</div>
+        <div>Sản phẩm</div>
+        <div>Trạng thái</div>
+        <div></div>
+      </div>
+
+      <div class="tree-table__body">
+        @for (row of visibleRows(); track row.node.key) {
+          <div
+            class="tree-row"
+            [class.tree-row--context]="row.isContext"
+            [class.tree-row--mismatch]="row.node.levelMismatch"
+          >
+            <div class="tree-row__category">
+              <div class="tree-row__category-inner" [style.padding-left.px]="row.node.effectiveLevel * 22">
+                @if (row.hasChildren) {
+                  <button
+                    type="button"
+                    class="tree-row__toggle"
+                    [class.tree-row__toggle--expanded]="row.expanded"
+                    (click)="toggleExpand(row.node.key)"
+                    [attr.aria-label]="row.expanded ? 'Thu gọn nhánh' : 'Mở rộng nhánh'"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                } @else {
+                  <span class="tree-row__toggle tree-row__toggle--placeholder"></span>
+                }
+
+                <div class="tree-row__content">
+                  <div class="tree-row__title">
+                    <span class="badge tree-row__level-badge" [class]="row.node.effectiveLevel === 0 ? 'badge badge--confirmed' : 'badge badge--processing'">
+                      {{ levelLabel(row.node) }}
+                    </span>
+                    <span class="tree-row__name">{{ row.node.name }}</span>
+                    @if (row.node.levelMismatch) {
+                      <span class="tree-row__flag">Lưu: level {{ storedLevel(row.node) }}</span>
+                    }
+                  </div>
+
+                  <div class="tree-row__meta">
+                    <span>{{ secondaryMeta(row.node) }}</span>
+                    <span>{{ parentTrail(row.node) }}</span>
+                    @if (childCount(row.node) > 0) {
+                      <span>{{ childCount(row.node) }} danh mục con</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tree-row__slug">{{ row.node.slug || '—' }}</div>
+            <div class="tree-row__level">{{ storedLevel(row.node) }} / {{ row.node.effectiveLevel }}</div>
+            <div class="tree-row__order">{{ orderLabel(row.node) }}</div>
+            <div class="tree-row__products">{{ productCountLabel(row.node) }}</div>
+            <div class="tree-row__status">
+              <span class="badge" [class]="row.node.is_active === false ? 'badge badge--inactive' : 'badge badge--active'">
+                {{ statusLabel(row.node) }}
+              </span>
+            </div>
+
+            <div class="tree-row__actions">
+              <a [routerLink]="['/categories', routeId(row.node), 'edit']" class="btn btn--ghost btn--sm" title="Sửa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </a>
+              <button type="button" class="btn btn--ghost btn--sm" title="Xóa" (click)="delete(row.node)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state categories-card__empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>Không có danh mục nào khớp bộ lọc hiện tại</span>
+            <button type="button" class="btn btn--outline btn--sm" (click)="searchQuery = ''; setFilter('all')">Xóa bộ lọc</button>
+          </div>
+        }
+      </div>
+    </div>
   }
 </div>

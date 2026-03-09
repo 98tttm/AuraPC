@@ -100,6 +100,10 @@
             <input type="text" [value]="displayPhone()" readonly class="input--readonly" />
           </div>
           <div class="account__form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="editEmail" placeholder="Nhập email của bạn" />
+          </div>
+          <div class="account__form-group">
             <label>Giới tính</label>
             <select [(ngModel)]="editGender">
               <option value="">Chọn giới tính</option>
@@ -128,6 +132,16 @@
           <div class="account__field">
             <dt>Số điện thoại</dt>
             <dd>{{ displayPhone() }}</dd>
+          </div>
+          <div class="account__field">
+            <dt>Email</dt>
+            <dd>
+              @if (displayEmail(); as email) {
+              {{ email }}
+              } @else {
+              <a href="#" class="account__add-link" (click)="$event.preventDefault(); startEdit()">Thêm email</a>
+              }
+            </dd>
           </div>
           <div class="account__field">
             <dt>Giới tính</dt>

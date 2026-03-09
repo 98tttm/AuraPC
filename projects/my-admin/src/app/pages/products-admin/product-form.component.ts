@@ -25,6 +25,7 @@ export class ProductFormComponent implements OnInit {
     slug: '',
     shortDescription: '',
     description: '',
+    brand: '',
     price: 0,
     salePrice: undefined,
     category: undefined,
@@ -58,10 +59,11 @@ export class ProductFormComponent implements OnInit {
             slug: p.slug,
             shortDescription: p.shortDescription,
             description: p.description,
+            brand: p.brand || '',
             price: p.price,
             salePrice: p.salePrice,
             category: (cat && typeof cat === 'object' && '_id' in cat) ? cat._id : cat as string | undefined,
-            images: p.images || [],
+            images: this.normalizeImages(p.images),
             stock: p.stock,
             featured: p.featured,
             active: p.active !== false,
@@ -95,6 +97,14 @@ export class ProductFormComponent implements OnInit {
     return '';
   }
 
+  get salePriceError(): string {
+    if (!this.touched()) return '';
+    if (this.model.salePrice != null && this.model.salePrice > 0 && this.model.price != null && this.model.salePrice > this.model.price) {
+      return 'Giá khuyến mãi phải <= giá gốc';
+    }
+    return '';
+  }
+
   get stockError(): string {
     if (!this.touched()) return '';
     if (this.model.stock != null && this.model.stock < 0) return 'Tồn kho phải >= 0';
@@ -114,10 +124,113 @@ export class ProductFormComponent implements OnInit {
     this.dirty.set(true);
   }
 
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+  }
+
+  categoryOptions(): Category[] {
+    return [...this.categories()].sort((a, b) => {
+      const levelA = Number(a.level ?? 0);
+      const levelB = Number(b.level ?? 0);
+      if (levelA !== levelB) return levelA - levelB;
+
+      const orderA = Number(a.display_order ?? Number.MAX_SAFE_INTEGER);
+      const orderB = Number(b.display_order ?? Number.MAX_SAFE_INTEGER);
+      if (orderA !== orderB) return orderA - orderB;
+
+      return a.name.localeCompare(b.name, 'vi');
+    });
+  }
+
+  categoryOptionLabel(category: Category): string {
+    const level = Math.max(0, Number(category.level ?? 0));
+    return `${'— '.repeat(level)}${category.name}`;
+  }
+
+  selectedCategoryName(): string {
+    const selected = this.model.category;
+    if (selected == null || selected === '') return 'Chưa chọn danh mục';
+
+    const found = this.categories().find((category) =>
+      this.sameRef(category._id, selected)
+      || this.sameRef(category.category_id, selected)
+      || this.sameRef(category.slug, selected)
+    );
+    return found?.name || String(selected);
+  }
+
+  firstImageUrl(): string {
+    const images = this.model.images ?? [];
+    if (!Array.isArray(images) || images.length === 0) return '';
+    const first = images[0];
+    return typeof first === 'string' ? first : first?.url || '';
+  }
+
+  imageCount(): number {
+    return Array.isArray(this.model.images) ? this.model.images.length : 0;
+  }
+
+  sellingPrice(): number {
+    if (this.model.salePrice != null && this.model.salePrice > 0 && this.model.price != null && this.model.salePrice <= this.model.price) {
+      return this.model.salePrice;
+    }
+    return this.model.price ?? 0;
+  }
+
+  hasDiscount(): boolean {
+    return this.model.salePrice != null
+      && this.model.salePrice > 0
+      && this.model.price != null
+      && this.model.salePrice < this.model.price;
+  }
+
+  discountPercent(): number {
+    if (!this.hasDiscount() || !this.model.price) return 0;
+    return Math.round(((this.model.price - (this.model.salePrice ?? 0)) / this.model.price) * 100);
+  }
+
+  visibilityLabel(): string {
+    return this.model.active === false ? 'Đang ẩn' : 'Đang hiển thị';
+  }
+
+  featuredLabel(): string {
+    return this.model.featured ? 'Có' : 'Không';
+  }
+
+  stockLabel(): string {
+    const stock = this.model.stock ?? 0;
+    if (stock <= 0) return 'Hết hàng';
+    if (stock < 5) return `Sắp hết (${stock})`;
+    return `${stock} sản phẩm`;
+  }
+
+  formatPrice(value: number | null | undefined): string {
+    if (value == null || Number.isNaN(value)) return '—';
+    return `${value.toLocaleString('vi-VN')}đ`;
+  }
+
+  private normalizeImages(images: Product['images']): { url: string; alt?: string }[] {
+    if (!Array.isArray(images)) return [];
+    const normalized: Array<{ url: string; alt?: string } | null> = images.map((image) => {
+      if (typeof image === 'string') return { url: image };
+      if (image && typeof image === 'object' && 'url' in image && image.url) {
+        return { url: image.url, alt: image.alt };
+      }
+      return null;
+    });
+    return normalized.filter((image): image is { url: string; alt?: string } => image !== null);
+  }
+
+  private sameRef(a: unknown, b: unknown): boolean {
+    if (a == null || b == null) return false;
+    return String(a) === String(b);
+  }
+
   submit(): void {
     this.touched.set(true);
     this.error.set('');
-    if (this.nameError || this.priceError || this.stockError) return;
+    if (this.nameError || this.priceError || this.salePriceError || this.stockError) return;
 
     this.loading.set(true);
     const id = this.id();

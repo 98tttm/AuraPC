@@ -1,93 +1,272 @@
-<div class="page">
-  <div class="page-header">
-    <div>
+<div class="editor-page">
+  <div class="editor-hero">
+    <div class="editor-hero__main">
       <a routerLink="/products" class="back-link">&larr; Quay lại</a>
-      <h2>{{ id() ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h2>
+      <div class="editor-hero__copy">
+        <h1>{{ id() ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm' }}</h1>
+        <p>Tối ưu phần thông tin, giá bán và hình ảnh để sản phẩm rõ ràng trước khi hiển thị trên storefront.</p>
+      </div>
+    </div>
+
+    <div class="editor-hero__chips">
+      <span class="editor-chip" [class.editor-chip--success]="model.active !== false" [class.editor-chip--muted]="model.active === false">
+        {{ visibilityLabel() }}
+      </span>
+      <span class="editor-chip" [class.editor-chip--accent]="model.featured" [class.editor-chip--muted]="!model.featured">
+        {{ model.featured ? 'Sản phẩm nổi bật' : 'Sản phẩm thường' }}
+      </span>
     </div>
   </div>
+
   @if (error()) {
     <div class="alert-error">{{ error() }}</div>
   }
-  <form (ngSubmit)="submit()" class="form">
-    <div class="field" [class.field--error]="nameError">
-      <label>Tên <span class="required">*</span></label>
-      <input type="text" [(ngModel)]="model.name" name="name" (ngModelChange)="onNameChange()" placeholder="Nhập tên sản phẩm" />
-      @if (nameError) {
-        <span class="field-error">{{ nameError }}</span>
-      }
-    </div>
-    <div class="field">
-      <label>Slug</label>
-      <input type="text" [(ngModel)]="model.slug" name="slug" (ngModelChange)="onFieldChange()" placeholder="tu-dong-tao-tu-ten" />
-    </div>
-    <div class="field">
-      <label>Mô tả ngắn</label>
-      <input type="text" [(ngModel)]="model.shortDescription" name="shortDescription" (ngModelChange)="onFieldChange()" />
-    </div>
-    <div class="field">
-      <label>Mô tả</label>
-      <textarea [(ngModel)]="model.description" name="description" rows="4" (ngModelChange)="onFieldChange()"></textarea>
-    </div>
-    <div class="row">
-      <div class="field" [class.field--error]="priceError">
-        <label>Giá <span class="required">*</span></label>
-        <input type="number" [(ngModel)]="model.price" name="price" min="0" step="1000" (ngModelChange)="onFieldChange()" />
-        @if (priceError) {
-          <span class="field-error">{{ priceError }}</span>
-        }
-      </div>
-      <div class="field">
-        <label>Giá sale</label>
-        <input type="number" [(ngModel)]="model.salePrice" name="salePrice" min="0" step="1000" (ngModelChange)="onFieldChange()" />
-      </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>Danh mục</label>
-        <select [(ngModel)]="model.category" name="category" (ngModelChange)="onFieldChange()">
-          <option [ngValue]="undefined">-- Chọn --</option>
-          @for (c of categories(); track c._id) {
-            <option [ngValue]="c._id">{{ c.name }}</option>
+
+  <form (ngSubmit)="submit()" class="editor-layout">
+    <div class="editor-main">
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Thông tin cơ bản</h2>
+            <p>Phần này quyết định cách sản phẩm được hiển thị trong danh sách và trang chi tiết.</p>
+          </div>
+        </div>
+
+        <div class="field" [class.field--error]="nameError">
+          <label>Tên sản phẩm <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="model.name" name="name" (ngModelChange)="onNameChange()" placeholder="Nhập tên sản phẩm" />
+          @if (nameError) {
+            <span class="field-error">{{ nameError }}</span>
           }
-        </select>
-      </div>
-      <div class="field" [class.field--error]="stockError">
-        <label>Tồn kho</label>
-        <input type="number" [(ngModel)]="model.stock" name="stock" min="0" (ngModelChange)="onFieldChange()" />
-        @if (stockError) {
-          <span class="field-error">{{ stockError }}</span>
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" [(ngModel)]="model.slug" name="slug" (ngModelChange)="onFieldChange()" placeholder="tu-dong-tao-tu-ten" />
+          </div>
+
+          <div class="field">
+            <label>Thương hiệu</label>
+            <input type="text" [(ngModel)]="model.brand" name="brand" (ngModelChange)="onFieldChange()" placeholder="VD: ASUS, MSI, Lenovo..." />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mô tả ngắn</label>
+          <input type="text" [(ngModel)]="model.shortDescription" name="shortDescription" (ngModelChange)="onFieldChange()" placeholder="Một dòng mô tả ngắn gọn để hiển thị nhanh" />
+        </div>
+
+        <div class="field">
+          <label>Mô tả chi tiết</label>
+          <textarea [(ngModel)]="model.description" name="description" rows="6" (ngModelChange)="onFieldChange()" placeholder="Mô tả nổi bật, cấu hình, trải nghiệm sử dụng..."></textarea>
+        </div>
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Giá bán & phân loại</h2>
+            <p>Thiết lập giá gốc, giá khuyến mãi, tồn kho và danh mục chính của sản phẩm.</p>
+          </div>
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field" [class.field--error]="priceError">
+            <label>Giá gốc <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="model.price" name="price" min="0" step="1000" (ngModelChange)="onFieldChange()" />
+            @if (priceError) {
+              <span class="field-error">{{ priceError }}</span>
+            }
+          </div>
+
+          <div class="field" [class.field--error]="salePriceError">
+            <label>Giá khuyến mãi</label>
+            <input type="number" [(ngModel)]="model.salePrice" name="salePrice" min="0" step="1000" (ngModelChange)="onFieldChange()" />
+            @if (salePriceError) {
+              <span class="field-error">{{ salePriceError }}</span>
+            }
+          </div>
+
+          <div class="field" [class.field--error]="stockError">
+            <label>Tồn kho</label>
+            <input type="number" [(ngModel)]="model.stock" name="stock" min="0" (ngModelChange)="onFieldChange()" />
+            @if (stockError) {
+              <span class="field-error">{{ stockError }}</span>
+            }
+          </div>
+
+          <div class="field">
+            <label>Danh mục</label>
+            <select [(ngModel)]="model.category" name="category" (ngModelChange)="onFieldChange()">
+              <option [ngValue]="undefined">-- Chọn danh mục --</option>
+              @for (category of categoryOptions(); track category._id) {
+                <option [ngValue]="category._id">{{ categoryOptionLabel(category) }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Thư viện ảnh</h2>
+            <p>Thêm ảnh bằng URL. Ảnh đầu tiên sẽ được dùng làm ảnh đại diện mặc định.</p>
+          </div>
+          <span class="editor-card__meta">{{ imageCount() }} ảnh</span>
+        </div>
+
+        <div class="image-input-row">
+          <input
+            type="text"
+            [(ngModel)]="imageUrlInput"
+            name="imageUrl"
+            placeholder="Nhập URL ảnh rồi nhấn Thêm"
+            (keyup.enter)="addImageUrl(); $event.preventDefault()"
+          />
+          <button type="button" class="btn btn--outline" (click)="addImageUrl()">Thêm ảnh</button>
+        </div>
+
+        @if (model.images && model.images.length > 0) {
+          <div class="gallery-grid">
+            @for (img of model.images; track $index) {
+              <div class="gallery-item">
+                <div class="gallery-item__frame">
+                  <img [src]="img.url" alt="" class="gallery-item__img" (error)="onImageError($event)" />
+                  @if ($index === 0) {
+                    <span class="gallery-item__badge">Ảnh chính</span>
+                  }
+                </div>
+                <button type="button" class="gallery-item__remove" (click)="removeImage($index)" title="Xóa ảnh">×</button>
+                <span class="gallery-item__caption">{{ img.url }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-panel">
+            <span>Chưa có ảnh nào. Thêm ít nhất một ảnh để sản phẩm trực quan hơn.</span>
+          </div>
         }
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Trạng thái hiển thị</h2>
+            <p>Kiểm soát sản phẩm có được đưa lên storefront và nhóm nổi bật hay không.</p>
+          </div>
+        </div>
+
+        <div class="toggle-grid">
+          <label class="toggle-card" [class.toggle-card--active]="model.featured">
+            <input type="checkbox" [(ngModel)]="model.featured" name="featured" (ngModelChange)="onFieldChange()" />
+            <span class="toggle-card__title">Nổi bật</span>
+            <span class="toggle-card__desc">Đưa sản phẩm vào các block featured và ưu tiên hiển thị.</span>
+          </label>
+
+          <label class="toggle-card" [class.toggle-card--active]="model.active !== false">
+            <input type="checkbox" [(ngModel)]="model.active" name="active" (ngModelChange)="onFieldChange()" />
+            <span class="toggle-card__title">Hiển thị</span>
+            <span class="toggle-card__desc">Cho phép sản phẩm xuất hiện trên website khách hàng.</span>
+          </label>
+        </div>
+      </section>
+
+      <div class="editor-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="loading()">
+          @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật sản phẩm' : 'Tạo sản phẩm' }} }
+        </button>
+        <a routerLink="/products" class="btn btn--outline">Hủy</a>
       </div>
     </div>
 
-    <!-- Images -->
-    <div class="field">
-      <label>Hình ảnh</label>
-      <div class="image-input-row">
-        <input type="text" [(ngModel)]="imageUrlInput" name="imageUrl" placeholder="Nhập URL ảnh rồi nhấn Thêm" (keyup.enter)="addImageUrl(); $event.preventDefault()" />
-        <button type="button" class="btn btn--outline btn--sm" (click)="addImageUrl()">Thêm</button>
-      </div>
-      @if (model.images && model.images.length > 0) {
-        <div class="image-preview-list">
-          @for (img of model.images; track $index) {
-            <div class="image-preview-item">
-              <img [src]="img.url" alt="" class="image-preview-item__img" />
-              <button type="button" class="image-preview-item__remove" (click)="removeImage($index)" title="Xóa">×</button>
+    <aside class="editor-aside">
+      <section class="editor-card editor-card--sticky">
+        <div class="editor-card__header">
+          <div>
+            <h2>Tóm tắt nhanh</h2>
+            <p>Kiểm tra nhanh các thông tin quan trọng trước khi lưu.</p>
+          </div>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-item">
+            <span>Giá đang bán</span>
+            <strong>{{ formatPrice(sellingPrice()) }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Giá gốc</span>
+            <strong>{{ formatPrice(model.price) }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Danh mục</span>
+            <strong>{{ selectedCategoryName() }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Tồn kho</span>
+            <strong>{{ stockLabel() }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Thương hiệu</span>
+            <strong>{{ model.brand?.trim() || 'Chưa nhập' }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Slug</span>
+            <strong>{{ model.slug?.trim() || 'Chưa tạo slug' }}</strong>
+          </div>
+
+          @if (hasDiscount()) {
+            <div class="summary-item summary-item--accent">
+              <span>Mức giảm giá</span>
+              <strong>-{{ discountPercent() }}%</strong>
             </div>
           }
         </div>
-      }
-    </div>
+      </section>
 
-    <div class="field row check">
-      <label><input type="checkbox" [(ngModel)]="model.featured" name="featured" (ngModelChange)="onFieldChange()" /> Nổi bật</label>
-      <label><input type="checkbox" [(ngModel)]="model.active" name="active" (ngModelChange)="onFieldChange()" /> Hiển thị</label>
-    </div>
-    <div class="actions">
-      <button type="submit" class="btn btn--primary" [disabled]="loading()">
-        @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật' : 'Tạo' }} }
-      </button>
-      <a routerLink="/products" class="btn btn--outline">Hủy</a>
-    </div>
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Xem trước ảnh chính</h2>
+            <p>Ảnh đầu tiên trong danh sách sẽ được ưu tiên sử dụng.</p>
+          </div>
+        </div>
+
+        @if (firstImageUrl(); as previewUrl) {
+          <div class="preview-media">
+            <img [src]="previewUrl" alt="" class="preview-media__img" (error)="onImageError($event)" />
+          </div>
+        } @else {
+          <div class="preview-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span>Chưa có ảnh đại diện</span>
+          </div>
+        }
+      </section>
+
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Gợi ý nhập liệu</h2>
+          </div>
+        </div>
+
+        <ul class="tip-list">
+          <li>Dùng mô tả ngắn cho listing card, mô tả chi tiết cho trang sản phẩm.</li>
+          <li>Giá khuyến mãi nên nhỏ hơn giá gốc để storefront hiển thị giảm giá đúng.</li>
+          <li>Ảnh đầu tiên nên là ảnh nền sạch, tỷ lệ ngang cân đối.</li>
+        </ul>
+      </section>
+    </aside>
   </form>
 </div>
