@@ -10,9 +10,9 @@ AuraPC is a Vietnamese-market gaming PC e-commerce platform. Monorepo with Angul
 
 ### Frontend (run from repo root)
 ```bash
-npm start                # Angular dev server on http://localhost:4200
-npm run build            # Production build (output: dist/my-client/browser)
-npm test                 # Run Karma tests
+npx ng serve my-client   # Angular dev server on http://localhost:4200
+npx ng build my-client   # Production build (output: dist/my-client/browser)
+npx ng test my-client    # Run Karma tests
 ```
 
 ### Admin Panel (run from repo root)
@@ -47,7 +47,7 @@ cd server && npm run update-brands  # Extract brands from products into categori
 - **All components are standalone** (no NgModules) with lazy-loaded routes
 - **State management**: Angular signals (`signal()`) for auth state, RxJS `BehaviorSubject` for cart
 - **Auth interceptor**: Functional interceptor in `app.config.ts` attaches JWT from localStorage (`aurapc_token`) to all API requests
-- **Routes use Vietnamese slugs**: `/san-pham` (products), `/tai-khoan` (account), `/aura-builder` (PC configurator)
+- **Routes use Vietnamese slugs**: `/san-pham` (products), `/tai-khoan` (account), `/aura-builder` (PC configurator), `/ho-tro` (support), `/tra-cuu-don-hang` (order tracking)
 - **Key services** in `core/services/`: `AuthService` (phone OTP login), `ApiService` (all backend calls + product helpers), `CartService` (local cart + backend sync), `AddressService`, `ToastService`
 - **3D visualization**: Three.js canvas on homepage, Google Model Viewer for product pages
 

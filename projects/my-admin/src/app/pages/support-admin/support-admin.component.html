@@ -1,0 +1,206 @@
+<div class="support-page">
+  <div class="page-header">
+    <div>
+      <h2>Tư vấn</h2>
+      <p>Quản lý hội thoại giữa nhân viên và khách hàng theo thời gian thực</p>
+    </div>
+    <button type="button" class="btn btn--outline" (click)="refresh()">Làm mới</button>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error">{{ error() }}</div>
+  }
+
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-card__label">Đang mở</div>
+      <div class="stat-card__value">{{ counts().open }}</div>
+      <div class="stat-card__sub">cuộc trò chuyện đang hoạt động</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Lưu trữ</div>
+      <div class="stat-card__value">{{ counts().archived }}</div>
+      <div class="stat-card__sub">hội thoại đã cất lại</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Chờ phản hồi</div>
+      <div class="stat-card__value">{{ counts().unread }}</div>
+      <div class="stat-card__sub">hội thoại có tin nhắn chưa đọc</div>
+    </div>
+  </div>
+
+  <div class="support-shell">
+    <aside class="support-sidebar">
+      <div class="support-sidebar__top">
+        <div>
+          <h3 class="support-sidebar__title">Hộp thư tư vấn</h3>
+          <p class="support-sidebar__subtitle">Danh sách lịch sử trao đổi với khách hàng</p>
+        </div>
+
+        <div class="search-box support-sidebar__search">
+          <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            class="search-box__input"
+            placeholder="Tìm theo tên, số điện thoại..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+        </div>
+      </div>
+
+      <div class="support-tabs">
+        <button type="button" class="support-tab" [class.support-tab--active]="activeTab() === 'open'" (click)="setTab('open')">
+          Đang mở
+          <span>{{ counts().open }}</span>
+        </button>
+        <button type="button" class="support-tab" [class.support-tab--active]="activeTab() === 'archived'" (click)="setTab('archived')">
+          Lưu trữ
+          <span>{{ counts().archived }}</span>
+        </button>
+        <button type="button" class="support-tab" [class.support-tab--active]="activeTab() === 'all'" (click)="setTab('all')">
+          Tất cả
+          <span>{{ counts().all }}</span>
+        </button>
+      </div>
+
+      <div class="support-list">
+        @if (loadingList()) {
+          <div class="support-list__empty">Đang tải danh sách hội thoại...</div>
+        } @else {
+          @for (conversation of filteredConversations(); track trackConversation($index, conversation)) {
+            <button
+              type="button"
+              class="support-thread"
+              [class.support-thread--active]="selectedConversationId() === conversation._id"
+              (click)="selectConversation(conversation._id)"
+            >
+              <div class="support-thread__avatar">
+                @if (conversation.user?.avatar) {
+                  <img [src]="conversation.user?.avatar" alt="" />
+                } @else {
+                  <span>{{ customerInitial(conversation) }}</span>
+                }
+              </div>
+
+              <div class="support-thread__content">
+                <div class="support-thread__head">
+                  <span class="support-thread__name">{{ displayCustomerName(conversation) }}</span>
+                  <span class="support-thread__time">{{ conversationTime(conversation.lastMessageAt) }}</span>
+                </div>
+                <div class="support-thread__meta">
+                  <span>{{ conversation.user?.phoneNumber || conversation.user?.email || 'Khách đã đăng nhập' }}</span>
+                  @if (conversation.archived) {
+                    <span class="support-thread__pill">Lưu trữ</span>
+                  }
+                </div>
+                <div class="support-thread__preview">
+                  {{ conversation.lastMessagePreview || 'Chưa có tin nhắn nào' }}
+                </div>
+              </div>
+
+              @if (conversation.unreadForAdmin > 0) {
+                <span class="support-thread__badge">{{ conversation.unreadForAdmin }}</span>
+              }
+            </button>
+          } @empty {
+            <div class="support-list__empty">Chưa có cuộc trò chuyện nào trong mục này.</div>
+          }
+        }
+      </div>
+    </aside>
+
+    <section class="support-main">
+      @if (!hasSelection()) {
+        <div class="support-empty">
+          <div class="support-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3>Chọn một hội thoại để bắt đầu</h3>
+          <p>Danh sách bên trái sẽ tự cập nhật realtime khi khách hàng nhắn mới.</p>
+        </div>
+      } @else {
+        <header class="support-main__header">
+          <div class="support-main__profile">
+            <div class="support-main__avatar">
+              @if (selectedConversation()?.user?.avatar) {
+                <img [src]="selectedConversation()?.user?.avatar" alt="" />
+              } @else {
+                <span>{{ customerInitial(selectedConversation()) }}</span>
+              }
+            </div>
+            <div>
+              <div class="support-main__name">{{ displayCustomerName(selectedConversation()) }}</div>
+              <div class="support-main__info">
+                <span>{{ selectedConversation()?.user?.phoneNumber || 'Không có số điện thoại' }}</span>
+                @if (selectedConversation()?.user?.email) {
+                  <span>·</span>
+                  <span>{{ selectedConversation()?.user?.email }}</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="support-main__actions">
+            @if (selectedConversation()?.assignedAdmin?.name) {
+              <span class="support-main__agent">{{ selectedConversation()?.assignedAdmin?.name }}</span>
+            }
+            <button type="button" class="btn btn--outline btn--sm" (click)="toggleArchive()">
+              {{ selectedConversation()?.archived ? 'Bỏ lưu trữ' : 'Lưu trữ' }}
+            </button>
+          </div>
+        </header>
+
+        <div class="support-main__body" #messagesContainer>
+          @if (loadingConversation()) {
+            <div class="support-list__empty">Đang tải nội dung cuộc trò chuyện...</div>
+          } @else {
+            @for (message of messages(); track trackMessage($index, message)) {
+              <div class="chat-message" [class.chat-message--self]="message.senderType === 'admin'">
+                @if (message.senderType !== 'admin') {
+                  <div class="chat-message__avatar">
+                    @if (selectedConversation()?.user?.avatar) {
+                      <img [src]="selectedConversation()?.user?.avatar" alt="" />
+                    } @else {
+                      <span>{{ customerInitial(selectedConversation()) }}</span>
+                    }
+                  </div>
+                }
+
+                <div class="chat-message__wrap">
+                  <div class="chat-message__bubble">{{ message.content }}</div>
+                  <div class="chat-message__meta">
+                    <span>{{ message.sender.name }}</span>
+                    <span>·</span>
+                    <span>{{ messageTime(message.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div class="support-list__empty">Khách hàng chưa gửi tin nhắn nào.</div>
+            }
+          }
+        </div>
+
+        <form class="support-composer" (ngSubmit)="send()">
+          <textarea
+            [(ngModel)]="inputTextValue"
+            name="adminSupportMessage"
+            rows="1"
+            placeholder="Nhập phản hồi cho khách hàng..."
+            [disabled]="sending() || loadingConversation()"
+            (keydown.enter)="onEnter($event)"
+            (input)="onTyping()"
+          ></textarea>
+          <button class="btn btn--primary" type="submit" [disabled]="sending() || !inputTextValue.trim()">
+            {{ sending() ? 'Đang gửi...' : 'Gửi' }}
+          </button>
+        </form>
+      }
+    </section>
+  </div>
+</div>

@@ -21,6 +21,16 @@ const postSchema = new mongoose.Schema(
     // Topic
     topic: { type: String, default: '' },
 
+    // Moderation status
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'approved',
+    },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+    reviewedAt: { type: Date, default: null },
+    rejectedReason: { type: String, default: null },
+
     // Interactions
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     likeCount: { type: Number, default: 0 },
@@ -59,5 +69,6 @@ postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ topic: 1, createdAt: -1 });
 postSchema.index({ isPublished: 1, scheduledAt: 1 });
 postSchema.index({ likeCount: -1 });
+postSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Post', postSchema);

@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { Subscription } from 'rxjs';
 import { AdminAuthService } from '../core/auth/admin-auth.service';
 import { ThemeService } from '../core/theme.service';
+import { LayoutService } from '../core/layout.service';
 import { AdminApiService, AdminNotification } from '../core/admin-api.service';
 import { AdminRealtimeService } from '../core/services/realtime.service';
 import { ToastComponent } from '../shared/toast.component';
@@ -17,7 +18,8 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
   styleUrl: './admin-layout.component.css',
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
-  sidebarCollapsed = signal(false);
+  private layoutService = inject(LayoutService);
+  sidebarCollapsed = this.layoutService.sidebarCollapsed;
   admin = this.auth.currentAdmin;
   themeService = inject(ThemeService);
   notifications = signal<AdminNotification[]>([]);
@@ -65,7 +67,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.update((v) => !v);
+    this.layoutService.toggleSidebar();
   }
 
   toggleTheme(): void {

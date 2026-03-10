@@ -22,11 +22,14 @@ const adminDashboardRoutes = require('./routes/admin/dashboardRoutes');
 const adminOrderRoutes = require('./routes/admin/orderRoutes');
 const adminUserRoutes = require('./routes/admin/userRoutes');
 const adminNotificationRoutes = require('./routes/admin/notificationRoutes');
+const adminSupportRoutes = require('./routes/admin/supportRoutes');
+const adminHubRoutes = require('./routes/admin/hubRoutes');
 const builderRoutes = require('./routes/builderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const hubRoutes = require('./routes/hubRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const supportRoutes = require('./routes/supportRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const faqRoutes = require('./routes/faqRoutes');
 
@@ -101,11 +104,14 @@ app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/notifications', adminNotificationRoutes);
+app.use('/api/admin/support', adminSupportRoutes);
+app.use('/api/admin/hub', adminHubRoutes);
 app.use('/api/builders', builderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/hub', hubRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/support', supportRoutes);
 app.use('/api/faqs', faqRoutes);
 
 // Serve static files (uploads)

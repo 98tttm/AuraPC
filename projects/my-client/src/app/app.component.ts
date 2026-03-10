@@ -1,17 +1,21 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, inject } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ChatbotWidgetComponent } from './components/chatbot-widget/chatbot-widget.component';
+import { SupportChatWidgetComponent } from './components/support-chat-widget/support-chat-widget.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RealtimeService } from './core/services/realtime.service';
+import { AuthService } from './core/services/auth.service';
+import { ToastService } from './core/services/toast.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent, ChatbotWidgetComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent, SupportChatWidgetComponent, ChatbotWidgetComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: { '[class.route-aura-builder]': 'hideFooter()' },
   template: `
@@ -23,6 +27,7 @@ import { RealtimeService } from './core/services/realtime.service';
     @if (!hideFooter()) {
       <app-footer></app-footer>
     }
+    <app-support-chat-widget></app-support-chat-widget>
     <app-chatbot-widget></app-chatbot-widget>
   `,
   styles: [`
@@ -48,20 +53,31 @@ export class AppComponent implements OnInit, OnDestroy {
   private scrollObserver: IntersectionObserver | null = null;
   private mutationObs: MutationObserver | null = null;
   private observedEls = new WeakSet<Element>();
+  private supportMsgSub: Subscription | null = null;
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private realtime = inject(RealtimeService);
 
   constructor(
     private router: Router,
-    /** Khởi tạo realtime socket khi app load (kết nối khi user đã đăng nhập). */
-    _realtime: RealtimeService,
   ) {}
 
   ngOnInit(): void {
     this.initScrollAnimations();
+    this.supportMsgSub = this.realtime.supportMessageCreated$.subscribe((payload) => {
+      const currentUserId = this.auth.currentUser()?._id;
+      if (!currentUserId || payload.conversation.user?._id !== currentUserId) return;
+      if (payload.message.senderType === 'admin') {
+        const name = payload.message.sender?.name || 'Nhân viên tư vấn';
+        this.toast.showInfo(`💬 ${name}: ${payload.message.content.slice(0, 80)}`);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.scrollObserver?.disconnect();
     this.mutationObs?.disconnect();
+    this.supportMsgSub?.unsubscribe();
   }
 
   private initScrollAnimations(): void {

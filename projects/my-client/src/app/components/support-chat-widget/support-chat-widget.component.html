@@ -1,0 +1,106 @@
+<div class="support-chat">
+  <button class="support-chat__toggle" type="button" (click)="toggleOpen()" aria-label="Tư vấn với AuraPC">
+    <img src="assets/support/support.png" alt="Tư vấn AuraPC" class="support-chat__icon" />
+    @if (unreadCount() > 0) {
+      <span class="support-chat__badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <section class="support-chat__panel">
+      <header class="support-chat__header">
+        <div class="support-chat__header-main">
+          <img src="assets/support/support.png" alt="Tư vấn AuraPC" class="support-chat__header-icon" />
+          <div>
+            <div class="support-chat__title">Tư vấn cùng AuraPC</div>
+            <div class="support-chat__subtitle">
+              @if (isLoggedIn()) {
+                <span class="support-chat__status-dot"></span>
+                {{ assignedAdminName() }} đang trực tuyến
+              } @else {
+                Đăng nhập để nói chuyện với nhân viên
+              }
+            </div>
+          </div>
+        </div>
+        <button type="button" class="support-chat__close" (click)="toggleOpen()">×</button>
+      </header>
+
+      <div class="support-chat__body" #messagesContainer>
+        @if (!isLoggedIn()) {
+          <div class="support-chat__empty support-chat__empty--center">
+            <img src="assets/support/support.png" alt="" class="support-chat__empty-icon" />
+            <h4>Đăng nhập để bắt đầu tư vấn</h4>
+            <p>Nhân viên AuraPC sẽ hỗ trợ cấu hình, sản phẩm và đơn hàng của bạn ngay trong cửa sổ này.</p>
+            <button type="button" class="support-chat__cta" (click)="openLoginPopup()">Đăng nhập ngay</button>
+          </div>
+        } @else if (loading()) {
+          <div class="support-chat__empty">Đang tải lịch sử cuộc trò chuyện...</div>
+        } @else {
+          @if (!hasMessages()) {
+            <div class="support-chat__empty">
+              Hãy để lại nhu cầu của bạn — nhân viên tư vấn sẽ phản hồi ngay tại đây. Cuộc trò chuyện được lưu lại theo tài khoản.
+            </div>
+          }
+
+          <div class="support-chat__messages">
+            @for (message of messages(); track trackMessage($index, message)) {
+              <div class="support-chat__message" [class.support-chat__message--self]="isOwnMessage(message)">
+                @if (!isOwnMessage(message)) {
+                  <img src="assets/support/support.png" alt="" class="support-chat__avatar" />
+                }
+
+                <div class="support-chat__bubble-wrap">
+                  <div class="support-chat__bubble">
+                    {{ message.content }}
+                  </div>
+                  <div class="support-chat__meta">
+                    @if (!isOwnMessage(message)) {
+                      <span>{{ message.sender.name }}</span>
+                      <span>·</span>
+                    }
+                    <span>{{ displayTime(message.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (adminTyping()) {
+              <div class="support-chat__message">
+                <img src="assets/support/support.png" alt="" class="support-chat__avatar" />
+                <div class="support-chat__bubble-wrap">
+                  <div class="support-chat__bubble support-chat__typing-bubble">
+                    <span class="support-chat__typing-dot"></span>
+                    <span class="support-chat__typing-dot"></span>
+                    <span class="support-chat__typing-dot"></span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="support-chat__error">{{ error() }}</div>
+      }
+
+      <form class="support-chat__composer" (ngSubmit)="send()">
+        <textarea
+          [(ngModel)]="inputTextValue"
+          name="supportMessage"
+          rows="1"
+          [disabled]="!isLoggedIn() || sending()"
+          [placeholder]="isLoggedIn() ? 'Nhập nội dung cần tư vấn...' : 'Đăng nhập để gửi tin nhắn...'"
+          (keydown.enter)="onEnter($event)"
+        ></textarea>
+        <button type="submit" [disabled]="!isLoggedIn() || sending() || !inputTextValue.trim()">
+          <svg class="support-chat__send-icon" viewBox="0 0 24 24">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+  }
+</div>

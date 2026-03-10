@@ -33,6 +33,20 @@
   gap: 0.5rem;
 }
 
+/* ── Category Filter ── */
+.category-filter {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  max-width: 180px;
+}
+.category-filter:focus { border-color: var(--text-secondary); }
+
 /* ── Search Box ── */
 .search-box { position: relative; }
 

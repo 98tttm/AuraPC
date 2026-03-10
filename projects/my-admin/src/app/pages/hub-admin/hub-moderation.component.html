@@ -1,0 +1,249 @@
+<div class="hub-page">
+  <div class="hub-page__header">
+    <div class="hub-page__title-wrap">
+      <h1 class="hub-page__title">AuraHub</h1>
+      <p class="hub-page__subtitle">Quản lý bài đăng cộng đồng, duyệt/từ chối và theo dõi chất lượng nội dung.</p>
+    </div>
+
+    <div class="hub-page__filters">
+      <div class="hub-page__tabs">
+        @for (tab of statusTabs; track tab.value) {
+          <button
+            type="button"
+            class="hub-page__tab"
+            [class.hub-page__tab--active]="status() === tab.value"
+            (click)="changeStatusTab(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+
+      <div class="hub-page__controls">
+        <input
+          type="text"
+          class="hub-page__search"
+          placeholder="Tìm theo nội dung, từ khóa..."
+          [ngModel]="search()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+
+        <select
+          class="hub-page__select"
+          [ngModel]="sort()"
+          (ngModelChange)="onSortChange($event)"
+        >
+          <option value="newest">Mới nhất</option>
+          <option value="trending">Trending</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="hub-page__content">
+    @if (loading()) {
+      <div class="hub-page__empty">Đang tải danh sách bài AuraHub...</div>
+    } @else if (items().length === 0) {
+      <div class="hub-page__empty">
+        <p>Chưa có bài nào phù hợp bộ lọc hiện tại.</p>
+      </div>
+    } @else {
+      <div class="hub-table">
+        <table class="hub-table__table">
+          <thead>
+            <tr>
+              <th>Người đăng</th>
+              <th>Nội dung</th>
+              <th>Chủ đề</th>
+              <th>TT</th>
+              <th>Lượt tương tác</th>
+              <th>Ngày tạo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (post of items(); track post._id) {
+              <tr>
+                <td>
+                  <div class="hub-table__author">
+                    <div class="hub-table__avatar">
+                      {{ authorName(post).charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="hub-table__author-info">
+                      <div class="hub-table__author-name">{{ authorName(post) }}</div>
+                      <div class="hub-table__author-meta">
+                        {{ post.author?.phoneNumber || post.author?._id }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="hub-table__content">{{ shortContent(post) }}</div>
+                </td>
+                <td>
+                  <span class="hub-table__topic" *ngIf="post.topic; else noTopic">{{ post.topic }}</span>
+                  <ng-template #noTopic>
+                    <span class="hub-table__topic hub-table__topic--muted">Không có</span>
+                  </ng-template>
+                </td>
+                <td>
+                  <span [class]="statusBadgeClass(post)">{{ statusLabel(post) }}</span>
+                </td>
+                <td>
+                  <div class="hub-table__metrics">
+                    <span>❤️ {{ post.likeCount || 0 }}</span>
+                    <span>💬 {{ post.commentCount || 0 }}</span>
+                    <span>👁️ {{ post.viewCount || 0 }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="hub-table__date">
+                    {{ post.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                  </div>
+                </td>
+                <td>
+                  <button type="button" class="hub-table__action" (click)="openDetail(post)">Xem</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="hub-table__footer" *ngIf="total() > 0">
+          <div class="hub-table__summary">
+            Đang hiển thị trang {{ page() }} / {{ totalPages() }} — tổng {{ total() }} bài
+          </div>
+          <div class="hub-table__pagination">
+            <button type="button" (click)="changePage(-1)" [disabled]="page() <= 1">Trước</button>
+            <button type="button" (click)="changePage(1)" [disabled]="page() >= totalPages()">Sau</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (detailOpen() && selectedPost()) {
+    <div class="hub-detail">
+      <div class="hub-detail__backdrop" (click)="closeDetail()"></div>
+      <div class="hub-detail__panel">
+        <div class="hub-detail__header">
+          <div>
+            <h2 class="hub-detail__title">Chi tiết bài AuraHub</h2>
+            <p class="hub-detail__meta">
+              {{ authorName(selectedPost()!) }} ·
+              {{ selectedPost()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+          <button type="button" class="hub-detail__close" (click)="closeDetail()">×</button>
+        </div>
+
+        <div class="hub-detail__status-row">
+          <span [class]="statusBadgeClass(selectedPost()!)">{{ statusLabel(selectedPost()!) }}</span>
+          <span class="hub-detail__metrics">
+            ❤️ {{ selectedPost()!.likeCount || 0 }} ·
+            💬 {{ selectedPost()!.commentCount || 0 }} ·
+            👁️ {{ selectedPost()!.viewCount || 0 }}
+          </span>
+        </div>
+
+        <div class="hub-detail__body">
+          <div class="hub-detail__section">
+            <h3>Nội dung</h3>
+            <p class="hub-detail__content">
+              {{ selectedPost()!.content || '(Không có nội dung)' }}
+            </p>
+          </div>
+
+          <div class="hub-detail__section" *ngIf="selectedPost()!.images?.length">
+            <h3>Hình ảnh</h3>
+            <div class="hub-detail__images">
+              @for (img of selectedPost()!.images!; track img) {
+                <img [src]="img" alt="AuraHub image" />
+              }
+            </div>
+          </div>
+
+          <div class="hub-detail__section">
+            <h3>Thông tin</h3>
+            <div class="hub-detail__info-grid">
+              <div>
+                <div class="hub-detail__label">Chủ đề</div>
+                <div class="hub-detail__value">{{ selectedPost()!.topic || 'Không có' }}</div>
+              </div>
+              <div>
+                <div class="hub-detail__label">Cho phép trả lời</div>
+                <div class="hub-detail__value">
+                  @switch (selectedPost()!.replyOption) {
+                    @case ('followers') { Chỉ người theo dõi }
+                    @case ('mentioned') { Chỉ người được nhắc đến }
+                    @default { Bất kỳ ai }
+                  }
+                </div>
+              </div>
+              <div>
+                <div class="hub-detail__label">Lịch đăng</div>
+                <div class="hub-detail__value">
+                  @if (selectedPost()!.scheduledAt) {
+                    {{ selectedPost()!.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+                  } @else {
+                    Không hẹn giờ
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hub-detail__section">
+            <h3>Lý do từ chối</h3>
+            <textarea
+              rows="3"
+              class="hub-detail__textarea"
+              placeholder="Nhập lý do nếu từ chối bài đăng..."
+              [ngModel]="rejectReason()"
+              (ngModelChange)="onRejectReasonChange($event)"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="hub-detail__footer">
+          <button
+            type="button"
+            class="hub-detail__btn hub-detail__btn--danger"
+            [disabled]="actionLoading()"
+            (click)="deleteSelected()"
+          >
+            Xóa bài
+          </button>
+
+          <div class="hub-detail__actions-right">
+            <button
+              type="button"
+              class="hub-detail__btn"
+              [disabled]="actionLoading() || !rejectReason().trim()"
+              (click)="rejectSelected()"
+            >
+              Từ chối
+            </button>
+            <button
+              type="button"
+              class="hub-detail__btn"
+              [disabled]="actionLoading()"
+              (click)="approveSelected(true)"
+            >
+              Duyệt & đăng ngay
+            </button>
+            <button
+              type="button"
+              class="hub-detail__btn hub-detail__btn--primary"
+              [disabled]="actionLoading()"
+              (click)="approveSelected(false)"
+            >
+              Duyệt
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

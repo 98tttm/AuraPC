@@ -53,7 +53,7 @@ Seed script: `server/scripts/seed-admins.js`
 ### Pages
 | Route | Component | Description |
 |-------|-----------|-------------|
-| `/` | DashboardComponent | Stats cards, charts (Chart.js), recent orders |
+| `/` | DashboardComponent | 4 KPI stat cards, multi-dataset revenue/orders/customers area chart (dual Y-axis), monthly target card, top products bar chart, order status doughnut, recent orders table. Theme-aware chart colors via getChartThemeColors(). |
 | `/products` | ProductsListAdminComponent | CRUD product list with sortable columns |
 | `/products/new` | ProductFormComponent | Add product with validation, auto-slug |
 | `/products/:id/edit` | ProductFormComponent | Edit product |

@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { NotificationService } from './notification.service';
 import { environment } from '../../../environments/environment';
+import type { SupportConversation, SupportMessage } from './support-chat.service';
 
 const TOKEN_KEY = 'aurapc_token';
 
@@ -11,6 +12,16 @@ export interface OrderUpdatedPayload {
   orderNumber: string;
   status?: string;
   userId?: string;
+}
+
+export interface SupportMessagePayload {
+  conversation: SupportConversation;
+  message: SupportMessage;
+}
+
+export interface SupportTypingPayload {
+  conversationId: string;
+  adminName: string;
 }
 
 /**
@@ -26,6 +37,9 @@ export class RealtimeService {
 
   /** Emit khi server gửi order:updated (để account page refresh danh sách đơn). */
   readonly orderUpdated$ = new Subject<OrderUpdatedPayload>();
+  readonly supportConversationUpdated$ = new Subject<SupportConversation>();
+  readonly supportMessageCreated$ = new Subject<SupportMessagePayload>();
+  readonly supportTyping$ = new Subject<SupportTypingPayload>();
 
   constructor() {
     effect(() => {
@@ -63,6 +77,18 @@ export class RealtimeService {
     this.socket.on('order:updated', (data: OrderUpdatedPayload) => {
       this.orderUpdated$.next(data);
       this.notif.loadNotifications(true);
+    });
+
+    this.socket.on('support:conversation:updated', (data: SupportConversation) => {
+      this.supportConversationUpdated$.next(data);
+    });
+
+    this.socket.on('support:message:created', (data: SupportMessagePayload) => {
+      this.supportMessageCreated$.next(data);
+    });
+
+    this.socket.on('support:typing', (data: SupportTypingPayload) => {
+      this.supportTyping$.next(data);
     });
 
     this.socket.on('connect_error', () => {

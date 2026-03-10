@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { Subject } from 'rxjs';
 import { AdminAuthService } from '../auth/admin-auth.service';
 import { environment } from '../../../environments/environment';
+import type { SupportConversation, SupportMessage } from './admin-support.service';
 
 const ADMIN_TOKEN_KEY = 'aurapc_admin_token';
 
@@ -10,6 +11,11 @@ export interface OrderUpdatedPayload {
   orderNumber: string;
   status?: string;
   userId?: string;
+}
+
+export interface SupportMessagePayload {
+  conversation: SupportConversation;
+  message: SupportMessage;
 }
 
 /**
@@ -24,6 +30,8 @@ export class AdminRealtimeService {
 
   /** Emit khi server gửi order:updated (layout refresh notifications, orders list refresh list). */
   readonly orderUpdated$ = new Subject<OrderUpdatedPayload>();
+  readonly supportConversationUpdated$ = new Subject<SupportConversation>();
+  readonly supportMessageCreated$ = new Subject<SupportMessagePayload>();
 
   constructor() {
     effect(() => {
@@ -62,7 +70,22 @@ export class AdminRealtimeService {
       this.orderUpdated$.next(data);
     });
 
+    this.socket.on('support:conversation:updated', (data: SupportConversation) => {
+      this.supportConversationUpdated$.next(data);
+    });
+
+    this.socket.on('support:message:created', (data: SupportMessagePayload) => {
+      this.supportMessageCreated$.next(data);
+    });
+
     this.socket.on('connect_error', () => {});
+  }
+
+  /** Emit typing event so client sees "..." indicator */
+  emitSupportTyping(data: { userId: string; conversationId: string; adminName: string }): void {
+    if (this.socket?.connected) {
+      this.socket.emit('support:typing', data);
+    }
   }
 
   private disconnect(): void {

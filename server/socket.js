@@ -1,8 +1,10 @@
 /**
- * Socket.IO realtime: order updates sync to client (user) and admin.
+ * Socket.IO realtime:
+ * - order updates sync to client (user) and admin
+ * - support chat syncs between customer and admin
+ * Rooms:
  * - User token -> join room user:${userId}
  * - Admin token -> join room admin
- * - emitOrderUpdated() sends to both admin and affected user.
  */
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
@@ -62,6 +64,17 @@ function initSocket(httpServer) {
       }
       if (decoded.isAdmin && decoded.adminId) {
         socket.join('admin');
+
+        // Admin typing → relay to customer
+        socket.on('support:typing', (data) => {
+          if (data?.userId && data?.conversationId) {
+            io.to(`user:${data.userId}`).emit('support:typing', {
+              conversationId: data.conversationId,
+              adminName: data.adminName || '',
+            });
+          }
+        });
+
         return;
       }
     } catch (err) {
@@ -88,8 +101,39 @@ function emitOrderUpdated(payload) {
   }
 }
 
+function resolveSupportUserId(conversation) {
+  const user = conversation?.user;
+  if (!user) return '';
+  if (typeof user === 'string') return user;
+  return String(user._id || '');
+}
+
+function emitSupportConversationUpdated(conversation) {
+  if (!io || !conversation) return;
+  const userId = resolveSupportUserId(conversation);
+  io.to('admin').emit('support:conversation:updated', conversation);
+  if (userId) {
+    io.to(`user:${userId}`).emit('support:conversation:updated', conversation);
+  }
+}
+
+function emitSupportMessageCreated(payload) {
+  if (!io || !payload?.conversation || !payload?.message) return;
+  const userId = resolveSupportUserId(payload.conversation);
+  io.to('admin').emit('support:message:created', payload);
+  if (userId) {
+    io.to(`user:${userId}`).emit('support:message:created', payload);
+  }
+}
+
 function getIO() {
   return io;
 }
 
-module.exports = { initSocket, getIO, emitOrderUpdated };
+module.exports = {
+  initSocket,
+  getIO,
+  emitOrderUpdated,
+  emitSupportConversationUpdated,
+  emitSupportMessageCreated,
+};

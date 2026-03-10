@@ -19,31 +19,137 @@ import { FormsModule } from '@angular/forms';
     standalone: true,
     imports: [CommonModule, FormsModule],
     template: `
-    <div class="chk-modal-overlay chk-otp-overlay" (click)="close()">
-      <div class="chk-otp-popup" (click)="$event.stopPropagation()">
-        <button type="button" class="chk-otp-popup__close" (click)="close()" aria-label="Đóng">×</button>
-        <h3 class="chk-otp-popup__title">Xác nhận mã OTP</h3>
-        <p class="chk-otp-popup__desc">
+    <div class="otp-overlay" (click)="close()">
+      <div class="otp-popup" (click)="$event.stopPropagation()">
+        <button type="button" class="otp-popup__close" (click)="close()" aria-label="Đóng">×</button>
+        <h3 class="otp-popup__title">Xác nhận mã OTP</h3>
+        <p class="otp-popup__desc">
           Mã xác thực đã gửi đến số {{ phone }}. Có hiệu lực trong {{ countdownText() }}
         </p>
-        <div class="chk-otp-popup__row">
+        <div class="otp-popup__row">
           @for (i of digits; track i) {
-          <input #otpInput type="text" inputmode="numeric" maxlength="1" class="chk-otp-popup__input"
-            [class.chk-otp-popup__input--error]="error()"
+          <input #otpInput type="text" inputmode="numeric" maxlength="1" class="otp-popup__input"
+            [class.otp-popup__input--error]="error()"
             [ngModel]="getDigit(i)" (ngModelChange)="setDigit(i, $event)"
             (keydown)="onKeydown($event, i)" />
           }
         </div>
         @if (error()) {
-        <p class="chk-otp-popup__error" role="alert">{{ error() }}</p>
+        <p class="otp-popup__error" role="alert">{{ error() }}</p>
         }
-        <button type="button" class="btn-submit chk-otp-popup__btn" (click)="submit()" [disabled]="submitting">
+        <button type="button" class="otp-popup__btn" (click)="submit()" [disabled]="submitting">
           {{ submitting ? 'Đang xử lý...' : 'Xác nhận' }}
         </button>
-        <button type="button" class="chk-otp-popup__resend" (click)="resend()">Gửi lại mã</button>
+        <button type="button" class="otp-popup__resend" (click)="resend()">Gửi lại mã</button>
       </div>
     </div>
   `,
+    styles: [`
+    .otp-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .otp-popup {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+    .otp-popup__close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: #666;
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+    .otp-popup__close:hover { color: #1a1a1a; }
+    .otp-popup__title {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .otp-popup__desc {
+      margin: 0 0 1.25rem;
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    .otp-popup__row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .otp-popup__input {
+      width: 44px;
+      height: 48px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .otp-popup__input:focus { border-color: #1a1a1a; }
+    .otp-popup__input--error { border-color: #d32f2f; }
+    .otp-popup__error {
+      margin: 0 0 0.75rem;
+      font-size: 0.875rem;
+      color: #d32f2f;
+    }
+    .otp-popup__btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+      transition: opacity 0.2s;
+    }
+    .otp-popup__btn:hover { opacity: 0.85; }
+    .otp-popup__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .otp-popup__resend {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      color: #FF6D2D;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .otp-popup__resend:hover { text-decoration: underline; }
+  `],
 })
 export class CodOtpDialogComponent implements OnDestroy {
     @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef<HTMLInputElement>>;

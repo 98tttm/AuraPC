@@ -12,11 +12,18 @@ export interface Product {
   slug?: string;
   description?: string;
   shortDescription?: string;
+  description_html?: string;
   price: number;
   salePrice?: number;
-  category?: string | { _id: string; name: string; slug?: string };
+  old_price?: number;
+  category?: string | number | { _id: string | number; name: string; slug?: string } | null;
+  category_id?: string;
+  primaryCategoryId?: number | null;
+  categoryIds?: number[];
   images?: { url: string; alt?: string }[];
   specs?: Record<string, unknown>;
+  techSpecs?: Record<string, unknown>;
+  brand?: string;
   stock?: number;
   featured?: boolean;
   active?: boolean;
@@ -31,12 +38,17 @@ export interface ProductsListResponse {
 
 // === Category interface ===
 export interface Category {
-  _id?: string;
+  _id?: string | number;
+  category_id?: string;
   name: string;
   slug?: string;
-  parent?: string | null;
-  order?: number;
-  active?: boolean;
+  parent_id?: string | number | null;
+  level?: number;
+  product_count?: number;
+  description?: string;
+  image?: string;
+  is_active?: boolean;
+  display_order?: number;
 }
 
 // === Blog interfaces ===
@@ -183,7 +195,10 @@ export interface OrderChartPoint {
 
 export interface RevenueChartPoint {
   _id: string;
+  label?: string;
   revenue: number;
+  orders: number;
+  newCustomers: number;
 }
 
 export interface TopProductPoint {
@@ -203,6 +218,43 @@ export interface DashboardStats {
   totalUsers: number;
   totalProducts: number;
   recentOrders: Order[];
+  usersThisMonth: number;
+  usersLastMonth: number;
+}
+
+// === AuraHub interfaces ===
+export interface HubPost {
+  _id?: string;
+  content: string;
+  images?: string[];
+  topic?: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  rejectedReason?: string | null;
+  replyOption?: 'anyone' | 'followers' | 'mentioned';
+  likeCount?: number;
+  commentCount?: number;
+  shareCount?: number;
+  repostCount?: number;
+  viewCount?: number;
+  scheduledAt?: string | null;
+  isPublished?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  author?: {
+    _id: string;
+    username?: string;
+    phoneNumber?: string;
+    avatar?: string;
+    profile?: { fullName?: string };
+  };
+}
+
+export interface HubPostsListResponse {
+  items: HubPost[];
+  total: number;
+  page: number;
+  totalPages: number;
+  limit: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -220,10 +272,14 @@ export class AdminApiService {
     });
   }
 
-  getRevenueChart(months = 6): Observable<RevenueChartPoint[]> {
+  getRevenueChart(months = 12): Observable<RevenueChartPoint[]> {
     return this.http.get<RevenueChartPoint[]>(`${BASE}/admin/dashboard/chart/revenue`, {
       params: { months: months.toString() },
     });
+  }
+
+  getWeeklyRevenueChart(): Observable<RevenueChartPoint[]> {
+    return this.http.get<RevenueChartPoint[]>(`${BASE}/admin/dashboard/chart/revenue-weekly`);
   }
 
   getTopProducts(limit = 5): Observable<TopProductPoint[]> {
@@ -322,6 +378,10 @@ export class AdminApiService {
     return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/status`, { status });
   }
 
+  cancelOrder(orderNumber: string, reason?: string): Observable<Order> {
+    return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/cancel`, { reason });
+  }
+
   resolveCancelRequest(orderNumber: string, action: 'approve' | 'reject', note?: string): Observable<Order> {
     return this.http.put<Order>(`${BASE}/admin/orders/${orderNumber}/cancel-request`, { action, note });
   }
@@ -356,5 +416,41 @@ export class AdminApiService {
 
   markAllNotificationsRead(): Observable<{ success: boolean; modifiedCount: number }> {
     return this.http.patch<{ success: boolean; modifiedCount: number }>(`${BASE}/admin/notifications/read-all`, {});
+  }
+
+  // ======== AuraHub moderation ========
+  getHubPosts(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    topic?: string;
+    search?: string;
+    sort?: 'newest' | 'trending';
+  }): Observable<HubPostsListResponse> {
+    let p = new HttpParams();
+    if (params?.page != null) p = p.set('page', params.page.toString());
+    if (params?.limit != null) p = p.set('limit', params.limit.toString());
+    if (params?.status) p = p.set('status', params.status);
+    if (params?.topic) p = p.set('topic', params.topic);
+    if (params?.search) p = p.set('search', params.search);
+    if (params?.sort) p = p.set('sort', params.sort);
+    return this.http.get<HubPostsListResponse>(`${BASE}/admin/hub/posts`, { params: p });
+  }
+
+  getHubPostDetail(id: string): Observable<HubPost> {
+    return this.http.get<HubPost>(`${BASE}/admin/hub/posts/${id}`);
+  }
+
+  approveHubPost(id: string, forcePublishNow?: boolean): Observable<HubPost> {
+    const body = forcePublishNow ? { forcePublishNow: true } : {};
+    return this.http.patch<HubPost>(`${BASE}/admin/hub/posts/${id}/approve`, body);
+  }
+
+  rejectHubPost(id: string, reason: string): Observable<HubPost> {
+    return this.http.patch<HubPost>(`${BASE}/admin/hub/posts/${id}/reject`, { reason });
+  }
+
+  deleteHubPost(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${BASE}/admin/hub/posts/${id}`);
   }
 }

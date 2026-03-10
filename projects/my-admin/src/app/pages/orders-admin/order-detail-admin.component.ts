@@ -107,6 +107,37 @@ export class OrderDetailAdminComponent implements OnInit, OnDestroy {
     return this.order()?.status === 'pending';
   }
 
+  canCancelOrder(): boolean {
+    const status = this.order()?.status;
+    return !!status && ['pending', 'confirmed', 'processing', 'shipped'].includes(status);
+  }
+
+  async cancelOrder(): Promise<void> {
+    const o = this.order();
+    if (!o || !this.canCancelOrder()) return;
+
+    const confirmed = await this.confirm.confirm({
+      title: 'Hủy đơn hàng',
+      message: `Bạn có chắc muốn hủy đơn #${o.orderNumber}? Hành động này không thể hoàn tác.`,
+      confirmText: 'Hủy đơn',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    this.updating.set(true);
+    this.api.cancelOrder(o.orderNumber, 'Admin hủy đơn').subscribe({
+      next: (updated) => {
+        this.syncOrderState(updated);
+        this.updating.set(false);
+        this.toast.success('Đã hủy đơn hàng');
+      },
+      error: (err) => {
+        this.updating.set(false);
+        this.toast.error(err?.error?.error || 'Hủy đơn thất bại');
+      },
+    });
+  }
+
   canUpdateStatus(): boolean {
     return this.statuses().length > 0;
   }

@@ -32,6 +32,11 @@
             @if (updating()) { Đang duyệt... } @else { Duyệt đơn hàng }
           </button>
         }
+        @if (canCancelOrder()) {
+          <button class="btn btn--danger" (click)="cancelOrder()" [disabled]="updating() || processingRequest()">
+            Hủy đơn
+          </button>
+        }
       </div>
     </div>
 

@@ -1,14 +1,14 @@
 # my-client — AuraPC Customer-Facing App
 
 ## Overview
-Main Angular storefront for AuraPC. Vietnamese-market gaming PC e-commerce with product browsing, PC builder, checkout, blog, and community hub.
+Main Angular storefront for AuraPC. Vietnamese-market gaming PC e-commerce with product browsing, support/order tracking, PC builder, checkout, blog, and community hub.
 
 ## Commands
 ```bash
 # From repo root:
-npm start              # Dev server → http://localhost:4200
-npm run build          # Production build → dist/my-client/browser
-npm test               # Karma unit tests
+npx ng serve my-client # Dev server → http://localhost:4200
+npx ng build my-client # Production build → dist/my-client/browser
+npx ng test my-client  # Karma unit tests
 ```
 
 ## Directory Structure
@@ -39,6 +39,8 @@ src/app/
     ├── product-list/      # /san-pham — product catalog with filters
     ├── product-detail/    # /san-pham/:slug — single product + reviews
     ├── builder/           # /aura-builder — PC configurator
+    ├── support/           # /ho-tro — support landing page
+    ├── track-order/       # /tra-cuu-don-hang — order tracking by order number
     ├── cart/              # /cart
     ├── checkout/          # /checkout — address, payment method selection
     ├── checkout-*/        # Payment-specific return/confirmation pages
@@ -46,7 +48,9 @@ src/app/
     ├── login/ & register/ # Auth pages (phone OTP)
     ├── blog-list/         # /blog
     ├── blog-detail/       # /blog/:slug
-    └── aura-hub/          # /aura-hub — community posts
+    ├── aura-hub/          # /aura-hub — community posts
+    ├── collabs-minecraft/ # /collabs/minecraft — campaign landing page
+    └── ve-aurapc/         # /ve-aurapc and /ve-aurapc/:slug — brand/content pages
 ```
 
 ## Routes (Vietnamese Slugs)
@@ -60,9 +64,16 @@ src/app/
 | `/checkout` | CheckoutComponent | Lazy |
 | `/checkout-*` | Payment return pages | Lazy |
 | `/aura-builder` | AuraBuilderComponent | Lazy |
+| `/aura-builder/:id` | AuraBuilderComponent | Lazy |
 | `/aura-hub` | AuraHubComponent | Lazy |
+| `/aura-hub/:postId` | AuraHubComponent | Lazy |
 | `/blog` | BlogListComponent | Lazy |
 | `/blog/:slug` | BlogDetailComponent | Lazy |
+| `/ho-tro` | SupportComponent | Lazy |
+| `/tra-cuu-don-hang` | TrackOrderComponent | Lazy |
+| `/collabs/minecraft` | CollabsMinecraftComponent | Lazy |
+| `/ve-aurapc` | VeAurapcComponent | Lazy |
+| `/ve-aurapc/:slug` | VeAurapcComponent | Lazy |
 
 ## Key Patterns
 - **All components are standalone** — no NgModules
@@ -71,6 +82,7 @@ src/app/
 - **JWT token**: Stored in `localStorage` as `aurapc_token`, attached via functional `authInterceptor`
 - **API base URL**: Configured in `ApiService`, points to backend (`localhost:3000` dev, Render prod)
 - **3D**: Three.js for homepage canvas, Google Model Viewer for product 3D views
+- **Support/order tracking**: `/ho-tro` links to `/tra-cuu-don-hang`, which looks up orders by order number via `ApiService.trackOrder()`
 
 ## Code Conventions
 - 2-space indentation, single quotes

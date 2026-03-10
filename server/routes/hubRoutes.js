@@ -90,12 +90,14 @@ router.post('/posts', requireAuth, async (req, res) => {
             return res.status(400).json({ message: 'Bài đăng cần có nội dung, ảnh hoặc poll.' });
         }
 
-        const postData = {
+    const postData = {
             author: req.userId,
             content: content || '',
             images: images || [],
             topic: topic || '',
             replyOption: replyOption || 'anyone',
+      status: 'pending',
+      isPublished: false,
         };
 
         // Poll
@@ -108,9 +110,8 @@ router.post('/posts', requireAuth, async (req, res) => {
         }
 
         // Schedule
-        if (scheduledAt) {
+    if (scheduledAt) {
             postData.scheduledAt = new Date(scheduledAt);
-            postData.isPublished = false;
         }
 
         const post = await Post.create(postData);

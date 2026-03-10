@@ -132,6 +132,48 @@ router.put('/:orderNumber/status', async (req, res) => {
   }
 });
 
+/** PUT /:orderNumber/cancel — admin manually cancels an order */
+router.put('/:orderNumber/cancel', async (req, res) => {
+  try {
+    const { reason } = req.body || {};
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const cancellableStatuses = ['pending', 'confirmed', 'processing', 'shipped'];
+    if (!cancellableStatuses.includes(order.status)) {
+      return res.status(400).json({ error: `Không thể hủy đơn ở trạng thái "${order.status}". Chỉ hủy được khi: ${cancellableStatuses.join(', ')}` });
+    }
+
+    const now = new Date();
+    order.status = 'cancelled';
+    order.cancelledAt = now;
+    if (!order.cancelRequest) order.cancelRequest = {};
+    order.cancelRequest.status = 'approved';
+    order.cancelRequest.reason = typeof reason === 'string' ? reason.trim().slice(0, 300) : 'Admin hủy đơn';
+    order.cancelRequest.resolvedAt = now;
+    order.cancelRequest.resolvedBy = req.adminId;
+    order.cancelRequest.note = 'Hủy bởi admin';
+    await order.save();
+
+    const userId = order.user && order.user.toString ? order.user.toString() : order.user;
+    if (userId) {
+      await createUserNotification({
+        userId,
+        type: 'order_cancel_approved',
+        title: 'Đơn hàng đã bị hủy',
+        message: `Đơn #${order.orderNumber} đã bị hủy bởi admin.${reason ? ' Lý do: ' + reason : ''}`,
+        metadata: { orderNumber: order.orderNumber },
+      });
+    }
+
+    const updated = await getOrderDetail(req.params.orderNumber);
+    emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status, userId: userId || undefined });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /** PUT /:orderNumber/cancel-request — approve/reject cancellation request */
 router.put('/:orderNumber/cancel-request', async (req, res) => {
   try {

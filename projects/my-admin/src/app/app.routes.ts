@@ -74,9 +74,24 @@ export const routes: Routes = [
           import('./pages/blogs-admin/blogs-list-admin.component').then((m) => m.BlogsListAdminComponent),
       },
       {
+        path: 'hub',
+        loadComponent: () =>
+          import('./pages/hub-admin/hub-moderation.component').then((m) => m.HubModerationComponent),
+      },
+      {
+        path: 'support',
+        loadComponent: () =>
+          import('./pages/support-admin/support-admin.component').then((m) => m.SupportAdminComponent),
+      },
+      {
         path: 'blogs/new',
         loadComponent: () =>
           import('./pages/blogs-admin/blog-form.component').then((m) => m.BlogFormComponent),
+      },
+      {
+        path: 'blogs/:id/detail',
+        loadComponent: () =>
+          import('./pages/blogs-admin/blog-detail-admin.component').then((m) => m.BlogDetailAdminComponent),
       },
       {
         path: 'blogs/:id/edit',

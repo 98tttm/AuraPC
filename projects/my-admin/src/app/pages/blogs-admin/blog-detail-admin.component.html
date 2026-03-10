@@ -1,0 +1,77 @@
+@if (loading()) {
+  <div class="loading-container">
+    <div class="skeleton skeleton--title" style="width: 300px"></div>
+    <div class="skeleton skeleton--text" style="width: 200px; margin-top: 0.5rem"></div>
+    <div class="skeleton" style="height: 200px; width: 100%; margin-top: 1.5rem; border-radius: var(--radius)"></div>
+    <div class="skeleton" style="height: 300px; width: 100%; margin-top: 1rem; border-radius: var(--radius)"></div>
+  </div>
+} @else if (error()) {
+  <div class="alert-error">{{ error() }}</div>
+} @else if (blog(); as b) {
+  <div class="blog-detail">
+    <div class="page-header">
+      <div>
+        <a routerLink="/blogs" class="back-link">&larr; Quay lại danh sách bài viết</a>
+        <h2>{{ b.title }}</h2>
+      </div>
+      <div class="page-header__actions">
+        <span class="badge" [class]="b.published ? 'badge--active' : 'badge--inactive'">
+          {{ b.published ? 'Đã xuất bản' : 'Bản nháp' }}
+        </span>
+        <a [routerLink]="['/blogs', b._id, 'edit']" class="btn btn--primary btn--sm">Sửa bài viết</a>
+      </div>
+    </div>
+
+    <!-- Meta info -->
+    <div class="blog-meta">
+      <div class="blog-meta__item">
+        <span class="blog-meta__label">Slug</span>
+        <span class="blog-meta__value">{{ b.slug || '-' }}</span>
+      </div>
+      <div class="blog-meta__item">
+        <span class="blog-meta__label">Tác giả</span>
+        <span class="blog-meta__value">{{ b.author || 'AuraPC' }}</span>
+      </div>
+      <div class="blog-meta__item">
+        <span class="blog-meta__label">Ngày tạo</span>
+        <span class="blog-meta__value">{{ b.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      @if (b.publishedAt) {
+        <div class="blog-meta__item">
+          <span class="blog-meta__label">Ngày xuất bản</span>
+          <span class="blog-meta__value">{{ b.publishedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Cover image -->
+    @if (b.coverImage) {
+      <div class="blog-cover">
+        <img [src]="b.coverImage" alt="" class="blog-cover__img" />
+      </div>
+    }
+
+    <!-- Excerpt -->
+    @if (b.excerpt) {
+      <div class="blog-excerpt">
+        <h3 class="section-title">Mô tả ngắn</h3>
+        <p>{{ b.excerpt }}</p>
+      </div>
+    }
+
+    <!-- Content -->
+    <div class="blog-content card">
+      <h3 class="section-title">Nội dung</h3>
+      @if (b.content) {
+        <div class="blog-content__body" [innerHTML]="b.content"></div>
+      } @else {
+        <p class="text-muted">Chưa có nội dung</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="empty-state" style="padding: 3rem">
+    <span>Không tìm thấy bài viết</span>
+    <a routerLink="/blogs" class="btn btn--outline btn--sm">Quay lại danh sách</a>
+  </div>
+}

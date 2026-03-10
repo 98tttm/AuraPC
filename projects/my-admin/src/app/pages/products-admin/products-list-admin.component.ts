@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
-import { AdminApiService, Product } from '../../core/admin-api.service';
+import { AdminApiService, Product, Category } from '../../core/admin-api.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../shared/confirm-dialog.component';
 import { getStockStatus, getStockLabel, getStockPercent } from '../../core/constants';
@@ -26,9 +26,11 @@ export class ProductsListAdminComponent implements OnInit {
   total = signal(0);
   loading = signal(true);
   error = signal('');
+  categories = signal<Category[]>([]);
   page = 1;
   limit = 20;
   searchQuery = '';
+  categoryFilter = '';
   sortColumn = '';
   sortDir: 'asc' | 'desc' = 'asc';
 
@@ -48,13 +50,17 @@ export class ProductsListAdminComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.api.getCategories().subscribe({
+      next: (list) => this.categories.set(list),
+      error: () => {},
+    });
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery }).subscribe({
+    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery, category: this.categoryFilter || undefined }).subscribe({
       next: (res) => {
         this.items.set(res.items);
         this.total.set(res.total);
@@ -87,6 +93,11 @@ export class ProductsListAdminComponent implements OnInit {
     this.load();
   }
 
+  onCategoryFilter(): void {
+    this.page = 1;
+    this.load();
+  }
+
   goToPage(p: number): void {
     this.page = p;
     this.load();
@@ -94,6 +105,22 @@ export class ProductsListAdminComponent implements OnInit {
 
   get totalPages(): number {
     return Math.ceil(this.total() / this.limit);
+  }
+
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages: number[] = [];
+    pages.push(1);
+    let start = Math.max(2, this.page - 1);
+    let end = Math.min(total - 1, this.page + 1);
+    if (this.page <= 3) { start = 2; end = Math.min(5, total - 1); }
+    if (this.page >= total - 2) { start = Math.max(2, total - 4); end = total - 1; }
+    if (start > 2) pages.push(-1); // ellipsis
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push(-1); // ellipsis
+    pages.push(total);
+    return pages;
   }
 
   toggleSort(column: string): void {

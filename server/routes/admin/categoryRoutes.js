@@ -7,7 +7,7 @@ router.use(requireAdmin);
 
 router.get('/', async (req, res) => {
   try {
-    const categories = await Category.find({}).sort({ order: 1, name: 1 }).lean();
+    const categories = await Category.find({}).sort({ display_order: 1, name: 1 }).lean();
     res.json(categories);
   } catch (err) {
     res.status(500).json({ error: err.message });
