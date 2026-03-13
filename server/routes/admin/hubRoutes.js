@@ -182,5 +182,78 @@ router.delete('/posts/:id', async (req, res) => {
   }
 });
 
+// GET /api/admin/hub/posts/:id/comments
+// Danh sách bình luận của 1 bài (bao gồm replies)
+router.get('/posts/:id/comments', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Bài đăng không tồn tại' });
+    }
+
+    // Top-level comments
+    const comments = await HubComment.find({ post: postId, parentComment: null })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username avatar profile phoneNumber')
+      .lean();
+
+    // Replies for each top-level comment
+    const commentIds = comments.map((c) => c._id);
+    const replies = await HubComment.find({ parentComment: { $in: commentIds } })
+      .sort({ createdAt: 1 })
+      .populate('author', 'username avatar profile phoneNumber')
+      .lean();
+
+    const repliesMap = {};
+    for (const r of replies) {
+      const pid = r.parentComment.toString();
+      if (!repliesMap[pid]) repliesMap[pid] = [];
+      repliesMap[pid].push(r);
+    }
+
+    const result = comments.map((c) => ({
+      ...c,
+      replies: repliesMap[c._id.toString()] || [],
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error('Admin Hub GET /posts/:id/comments error:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// DELETE /api/admin/hub/comments/:id
+// Admin xóa bình luận bất kỳ
+router.delete('/comments/:id', async (req, res) => {
+  try {
+    const comment = await HubComment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Bình luận không tồn tại' });
+    }
+
+    const postId = comment.post;
+
+    if (comment.parentComment) {
+      // Reply: decrement parent's replyCount
+      await HubComment.findByIdAndUpdate(comment.parentComment, { $inc: { replyCount: -1 } });
+      await comment.deleteOne();
+      await Post.findByIdAndUpdate(postId, { $inc: { commentCount: -1 } });
+    } else {
+      // Top-level: delete all replies + the comment
+      const replyCount = await HubComment.countDocuments({ parentComment: comment._id });
+      await HubComment.deleteMany({ parentComment: comment._id });
+      await comment.deleteOne();
+      await Post.findByIdAndUpdate(postId, { $inc: { commentCount: -(1 + replyCount) } });
+    }
+
+    res.json({ message: 'Đã xóa bình luận' });
+  } catch (err) {
+    console.error('Admin Hub DELETE /comments/:id error:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 module.exports = router;
 

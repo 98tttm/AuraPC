@@ -125,10 +125,11 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   showFollowsModal = signal(false);
   followsTab = signal<'followers' | 'following'>('followers');
-  hubTab = signal<'threads' | 'replies' | 'media'>('threads');
+  hubTab = signal<'threads' | 'replies' | 'media' | 'pending'>('threads');
   hubThreads = signal<any[]>([]);
   hubReplies = signal<any[]>([]);
   hubMedia = signal<any[]>([]);
+  hubPending = signal<any[]>([]);
 
   hubLoading = signal(false);
 
@@ -179,6 +180,10 @@ export class AccountPageComponent implements OnInit, OnDestroy {
         this.loadSocialCounts();
         // luôn load Threads lần đầu khi vào tab Hoạt động AuraHub
         this.setHubTab(this.hubTab());
+        // Preload pending count for badge
+        this.api.getHubUserPending().subscribe({
+          next: (res) => this.hubPending.set(res.items || []),
+        });
       }
     }
   }
@@ -326,16 +331,26 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   // Hoạt động AuraHub
-  setHubTab(tab: 'threads' | 'replies' | 'media'): void {
+  setHubTab(tab: 'threads' | 'replies' | 'media' | 'pending'): void {
     this.hubTab.set(tab);
     this.loadHubActivity(tab);
   }
 
-  private loadHubActivity(tab: 'threads' | 'replies' | 'media'): void {
+  private loadHubActivity(tab: 'threads' | 'replies' | 'media' | 'pending'): void {
     const u = this.user();
     const userId = u?._id ?? (u as any)?.id;
     if (!userId) return;
     this.hubLoading.set(true);
+    if (tab === 'pending') {
+      this.api.getHubUserPending().subscribe({
+        next: (res) => {
+          this.hubPending.set(res.items || []);
+          this.hubLoading.set(false);
+        },
+        error: () => this.hubLoading.set(false),
+      });
+      return;
+    }
     if (tab === 'replies') {
       this.api.getHubUserReplies(userId).subscribe({
         next: (res) => {

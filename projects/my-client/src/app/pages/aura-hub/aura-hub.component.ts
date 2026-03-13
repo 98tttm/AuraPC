@@ -192,10 +192,10 @@ export class AuraHubComponent implements OnInit, OnDestroy {
             images,
             topic: this.newPostTopic() || undefined,
         }).subscribe({
-            next: (post) => {
-                this.posts.update(prev => [post, ...prev]);
+            next: () => {
                 this.closeCreateModal();
                 this.creating.set(false);
+                this.toast.showInfo('Bài viết đã được gửi và đang chờ duyệt bởi quản trị viên.');
             },
             error: () => this.creating.set(false),
         });

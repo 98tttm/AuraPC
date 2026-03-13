@@ -6,7 +6,7 @@ const Post = require('../models/Post');
 const HubComment = require('../models/HubComment');
 const Share = require('../models/Share');
 const User = require('../models/User');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -273,13 +273,32 @@ router.post('/posts/:id/share', requireAuth, async (req, res) => {
 
 // ─── USER ACTIVITY (for AuraHub profile) ─────────────────
 
+/** GET /api/hub/user/me/pending — bài viết chờ duyệt của chính mình */
+router.get('/user/me/pending', requireAuth, async (req, res) => {
+    try {
+        const posts = await Post.find({ author: req.userId, status: 'pending' })
+            .sort({ createdAt: -1 })
+            .populate('author', 'username avatar profile phoneNumber')
+            .lean();
+
+        res.json({ success: true, items: posts });
+    } catch (err) {
+        console.error('Hub GET /user/me/pending error:', err);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 /** GET /api/hub/user/:userId/posts?type=threads|media|reposts */
-router.get('/user/:userId/posts', async (req, res) => {
+router.get('/user/:userId/posts', optionalAuth, async (req, res) => {
     try {
         const { userId } = req.params;
         const { type = 'threads' } = req.query;
 
-        const baseFilter = { isPublished: true };
+        // If user is viewing their own profile, include pending posts
+        const isOwner = req.userId && req.userId === userId;
+        const baseFilter = isOwner
+            ? { $or: [{ isPublished: true }, { status: 'pending' }] }
+            : { isPublished: true };
         let filter = { ...baseFilter, author: userId };
 
         if (type === 'media') {

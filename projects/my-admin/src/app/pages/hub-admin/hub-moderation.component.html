@@ -15,18 +15,26 @@
             (click)="changeStatusTab(tab.value)"
           >
             {{ tab.label }}
+            @if (tab.value === 'pending' && pendingCount() > 0) {
+              <span class="hub-page__tab-badge">{{ pendingCount() }}</span>
+            }
           </button>
         }
       </div>
 
       <div class="hub-page__controls">
-        <input
-          type="text"
-          class="hub-page__search"
-          placeholder="Tìm theo nội dung, từ khóa..."
-          [ngModel]="search()"
-          (ngModelChange)="onSearchChange($event)"
-        />
+        <div class="hub-page__search-wrap">
+          <svg class="hub-page__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            class="hub-page__search"
+            placeholder="Tìm theo nội dung, từ khóa..."
+            [ngModel]="search()"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </div>
 
         <select
           class="hub-page__select"
@@ -42,137 +50,196 @@
 
   <div class="hub-page__content">
     @if (loading()) {
-      <div class="hub-page__empty">Đang tải danh sách bài AuraHub...</div>
+      <div class="hub-page__loading">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="hub-card hub-card--skeleton">
+            <div class="hub-card__header">
+              <div class="skeleton skeleton--circle"></div>
+              <div class="skeleton skeleton--text" style="width: 140px"></div>
+            </div>
+            <div class="skeleton skeleton--block"></div>
+            <div class="skeleton skeleton--text" style="width: 60%"></div>
+          </div>
+        }
+      </div>
     } @else if (items().length === 0) {
       <div class="hub-page__empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="3" y="4" width="18" height="14" rx="3"/>
+          <path d="M8 10h8"/>
+          <path d="M8 14h5"/>
+        </svg>
         <p>Chưa có bài nào phù hợp bộ lọc hiện tại.</p>
       </div>
     } @else {
-      <div class="hub-table">
-        <table class="hub-table__table">
-          <thead>
-            <tr>
-              <th>Người đăng</th>
-              <th>Nội dung</th>
-              <th>Chủ đề</th>
-              <th>TT</th>
-              <th>Lượt tương tác</th>
-              <th>Ngày tạo</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (post of items(); track post._id) {
-              <tr>
-                <td>
-                  <div class="hub-table__author">
-                    <div class="hub-table__avatar">
-                      {{ authorName(post).charAt(0).toUpperCase() }}
-                    </div>
-                    <div class="hub-table__author-info">
-                      <div class="hub-table__author-name">{{ authorName(post) }}</div>
-                      <div class="hub-table__author-meta">
-                        {{ post.author?.phoneNumber || post.author?._id }}
-                      </div>
-                    </div>
+      <div class="hub-cards">
+        @for (post of items(); track post._id) {
+          <div class="hub-card" [class.hub-card--pending]="post.status === 'pending'" [class.hub-card--rejected]="post.status === 'rejected'">
+            <!-- Header: Author + Status + Date -->
+            <div class="hub-card__header">
+              <div class="hub-card__author">
+                @if (post.author?.avatar) {
+                  <img [src]="getImageUrl(post.author!.avatar!)" class="hub-card__avatar" alt="" />
+                } @else {
+                  <div class="hub-card__avatar hub-card__avatar--placeholder">
+                    {{ authorName(post).charAt(0).toUpperCase() }}
                   </div>
-                </td>
-                <td>
-                  <div class="hub-table__content">{{ shortContent(post) }}</div>
-                </td>
-                <td>
-                  <span class="hub-table__topic" *ngIf="post.topic; else noTopic">{{ post.topic }}</span>
-                  <ng-template #noTopic>
-                    <span class="hub-table__topic hub-table__topic--muted">Không có</span>
-                  </ng-template>
-                </td>
-                <td>
-                  <span [class]="statusBadgeClass(post)">{{ statusLabel(post) }}</span>
-                </td>
-                <td>
-                  <div class="hub-table__metrics">
-                    <span>❤️ {{ post.likeCount || 0 }}</span>
-                    <span>💬 {{ post.commentCount || 0 }}</span>
-                    <span>👁️ {{ post.viewCount || 0 }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="hub-table__date">
-                    {{ post.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-                  </div>
-                </td>
-                <td>
-                  <button type="button" class="hub-table__action" (click)="openDetail(post)">Xem</button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                }
+                <div class="hub-card__author-info">
+                  <span class="hub-card__author-name">{{ authorName(post) }}</span>
+                  <span class="hub-card__date">{{ post.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+              <div class="hub-card__header-right">
+                <span [class]="statusBadgeClass(post)">{{ statusLabel(post) }}</span>
+                @if (post.topic) {
+                  <span class="hub-card__topic">{{ post.topic }}</span>
+                }
+              </div>
+            </div>
 
-        <div class="hub-table__footer" *ngIf="total() > 0">
-          <div class="hub-table__summary">
-            Đang hiển thị trang {{ page() }} / {{ totalPages() }} — tổng {{ total() }} bài
+            <!-- Content: Full caption -->
+            <div class="hub-card__content">
+              <p class="hub-card__text">{{ post.content || '(Không có nội dung)' }}</p>
+            </div>
+
+            <!-- Images: preserve original ratio -->
+            @if (post.images?.length) {
+              <div class="hub-card__images" [class.hub-card__images--single]="post.images!.length === 1" [class.hub-card__images--multi]="post.images!.length > 1">
+                @for (img of post.images!; track img; let i = $index) {
+                  <div class="hub-card__img-wrap" (click)="openImagePreview(post.images!, i)">
+                    <img [src]="getImageUrl(img)" alt="AuraHub image" loading="lazy" />
+                    @if (i === 3 && post.images!.length > 4) {
+                      <div class="hub-card__img-more">+{{ post.images!.length - 4 }}</div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Footer: Metrics + Actions -->
+            <div class="hub-card__footer">
+              <div class="hub-card__metrics">
+                <span class="hub-card__metric">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1.1L12 21.5l7.8-7.9 1-1.1a5.5 5.5 0 000-7.8z"/></svg>
+                  {{ post.likeCount || 0 }}
+                </span>
+                <span class="hub-card__metric">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  {{ post.commentCount || 0 }}
+                </span>
+                <span class="hub-card__metric">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  {{ post.viewCount || 0 }}
+                </span>
+                <span class="hub-card__metric">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                  {{ post.repostCount || 0 }}
+                </span>
+              </div>
+
+              <div class="hub-card__actions">
+                @if (post.status === 'pending') {
+                  <button
+                    type="button"
+                    class="hub-card__btn hub-card__btn--approve"
+                    [disabled]="actionLoading()"
+                    (click)="approvePost(post, true); $event.stopPropagation()"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    Duyệt
+                  </button>
+                  <button
+                    type="button"
+                    class="hub-card__btn hub-card__btn--reject"
+                    (click)="openDetail(post)"
+                  >
+                    Từ chối
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="hub-card__btn hub-card__btn--detail"
+                  (click)="openDetail(post)"
+                >
+                  Chi tiết
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="hub-table__pagination">
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (total() > 0) {
+        <div class="hub-page__pagination">
+          <div class="hub-page__summary">
+            Trang {{ page() }} / {{ totalPages() }} — {{ total() }} bài
+          </div>
+          <div class="hub-page__pagination-btns">
             <button type="button" (click)="changePage(-1)" [disabled]="page() <= 1">Trước</button>
             <button type="button" (click)="changePage(1)" [disabled]="page() >= totalPages()">Sau</button>
           </div>
         </div>
-      </div>
+      }
     }
   </div>
 
+  <!-- Detail overlay -->
   @if (detailOpen() && selectedPost()) {
-    <div class="hub-detail">
-      <div class="hub-detail__backdrop" (click)="closeDetail()"></div>
-      <div class="hub-detail__panel">
-        <div class="hub-detail__header">
+    <div class="hub-overlay" (click)="closeDetail()">
+      <div class="hub-overlay__panel" (click)="$event.stopPropagation()">
+        <div class="hub-overlay__header">
           <div>
-            <h2 class="hub-detail__title">Chi tiết bài AuraHub</h2>
-            <p class="hub-detail__meta">
-              {{ authorName(selectedPost()!) }} ·
-              {{ selectedPost()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            <h2 class="hub-overlay__title">Chi tiết bài đăng</h2>
+            <p class="hub-overlay__meta">
+              {{ authorName(selectedPost()!) }} · {{ selectedPost()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}
             </p>
           </div>
-          <button type="button" class="hub-detail__close" (click)="closeDetail()">×</button>
+          <button type="button" class="hub-overlay__close" (click)="closeDetail()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+          </button>
         </div>
 
-        <div class="hub-detail__status-row">
+        <div class="hub-overlay__status-row">
           <span [class]="statusBadgeClass(selectedPost()!)">{{ statusLabel(selectedPost()!) }}</span>
-          <span class="hub-detail__metrics">
-            ❤️ {{ selectedPost()!.likeCount || 0 }} ·
-            💬 {{ selectedPost()!.commentCount || 0 }} ·
-            👁️ {{ selectedPost()!.viewCount || 0 }}
-          </span>
+          <div class="hub-overlay__metrics">
+            <span>{{ selectedPost()!.likeCount || 0 }} thích</span>
+            <span>{{ selectedPost()!.commentCount || 0 }} bình luận</span>
+            <span>{{ selectedPost()!.viewCount || 0 }} lượt xem</span>
+          </div>
         </div>
 
-        <div class="hub-detail__body">
-          <div class="hub-detail__section">
+        <div class="hub-overlay__body">
+          <!-- Post content -->
+          <div class="hub-overlay__section">
             <h3>Nội dung</h3>
-            <p class="hub-detail__content">
-              {{ selectedPost()!.content || '(Không có nội dung)' }}
-            </p>
+            <p class="hub-overlay__content">{{ selectedPost()!.content || '(Không có nội dung)' }}</p>
           </div>
 
-          <div class="hub-detail__section" *ngIf="selectedPost()!.images?.length">
-            <h3>Hình ảnh</h3>
-            <div class="hub-detail__images">
-              @for (img of selectedPost()!.images!; track img) {
-                <img [src]="img" alt="AuraHub image" />
-              }
+          <!-- Images -->
+          @if (selectedPost()!.images?.length) {
+            <div class="hub-overlay__section">
+              <h3>Hình ảnh</h3>
+              <div class="hub-overlay__images">
+                @for (img of selectedPost()!.images!; track img) {
+                  <img [src]="getImageUrl(img)" alt="AuraHub image" (click)="openImagePreview(selectedPost()!.images!, $index)" />
+                }
+              </div>
             </div>
-          </div>
+          }
 
-          <div class="hub-detail__section">
+          <!-- Info -->
+          <div class="hub-overlay__section">
             <h3>Thông tin</h3>
-            <div class="hub-detail__info-grid">
+            <div class="hub-overlay__info-grid">
               <div>
-                <div class="hub-detail__label">Chủ đề</div>
-                <div class="hub-detail__value">{{ selectedPost()!.topic || 'Không có' }}</div>
+                <div class="hub-overlay__label">Chủ đề</div>
+                <div class="hub-overlay__value">{{ selectedPost()!.topic || 'Không có' }}</div>
               </div>
               <div>
-                <div class="hub-detail__label">Cho phép trả lời</div>
-                <div class="hub-detail__value">
+                <div class="hub-overlay__label">Cho phép trả lời</div>
+                <div class="hub-overlay__value">
                   @switch (selectedPost()!.replyOption) {
                     @case ('followers') { Chỉ người theo dõi }
                     @case ('mentioned') { Chỉ người được nhắc đến }
@@ -181,8 +248,8 @@
                 </div>
               </div>
               <div>
-                <div class="hub-detail__label">Lịch đăng</div>
-                <div class="hub-detail__value">
+                <div class="hub-overlay__label">Lịch đăng</div>
+                <div class="hub-overlay__value">
                   @if (selectedPost()!.scheduledAt) {
                     {{ selectedPost()!.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
                   } @else {
@@ -193,57 +260,163 @@
             </div>
           </div>
 
-          <div class="hub-detail__section">
-            <h3>Lý do từ chối</h3>
-            <textarea
-              rows="3"
-              class="hub-detail__textarea"
-              placeholder="Nhập lý do nếu từ chối bài đăng..."
-              [ngModel]="rejectReason()"
-              (ngModelChange)="onRejectReasonChange($event)"
-            ></textarea>
+          <!-- Reject reason -->
+          @if (selectedPost()!.status !== 'approved') {
+            <div class="hub-overlay__section">
+              <h3>Lý do từ chối</h3>
+              <textarea
+                rows="3"
+                class="hub-overlay__textarea"
+                placeholder="Nhập lý do nếu từ chối bài đăng..."
+                [ngModel]="rejectReason()"
+                (ngModelChange)="onRejectReasonChange($event)"
+              ></textarea>
+            </div>
+          }
+
+          <!-- Comments section -->
+          <div class="hub-overlay__section">
+            <h3>Bình luận ({{ selectedPost()!.commentCount || 0 }})</h3>
+            @if (commentsLoading()) {
+              <div class="hub-comments__loading">Đang tải bình luận...</div>
+            } @else if (comments().length === 0) {
+              <div class="hub-comments__empty">Chưa có bình luận nào.</div>
+            } @else {
+              <div class="hub-comments">
+                @for (comment of comments(); track comment._id) {
+                  <div class="hub-comment">
+                    <div class="hub-comment__main">
+                      <div class="hub-comment__author">
+                        @if (comment.author?.avatar) {
+                          <img [src]="getImageUrl(comment.author!.avatar!)" class="hub-comment__avatar" alt="" />
+                        } @else {
+                          <div class="hub-comment__avatar hub-comment__avatar--placeholder">
+                            {{ commentAuthorName(comment).charAt(0).toUpperCase() }}
+                          </div>
+                        }
+                        <div>
+                          <span class="hub-comment__name">{{ commentAuthorName(comment) }}</span>
+                          <span class="hub-comment__date">{{ comment.createdAt | date: 'dd/MM HH:mm' }}</span>
+                        </div>
+                      </div>
+                      <button type="button" class="hub-comment__delete" (click)="deleteComment(comment._id)" title="Xóa bình luận">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+                      </button>
+                    </div>
+                    <div class="hub-comment__body">{{ comment.content }}</div>
+                    @if (comment.images?.length) {
+                      <div class="hub-comment__images">
+                        @for (img of comment.images!; track img) {
+                          <img [src]="getImageUrl(img)" alt="" (click)="openImagePreview(comment.images!, $index)" />
+                        }
+                      </div>
+                    }
+                    @if (comment.likeCount) {
+                      <div class="hub-comment__likes">{{ comment.likeCount }} thích</div>
+                    }
+
+                    <!-- Replies -->
+                    @if (comment.replies?.length) {
+                      <div class="hub-comment__replies">
+                        @for (reply of comment.replies!; track reply._id) {
+                          <div class="hub-comment hub-comment--reply">
+                            <div class="hub-comment__main">
+                              <div class="hub-comment__author">
+                                @if (reply.author?.avatar) {
+                                  <img [src]="getImageUrl(reply.author!.avatar!)" class="hub-comment__avatar hub-comment__avatar--small" alt="" />
+                                } @else {
+                                  <div class="hub-comment__avatar hub-comment__avatar--small hub-comment__avatar--placeholder">
+                                    {{ commentAuthorName(reply).charAt(0).toUpperCase() }}
+                                  </div>
+                                }
+                                <div>
+                                  <span class="hub-comment__name">{{ commentAuthorName(reply) }}</span>
+                                  <span class="hub-comment__date">{{ reply.createdAt | date: 'dd/MM HH:mm' }}</span>
+                                </div>
+                              </div>
+                              <button type="button" class="hub-comment__delete" (click)="deleteComment(reply._id)" title="Xóa bình luận">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+                              </button>
+                            </div>
+                            <div class="hub-comment__body">{{ reply.content }}</div>
+                            @if (reply.images?.length) {
+                              <div class="hub-comment__images">
+                                @for (img of reply.images!; track img) {
+                                  <img [src]="getImageUrl(img)" alt="" (click)="openImagePreview(reply.images!, $index)" />
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
 
-        <div class="hub-detail__footer">
+        <div class="hub-overlay__footer">
           <button
             type="button"
-            class="hub-detail__btn hub-detail__btn--danger"
+            class="hub-overlay__btn hub-overlay__btn--danger"
             [disabled]="actionLoading()"
             (click)="deleteSelected()"
           >
             Xóa bài
           </button>
 
-          <div class="hub-detail__actions-right">
-            <button
-              type="button"
-              class="hub-detail__btn"
-              [disabled]="actionLoading() || !rejectReason().trim()"
-              (click)="rejectSelected()"
-            >
-              Từ chối
-            </button>
-            <button
-              type="button"
-              class="hub-detail__btn"
-              [disabled]="actionLoading()"
-              (click)="approveSelected(true)"
-            >
-              Duyệt & đăng ngay
-            </button>
-            <button
-              type="button"
-              class="hub-detail__btn hub-detail__btn--primary"
-              [disabled]="actionLoading()"
-              (click)="approveSelected(false)"
-            >
-              Duyệt
-            </button>
+          <div class="hub-overlay__actions-right">
+            @if (selectedPost()!.status !== 'approved') {
+              <button
+                type="button"
+                class="hub-overlay__btn"
+                [disabled]="actionLoading() || !rejectReason().trim()"
+                (click)="rejectSelected()"
+              >
+                Từ chối
+              </button>
+              <button
+                type="button"
+                class="hub-overlay__btn hub-overlay__btn--primary"
+                [disabled]="actionLoading()"
+                (click)="approveSelected(true)"
+              >
+                Duyệt & đăng ngay
+              </button>
+            }
           </div>
         </div>
       </div>
     </div>
   }
-</div>
 
+  <!-- Image preview lightbox -->
+  @if (previewImages().length > 0) {
+    <div class="hub-lightbox" (click)="closeImagePreview()">
+      <button class="hub-lightbox__close" (click)="closeImagePreview()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+      @if (previewImages().length > 1) {
+        <button class="hub-lightbox__nav hub-lightbox__nav--prev" (click)="prevImage(); $event.stopPropagation()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="hub-lightbox__nav hub-lightbox__nav--next" (click)="nextImage(); $event.stopPropagation()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      }
+      <img
+        [src]="getImageUrl(previewImages()[previewIndex()])"
+        class="hub-lightbox__img"
+        alt="Preview"
+        (click)="$event.stopPropagation()"
+      />
+      @if (previewImages().length > 1) {
+        <div class="hub-lightbox__counter" (click)="$event.stopPropagation()">
+          {{ previewIndex() + 1 }} / {{ previewImages().length }}
+        </div>
+      }
+    </div>
+  }
+</div>

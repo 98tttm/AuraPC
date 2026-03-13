@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminApiService, HubPost, HubPostsListResponse } from '../../core/admin-api.service';
+import { AdminApiService, HubPost, HubPostsListResponse, HubComment } from '../../core/admin-api.service';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   standalone: true,
@@ -13,10 +15,10 @@ import { FormsModule } from '@angular/forms';
 })
 export class HubModerationComponent implements OnInit {
   readonly statusTabs = [
-    { value: 'all', label: 'Tất cả' },
     { value: 'pending', label: 'Chờ duyệt' },
     { value: 'approved', label: 'Đã duyệt' },
     { value: 'rejected', label: 'Từ chối' },
+    { value: 'all', label: 'Tất cả' },
   ] as const;
 
   loading = signal(false);
@@ -24,8 +26,8 @@ export class HubModerationComponent implements OnInit {
   page = signal(1);
   totalPages = signal(1);
   total = signal(0);
-  // Mặc định xem tất cả bài, không chỉ chờ duyệt
-  status = signal<string>('all');
+  pendingCount = signal(0);
+  status = signal<string>('pending');
   search = signal<string>('');
   topic = signal<string>('');
   sort = signal<'newest' | 'trending'>('newest');
@@ -35,10 +37,22 @@ export class HubModerationComponent implements OnInit {
   rejectReason = signal<string>('');
   actionLoading = signal(false);
 
-  constructor(private adminApi: AdminApiService) {}
+  // Comments
+  comments = signal<HubComment[]>([]);
+  commentsLoading = signal(false);
+
+  // Image preview lightbox
+  previewImages = signal<string[]>([]);
+  previewIndex = signal(0);
+
+  constructor(
+    private adminApi: AdminApiService,
+    private toast: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.fetchPosts(true);
+    this.fetchPendingCount();
   }
 
   onSearchChange(value: string): void {
@@ -82,6 +96,16 @@ export class HubModerationComponent implements OnInit {
       });
   }
 
+  fetchPendingCount(): void {
+    this.adminApi
+      .getHubPosts({ page: 1, limit: 1, status: 'pending' })
+      .subscribe({
+        next: (res: HubPostsListResponse) => {
+          this.pendingCount.set(res.total);
+        },
+      });
+  }
+
   changeStatusTab(value: string): void {
     this.status.set(value);
     this.fetchPosts(true);
@@ -98,12 +122,63 @@ export class HubModerationComponent implements OnInit {
     this.selectedPost.set(post);
     this.rejectReason.set(post.rejectedReason || '');
     this.detailOpen.set(true);
+    this.comments.set([]);
+    this.fetchComments(post._id!);
   }
 
   closeDetail(): void {
     this.detailOpen.set(false);
     this.selectedPost.set(null);
     this.rejectReason.set('');
+    this.comments.set([]);
+  }
+
+  fetchComments(postId: string): void {
+    this.commentsLoading.set(true);
+    this.adminApi.getHubPostComments(postId).subscribe({
+      next: (res) => {
+        this.comments.set(res);
+        this.commentsLoading.set(false);
+      },
+      error: () => {
+        this.commentsLoading.set(false);
+      },
+    });
+  }
+
+  deleteComment(commentId: string): void {
+    if (!confirm('Xóa bình luận này?')) return;
+    this.adminApi.deleteHubComment(commentId).subscribe({
+      next: () => {
+        // Remove from local state
+        const updated = this.comments().filter((c) => {
+          if (c._id === commentId) return false;
+          if (c.replies) {
+            c.replies = c.replies.filter((r) => r._id !== commentId);
+          }
+          return true;
+        });
+        this.comments.set(updated);
+        this.toast.show('Đã xóa bình luận', 'success');
+        // Refresh post to update commentCount
+        const post = this.selectedPost();
+        if (post?._id) {
+          this.adminApi.getHubPostDetail(post._id).subscribe({
+            next: (res) => {
+              this.selectedPost.set(res);
+              this.replaceItem(res);
+            },
+          });
+        }
+      },
+      error: () => {
+        this.toast.show('Không thể xóa bình luận', 'error');
+      },
+    });
+  }
+
+  commentAuthorName(c: HubComment): string {
+    return c.author?.profile?.fullName || c.author?.username || c.author?.phoneNumber || 'Ẩn danh';
   }
 
   statusLabel(p: HubPost): string {
@@ -117,20 +192,38 @@ export class HubModerationComponent implements OnInit {
   statusBadgeClass(p: HubPost): string {
     const status = p.status;
     const isApproved = status === 'approved' || (!status && p.isPublished);
-    if (isApproved) return 'hub-table__status hub-table__status--approved';
-    if (status === 'rejected') return 'hub-table__status hub-table__status--rejected';
-    return 'hub-table__status hub-table__status--pending';
-  }
-
-  shortContent(p: HubPost): string {
-    const text = (p.content || '').trim();
-    if (!text) return '(Không có nội dung)';
-    if (text.length <= 120) return text;
-    return text.slice(0, 120) + '…';
+    if (isApproved) return 'hub-status hub-status--approved';
+    if (status === 'rejected') return 'hub-status hub-status--rejected';
+    return 'hub-status hub-status--pending';
   }
 
   authorName(p: HubPost): string {
     return p.author?.profile?.fullName || p.author?.username || p.author?.phoneNumber || 'Ẩn danh';
+  }
+
+  getImageUrl(url: string): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const base = environment.apiUrl.replace(/\/api$/, '');
+    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
+
+  // Approve directly from the card list
+  approvePost(post: HubPost, forcePublishNow = false): void {
+    if (!post._id) return;
+    this.actionLoading.set(true);
+    this.adminApi.approveHubPost(post._id, forcePublishNow).subscribe({
+      next: (res) => {
+        this.replaceItem(res);
+        this.actionLoading.set(false);
+        this.toast.show('Đã duyệt bài đăng thành công', 'success');
+        this.fetchPendingCount();
+      },
+      error: () => {
+        this.actionLoading.set(false);
+        this.toast.show('Không thể duyệt bài đăng', 'error');
+      },
+    });
   }
 
   approveSelected(forcePublishNow = false): void {
@@ -142,9 +235,12 @@ export class HubModerationComponent implements OnInit {
         this.replaceItem(res);
         this.selectedPost.set(res);
         this.actionLoading.set(false);
+        this.toast.show('Đã duyệt bài đăng thành công', 'success');
+        this.fetchPendingCount();
       },
       error: () => {
         this.actionLoading.set(false);
+        this.toast.show('Không thể duyệt bài đăng', 'error');
       },
     });
   }
@@ -160,9 +256,12 @@ export class HubModerationComponent implements OnInit {
         this.replaceItem(res);
         this.selectedPost.set(res);
         this.actionLoading.set(false);
+        this.toast.show('Đã từ chối bài đăng', 'success');
+        this.fetchPendingCount();
       },
       error: () => {
         this.actionLoading.set(false);
+        this.toast.show('Không thể từ chối bài đăng', 'error');
       },
     });
   }
@@ -177,11 +276,37 @@ export class HubModerationComponent implements OnInit {
         this.items.set(this.items().filter((p) => p._id !== current._id));
         this.closeDetail();
         this.actionLoading.set(false);
+        this.toast.show('Đã xóa bài đăng', 'success');
+        this.fetchPendingCount();
       },
       error: () => {
         this.actionLoading.set(false);
+        this.toast.show('Không thể xóa bài đăng', 'error');
       },
     });
+  }
+
+  // Image preview
+  openImagePreview(images: string[], index: number): void {
+    this.previewImages.set(images);
+    this.previewIndex.set(index);
+  }
+
+  closeImagePreview(): void {
+    this.previewImages.set([]);
+    this.previewIndex.set(0);
+  }
+
+  prevImage(): void {
+    const idx = this.previewIndex();
+    if (idx > 0) this.previewIndex.set(idx - 1);
+    else this.previewIndex.set(this.previewImages().length - 1);
+  }
+
+  nextImage(): void {
+    const idx = this.previewIndex();
+    if (idx < this.previewImages().length - 1) this.previewIndex.set(idx + 1);
+    else this.previewIndex.set(0);
   }
 
   private replaceItem(updated: HubPost): void {
@@ -194,4 +319,3 @@ export class HubModerationComponent implements OnInit {
     }
   }
 }
-

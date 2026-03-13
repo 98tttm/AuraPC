@@ -249,6 +249,26 @@ export interface HubPost {
   };
 }
 
+export interface HubComment {
+  _id: string;
+  post: string;
+  content: string;
+  images?: string[];
+  likeCount?: number;
+  replyCount?: number;
+  parentComment?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  author?: {
+    _id: string;
+    username?: string;
+    phoneNumber?: string;
+    avatar?: string;
+    profile?: { fullName?: string };
+  };
+  replies?: HubComment[];
+}
+
 export interface HubPostsListResponse {
   items: HubPost[];
   total: number;
@@ -296,6 +316,10 @@ export class AdminApiService {
     if (params?.category) p = p.set('category', params.category);
     if (params?.search) p = p.set('search', params.search);
     return this.http.get<ProductsListResponse>(`${BASE}/admin/products`, { params: p });
+  }
+
+  getCategoryStats(): Observable<{ stats: { name: string; count: number }[]; total: number }> {
+    return this.http.get<{ stats: { name: string; count: number }[]; total: number }>(`${BASE}/admin/products/category-stats`);
   }
 
   getProduct(id: string): Observable<Product> {
@@ -452,5 +476,13 @@ export class AdminApiService {
 
   deleteHubPost(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${BASE}/admin/hub/posts/${id}`);
+  }
+
+  getHubPostComments(postId: string): Observable<HubComment[]> {
+    return this.http.get<HubComment[]>(`${BASE}/admin/hub/posts/${postId}/comments`);
+  }
+
+  deleteHubComment(commentId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${BASE}/admin/hub/comments/${commentId}`);
   }
 }

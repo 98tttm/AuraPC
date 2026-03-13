@@ -299,8 +299,8 @@ router.post('/', async (req, res, next) => {
     let modelProducts = [];
     const parsed = extractJSON(raw);
     if (parsed && typeof parsed === 'object') {
-      // AI có thể trả "assistant_reply" hoặc "response" — chấp nhận cả hai
-      const replyField = parsed.assistant_reply || parsed.response || parsed.reply || '';
+      // AI có thể trả nhiều key khác nhau — chấp nhận tất cả
+      const replyField = parsed.assistant_reply || parsed.response || parsed.reply || parsed.message || parsed.answer || parsed.text || '';
       if (typeof replyField === 'string' && replyField.trim()) {
         modelReplyText = replyField.trim();
       }
@@ -312,6 +312,19 @@ router.post('/', async (req, res, next) => {
             slug: typeof p.slug === 'string' ? p.slug.trim() : '',
           }));
       }
+    }
+
+    // Safety net: if modelReplyText still looks like JSON, extract text from it
+    if (modelReplyText.startsWith('{') && modelReplyText.includes('"')) {
+      try {
+        const inner = JSON.parse(modelReplyText);
+        if (inner && typeof inner === 'object') {
+          const txt = inner.assistant_reply || inner.response || inner.reply || inner.message || inner.answer || inner.text || '';
+          if (typeof txt === 'string' && txt.trim()) {
+            modelReplyText = txt.trim();
+          }
+        }
+      } catch (_) { /* not JSON, keep as-is */ }
     }
 
     // ── Map model products to real DB products ──

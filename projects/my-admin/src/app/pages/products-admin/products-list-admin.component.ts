@@ -55,6 +55,7 @@ export class ProductsListAdminComponent implements OnInit {
       error: () => {},
     });
     this.load();
+    this.loadCategoryStats();
   }
 
   load(): void {
@@ -64,7 +65,6 @@ export class ProductsListAdminComponent implements OnInit {
       next: (res) => {
         this.items.set(res.items);
         this.total.set(res.total);
-        this.buildCategoryChart(res.items);
         this.loading.set(false);
       },
       error: (err) => {
@@ -74,17 +74,16 @@ export class ProductsListAdminComponent implements OnInit {
     });
   }
 
-  private buildCategoryChart(products: Product[]): void {
-    const catMap = new Map<string, number>();
-    products.forEach(p => {
-      const cat = this.categoryName(p);
-      catMap.set(cat, (catMap.get(cat) || 0) + 1);
-    });
-    const entries = [...catMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
-    const colors = ['#1a1a2e', '#374151', '#4b5563', '#6b7280', '#9ca3af', '#d1d5db'];
-    this.categoryChartData.set({
-      labels: entries.map(e => e[0]),
-      datasets: [{ data: entries.map(e => e[1]), backgroundColor: colors.slice(0, entries.length), borderWidth: 0 }],
+  private loadCategoryStats(): void {
+    this.api.getCategoryStats().subscribe({
+      next: (res) => {
+        const colors = ['#1a1a2e', '#374151', '#4b5563', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb'];
+        this.categoryChartData.set({
+          labels: res.stats.map(s => s.name),
+          datasets: [{ data: res.stats.map(s => s.count), backgroundColor: colors.slice(0, res.stats.length), borderWidth: 0 }],
+        });
+      },
+      error: () => {},
     });
   }
 

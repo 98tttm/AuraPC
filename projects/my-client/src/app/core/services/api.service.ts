@@ -604,6 +604,10 @@ export class ApiService {
     );
   }
 
+  getHubUserPending() {
+    return this.http.get<{ success: boolean; items: any[] }>(`${BASE}/hub/user/me/pending`);
+  }
+
   getHubUserReplies(userId: string) {
     return this.http.get<{ success: boolean; items: any[] }>(
       `${BASE}/hub/user/${encodeURIComponent(userId)}/replies`

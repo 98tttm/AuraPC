@@ -522,6 +522,12 @@
             (click)="setHubTab('replies')">Replies</button>
           <button type="button" class="hub-act__tab" [class.hub-act__tab--active]="hubTab() === 'media'"
             (click)="setHubTab('media')">Media</button>
+          <button type="button" class="hub-act__tab hub-act__tab--pending" [class.hub-act__tab--active]="hubTab() === 'pending'"
+            (click)="setHubTab('pending')">Chờ duyệt
+            @if (hubPending().length > 0) {
+              <span class="hub-act__tab-count">{{ hubPending().length }}</span>
+            }
+          </button>
 
         </div>
 
@@ -560,6 +566,9 @@
               <div class="hub-act__post-head">
                 <span class="hub-act__post-name">{{ displayName() }}</span>
                 <span class="hub-act__post-time">{{ timeAgo(item.createdAt) }}</span>
+                @if (item.status === 'pending') {
+                  <span class="hub-act__pending-badge">Chờ duyệt</span>
+                }
                 <button class="hub-act__post-more" (click)="$event.stopPropagation()">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -691,6 +700,49 @@
           }
           }
 
+          <!-- Chờ duyệt Tab -->
+          @if (hubTab() === 'pending') {
+          @if (hubPending().length === 0) {
+          <div class="hub-act__empty">
+            <p>Không có bài viết nào đang chờ duyệt.</p>
+            <span>Bài viết mới sẽ hiển thị ở đây cho đến khi được quản trị viên duyệt.</span>
+          </div>
+          } @else {
+          @for (item of hubPending(); track item._id) {
+          <div class="hub-act__post hub-act__post--pending">
+            <div class="hub-act__post-left">
+              <img [src]="getAvatarUrl(u.avatar)" class="hub-act__post-avatar" alt="" />
+            </div>
+            <div class="hub-act__post-right">
+              <div class="hub-act__post-head">
+                <span class="hub-act__post-name">{{ displayName() }}</span>
+                <span class="hub-act__post-time">{{ timeAgo(item.createdAt) }}</span>
+                <span class="hub-act__pending-badge">Chờ duyệt</span>
+              </div>
+              @if (item.topic) {
+              <span class="hub-act__post-topic">#{{ item.topic }}</span>
+              }
+              @if (item.content) {
+              <p class="hub-act__post-content">{{ item.content }}</p>
+              }
+              @if (item.images?.length) {
+              <div class="hub-act__post-images" [class.hub-act__post-images--multi]="item.images.length > 1">
+                @for (img of item.images; track img) {
+                <img [src]="getHubImageUrl(img)" class="hub-act__post-img" alt="" loading="lazy" />
+                }
+              </div>
+              }
+              <div class="hub-act__pending-info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                </svg>
+                <span>Bài viết đang chờ quản trị viên xem xét và duyệt</span>
+              </div>
+            </div>
+          </div>
+          }
+          }
+          }
 
         </div>
         }
