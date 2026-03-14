@@ -1,4 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, inject, HostListener, signal, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -27,6 +28,13 @@ import { ToastService } from './core/services/toast.service';
     @if (!hideFooter()) {
       <app-footer></app-footer>
     }
+    @if (showScrollTop()) {
+      <button class="scroll-top-btn" (click)="scrollToTop()" title="Lên đầu trang">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 15l-6-6-6 6"/>
+        </svg>
+      </button>
+    }
     <app-support-chat-widget></app-support-chat-widget>
     <app-chatbot-widget></app-chatbot-widget>
   `,
@@ -39,9 +47,46 @@ import { ToastService } from './core/services/toast.service';
       height: calc(100vh - 72px);
       overflow: hidden;
     }
+    .scroll-top-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 152px;
+      z-index: 1200;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    .scroll-top-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+    }
   `],
 })
 export class AppComponent implements OnInit, OnDestroy {
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  showScrollTop = signal(false);
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    if (!this.isBrowser) return;
+    this.showScrollTop.set(window.scrollY > 600);
+  }
+
+  scrollToTop(): void {
+    if (!this.isBrowser) return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   hideFooter = toSignal(
     this.router.events.pipe(
       startWith(null),

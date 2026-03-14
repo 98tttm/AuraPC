@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ChatbotService, ChatMessage, ChatProduct } from '../../core/services/chatbot.service';
 import { AuthService } from '../../core/services/auth.service';

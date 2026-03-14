@@ -124,7 +124,6 @@ export class HeaderComponent implements OnDestroy {
   readonly menuItems = [
     { id: 'products', label: 'SẢN PHẨM', route: '/san-pham' },
     { id: 'news', label: 'BẢN TIN', route: '/blog' },
-    { id: 'guide', label: 'HƯỚNG DẪN', route: '/' },
     { id: 'aura-builder', label: 'AURA BUILDER', route: '/aura-builder' },
     { id: 'aurahub', label: 'AURAHUB', route: '/aura-hub' },
     { id: 'support', label: 'HỖ TRỢ', route: '/ho-tro' },
@@ -428,6 +427,15 @@ export class HeaderComponent implements OnDestroy {
   onMouseMove(e: MouseEvent): void {
     if (!this.isBrowser) return;
     if (e.clientY <= this.HOVER_SHOW_ZONE) this.headerVisible.set(true);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent): void {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      this.headerVisible.set(true);
+      this.toggleSearch();
+    }
   }
 
   setActiveMenu(menuId: string): void {
