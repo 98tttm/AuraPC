@@ -485,4 +485,47 @@ export class AdminApiService {
   deleteHubComment(commentId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${BASE}/admin/hub/comments/${commentId}`);
   }
+
+  // ======== Promotions ========
+
+  getPromotions(params?: { page?: number; limit?: number; search?: string }): Observable<{ items: Promotion[]; total: number; page: number; limit: number }> {
+    let hp = new HttpParams();
+    if (params?.page) hp = hp.set('page', String(params.page));
+    if (params?.limit) hp = hp.set('limit', String(params.limit));
+    if (params?.search) hp = hp.set('search', params.search);
+    return this.http.get<{ items: Promotion[]; total: number; page: number; limit: number }>(`${BASE}/admin/promotions`, { params: hp });
+  }
+
+  getPromotion(id: string): Observable<Promotion> {
+    return this.http.get<Promotion>(`${BASE}/admin/promotions/${id}`);
+  }
+
+  createPromotion(body: Partial<Promotion>): Observable<Promotion> {
+    return this.http.post<Promotion>(`${BASE}/admin/promotions`, body);
+  }
+
+  updatePromotion(id: string, body: Partial<Promotion>): Observable<Promotion> {
+    return this.http.put<Promotion>(`${BASE}/admin/promotions/${id}`, body);
+  }
+
+  deletePromotion(id: string): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${BASE}/admin/promotions/${id}`);
+  }
+}
+
+export interface Promotion {
+  _id?: string;
+  code: string;
+  description?: string;
+  discountPercent: number;
+  maxDiscountAmount?: number | null;
+  minOrderAmount?: number;
+  maxUsage?: number | null;
+  usedCount?: number;
+  maxUsagePerUser?: number;
+  startDate: string;
+  endDate: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

@@ -32,6 +32,8 @@ const chatRoutes = require('./routes/chatRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const faqRoutes = require('./routes/faqRoutes');
+const promotionRoutes = require('./routes/promotionRoutes');
+const adminPromotionRoutes = require('./routes/admin/promotionRoutes');
 
 connectDB();
 
@@ -113,6 +115,8 @@ app.use('/api/hub', hubRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/faqs', faqRoutes);
+app.use('/api/promotions', promotionRoutes);
+app.use('/api/admin/promotions', adminPromotionRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));

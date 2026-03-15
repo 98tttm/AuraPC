@@ -46,6 +46,11 @@ const orderSchema = new mongoose.Schema(
     total: { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
+    appliedPromotion: {
+      code: { type: String },
+      discountPercent: { type: Number },
+      discountAmount: { type: Number },
+    },
     paymentMethod: {
       type: String,
       enum: ['cod', 'qr', 'momo', 'zalopay', 'atm'],

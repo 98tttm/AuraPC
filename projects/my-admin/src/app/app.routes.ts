@@ -98,6 +98,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/blogs-admin/blog-form.component').then((m) => m.BlogFormComponent),
       },
+      {
+        path: 'promotions',
+        loadComponent: () =>
+          import('./pages/promotions-admin/promotions-list-admin.component').then((m) => m.PromotionsListAdminComponent),
+      },
+      {
+        path: 'promotions/new',
+        loadComponent: () =>
+          import('./pages/promotions-admin/promotion-form.component').then((m) => m.PromotionFormComponent),
+      },
+      {
+        path: 'promotions/:id/edit',
+        loadComponent: () =>
+          import('./pages/promotions-admin/promotion-form.component').then((m) => m.PromotionFormComponent),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

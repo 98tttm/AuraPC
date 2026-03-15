@@ -109,14 +109,27 @@
             <!-- ===== RIGHT: Order Summary ===== -->
             <div class="cart-sidebar">
                 <div class="summary-card">
-                    <!-- Coupon Input -->
-                    <button class="coupon-btn">
+                    <!-- Voucher -->
+                    @if (appliedVoucher(); as v) {
+                    <div class="voucher-applied">
+                        <div class="voucher-applied__info">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            <span class="voucher-applied__code">{{ v.code }}</span>
+                            <span class="voucher-applied__desc">-{{ v.discountPercent }}%</span>
+                        </div>
+                        <button class="voucher-applied__remove" (click)="removeVoucher()" title="Xóa mã">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    } @else {
+                    <button class="coupon-btn" (click)="openVoucherModal()">
                         <span class="coupon-btn__text">Áp dụng ưu đãi để được giảm giá</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </button>
+                    }
 
                     <div class="summary-row">
                         <span class="summary-label">Tổng tiền</span>
@@ -126,6 +139,12 @@
                         <span class="summary-label">Giảm giá trực tiếp</span>
                         <span class="summary-val summary-val--discount">{{ directDiscountLabel() }}</span>
                     </div>
+                    @if (appliedVoucher()) {
+                    <div class="summary-row">
+                        <span class="summary-label">Giảm giá voucher</span>
+                        <span class="summary-val summary-val--discount">{{ voucherDiscountLabel() }}</span>
+                    </div>
+                    }
 
                     <div class="summary-divider"></div>
 
@@ -170,6 +189,33 @@
             <div class="delete-popup__actions">
                 <button class="delete-popup__btn delete-popup__btn--cancel" (click)="cancelDelete()">Hủy</button>
                 <button class="delete-popup__btn delete-popup__btn--confirm" (click)="confirmDelete()">Xóa</button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Voucher Modal -->
+    @if (showVoucherModal()) {
+    <div class="voucher-overlay" (click)="closeVoucherModal()">
+        <div class="voucher-modal" (click)="$event.stopPropagation()">
+            <div class="voucher-modal__header">
+                <h3 class="voucher-modal__title">Nhập mã giảm giá</h3>
+                <button class="voucher-modal__close" (click)="closeVoucherModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="voucher-modal__body">
+                <div class="voucher-modal__input-wrap">
+                    <input type="text" class="voucher-modal__input" placeholder="Nhập mã voucher"
+                        [value]="couponCode()" (input)="couponCode.set($any($event.target).value)"
+                        (keydown.enter)="applyVoucher()" />
+                    <button class="voucher-modal__apply" (click)="applyVoucher()" [disabled]="voucherLoading() || !couponCode().trim()">
+                        @if (voucherLoading()) { Đang kiểm tra... } @else { Áp dụng }
+                    </button>
+                </div>
+                @if (voucherError()) {
+                <p class="voucher-modal__error">{{ voucherError() }}</p>
+                }
             </div>
         </div>
     </div>

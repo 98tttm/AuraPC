@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Promotion = require('../models/Promotion');
+const PromotionUsage = require('../models/PromotionUsage');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
 const { createAdminNotification } = require('../utils/adminNotifications');
@@ -144,6 +146,7 @@ router.post('/', optionalAuth, async (req, res) => {
       requestInvoice,
       invoiceEmail,
       invoiceType,
+      promotionCode,
     } = req.body;
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Items required' });
@@ -185,8 +188,47 @@ router.post('/', optionalAuth, async (req, res) => {
     }
 
     const paidFlag = isPaid === true || isPaid === 'true' || isPaid === 1 || isPaid === '1';
-    const total = verifiedItems.reduce((sum, i) => sum + i.price * i.qty, 0) + (Number(shippingFee) || 0) - (Number(discount) || 0);
+    const subtotal = verifiedItems.reduce((sum, i) => sum + i.price * i.qty, 0);
     const resolvedUserId = req.userId || userId;
+
+    // === PROMOTION VALIDATION ===
+    let promoDiscount = 0;
+    let appliedPromotion = null;
+    let validatedPromo = null;
+    if (promotionCode) {
+      validatedPromo = await Promotion.findOne({ code: promotionCode.toUpperCase().trim(), isActive: true });
+      if (!validatedPromo) {
+        return res.status(400).json({ error: 'Mã giảm giá không hợp lệ.' });
+      }
+      const now = new Date();
+      if (now < new Date(validatedPromo.startDate) || now > new Date(validatedPromo.endDate)) {
+        return res.status(400).json({ error: 'Mã giảm giá đã hết hạn.' });
+      }
+      if (validatedPromo.maxUsage != null && validatedPromo.usedCount >= validatedPromo.maxUsage) {
+        return res.status(400).json({ error: 'Mã giảm giá đã hết lượt sử dụng.' });
+      }
+      if (subtotal < validatedPromo.minOrderAmount) {
+        return res.status(400).json({ error: 'Đơn hàng không đạt giá trị tối thiểu để dùng mã.' });
+      }
+      if (resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId)) {
+        const userUsageCount = await PromotionUsage.countDocuments({ promotion: validatedPromo._id, user: resolvedUserId });
+        if (userUsageCount >= validatedPromo.maxUsagePerUser) {
+          return res.status(400).json({ error: 'Bạn đã sử dụng mã này đủ số lần.' });
+        }
+      }
+      const rawDiscount = (subtotal * validatedPromo.discountPercent) / 100;
+      promoDiscount = Math.round(
+        validatedPromo.maxDiscountAmount != null ? Math.min(rawDiscount, validatedPromo.maxDiscountAmount) : rawDiscount
+      );
+      appliedPromotion = {
+        code: validatedPromo.code,
+        discountPercent: validatedPromo.discountPercent,
+        discountAmount: promoDiscount,
+      };
+    }
+
+    const totalDiscount = (Number(discount) || 0) + promoDiscount;
+    const total = subtotal + (Number(shippingFee) || 0) - totalDiscount;
     const userObjectId = resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId) ? new mongoose.Types.ObjectId(resolvedUserId) : null;
     const duplicateOrder = await findRecentDuplicateOrder({
       userId: resolvedUserId,
@@ -211,13 +253,20 @@ router.post('/', optionalAuth, async (req, res) => {
       shippingAddress: shippingAddress || {},
       total: Math.max(0, total),
       shippingFee: Number(shippingFee) || 0,
-      discount: Number(discount) || 0,
+      discount: totalDiscount,
+      appliedPromotion: appliedPromotion || undefined,
       paymentMethod,
       isPaid: paidFlag,
       paidAt: paidFlag ? new Date() : null,
       status: 'pending',
     });
     await order.save();
+
+    // Track promotion usage
+    if (validatedPromo && userObjectId) {
+      await Promotion.updateOne({ _id: validatedPromo._id }, { $inc: { usedCount: 1 } });
+      await PromotionUsage.create({ promotion: validatedPromo._id, user: userObjectId, order: order._id });
+    }
 
     await createAdminNotification({
       type: 'order_new',
