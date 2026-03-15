@@ -31,6 +31,7 @@ export class CartService {
   private apiUrl = `${environment.apiUrl}/cart`;
 
   itemAdded$ = new Subject<Product>();
+  private wasLoggedIn = false;
 
   cartCount = computed(() => this.items().reduce((sum, i) => sum + i.qty, 0));
   cartTotal = computed(() =>
@@ -43,9 +44,11 @@ export class CartService {
       const user = this.auth.currentUser();
       const uid = user?._id || user?.id || '';
       if (uid) {
+        this.wasLoggedIn = true;
         this.fetchServerCart(uid);
-      } else {
-        // User logged out — clear local cart so it doesn't leak to the next session
+      } else if (this.wasLoggedIn) {
+        // User actually logged out — clear cart so it doesn't leak to next session
+        this.wasLoggedIn = false;
         this.items.set([]);
         this.save();
       }
