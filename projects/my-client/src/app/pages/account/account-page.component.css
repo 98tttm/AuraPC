@@ -443,6 +443,18 @@ a.account__nav-link {
   color: #000;
 }
 
+.account__form-group.has-error input,
+.account__form-group.has-error select {
+  border-color: #dc2626;
+}
+
+.account__field-error {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
 .input--readonly {
   opacity: 0.6;
   cursor: not-allowed;

@@ -826,17 +826,23 @@
               </select>
             </div>
             <div class="account__form-row">
-              <div class="account__form-group">
+              <div class="account__form-group" [class.has-error]="addrErrors()['fullName']">
                 <label>Họ và tên <span class="required">*</span></label>
                 <input type="text" [(ngModel)]="addrFullName" placeholder="Nhập họ tên người nhận" />
+                @if (addrErrors()['fullName']) {
+                  <span class="account__field-error">{{ addrErrors()['fullName'] }}</span>
+                }
               </div>
-              <div class="account__form-group">
+              <div class="account__form-group" [class.has-error]="addrErrors()['phone']">
                 <label>Số điện thoại <span class="required">*</span></label>
-                <input type="tel" [(ngModel)]="addrPhone" placeholder="Nhập số điện thoại" />
+                <input type="tel" [(ngModel)]="addrPhone" placeholder="Nhập số điện thoại" maxlength="11" />
+                @if (addrErrors()['phone']) {
+                  <span class="account__field-error">{{ addrErrors()['phone'] }}</span>
+                }
               </div>
             </div>
-            <div class="account__form-group">
-              <label>Tỉnh / Thành phố</label>
+            <div class="account__form-group" [class.has-error]="addrErrors()['city']">
+              <label>Tỉnh / Thành phố <span class="required">*</span></label>
               <select [(ngModel)]="addrCity" (change)="onProvinceChange()">
                 <option value="">Chọn Tỉnh / Thành phố</option>
                 @for (p of addressService.provinces(); track p.code) {
@@ -845,8 +851,8 @@
               </select>
             </div>
             <div class="account__form-row">
-              <div class="account__form-group">
-                <label>Quận / Huyện</label>
+              <div class="account__form-group" [class.has-error]="addrErrors()['district']">
+                <label>Quận / Huyện <span class="required">*</span></label>
                 <select [(ngModel)]="addrDistrict" (change)="onDistrictChange()" [disabled]="!addrCity">
                   <option value="">Chọn Quận / Huyện</option>
                   @for (d of districts(); track d.code) {
@@ -854,8 +860,8 @@
                   }
                 </select>
               </div>
-              <div class="account__form-group">
-                <label>Phường / Xã</label>
+              <div class="account__form-group" [class.has-error]="addrErrors()['ward']">
+                <label>Phường / Xã <span class="required">*</span></label>
                 <select [(ngModel)]="addrWard" [disabled]="!addrDistrict">
                   <option value="">Chọn Phường / Xã</option>
                   @for (w of wards(); track w.code) {
@@ -864,9 +870,12 @@
                 </select>
               </div>
             </div>
-            <div class="account__form-group">
-              <label>Địa chỉ cụ thể</label>
+            <div class="account__form-group" [class.has-error]="addrErrors()['address']">
+              <label>Địa chỉ cụ thể <span class="required">*</span></label>
               <input type="text" [(ngModel)]="addrAddress" placeholder="Số nhà, tên đường..." />
+              @if (addrErrors()['address']) {
+                <span class="account__field-error">{{ addrErrors()['address'] }}</span>
+              }
             </div>
             <div class="modal-settings-row">
               <span class="modal-settings-label">Đặt làm địa chỉ mặc định</span>

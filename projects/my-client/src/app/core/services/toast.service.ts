@@ -29,10 +29,9 @@ export class ToastService {
     }, OTP_DURATION_MS);
   }
 
-  showInfo(message: string, durationMs = DEFAULT_DURATION_MS): void {
+  showInfo(message: string): void {
     this.clear();
     this.toast.set({ message, type: 'info' });
-    this.timeoutId = setTimeout(() => this.dismiss(), durationMs);
   }
 
   dismiss(): void {

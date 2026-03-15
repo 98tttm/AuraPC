@@ -4,6 +4,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ChatbotService, ChatMessage, ChatProduct } from '../../core/services/chatbot.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ChatPanelService } from '../../core/services/chat-panel.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -17,13 +18,14 @@ import { Router } from '@angular/router';
 export class ChatbotWidgetComponent implements AfterViewChecked {
   private chat = inject(ChatbotService);
   private auth = inject(AuthService);
+  private chatPanel = inject(ChatPanelService);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
 
   @ViewChild('messagesContainer') private messagesEl!: ElementRef<HTMLDivElement>;
   @ViewChild('scrollAnchor') private scrollAnchor!: ElementRef<HTMLDivElement>;
 
-  isOpen = signal(false);
+  isOpen = computed(() => this.chatPanel.active() === 'chatbot');
   isSending = signal(false);
   inputText = signal('');
   messages = signal<ChatMessage[]>([]);
@@ -68,7 +70,7 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
   }
 
   toggleOpen(): void {
-    this.isOpen.update((v) => !v);
+    this.chatPanel.toggle('chatbot');
     if (this.isOpen()) {
       this.scrollTarget = 'bottom';
     }
@@ -148,6 +150,6 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
     } else {
       return;
     }
-    this.isOpen.set(false);
+    this.chatPanel.close();
   }
 }

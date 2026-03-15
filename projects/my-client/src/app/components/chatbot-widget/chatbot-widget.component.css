@@ -1,29 +1,34 @@
 .aru-chatbot {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 1200;
+  position: relative;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .aru-chatbot-toggle {
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: none;
-  background: transparent;
+  border: 2px solid #FF6D2D;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   padding: 0;
   overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.aru-chatbot-toggle:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(255, 109, 45, 0.3);
 }
 
 .aru-avatar {
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   border-radius: 999px;
   object-fit: cover;
 }

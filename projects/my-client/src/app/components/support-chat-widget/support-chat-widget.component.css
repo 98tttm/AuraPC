@@ -2,37 +2,33 @@
 /* Modern floating chat with slide-up panel, glassmorphism, and polished bubbles */
 
 .support-chat {
-  position: fixed;
-  right: 16px;
-  bottom: 84px;
-  z-index: 1190;
+  position: relative;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 /* ─── Toggle Button ─── */
 .support-chat__toggle {
   position: relative;
-  width: 56px;
-  height: 56px;
-  border: none;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   padding: 0;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s, border-color 0.2s;
 }
 
 .support-chat__toggle:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.18),
-    0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .support-chat__toggle:active {
@@ -40,9 +36,10 @@
 }
 
 .support-chat__icon {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 /* Pulse ring animation on toggle */
@@ -51,7 +48,7 @@
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(255, 109, 45, 0.35);
   animation: support-pulse 2.5s ease-in-out infinite;
 }
 
@@ -491,11 +488,6 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
-  .support-chat {
-    right: 10px;
-    bottom: 78px;
-  }
-
   .support-chat__panel {
     width: min(360px, calc(100vw - 20px));
     right: -4px;
@@ -504,12 +496,12 @@
   }
 
   .support-chat__toggle {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
   }
 
   .support-chat__icon {
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
   }
 }

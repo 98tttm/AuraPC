@@ -6,61 +6,94 @@ import { ToastService } from '../../core/services/toast.service';
   standalone: true,
   template: `
     @if (toast(); as t) {
-      <div class="toast toast--{{ t.type }}" role="status" aria-live="polite">
-        <span class="toast__message">{{ t.message }}</span>
-        <button type="button" class="toast__close" (click)="dismiss()" aria-label="Đóng">×</button>
+      <div class="popup-overlay" (click)="dismiss()">
+        <div class="popup" [class]="'popup--' + t.type" (click)="$event.stopPropagation()">
+          <div class="popup__icon">
+            @if (t.type === 'otp') {
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            } @else {
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            }
+          </div>
+          <p class="popup__message">{{ t.message }}</p>
+          <button type="button" class="popup__btn" (click)="dismiss()">Đã hiểu</button>
+        </div>
       </div>
     }
   `,
   styles: [`
-    .toast {
+    .popup-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      inset: 0;
       z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
-      padding: 0.875rem 1rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-      animation: toastIn 0.3s ease-out;
+      background: rgba(0, 0, 0, 0.45);
+      animation: fadeIn 0.2s ease-out;
     }
-    .toast--otp {
+    .popup {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem 2rem 1.5rem;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: popIn 0.25s ease-out;
+    }
+    .popup__icon {
+      margin-bottom: 1rem;
+    }
+    .popup--info .popup__icon {
+      color: #FF6D2D;
+    }
+    .popup--otp .popup__icon {
+      color: #16a34a;
+    }
+    .popup__message {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin: 0 0 1.5rem;
+    }
+    .popup__btn {
+      display: inline-block;
+      padding: 0.625rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .popup--info .popup__btn {
+      background: #FF6D2D;
+      color: #fff;
+    }
+    .popup--info .popup__btn:hover {
+      background: #e55a1b;
+    }
+    .popup--otp .popup__btn {
       background: #16a34a;
       color: #fff;
     }
-    .toast--info {
-      background: #1e40af;
-      color: #fff;
+    .popup--otp .popup__btn:hover {
+      background: #15803d;
     }
-    .toast__message {
-      font-weight: 600;
-      font-size: 0.9375rem;
-      letter-spacing: 0.02em;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    .toast__close {
-      background: none;
-      border: none;
-      color: inherit;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 0.9;
-      padding: 0 0.25rem;
-    }
-    .toast__close:hover {
-      opacity: 1;
-    }
-    @keyframes toastIn {
+    @keyframes popIn {
       from {
         opacity: 0;
-        transform: translateY(-100%);
+        transform: scale(0.9);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
       }
     }
   `],
