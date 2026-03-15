@@ -112,24 +112,30 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Tỉnh / Thành phố</label>
-                            <select [(ngModel)]="city">
+                            <select [(ngModel)]="city" (change)="onGuestProvinceChange()">
                                 <option value="">Chọn Tỉnh / Thành phố</option>
-                                <option value="hcm">TP. Hồ Chí Minh</option>
-                                <option value="hn">Hà Nội</option>
-                                <option value="dn">Đà Nẵng</option>
+                                @for (p of addressService.provinces(); track p.code) {
+                                <option [value]="p.name">{{ p.name }}</option>
+                                }
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Quận / Huyện</label>
-                            <select [(ngModel)]="district">
+                            <select [(ngModel)]="district" (change)="onGuestDistrictChange()" [disabled]="!city">
                                 <option value="">Chọn Quận / Huyện</option>
+                                @for (d of districts(); track d.code) {
+                                <option [value]="d.name">{{ d.name }}</option>
+                                }
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Phường / Xã</label>
-                        <select [(ngModel)]="ward">
+                        <select [(ngModel)]="ward" [disabled]="!district">
                             <option value="">Chọn Phường / Xã</option>
+                            @for (w of wards(); track w.code) {
+                            <option [value]="w.name">{{ w.name }}</option>
+                            }
                         </select>
                     </div>
                     <div class="form-group">
