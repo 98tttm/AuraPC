@@ -214,8 +214,7 @@
             <span class="score-number score-number--big">{{ avgRating().toFixed(0) }}</span>
             <span class="star star--big" [class.filled]="avgRating() >= 1">★</span>
           </div>
-          <button type="button" class="pd-btn pd-btn-review pd-btn-review--blue" (click)="openReviewForm()"
-            [disabled]="isLoggedIn() && !canReview() && !canReviewLoading()">
+          <button type="button" class="pd-btn pd-btn-review pd-btn-review--blue" (click)="openReviewForm()">
             Gửi đánh giá
           </button>
           @if (alreadyReviewed() && isLoggedIn()) {

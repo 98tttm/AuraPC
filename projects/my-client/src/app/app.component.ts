@@ -28,15 +28,17 @@ import { ToastService } from './core/services/toast.service';
     @if (!hideFooter()) {
       <app-footer></app-footer>
     }
-    @if (showScrollTop()) {
-      <button class="scroll-top-btn" (click)="scrollToTop()" title="Lên đầu trang">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 15l-6-6-6 6"/>
-        </svg>
-      </button>
-    }
-    <app-support-chat-widget></app-support-chat-widget>
-    <app-chatbot-widget></app-chatbot-widget>
+    <div class="floating-actions">
+      @if (showScrollTop()) {
+        <button class="scroll-top-btn" (click)="scrollToTop()" title="Lên đầu trang">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 15l-6-6-6 6"/>
+          </svg>
+        </button>
+      }
+      <app-support-chat-widget></app-support-chat-widget>
+      <app-chatbot-widget></app-chatbot-widget>
+    </div>
   `,
   styles: [`
     main {
@@ -47,28 +49,42 @@ import { ToastService } from './core/services/toast.service';
       height: calc(100vh - 72px);
       overflow: hidden;
     }
-    .scroll-top-btn {
+    .floating-actions {
       position: fixed;
-      right: 20px;
-      bottom: 152px;
+      right: 16px;
+      bottom: 16px;
       z-index: 1200;
-      width: 40px;
-      height: 40px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+    }
+    .scroll-top-btn {
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      border: none;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      animation: scrollBtnIn 0.3s ease-out;
     }
     .scroll-top-btn:hover {
-      background: rgba(255, 255, 255, 0.22);
-      transform: translateY(-2px);
+      background: #FF6D2D;
+      border-color: #FF6D2D;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(255, 109, 45, 0.3);
+    }
+    @keyframes scrollBtnIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.8); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
   `],
 })

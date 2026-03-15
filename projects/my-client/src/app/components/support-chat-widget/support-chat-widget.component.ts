@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { ChatPanelService } from '../../core/services/chat-panel.service';
 import { RealtimeService, SupportMessagePayload } from '../../core/services/realtime.service';
 import { SupportChatService, SupportConversation, SupportMessage } from '../../core/services/support-chat.service';
 
@@ -28,6 +29,7 @@ import { SupportChatService, SupportConversation, SupportMessage } from '../../c
 })
 export class SupportChatWidgetComponent implements OnInit, OnDestroy, AfterViewChecked {
   private auth = inject(AuthService);
+  private chatPanel = inject(ChatPanelService);
   private realtime = inject(RealtimeService);
   private supportChat = inject(SupportChatService);
 
@@ -39,7 +41,7 @@ export class SupportChatWidgetComponent implements OnInit, OnDestroy, AfterViewC
   readonly hasMessages = computed(() => this.messages().length > 0);
   readonly assignedAdminName = computed(() => this.conversation()?.assignedAdmin?.name || 'Nhân viên tư vấn');
 
-  isOpen = signal(false);
+  isOpen = computed(() => this.chatPanel.active() === 'support');
   loading = signal(false);
   sending = signal(false);
   error = signal('');
@@ -122,10 +124,8 @@ export class SupportChatWidgetComponent implements OnInit, OnDestroy, AfterViewC
   }
 
   toggleOpen(): void {
-    const next = !this.isOpen();
-    this.isOpen.set(next);
-
-    if (!next) return;
+    this.chatPanel.toggle('support');
+    if (!this.isOpen()) return;
 
     if (this.isLoggedIn()) {
       if (!this.conversation() && !this.loading()) {
@@ -271,7 +271,7 @@ export class SupportChatWidgetComponent implements OnInit, OnDestroy, AfterViewC
   }
 
   private resetState(): void {
-    this.isOpen.set(false);
+    if (this.isOpen()) this.chatPanel.close();
     this.loading.set(false);
     this.sending.set(false);
     this.error.set('');

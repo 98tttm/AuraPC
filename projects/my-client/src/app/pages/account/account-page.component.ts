@@ -1154,6 +1154,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.addrWard = '';
     this.addrAddress = '';
     this.addrIsDefault = false;
+    this.addrErrors.set({});
     this.districts.set([]);
     this.wards.set([]);
     this.showAddressModal.set(true);
@@ -1170,6 +1171,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.addrWard = addr.ward;
     this.addrAddress = addr.address;
     this.addrIsDefault = addr.isDefault;
+    this.addrErrors.set({});
     this.districts.set([]);
     this.wards.set([]);
     this.showAddressModal.set(true);
@@ -1232,11 +1234,27 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     this.showAddressModal.set(false);
   }
 
-  saveAddress() {
-    if (!this.addrFullName.trim() || !this.addrPhone.trim()) {
-      alert('Vui lòng nhập họ tên và số điện thoại.');
-      return;
+  addrErrors = signal<Record<string, string>>({});
+
+  private validateAddressForm(): boolean {
+    const errors: Record<string, string> = {};
+    if (!this.addrFullName.trim()) errors['fullName'] = 'Vui lòng nhập họ tên.';
+    const phone = this.addrPhone.replace(/\s+/g, '');
+    if (!phone) {
+      errors['phone'] = 'Vui lòng nhập số điện thoại.';
+    } else if (!/^(0\d{9}|84\d{9})$/.test(phone)) {
+      errors['phone'] = 'Số điện thoại không hợp lệ (VD: 0912345678).';
     }
+    if (!this.addrCity) errors['city'] = 'Vui lòng chọn Tỉnh / Thành phố.';
+    if (!this.addrDistrict) errors['district'] = 'Vui lòng chọn Quận / Huyện.';
+    if (!this.addrWard) errors['ward'] = 'Vui lòng chọn Phường / Xã.';
+    if (!this.addrAddress.trim()) errors['address'] = 'Vui lòng nhập địa chỉ cụ thể.';
+    this.addrErrors.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  saveAddress() {
+    if (!this.validateAddressForm()) return;
 
     const data = {
       label: this.addrLabel,
