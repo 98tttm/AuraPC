@@ -914,4 +914,30 @@
     }
 }
 
+/* ========== Voucher Applied Badge ========== */
+.voucher-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid #00b14f;
+  border-radius: 8px;
+  background: #f0fdf4;
+  margin-bottom: 0.75rem;
+}
+
+.voucher-applied__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #00b14f;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.voucher-applied__info svg { flex-shrink: 0; }
+.voucher-applied__code { font-weight: 700; letter-spacing: 0.5px; }
+.voucher-applied__desc { color: #15803d; font-weight: 500; }
+
 /* COD OTP Popup styles moved to cod-otp-dialog component */

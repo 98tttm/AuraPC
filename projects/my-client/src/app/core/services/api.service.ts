@@ -354,6 +354,14 @@ export class ApiService {
     return this.http.post<{ success: boolean; payUrl: string }>(`${BASE}/payment/momo/create`, payload);
   }
 
+  validatePromotion(code: string, orderAmount: number): Observable<{
+    valid: boolean;
+    message?: string;
+    promotion?: { _id: string; code: string; description: string; discountPercent: number; discountAmount: number };
+  }> {
+    return this.http.post<any>(`${BASE}/promotions/validate`, { code, orderAmount });
+  }
+
   createOrder(body: {
     items: { product: string; name: string; price: number; qty: number }[];
     shippingAddress?: Record<string, string>;
@@ -365,6 +373,7 @@ export class ApiService {
     requestInvoice?: boolean;
     invoiceEmail?: string;
     invoiceType?: 'personal' | 'company';
+    promotionCode?: string;
   }): Observable<{ _id: string; orderNumber: string; total: number }> {
     return this.http.post<{ _id: string; orderNumber: string; total: number }>(`${BASE}/orders`, body);
   }

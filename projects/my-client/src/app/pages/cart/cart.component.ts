@@ -2,7 +2,8 @@ import { Component, inject, signal, computed, effect } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../core/services/cart.service';
-import { productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
+import { ApiService, productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
 import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
@@ -16,6 +17,8 @@ import { RecentlyViewedSectionComponent } from '../../components/recently-viewed
 export class CartComponent {
   private cart = inject(CartService);
   private router = inject(Router);
+  private api = inject(ApiService);
+  private auth = inject(AuthService);
 
   /** Flag: has the initial auto-select already happened? */
   private hasInitialized = false;
@@ -28,8 +31,12 @@ export class CartComponent {
   deleteMode = signal<'single' | 'selected'>('single');
   deleteTargetId = signal<string>('');
 
-  // Coupon input
+  // Voucher state
   couponCode = signal('');
+  showVoucherModal = signal(false);
+  voucherLoading = signal(false);
+  voucherError = signal('');
+  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number } | null>(null);
 
   // Computed cart items directly from service
   cartItems = computed(() => this.cart.getItems());
@@ -168,9 +175,28 @@ export class CartComponent {
     return '-' + d.toLocaleString('vi-VN') + '₫';
   }
 
-  /** Final total = selectedTotal (already discounted display prices) */
+  /** Voucher discount amount (recomputed when voucher or total changes) */
+  voucherDiscount = computed(() => {
+    const v = this.appliedVoucher();
+    if (!v) return 0;
+    const subtotal = this.selectedTotal();
+    return Math.min(Math.round(subtotal * v.discountPercent / 100), v.discountAmount);
+  });
+
+  /** Final total after all discounts */
+  finalTotal = computed(() => Math.max(0, this.selectedTotal() - this.voucherDiscount()));
+
+  /** Final total = selectedTotal - voucher discount */
   finalTotalLabel(): string {
-    return this.totalLabel();
+    const total = this.finalTotal();
+    if (!total || total <= 0) return '0₫';
+    return total.toLocaleString('vi-VN') + '₫';
+  }
+
+  voucherDiscountLabel(): string {
+    const d = this.voucherDiscount();
+    if (!d || d <= 0) return '0₫';
+    return '-' + d.toLocaleString('vi-VN') + '₫';
   }
 
   productSlug(p: Product): string {
@@ -277,6 +303,54 @@ export class CartComponent {
   remove(productId: string) {
     if (!productId) return;
     this.requestDeleteSingle(productId);
+  }
+
+  // ---- Voucher Logic ----
+
+  openVoucherModal() {
+    this.showVoucherModal.set(true);
+    this.voucherError.set('');
+  }
+
+  closeVoucherModal() {
+    this.showVoucherModal.set(false);
+  }
+
+  applyVoucher() {
+    const code = this.couponCode().trim();
+    if (!code) return;
+    this.voucherLoading.set(true);
+    this.voucherError.set('');
+
+    const userId = this.auth.currentUser()?._id;
+    this.api.validatePromotion(code, this.selectedTotal()).subscribe({
+      next: (res) => {
+        this.voucherLoading.set(false);
+        if (res.valid && res.promotion) {
+          this.appliedVoucher.set({
+            code: res.promotion.code,
+            description: res.promotion.description,
+            discountPercent: res.promotion.discountPercent,
+            discountAmount: res.promotion.discountAmount,
+          });
+          // Store in sessionStorage for checkout page
+          sessionStorage.setItem('appliedVoucher', JSON.stringify(this.appliedVoucher()));
+          this.showVoucherModal.set(false);
+        } else {
+          this.voucherError.set(res.message || 'Mã không hợp lệ.');
+        }
+      },
+      error: () => {
+        this.voucherLoading.set(false);
+        this.voucherError.set('Lỗi hệ thống, vui lòng thử lại.');
+      },
+    });
+  }
+
+  removeVoucher() {
+    this.appliedVoucher.set(null);
+    this.couponCode.set('');
+    sessionStorage.removeItem('appliedVoucher');
   }
 
   // ---- Checkout navigation ----

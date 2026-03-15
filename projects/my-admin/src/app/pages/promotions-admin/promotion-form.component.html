@@ -1,0 +1,181 @@
+<div class="editor-page">
+  <div class="editor-hero">
+    <div class="editor-hero__main">
+      <a routerLink="/promotions" class="back-link">&larr; Quay lại</a>
+      <div class="editor-hero__copy">
+        <h1>{{ id() ? 'Cập nhật mã giảm giá' : 'Thêm mã giảm giá' }}</h1>
+        <p>Tạo voucher cho khách hàng sử dụng khi thanh toán.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error">{{ error() }}</div>
+  }
+
+  <form (ngSubmit)="submit()" class="editor-layout">
+    <div class="editor-main">
+      <!-- Basic Info -->
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Thông tin cơ bản</h2>
+            <p>Mã voucher, mô tả và phần trăm giảm giá.</p>
+          </div>
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field" [class.field--error]="codeError">
+            <label>Mã voucher <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="model.code" name="code" placeholder="VD: GIAM10, TETAPC" style="text-transform: uppercase" />
+            @if (codeError) {
+              <span class="field-error">{{ codeError }}</span>
+            }
+          </div>
+
+          <div class="field" [class.field--error]="discountError">
+            <label>Phần trăm giảm (%) <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="model.discountPercent" name="discountPercent" min="1" max="100" />
+            @if (discountError) {
+              <span class="field-error">{{ discountError }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mô tả</label>
+          <textarea [(ngModel)]="model.description" name="description" rows="2" placeholder="Mô tả ngắn cho mã giảm giá"></textarea>
+        </div>
+      </section>
+
+      <!-- Limits -->
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Giới hạn</h2>
+            <p>Thiết lập mức giảm tối đa, đơn tối thiểu và số lượt dùng.</p>
+          </div>
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field">
+            <label>Giảm tối đa (VNĐ)</label>
+            <input type="number" [(ngModel)]="model.maxDiscountAmount" name="maxDiscountAmount" min="0" placeholder="Để trống = không giới hạn" />
+            <span class="field-hint">Mức giảm tối đa cho mỗi đơn hàng</span>
+          </div>
+
+          <div class="field">
+            <label>Đơn tối thiểu (VNĐ)</label>
+            <input type="number" [(ngModel)]="model.minOrderAmount" name="minOrderAmount" min="0" />
+            <span class="field-hint">Giá trị đơn hàng tối thiểu để dùng mã</span>
+          </div>
+        </div>
+
+        <div class="editor-grid editor-grid--2">
+          <div class="field">
+            <label>Tổng lượt dùng tối đa</label>
+            <input type="number" [(ngModel)]="model.maxUsage" name="maxUsage" min="1" placeholder="Để trống = không giới hạn" />
+          </div>
+
+          <div class="field">
+            <label>Lượt dùng/người</label>
+            <input type="number" [(ngModel)]="model.maxUsagePerUser" name="maxUsagePerUser" min="1" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Date Range -->
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Thời gian hiệu lực</h2>
+            <p>Mã chỉ hoạt động trong khoảng thời gian này.</p>
+          </div>
+        </div>
+
+        <div class="editor-grid editor-grid--2" [class.field--error]="dateError">
+          <div class="field">
+            <label>Ngày bắt đầu <span class="required">*</span></label>
+            <input type="date" [(ngModel)]="model.startDate" name="startDate" />
+          </div>
+
+          <div class="field">
+            <label>Ngày kết thúc <span class="required">*</span></label>
+            <input type="date" [(ngModel)]="model.endDate" name="endDate" />
+          </div>
+        </div>
+        @if (dateError) {
+          <span class="field-error">{{ dateError }}</span>
+        }
+      </section>
+
+      <!-- Status -->
+      <section class="editor-card">
+        <div class="editor-card__header">
+          <div>
+            <h2>Trạng thái</h2>
+          </div>
+        </div>
+
+        <label class="toggle-card" [class.toggle-card--active]="model.isActive">
+          <input type="checkbox" [(ngModel)]="model.isActive" name="isActive" />
+          <span class="toggle-card__title">{{ model.isActive ? 'Đang kích hoạt' : 'Đã tắt' }}</span>
+          <span class="toggle-card__desc">Khi tắt, khách hàng sẽ không thể sử dụng mã này.</span>
+        </label>
+      </section>
+
+      <div class="editor-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="loading()">
+          @if (loading()) { Đang lưu... } @else { {{ id() ? 'Cập nhật' : 'Tạo mã giảm giá' }} }
+        </button>
+        <a routerLink="/promotions" class="btn btn--outline">Hủy</a>
+      </div>
+    </div>
+
+    <!-- Sidebar summary -->
+    <aside class="editor-aside">
+      <section class="editor-card editor-card--sticky">
+        <div class="editor-card__header">
+          <div>
+            <h2>Tóm tắt</h2>
+          </div>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-item">
+            <span>Mã</span>
+            <strong>{{ (model.code || '').toUpperCase() || 'Chưa nhập' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Giảm</span>
+            <strong>{{ model.discountPercent || 0 }}%</strong>
+          </div>
+          <div class="summary-item">
+            <span>Giảm tối đa</span>
+            <strong>{{ model.maxDiscountAmount ? (model.maxDiscountAmount | number:'1.0-0') + '₫' : 'Không giới hạn' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Đơn tối thiểu</span>
+            <strong>{{ (model.minOrderAmount || 0 | number:'1.0-0') + '₫' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Tổng lượt dùng</span>
+            <strong>{{ model.maxUsage || '∞' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Lượt/người</span>
+            <strong>{{ model.maxUsagePerUser || 1 }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Hiệu lực</span>
+            <strong>{{ model.startDate || '?' }} → {{ model.endDate || '?' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Trạng thái</span>
+            <strong>{{ model.isActive ? 'Kích hoạt' : 'Đã tắt' }}</strong>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </form>
+</div>

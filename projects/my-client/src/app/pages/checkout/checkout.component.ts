@@ -73,6 +73,9 @@ export class CheckoutComponent implements OnInit {
   submitting = signal(false);
   errorMessage = signal<string | null>(null);
 
+  // Voucher from cart page
+  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number } | null>(null);
+
   /** COD: popup xác nhận OTP */
   showCodOtpPopup = signal(false);
   codOtpPhone = '';
@@ -113,7 +116,24 @@ export class CheckoutComponent implements OnInit {
     }, 0);
   });
 
+  /** Voucher discount amount */
+  voucherDiscount = computed(() => {
+    const v = this.appliedVoucher();
+    if (!v) return 0;
+    const subtotal = this.selectedTotal();
+    return Math.min(Math.round(subtotal * v.discountPercent / 100), v.discountAmount);
+  });
+
+  /** Final total after voucher */
+  finalTotal = computed(() => Math.max(0, this.selectedTotal() - this.voucherDiscount()));
+
   ngOnInit(): void {
+    // Load voucher from cart page
+    try {
+      const raw = sessionStorage.getItem('appliedVoucher');
+      if (raw) this.appliedVoucher.set(JSON.parse(raw));
+    } catch { }
+
     const savedMethod = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('aurapc_checkout_payment_method') : null;
     if (savedMethod && ['cod', 'qr', 'momo', 'zalopay', 'atm'].includes(savedMethod)) {
       this.paymentMethod = savedMethod;
@@ -440,6 +460,7 @@ export class CheckoutComponent implements OnInit {
     requestInvoice?: boolean;
     invoiceEmail?: string;
     invoiceType?: 'personal' | 'company';
+    promotionCode?: string;
   } {
     const items = this.cartItems().map(i => ({
       product: i.product._id!,
@@ -463,11 +484,16 @@ export class CheckoutComponent implements OnInit {
       requestInvoice?: boolean;
       invoiceEmail?: string;
       invoiceType?: 'personal' | 'company';
+      promotionCode?: string;
     } = { items, shippingAddress };
     if (this.requestInvoice && this.invoiceEmail?.trim()) {
       payload.requestInvoice = true;
       payload.invoiceEmail = this.invoiceEmail.trim();
       payload.invoiceType = this.invoiceType;
+    }
+    const voucher = this.appliedVoucher();
+    if (voucher?.code) {
+      payload.promotionCode = voucher.code;
     }
     return payload;
   }
@@ -475,7 +501,7 @@ export class CheckoutComponent implements OnInit {
   /** Tạo đơn hàng (gọi trực tiếp khi không COD, hoặc sau khi xác thực OTP COD). */
   doCreateOrder(): void {
     const payload = this.buildOrderPayload();
-    const { items, shippingAddress, requestInvoice, invoiceEmail, invoiceType } = payload;
+    const { items, shippingAddress, requestInvoice, invoiceEmail, invoiceType, promotionCode } = payload;
     this.submitting.set(true);
     const user = this.auth.currentUser();
     const userId = user?._id ?? (user as { id?: string })?.id;
@@ -486,10 +512,14 @@ export class CheckoutComponent implements OnInit {
       isPaid: false,
       user: userId ?? undefined,
       ...(requestInvoice && invoiceEmail ? { requestInvoice: true, invoiceEmail, invoiceType } : {}),
+      ...(promotionCode ? { promotionCode } : {}),
     }).subscribe({
       next: (res) => {
         this.cart.clear();
-        try { sessionStorage.removeItem('aurapc_checkout_payment_method'); } catch { }
+        try {
+          sessionStorage.removeItem('aurapc_checkout_payment_method');
+          sessionStorage.removeItem('appliedVoucher');
+        } catch { }
         this.router.navigate(['/checkout-success'], { queryParams: { order: res.orderNumber } });
       },
       error: (err) => {

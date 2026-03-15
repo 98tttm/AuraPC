@@ -1,0 +1,249 @@
+.editor-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.editor-hero__copy h1 {
+  font-size: 1.9rem;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.editor-hero__copy p {
+  margin: 0.45rem 0 0;
+  color: var(--text-secondary);
+  max-width: 680px;
+}
+
+.back-link {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+}
+
+.back-link:hover {
+  color: var(--text-primary);
+}
+
+.alert-error {
+  background: var(--accent-red-light);
+  color: var(--accent-red);
+  padding: 0.75rem 0.95rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.95fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.editor-main,
+.editor-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.editor-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.35rem;
+  box-shadow: var(--shadow);
+}
+
+.editor-card--sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+.editor-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.editor-card__header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.editor-card__header p {
+  margin: 0.3rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.editor-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.editor-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.42rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-light);
+}
+
+.field--error input,
+.field--error textarea {
+  border-color: var(--accent-red);
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--accent-red);
+  font-size: 0.78rem;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.required {
+  color: var(--accent-red);
+}
+
+.toggle-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.toggle-card input {
+  position: absolute;
+  left: 1rem;
+  top: 1.05rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.toggle-card--active {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-light);
+}
+
+.toggle-card__title {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.toggle-card__desc {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+}
+
+.summary-item span {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.summary-item strong {
+  color: var(--text-primary);
+  text-align: right;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 1120px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-card--sticky {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .editor-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
