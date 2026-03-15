@@ -128,6 +128,9 @@ export class CheckoutComponent implements OnInit {
   finalTotal = computed(() => Math.max(0, this.selectedTotal() - this.voucherDiscount()));
 
   ngOnInit(): void {
+    // Load provinces for address dropdowns
+    this.addressService.loadProvinces();
+
     // Load voucher from cart page
     try {
       const raw = sessionStorage.getItem('appliedVoucher');
@@ -255,6 +258,31 @@ export class CheckoutComponent implements OnInit {
     const d = this.districts().find(x => x.name === this.addrDistrict);
     this.wards.set([]);
     this.addrWard = '';
+    if (d) {
+      this.addressService.getWards(d.code).subscribe(res => {
+        this.wards.set(res.wards || []);
+      });
+    }
+  }
+
+  // Guest address cascading handlers (reuses same districts/wards signals)
+  onGuestProvinceChange() {
+    const p = this.addressService.provinces().find(x => x.name === this.city);
+    this.districts.set([]);
+    this.wards.set([]);
+    this.district = '';
+    this.ward = '';
+    if (p) {
+      this.addressService.getDistricts(p.code).subscribe(res => {
+        this.districts.set(res.districts || []);
+      });
+    }
+  }
+
+  onGuestDistrictChange() {
+    const d = this.districts().find(x => x.name === this.district);
+    this.wards.set([]);
+    this.ward = '';
     if (d) {
       this.addressService.getWards(d.code).subscribe(res => {
         this.wards.set(res.wards || []);

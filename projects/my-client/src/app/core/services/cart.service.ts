@@ -38,12 +38,16 @@ export class CartService {
   );
 
   constructor() {
-    // Logged-in user: DB is source of truth. Load cart from server.
+    // React to auth state changes: load server cart on login, clear on logout.
     effect(() => {
       const user = this.auth.currentUser();
       const uid = user?._id || user?.id || '';
       if (uid) {
         this.fetchServerCart(uid);
+      } else {
+        // User logged out — clear local cart so it doesn't leak to the next session
+        this.items.set([]);
+        this.save();
       }
     });
   }
