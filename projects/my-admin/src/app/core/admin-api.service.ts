@@ -309,17 +309,22 @@ export class AdminApiService {
   }
 
   // ======== Products ========
-  getProducts(params?: { page?: number; limit?: number; category?: string; search?: string }): Observable<ProductsListResponse> {
+  getProducts(params?: { page?: number; limit?: number; category?: string; search?: string; stockStatus?: string }): Observable<ProductsListResponse> {
     let p = new HttpParams();
     if (params?.page != null) p = p.set('page', params.page.toString());
     if (params?.limit != null) p = p.set('limit', params.limit.toString());
     if (params?.category) p = p.set('category', params.category);
     if (params?.search) p = p.set('search', params.search);
+    if (params?.stockStatus) p = p.set('stockStatus', params.stockStatus);
     return this.http.get<ProductsListResponse>(`${BASE}/admin/products`, { params: p });
   }
 
   getCategoryStats(): Observable<{ stats: { name: string; count: number }[]; total: number }> {
     return this.http.get<{ stats: { name: string; count: number }[]; total: number }>(`${BASE}/admin/products/category-stats`);
+  }
+
+  getStockStats(): Observable<{ stats: { name: string; count: number }[]; total: number }> {
+    return this.http.get<{ stats: { name: string; count: number }[]; total: number }>(`${BASE}/admin/products/stock-stats`);
   }
 
   getProduct(id: string): Observable<Product> {

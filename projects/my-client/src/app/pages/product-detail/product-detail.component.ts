@@ -57,8 +57,15 @@ export class ProductDetailComponent implements OnDestroy {
   replyContent = '';
   submitLoading = signal(false);
   submitError = signal<string | null>(null);
+  quantity = signal(1);
 
   readonly isLoggedIn = computed(() => !!this.auth.currentUser());
+  readonly productStock = computed(() => this.product()?.stock ?? 0);
+  readonly isOutOfStock = computed(() => this.productStock() === 0);
+  readonly isLowStock = computed(() => {
+    const stock = this.productStock();
+    return stock > 0 && stock < 10;
+  });
 
   /** Tên hiển thị của user đang đăng nhập (ưu tiên tên, không hiển thị SĐT thô). */
   currentUserDisplayName(): string {
@@ -149,6 +156,7 @@ export class ProductDetailComponent implements OnDestroy {
     this.canReviewLoading.set(false);
     this.relatedProducts.set([]);
     this.recentlyViewedProducts.set([]);
+    this.quantity.set(1);
 
     this.api.getProductBySlug(slug).subscribe({
       next: (p) => {
@@ -572,19 +580,46 @@ export class ProductDetailComponent implements OnDestroy {
     return all.slice(0, 10);
   }
 
+  increaseQty(): void {
+    const stock = this.productStock();
+    if (this.quantity() < stock) {
+      this.quantity.update(q => q + 1);
+    }
+  }
+
+  decreaseQty(): void {
+    if (this.quantity() > 1) {
+      this.quantity.update(q => q - 1);
+    }
+  }
+
   /** Mua ngay: thêm vào giỏ + chuyển hướng tới trang giỏ hàng */
   buyNow(): void {
     const p = this.product();
-    if (!p) return;
-    this.cart.add(p, 1);
+    if (!p || this.isOutOfStock()) return;
+    this.cart.add(p, this.quantity());
     this.router.navigate(['/cart']);
   }
 
   /** Thêm vào giỏ hàng (không chuyển hướng) */
   addToCart(): void {
     const p = this.product();
-    if (!p) return;
-    this.cart.add(p, 1);
+    if (!p || this.isOutOfStock()) return;
+    this.cart.add(p, this.quantity());
     this.toast.showInfo('Đã thêm sản phẩm vào giỏ hàng!');
+  }
+
+  stockStatusLabel(): string {
+    const stock = this.productStock();
+    if (stock === 0) return 'Hết hàng';
+    if (stock < 10) return 'Sắp hết hàng';
+    return 'Còn hàng';
+  }
+
+  stockStatusClass(): string {
+    const stock = this.productStock();
+    if (stock === 0) return 'out-of-stock';
+    if (stock < 10) return 'low-stock';
+    return 'in-stock';
   }
 }

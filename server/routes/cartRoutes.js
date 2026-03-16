@@ -118,6 +118,13 @@ router.post('/add', requireAuth, async (req, res) => {
 
     const qty = Math.max(1, Number(quantity) || 1);
 
+    // Check stock availability
+    const product = await Product.findById(resolvedProductId).select('stock name').lean();
+    if (product) {
+      const stock = product.stock ?? 0;
+      if (stock === 0) return res.status(400).json({ success: false, message: `"${product.name}" đã hết hàng.` });
+    }
+
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       cart = new Cart({ user: userId, items: [] });
@@ -125,8 +132,15 @@ router.post('/add', requireAuth, async (req, res) => {
 
     const existingItem = cart.items.find((i) => normalizeId(i.product) === resolvedProductId);
     if (existingItem) {
-      existingItem.quantity += qty;
+      const newQty = existingItem.quantity + qty;
+      if (product && newQty > (product.stock ?? 0)) {
+        return res.status(400).json({ success: false, message: `Chỉ còn ${product.stock} sản phẩm trong kho.` });
+      }
+      existingItem.quantity = newQty;
     } else {
+      if (product && qty > (product.stock ?? 0)) {
+        return res.status(400).json({ success: false, message: `Chỉ còn ${product.stock} sản phẩm trong kho.` });
+      }
       cart.items.push({ product: resolvedProductId, quantity: qty });
     }
 
@@ -158,6 +172,11 @@ router.put('/update', requireAuth, async (req, res) => {
     if (qty <= 0) {
       cart.items = cart.items.filter((i) => normalizeId(i.product) !== resolvedProductId);
     } else {
+      // Check stock availability
+      const product = await Product.findById(resolvedProductId).select('stock name').lean();
+      if (product && qty > (product.stock ?? 0)) {
+        return res.status(400).json({ success: false, message: `"${product.name}" chỉ còn ${product.stock ?? 0} sản phẩm trong kho.` });
+      }
       const item = cart.items.find((i) => normalizeId(i.product) === resolvedProductId);
       if (item) item.quantity = qty;
       else cart.items.push({ product: resolvedProductId, quantity: qty });

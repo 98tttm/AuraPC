@@ -67,8 +67,16 @@ async function resolveCategories(items) {
 
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 20, category, search } = req.query;
+    const { page = 1, limit = 20, category, search, stockStatus } = req.query;
     const filter = {};
+    // Stock status filter: 'in-stock' (>=10), 'low-stock' (1-9), 'out-of-stock' (0)
+    if (stockStatus === 'out-of-stock') {
+      filter.stock = 0;
+    } else if (stockStatus === 'low-stock') {
+      filter.stock = { $gt: 0, $lt: 10 };
+    } else if (stockStatus === 'in-stock') {
+      filter.stock = { $gte: 10 };
+    }
     if (category) {
       // Support filtering by category _id (numeric or ObjectId) or category_id string
       filter.$or = [
@@ -124,6 +132,27 @@ router.get('/category-stats', async (req, res) => {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
     res.json({ stats, total: products.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Stock distribution stats across ALL products
+router.get('/stock-stats', async (req, res) => {
+  try {
+    const [inStock, lowStock, outOfStock] = await Promise.all([
+      Product.countDocuments({ stock: { $gte: 10 } }),
+      Product.countDocuments({ stock: { $gt: 0, $lt: 10 } }),
+      Product.countDocuments({ stock: 0 }),
+    ]);
+    res.json({
+      stats: [
+        { name: 'Còn hàng', count: inStock },
+        { name: 'Sắp hết hàng', count: lowStock },
+        { name: 'Hết hàng', count: outOfStock },
+      ],
+      total: inStock + lowStock + outOfStock,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

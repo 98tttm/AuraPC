@@ -31,18 +31,28 @@ export class ProductsListAdminComponent implements OnInit {
   limit = 20;
   searchQuery = '';
   categoryFilter = '';
+  stockFilter = '';
   sortColumn = '';
   sortDir: 'asc' | 'desc' = 'asc';
 
-  // Stats from total (not page data)
+  // Stats from DB (all products, not just current page)
   totalProducts = computed(() => this.total());
-  activeProducts = computed(() => this.items().filter(p => p.active !== false).length);
-  lowStockProducts = computed(() => this.items().filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) < 5).length);
-  outOfStockProducts = computed(() => this.items().filter(p => (p.stock ?? 0) === 0).length);
+  inStockProducts = signal(0);
+  lowStockProducts = signal(0);
+  outOfStockProducts = signal(0);
 
   // Categories doughnut
   categoryChartData = signal<ChartConfiguration<'doughnut'>['data']>({ labels: [], datasets: [] });
   categoryChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } } },
+  };
+
+  // Stock doughnut
+  stockChartData = signal<ChartConfiguration<'doughnut'>['data']>({ labels: [], datasets: [] });
+  stockChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '65%',
@@ -56,12 +66,13 @@ export class ProductsListAdminComponent implements OnInit {
     });
     this.load();
     this.loadCategoryStats();
+    this.loadStockStats();
   }
 
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery, category: this.categoryFilter || undefined }).subscribe({
+    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery, category: this.categoryFilter || undefined, stockStatus: this.stockFilter || undefined }).subscribe({
       next: (res) => {
         this.items.set(res.items);
         this.total.set(res.total);
@@ -87,12 +98,36 @@ export class ProductsListAdminComponent implements OnInit {
     });
   }
 
+  private loadStockStats(): void {
+    this.api.getStockStats().subscribe({
+      next: (res) => {
+        const colors = ['#16a34a', '#eab308', '#dc2626'];
+        this.stockChartData.set({
+          labels: res.stats.map(s => s.name),
+          datasets: [{ data: res.stats.map(s => s.count), backgroundColor: colors, borderWidth: 0 }],
+        });
+        // Populate stat cards from DB totals
+        for (const s of res.stats) {
+          if (s.name === 'Còn hàng') this.inStockProducts.set(s.count);
+          else if (s.name === 'Sắp hết hàng') this.lowStockProducts.set(s.count);
+          else if (s.name === 'Hết hàng') this.outOfStockProducts.set(s.count);
+        }
+      },
+      error: () => {},
+    });
+  }
+
   onSearch(): void {
     this.page = 1;
     this.load();
   }
 
   onCategoryFilter(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  onStockFilter(): void {
     this.page = 1;
     this.load();
   }

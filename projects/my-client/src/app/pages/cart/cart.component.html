@@ -89,9 +89,13 @@
                     </div>
 
                     <div class="cart-item__qty">
+                        @if (isOutOfStock(item)) {
+                        <span class="cart-item__out-of-stock">Hết hàng</span>
+                        } @else {
                         <button class="qty-btn" (click)="decreaseQty(productId(item.product))">−</button>
                         <span class="qty-val">{{ item.qty }}</span>
-                        <button class="qty-btn" (click)="increaseQty(productId(item.product))">+</button>
+                        <button class="qty-btn" [disabled]="isMaxStock(item)" (click)="increaseQty(productId(item.product))">+</button>
+                        }
                     </div>
 
                     <button class="cart-item__del" (click)="remove(productId(item.product))" title="Xóa sản phẩm">

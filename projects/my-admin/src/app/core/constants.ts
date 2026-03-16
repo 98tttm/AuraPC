@@ -41,7 +41,7 @@ export function getUserSegmentLabel(orderCount: number): string {
 
 // === Stock Thresholds ===
 export const STOCK_THRESHOLDS = {
-  low: 5,
+  low: 10,
   max: 50,
 } as const;
 
