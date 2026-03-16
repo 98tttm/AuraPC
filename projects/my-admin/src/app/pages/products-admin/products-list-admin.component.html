@@ -35,9 +35,9 @@
         </svg>
       </div>
     </div>
-    <span class="stat-card__label">Đang bán</span>
-    <span class="stat-card__value">{{ activeProducts() }}</span>
-    <span class="stat-card__sub">trang hiện tại</span>
+    <span class="stat-card__label">Còn hàng</span>
+    <span class="stat-card__value">{{ inStockProducts() }}</span>
+    <span class="stat-card__sub">toàn bộ kho</span>
   </div>
 
   <div class="stat-card">
@@ -51,7 +51,7 @@
     </div>
     <span class="stat-card__label">Sắp hết hàng</span>
     <span class="stat-card__value">{{ lowStockProducts() }}</span>
-    <span class="stat-card__sub">trang hiện tại</span>
+    <span class="stat-card__sub">toàn bộ kho</span>
   </div>
 
   <div class="stat-card">
@@ -64,17 +64,24 @@
     </div>
     <span class="stat-card__label">Hết hàng</span>
     <span class="stat-card__value">{{ outOfStockProducts() }}</span>
-    <span class="stat-card__sub">trang hiện tại</span>
+    <span class="stat-card__sub">toàn bộ kho</span>
   </div>
 </div>
 
-<!-- Categories Chart -->
+<!-- Charts Row -->
 <div class="charts-row">
   <div class="chart-card">
     <div class="chart-card__title">Danh mục</div>
     <div class="chart-card__subtitle">Phân bổ sản phẩm (toàn bộ kho hàng)</div>
     <div class="chart-wrapper">
       <canvas baseChart type="doughnut" [data]="categoryChartData()" [options]="categoryChartOptions"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card__title">Tồn kho</div>
+    <div class="chart-card__subtitle">Tình trạng tồn kho (toàn bộ kho hàng)</div>
+    <div class="chart-wrapper">
+      <canvas baseChart type="doughnut" [data]="stockChartData()" [options]="stockChartOptions"></canvas>
     </div>
   </div>
 </div>
@@ -87,6 +94,12 @@
       <p class="card-subtitle">Quản lý danh mục sản phẩm</p>
     </div>
     <div class="card-header__actions">
+      <select class="category-filter" [(ngModel)]="stockFilter" (ngModelChange)="onStockFilter()">
+        <option value="">Tất cả tồn kho</option>
+        <option value="in-stock">Còn hàng</option>
+        <option value="low-stock">Sắp hết hàng</option>
+        <option value="out-of-stock">Hết hàng</option>
+      </select>
       <select class="category-filter" [(ngModel)]="categoryFilter" (ngModelChange)="onCategoryFilter()">
         <option value="">Tất cả danh mục</option>
         @for (c of categories(); track c._id) {

@@ -159,13 +159,13 @@ router.post('/', optionalAuth, async (req, res) => {
       .filter(id => id && mongoose.Types.ObjectId.isValid(id));
 
     const products = await Product.find({ _id: { $in: productIds } })
-      .select('_id name price salePrice old_price')
+      .select('_id name price salePrice old_price stock')
       .lean();
 
     const productMap = new Map();
     products.forEach(p => productMap.set(String(p._id), p));
 
-    // Build verified items with server-side prices
+    // Build verified items with server-side prices + stock check
     const verifiedItems = [];
     for (const item of items) {
       const dbProduct = productMap.get(String(item.product));
@@ -173,6 +173,13 @@ router.post('/', optionalAuth, async (req, res) => {
         return res.status(400).json({ error: `Sản phẩm không tồn tại: ${item.product}` });
       }
       const qty = Math.max(1, Number(item.qty) || 1);
+      const stock = dbProduct.stock ?? 0;
+      if (stock === 0) {
+        return res.status(400).json({ error: `Sản phẩm "${dbProduct.name}" đã hết hàng.` });
+      }
+      if (qty > stock) {
+        return res.status(400).json({ error: `Sản phẩm "${dbProduct.name}" chỉ còn ${stock} sản phẩm trong kho.` });
+      }
       // Use actual DB price (price field = current selling price)
       const verifiedPrice = dbProduct.price ?? 0;
       verifiedItems.push({

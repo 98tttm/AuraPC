@@ -201,7 +201,7 @@ export class ProductFormComponent implements OnInit {
   stockLabel(): string {
     const stock = this.model.stock ?? 0;
     if (stock <= 0) return 'Hết hàng';
-    if (stock < 5) return `Sắp hết (${stock})`;
+    if (stock < 10) return `Sắp hết (${stock})`;
     return `${stock} sản phẩm`;
   }
 

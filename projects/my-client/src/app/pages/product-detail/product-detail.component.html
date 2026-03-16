@@ -53,7 +53,7 @@
         <div class="pd-meta">
           <span class="pd-meta-item">Thương hiệu: <strong>{{ brandName(p) }}</strong></span>
           <span class="pd-meta-sep">|</span>
-          <span class="pd-meta-item">Tình trạng: <span class="pd-stock in-stock">Còn hàng</span></span>
+          <span class="pd-meta-item">Tình trạng: <span class="pd-stock" [class]="stockStatusClass()">{{ stockStatusLabel() }}</span></span>
           <span class="pd-meta-sep">|</span>
           <span class="pd-meta-item">SKU: {{ sku(p) }}</span>
         </div>
@@ -96,7 +96,25 @@
           </div>
         </div>
 
+        @if (!isOutOfStock()) {
+        <div class="pd-qty-row">
+          <span class="pd-qty-label">Số lượng:</span>
+          <div class="pd-qty-control">
+            <button class="pd-qty-btn" (click)="decreaseQty()" [disabled]="quantity() <= 1">−</button>
+            <span class="pd-qty-val">{{ quantity() }}</span>
+            <button class="pd-qty-btn" (click)="increaseQty()" [disabled]="quantity() >= productStock()">+</button>
+          </div>
+          <span class="pd-qty-stock">{{ productStock() }} sản phẩm có sẵn</span>
+        </div>
+        }
+
         <div class="pd-actions">
+          @if (isOutOfStock()) {
+          <button class="pd-btn pd-btn-buy pd-btn--disabled" disabled>
+            <span class="pd-btn-title">HẾT HÀNG</span>
+            <span class="pd-btn-desc">Sản phẩm tạm thời hết hàng</span>
+          </button>
+          } @else {
           <button class="pd-btn pd-btn-buy" (click)="buyNow()">
             <span class="pd-btn-title">MUA NGAY</span>
             <span class="pd-btn-desc">Giao hàng tận nơi hoặc nhận tại cửa hàng</span>
@@ -105,6 +123,7 @@
             <span class="pd-btn-title">THÊM VÀO GIỎ</span>
             <span class="pd-btn-desc">Thêm vào giỏ để chọn tiếp</span>
           </button>
+          }
         </div>
       </div>
     </div>

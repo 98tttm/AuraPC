@@ -10,6 +10,15 @@
 /* ── Charts Row ── */
 .charts-row {
   margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-wrapper {

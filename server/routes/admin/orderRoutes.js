@@ -1,5 +1,6 @@
 const express = require('express');
 const Order = require('../../models/Order');
+const Product = require('../../models/Product');
 const { requireAdmin } = require('../../middleware/auth');
 const { createUserNotification } = require('../../utils/userNotifications');
 const { emitOrderUpdated } = require('../../socket');
@@ -8,6 +9,18 @@ const router = express.Router();
 router.use(requireAdmin);
 
 const VALID_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+
+/** Restore stock when an order is cancelled */
+async function restoreOrderStock(order) {
+  if (!order || !Array.isArray(order.items)) return;
+  for (const item of order.items) {
+    const productId = item.product?._id || item.product;
+    const qty = Number(item.qty) || 0;
+    if (productId && qty > 0) {
+      await Product.updateOne({ _id: productId }, { $inc: { stock: qty } });
+    }
+  }
+}
 const ADMIN_MANUAL_STATUSES = ['processing', 'shipped'];
 const STATUS_TRANSITIONS = {
   pending: ['processing'],
@@ -107,6 +120,20 @@ router.put('/:orderNumber/status', async (req, res) => {
 
     await order.save();
 
+    // Deduct stock when order is shipped
+    if (status === 'shipped') {
+      for (const item of order.items || []) {
+        const productId = item.product?._id || item.product;
+        const qty = Number(item.qty) || 0;
+        if (productId && qty > 0) {
+          await Product.updateOne(
+            { _id: productId, stock: { $gte: qty } },
+            { $inc: { stock: -qty } }
+          );
+        }
+      }
+    }
+
     const userId = order.user && order.user.toString ? order.user.toString() : order.user;
     if (userId) {
       const titles = { processing: 'Đơn đang xử lý', shipped: 'Đơn đang giao' };
@@ -154,6 +181,7 @@ router.put('/:orderNumber/cancel', async (req, res) => {
     order.cancelRequest.resolvedBy = req.adminId;
     order.cancelRequest.note = 'Hủy bởi admin';
     await order.save();
+    await restoreOrderStock(order);
 
     const userId = order.user && order.user.toString ? order.user.toString() : order.user;
     if (userId) {
@@ -203,6 +231,7 @@ router.put('/:orderNumber/cancel-request', async (req, res) => {
     order.cancelRequest.resolvedBy = req.adminId;
     order.cancelRequest.note = adminNote;
     await order.save();
+    if (action === 'approve') await restoreOrderStock(order);
 
     const userId = order.user && order.user.toString ? order.user.toString() : order.user;
     if (userId) {
@@ -255,6 +284,7 @@ router.put('/:orderNumber/return-request', async (req, res) => {
     order.returnRequest.resolvedBy = req.adminId;
     order.returnRequest.note = adminNote;
     await order.save();
+    if (action === 'approve') await restoreOrderStock(order);
 
     const userId = order.user && order.user.toString ? order.user.toString() : order.user;
     if (userId) {

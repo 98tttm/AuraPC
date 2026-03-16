@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../core/services/cart.service';
 import { ApiService, productDisplayPrice, productMainImage, Product } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
 import { RecentlyViewedSectionComponent } from '../../components/recently-viewed-section/recently-viewed-section.component';
 
@@ -19,6 +20,7 @@ export class CartComponent {
   private router = inject(Router);
   private api = inject(ApiService);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   /** Flag: has the initial auto-select already happened? */
   private hasInitialized = false;
@@ -228,7 +230,22 @@ export class CartComponent {
   increaseQty(productId: string) {
     if (!productId) return;
     const item = this.cartItems().find(i => this.productId(i.product) === productId);
-    if (item) this.cart.setQty(productId, item.qty + 1);
+    if (!item) return;
+    const stock = item.product.stock ?? 0;
+    if (item.qty >= stock) {
+      this.toast.showInfo(`Chỉ còn ${stock} sản phẩm trong kho`);
+      return;
+    }
+    this.cart.setQty(productId, item.qty + 1);
+  }
+
+  isMaxStock(item: CartItem): boolean {
+    const stock = item.product.stock ?? 0;
+    return item.qty >= stock;
+  }
+
+  isOutOfStock(item: CartItem): boolean {
+    return (item.product.stock ?? 0) === 0;
   }
 
   decreaseQty(productId: string) {
@@ -356,6 +373,21 @@ export class CartComponent {
   // ---- Checkout navigation ----
   goToCheckout() {
     if (this.selectedTotal() <= 0) return;
+    // Check for out-of-stock or over-stock items
+    const selected = this.selectedMethod();
+    for (const item of this.cartItems()) {
+      const id = this.productId(item.product);
+      if (!id || !selected.has(id)) continue;
+      const stock = item.product.stock ?? 0;
+      if (stock === 0) {
+        this.toast.showInfo(`"${item.product.name}" đã hết hàng. Vui lòng xóa khỏi giỏ.`);
+        return;
+      }
+      if (item.qty > stock) {
+        this.toast.showInfo(`"${item.product.name}" chỉ còn ${stock} sản phẩm. Vui lòng giảm số lượng.`);
+        return;
+      }
+    }
     this.router.navigate(['/checkout']);
   }
 
