@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
@@ -22,6 +23,15 @@ function generateOrderNumber() {
   const d = String(now.getDate()).padStart(2, '0');
   const r = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `AP${y}${m}${d}${r}`;
+}
+
+function generateSerialNumber() {
+  const now = new Date();
+  const y = now.getFullYear().toString();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const rand = crypto.randomBytes(4).toString('hex').slice(0, 5).toUpperCase();
+  return `APC-${y}${m}${d}-${rand}`;
 }
 
 function isOrderOwnedByUser(order, userId) {
@@ -411,6 +421,11 @@ router.post('/:orderNumber/confirm-received', requireAuth, async (req, res) => {
 
     order.status = 'delivered';
     order.deliveredAt = new Date();
+    for (const item of order.items) {
+      if (!item.serialNumber) {
+        item.serialNumber = generateSerialNumber();
+      }
+    }
     await order.save();
 
     const userId = order.user && order.user.toString ? order.user.toString() : order.user;

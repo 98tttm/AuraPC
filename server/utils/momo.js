@@ -62,7 +62,8 @@ function getCreateConfigIssues({ paymentMethod, amount } = {}) {
     if (!config.ipnUrl) {
         issues.push('Thiếu MOMO_IPN_URL.');
     } else if (isLocalhostUrl(config.ipnUrl)) {
-        issues.push('MOMO_IPN_URL đang là localhost. MoMo không thể callback vào localhost; hãy dùng URL HTTPS public như ngrok hoặc cloudflared cho IPN.');
+        // Warn but don't block — redirect flow still works in sandbox without IPN callback.
+        console.warn('[MoMo] MOMO_IPN_URL đang là localhost. IPN callback sẽ không hoạt động; redirect flow vẫn OK cho sandbox.');
     }
 
     if (paymentMethod === 'atm' && Number(amount || 0) < 10000) {

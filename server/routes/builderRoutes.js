@@ -130,16 +130,16 @@ router.post('/:id/email-pdf', requireUserOrAdmin, async (req, res) => {
     const { id } = req.params;
     const { email } = req.body || {};
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return res.status(400).json({ error: 'Invalid email' });
+      return res.status(400).json({ error: 'Vui lòng nhập email hợp lệ.' });
     }
 
     const transporter = getEmailTransporter();
     if (!transporter) {
-      return res.status(503).json({ error: 'Email is not configured on the server' });
+      return res.status(503).json({ error: 'Chưa cấu hình email trên server. Vui lòng thêm EMAIL_USER và EMAIL_PASS.' });
     }
 
     const builder = await Builder.findOne(resolveBuilderQuery(id)).lean();
-    if (!builder) return res.status(404).json({ error: 'Builder not found' });
+    if (!builder) return res.status(404).json({ error: 'Không tìm thấy cấu hình builder.' });
     if (!requireBuilderOwnerOrAdmin(builder, req, res, 'email')) return;
 
     const pdfBuffer = await buildConfigPdf(builder);
@@ -147,29 +147,73 @@ router.post('/:id/email-pdf', requireUserOrAdmin, async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
     const viewUrl = `${frontendUrl}/aura-builder/${shareId}`;
 
+    // Build components summary for email body
+    const STEP_LABELS = {
+      GPU: 'VGA', CPU: 'CPU', MB: 'Bo mạch chủ', CASE: 'Vỏ case',
+      COOLING: 'Tản nhiệt', MEMORY: 'RAM', STORAGE: 'Ổ cứng', PSU: 'Nguồn',
+      FANS: 'Quạt', MONITOR: 'Màn hình', KEYBOARD: 'Bàn phím', MOUSE: 'Chuột', HEADSET: 'Tai nghe',
+    };
+    const components = builder.components || {};
+    let componentsHtml = '';
+    let total = 0;
+    for (const [step, label] of Object.entries(STEP_LABELS)) {
+      const comp = components[step];
+      if (comp && comp.name) {
+        const price = Number(comp.price) || 0;
+        total += price;
+        const priceStr = price > 0 ? Number(price).toLocaleString('vi-VN') + 'đ' : 'Liên hệ';
+        componentsHtml += `
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #222;color:#aaa;font-size:0.85rem;">${label}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #222;color:#fff;font-size:0.85rem;">${comp.name}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #222;color:#ffb81c;font-size:0.85rem;text-align:right;white-space:nowrap;">${priceStr}</td>
+          </tr>`;
+      }
+    }
+    const totalStr = total > 0 ? Number(total).toLocaleString('vi-VN') + 'đ' : 'Liên hệ';
+
     await transporter.sendMail({
       from: `"AuraPC" <${process.env.EMAIL_USER || process.env.GMAIL_USER}>`,
       to: email.trim(),
-      subject: 'AuraPC builder configuration',
+      subject: 'Cấu hình PC của bạn — AuraPC Builder',
       html: `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#000;color:#fff;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#000;color:#fff;">
   <div style="max-width:600px;margin:0 auto;background:#0c0c0e;">
-    <div style="padding:24px;text-align:center;background:#111;border-bottom:1px solid #333;">
-      <span style="font-size:1.2rem;font-weight:800;letter-spacing:2px;">AURA PC</span>
+    <div style="padding:24px 24px 20px;text-align:center;background:linear-gradient(135deg,#1a1a2e,#0c0c0e);border-bottom:2px solid #ffb81c;">
+      <span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#fff;">AURA</span><span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#ffb81c;">PC</span>
+      <p style="margin:6px 0 0;font-size:0.75rem;color:#666;letter-spacing:1px;text-transform:uppercase;">Aura Builder Configuration</p>
     </div>
-    <div style="padding:32px 24px;">
-      <h2 style="margin:0 0 8px;font-size:1.1rem;color:#ffb81c;text-transform:uppercase;letter-spacing:1px;">YOUR PC CONFIGURATION</h2>
-      <p style="margin:0 0 20px;color:#ccc;font-size:0.95rem;line-height:1.5;">Thanks for using Aura Builder. Your PDF is attached below.</p>
-      <div style="margin:24px 0;">
-        <a href="${viewUrl}" style="display:inline-block;padding:14px 28px;background:#ffb81c;color:#000;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:4px;">VIEW ONLINE</a>
+    <div style="padding:28px 24px;">
+      <h2 style="margin:0 0 6px;font-size:1rem;color:#ffb81c;text-transform:uppercase;letter-spacing:1px;">Cấu hình PC của bạn</h2>
+      <p style="margin:0 0 20px;color:#999;font-size:0.85rem;">File PDF đính kèm bên dưới. Bạn cũng có thể xem online:</p>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+        <thead>
+          <tr style="border-bottom:2px solid #ffb81c;">
+            <th style="padding:8px 12px;text-align:left;color:#ffb81c;font-size:0.8rem;text-transform:uppercase;">Loại</th>
+            <th style="padding:8px 12px;text-align:left;color:#ffb81c;font-size:0.8rem;text-transform:uppercase;">Sản phẩm</th>
+            <th style="padding:8px 12px;text-align:right;color:#ffb81c;font-size:0.8rem;text-transform:uppercase;">Giá</th>
+          </tr>
+        </thead>
+        <tbody>${componentsHtml}</tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="padding:12px;text-align:right;color:#fff;font-weight:700;font-size:0.95rem;border-top:2px solid #333;">TỔNG CỘNG</td>
+            <td style="padding:12px;text-align:right;color:#ffb81c;font-weight:700;font-size:0.95rem;border-top:2px solid #333;">${totalStr}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${viewUrl}" style="display:inline-block;padding:14px 32px;background:#ffb81c;color:#000;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:6px;letter-spacing:0.5px;">XEM ONLINE</a>
       </div>
-      <p style="margin:16px 0 0;font-size:0.8rem;color:#888;">Link: ${viewUrl}</p>
+      <p style="text-align:center;font-size:0.75rem;color:#555;">Link: ${viewUrl}</p>
     </div>
-    <div style="padding:20px 24px;border-top:1px solid #333;text-align:center;">
-      <p style="margin:0;font-size:0.85rem;color:#999;">AuraPC</p>
+    <div style="padding:16px 24px;border-top:1px solid #222;text-align:center;">
+      <p style="margin:0;font-size:0.8rem;color:#666;">AuraPC — Gaming PC & Linh kiện chính hãng</p>
     </div>
   </div>
 </body>
@@ -183,11 +227,14 @@ router.post('/:id/email-pdf', requireUserOrAdmin, async (req, res) => {
       ],
     });
 
-    return res.json({ success: true, message: 'Builder PDF sent successfully' });
+    return res.json({ success: true, message: 'Đã gửi email thành công!' });
   } catch (err) {
-    let message = err.message || 'Unable to send email';
+    let message = err.message || 'Không gửi được email.';
     if (err.code === 'EAUTH' || String(message).toLowerCase().includes('invalid login')) {
-      message = 'Invalid Gmail credentials. Check EMAIL_USER and EMAIL_PASS.';
+      message = 'Sai thông tin Gmail. Kiểm tra EMAIL_USER và EMAIL_PASS (App Password).';
+    }
+    if (err.code === 'ESOCKET' || err.code === 'ECONNECTION') {
+      message = 'Không kết nối được Gmail SMTP. Kiểm tra kết nối mạng server.';
     }
     return res.status(500).json({ error: message });
   }

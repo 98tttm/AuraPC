@@ -8,6 +8,7 @@ import { AdminAuthService } from '../../core/auth/admin-auth.service';
 import { ThemeService } from '../../core/theme.service';
 import { LayoutService } from '../../core/layout.service';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_KEYS, ORDER_STATUS_COLORS } from '../../core/constants';
+import * as XLSX from 'xlsx';
 
 function getChartThemeColors(theme: 'light' | 'dark') {
   if (theme === 'dark') {
@@ -381,6 +382,84 @@ export class DashboardComponent implements OnInit {
         barThickness: 20,
       }],
     });
+  }
+
+  exportExcel(): void {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Tổng quan
+    const overview = [
+      ['Thống kê tổng quan AuraPC', '', '', this.today.toLocaleDateString('vi-VN')],
+      [],
+      ['Chỉ số', 'Giá trị', 'Tháng này', 'Tháng trước'],
+      ['Doanh thu (đ)', this.totalRevenue(), this.revenueThisMonth(), this.revenueLastMonth()],
+      ['Đơn hàng', this.totalOrders(), this.ordersThisMonth(), this.ordersLastMonth()],
+      ['Khách hàng', this.totalUsers(), this.usersThisMonth(), this.usersLastMonth()],
+      ['Sản phẩm', this.totalProducts(), '', ''],
+      ['Giá trị TB đơn hàng (đ)', this.getAvgOrderValue(), '', ''],
+      ['Đơn chờ xử lý', this.getPendingOrders(), '', ''],
+      [],
+      ['Mục tiêu tháng (đ)', this.getRevenueTarget()],
+      ['Tiến độ (%)', this.getRevenueProgress()],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(overview);
+    ws1['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Tổng quan');
+
+    // Sheet 2: Doanh thu theo tuần/tháng
+    const chartLabel = this.chartMode() === 'weekly' ? 'Tuần' : 'Tháng';
+    const revenueRows = this.revenueChartLabels.map((label, i) => [
+      label,
+      this.revenueChartRevenue[i] || 0,
+      this.revenueChartOrders[i] || 0,
+      this.revenueChartCustomers[i] || 0,
+    ]);
+    const ws2 = XLSX.utils.aoa_to_sheet([
+      [chartLabel, 'Doanh thu (đ)', 'Đơn hàng', 'Khách hàng mới'],
+      ...revenueRows,
+    ]);
+    ws2['!cols'] = [{ wch: 15 }, { wch: 18 }, { wch: 12 }, { wch: 16 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Doanh thu');
+
+    // Sheet 3: Sản phẩm bán chạy
+    const topRows = this.topProducts().map((p, i) => [
+      i + 1, p._id, p.totalQty, this.getTopProductPercent(p.totalQty) + '%',
+    ]);
+    const ws3 = XLSX.utils.aoa_to_sheet([
+      ['#', 'Sản phẩm', 'Số lượng bán', 'Tỷ lệ'],
+      ...topRows,
+    ]);
+    ws3['!cols'] = [{ wch: 5 }, { wch: 40 }, { wch: 14 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Sản phẩm bán chạy');
+
+    // Sheet 4: Trạng thái đơn hàng
+    const statusRows = ORDER_STATUS_KEYS.map(k => [
+      ORDER_STATUS_LABELS[k], this.ordersByStatus()[k] || 0,
+    ]);
+    const ws4 = XLSX.utils.aoa_to_sheet([
+      ['Trạng thái', 'Số lượng'],
+      ...statusRows,
+    ]);
+    ws4['!cols'] = [{ wch: 20 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws4, 'Trạng thái đơn hàng');
+
+    // Sheet 5: Đơn hàng gần đây
+    const orderRows = this.recentOrders().map(o => [
+      o.orderNumber,
+      this.getCustomerName(o),
+      o.total,
+      this.getStatusLabel(o.status),
+      o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '',
+    ]);
+    const ws5 = XLSX.utils.aoa_to_sheet([
+      ['Mã đơn', 'Khách hàng', 'Tổng (đ)', 'Trạng thái', 'Ngày'],
+      ...orderRows,
+    ]);
+    ws5['!cols'] = [{ wch: 12 }, { wch: 25 }, { wch: 18 }, { wch: 16 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws5, 'Đơn hàng gần đây');
+
+    const dateStr = this.today.toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `AuraPC_Dashboard_${dateStr}.xlsx`);
   }
 
   getPercentChange(current: number, previous: number): number {

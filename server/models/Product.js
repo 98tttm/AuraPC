@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema(
     stock: { type: Number, default: 0 },
     featured: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
+    warrantyMonths: { type: Number, default: 24 },
   },
   { timestamps: true, strict: false }
 );

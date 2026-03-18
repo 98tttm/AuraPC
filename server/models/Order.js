@@ -5,6 +5,7 @@ const orderItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   qty: { type: Number, required: true, min: 1 },
+  serialNumber: { type: String, default: null },
 });
 
 const requestStateSchema = new mongoose.Schema(
@@ -58,6 +59,7 @@ const orderSchema = new mongoose.Schema(
     },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date, default: null },
+    zaloPayTransId: { type: String, default: null },
     shippedAt: { type: Date, default: null },
     deliveredAt: { type: Date, default: null },
     cancelledAt: { type: Date, default: null },
@@ -72,5 +74,6 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ 'cancelRequest.status': 1 });
 orderSchema.index({ 'returnRequest.status': 1 });
+orderSchema.index({ 'items.serialNumber': 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

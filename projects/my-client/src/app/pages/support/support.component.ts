@@ -27,10 +27,12 @@ export class SupportComponent implements OnInit {
   expandedFaqId = signal<string | null>(null);
   /** Mã đơn nhập tại trang Hỗ trợ — khi bấm Tra cứu sẽ chuyển sang trang tra-cuu-don-hang và truyền mã này */
   orderNumber = signal('');
+  warrantyQuery = signal('');
 
   readonly serviceLinks: SupportServiceLink[] = [
     { label: 'Chính sách bảo hành', route: '/ve-aurapc/chinh-sach-doi-tra' },
     { label: 'Tra cứu đơn hàng', route: '/tra-cuu-don-hang' },
+    { label: 'Tra cứu bảo hành', route: '/tra-cuu-bao-hanh' },
     { label: 'Đổi trả / Hoàn tiền', route: '/ve-aurapc/chinh-sach-doi-tra' },
     { label: 'Chính sách giao hàng', route: '/ve-aurapc/chinh-sach-giao-hang' },
     { label: 'Chính sách thanh toán', route: '/ve-aurapc/chinh-sach-thanh-toan' },
@@ -66,6 +68,15 @@ export class SupportComponent implements OnInit {
 
   isExpanded(id: string): boolean {
     return this.expandedFaqId() === id;
+  }
+
+  goWarrantyLookup(): void {
+    const q = this.warrantyQuery().trim();
+    if (q) {
+      this.router.navigate(['/tra-cuu-bao-hanh'], { queryParams: { q } });
+    } else {
+      this.router.navigate(['/tra-cuu-bao-hanh']);
+    }
   }
 
   /** Chuyển sang trang tra cứu đơn hàng và truyền mã đơn (nếu có) để trang kia tự tra cứu */

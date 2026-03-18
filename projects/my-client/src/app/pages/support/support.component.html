@@ -70,7 +70,24 @@
       </button>
     </section>
 
-    <!-- Cột 3: Dịch vụ khách hàng -->
+    <!-- Cột 3: Tra cứu bảo hành -->
+    <section class="support-card">
+      <h3 class="support-card__title">Tra cứu bảo hành</h3>
+      <p class="support-track__hint">Nhập Serial Number (APC-...) hoặc mã đơn hàng để kiểm tra tình trạng bảo hành sản phẩm.</p>
+      <input
+        type="text"
+        class="support-track__input"
+        placeholder="Serial Number hoặc mã đơn hàng"
+        [ngModel]="warrantyQuery()"
+        (ngModelChange)="warrantyQuery.set($event)"
+        (keydown.enter)="goWarrantyLookup()"
+      />
+      <button type="button" class="support-track__btn" (click)="goWarrantyLookup()">
+        Tra cứu bảo hành
+      </button>
+    </section>
+
+    <!-- Cột 4: Dịch vụ khách hàng -->
     <section class="support-card">
       <h3 class="support-card__title">Dịch vụ khách hàng</h3>
       <ul class="support-service-list">

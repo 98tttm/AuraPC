@@ -505,6 +505,19 @@
     text-align: center;
 }
 
+.checkout-dedup-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #FF6D2D;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.checkout-dedup-link:hover {
+    color: #e55a1b;
+}
+
 /* =========================================
    ADDRESS CARD & MODAL STYLES
    ========================================= */
