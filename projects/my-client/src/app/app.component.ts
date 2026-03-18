@@ -36,8 +36,10 @@ import { ToastService } from './core/services/toast.service';
           </svg>
         </button>
       }
-      <app-support-chat-widget></app-support-chat-widget>
-      <app-chatbot-widget></app-chatbot-widget>
+      @if (!hideFooter()) {
+        <app-support-chat-widget></app-support-chat-widget>
+        <app-chatbot-widget></app-chatbot-widget>
+      }
     </div>
   `,
   styles: [`

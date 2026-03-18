@@ -8,6 +8,8 @@ const { requireAuth } = require('../middleware/auth');
 const momoUtils = require('../utils/momo');
 const zalopayUtils = require('../utils/zalopay');
 const { createAdminNotification } = require('../utils/adminNotifications');
+const { buildInvoicePdf } = require('../utils/invoicePdf');
+const { getEmailTransporter } = require('../utils/email');
 
 // ── Pending Payments Store ──────────────────────────────────────────
 // Order is NOT created until payment is confirmed (callback/IPN/redirect).
@@ -211,7 +213,57 @@ async function createOrderFromPending(pendingData, { isPaid = true } = {}) {
         zaloPayTransId: pendingData.zaloPayTransId || null,
     });
     await order.save();
+
+    // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
+    if (pendingData.requestInvoice && pendingData.invoiceEmail) {
+        sendInvoiceEmail(order.toObject ? order.toObject() : order, pendingData.invoiceEmail, pendingData.invoiceType).catch(() => {});
+    }
+
     return order;
+}
+
+/**
+ * Gửi hóa đơn điện tử qua email (fire-and-forget, không block flow chính)
+ */
+async function sendInvoiceEmail(order, emailTo, invoiceType = 'personal') {
+    const transporter = getEmailTransporter();
+    if (!transporter) return;
+    const fromEmail = process.env.EMAIL_USER || process.env.GMAIL_USER;
+    const pdfBuffer = await buildInvoicePdf(order, invoiceType === 'company' ? 'company' : 'personal');
+    await transporter.sendMail({
+        from: `"AuraPC" <${fromEmail}>`,
+        to: emailTo.trim(),
+        subject: `Hóa đơn điện tử đơn hàng #${order.orderNumber} - AuraPC`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5;color:#333;">
+  <div style="max-width:600px;margin:0 auto;background:#fff;">
+    <div style="padding:24px;background:#1a1a2e;text-align:center;">
+      <span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#fff;">AURA</span><span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#f97316;">PC</span>
+    </div>
+    <div style="padding:24px;">
+      <h2 style="margin:0 0 8px;font-size:1.1rem;color:#1a1a2e;">Cảm ơn bạn đã mua hàng tại AuraPC!</h2>
+      <p style="color:#666;font-size:0.9rem;">Đơn hàng <strong>#${order.orderNumber}</strong> đã được xác nhận thanh toán.</p>
+      <p style="color:#666;font-size:0.9rem;">Hóa đơn điện tử được đính kèm trong email này dưới dạng file PDF.</p>
+      <div style="margin:20px 0;padding:16px;background:#f8f9fa;border-radius:8px;">
+        <p style="margin:0 0 4px;font-size:0.85rem;color:#666;">Tổng thanh toán:</p>
+        <p style="margin:0;font-size:1.25rem;font-weight:700;color:#f97316;">${Number(order.total).toLocaleString('vi-VN')}đ</p>
+      </div>
+      <p style="color:#999;font-size:0.8rem;">Nếu bạn có thắc mắc, vui lòng liên hệ bộ phận hỗ trợ AuraPC.</p>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #eee;text-align:center;">
+      <p style="margin:0;font-size:0.8rem;color:#999;">AuraPC — Gaming PC & Linh kiện chính hãng</p>
+    </div>
+  </div>
+</body>
+</html>`,
+        attachments: [{
+            filename: `HoaDon_${order.orderNumber}.pdf`,
+            content: pdfBuffer,
+        }],
+    });
 }
 
 // ── MoMo ────────────────────────────────────────────────────────────
@@ -224,7 +276,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
 
     try {
         const userId = req.userId;
-        const { items, shippingAddress, directDiscount } = req.body;
+        const { items, shippingAddress, directDiscount, requestInvoice, invoiceEmail, invoiceType } = req.body;
 
         if (!['momo', 'atm'].includes(paymentMethod)) {
             return res.status(400).json({ success: false, message: 'Invalid payment method' });
@@ -286,6 +338,9 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             discountAmount,
             shippingAddress,
             paymentMethod,
+            requestInvoice: !!requestInvoice,
+            invoiceEmail: invoiceEmail || '',
+            invoiceType: invoiceType || 'personal',
         };
 
         const requestId = `${orderNumber}_${Date.now()}`;
@@ -465,7 +520,7 @@ router.get('/momo/confirm', requireAuth, async (req, res) => {
 router.post('/zalopay/create', requireAuth, async (req, res) => {
     try {
         const userId = req.userId;
-        const { items, shippingAddress, directDiscount } = req.body;
+        const { items, shippingAddress, directDiscount, requestInvoice, invoiceEmail, invoiceType } = req.body;
 
         if (!items || !items.length) {
             return res.status(400).json({ success: false, message: 'Cart items required' });
@@ -537,6 +592,9 @@ router.post('/zalopay/create', requireAuth, async (req, res) => {
             shippingAddress,
             paymentMethod: 'zalopay',
             zaloPayTransId: zaloPayload.app_trans_id,
+            requestInvoice: !!requestInvoice,
+            invoiceEmail: invoiceEmail || '',
+            invoiceType: invoiceType || 'personal',
         });
 
         return res.json({

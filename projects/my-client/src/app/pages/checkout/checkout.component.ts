@@ -434,6 +434,7 @@ export class CheckoutComponent implements OnInit {
         items: payload.items,
         shippingAddress: payload.shippingAddress,
         directDiscount: this.directDiscount(),
+        ...(payload.requestInvoice && payload.invoiceEmail ? { requestInvoice: true, invoiceEmail: payload.invoiceEmail, invoiceType: payload.invoiceType } : {}),
       }).subscribe({
         next: (res) => {
           if (res.orderUrl) {
@@ -462,6 +463,7 @@ export class CheckoutComponent implements OnInit {
         shippingAddress: payload.shippingAddress,
         paymentMethod: this.paymentMethod,
         directDiscount: this.directDiscount(),
+        ...(payload.requestInvoice && payload.invoiceEmail ? { requestInvoice: true, invoiceEmail: payload.invoiceEmail, invoiceType: payload.invoiceType } : {}),
       }).subscribe({
         next: (res) => {
           if (res.payUrl) {
