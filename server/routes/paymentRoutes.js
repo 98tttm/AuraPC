@@ -57,7 +57,12 @@ function generateOrderNumber(prefix = 'MOMO') {
 }
 
 function buildMockPayUrl(orderNumber, paymentMethod) {
-    const url = new URL(momoUtils.config.redirectUrl);
+    // Prefer FRONTEND_URL for mock mode (redirectUrl may still be localhost)
+    let baseRedirect = momoUtils.config.redirectUrl;
+    if (baseRedirect.includes('localhost') && process.env.FRONTEND_URL) {
+        baseRedirect = `${process.env.FRONTEND_URL.replace(/\/$/, '')}/checkout-momo-return`;
+    }
+    const url = new URL(baseRedirect);
     const message = paymentMethod === 'atm'
         ? 'Thanh toán ATM MoMo giả lập thành công.'
         : 'Thanh toán MoMo giả lập thành công.';

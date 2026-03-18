@@ -302,14 +302,18 @@ router.post('/', optionalAuth, async (req, res) => {
     const userIdNew = order.user && order.user.toString ? order.user.toString() : order.user;
     emitOrderUpdated({ orderNumber: order.orderNumber, status: 'pending', userId: userIdNew || undefined });
 
-    // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
+    // Trả response ngay — không chờ email
+    res.status(201).json(order);
+
+    // Gửi hóa đơn điện tử qua email (fire-and-forget, không block response)
     const shouldSendInvoice = requestInvoice && invoiceEmail && typeof invoiceEmail === 'string' && invoiceEmail.trim().includes('@');
     if (shouldSendInvoice) {
       const emailTo = invoiceEmail.trim();
-      try {
-        const pdfBuffer = await buildInvoicePdf(order.toObject ? order.toObject() : order, invoiceType === 'company' ? 'company' : 'personal');
-        const transporter = getEmailTransporter();
-        if (transporter) {
+      (async () => {
+        try {
+          const pdfBuffer = await buildInvoicePdf(order.toObject ? order.toObject() : order, invoiceType === 'company' ? 'company' : 'personal');
+          const transporter = getEmailTransporter();
+          if (!transporter) return;
           const fromEmail = process.env.EMAIL_USER || process.env.GMAIL_USER;
           await transporter.sendMail({
             from: `"AuraPC" <${fromEmail}>`,
@@ -319,40 +323,37 @@ router.post('/', optionalAuth, async (req, res) => {
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#333;">
-  <div style="max-width:600px;margin:0 auto;background:#fff;padding:24px;">
-    <h1 style="margin:0 0 8px;font-size:1.25rem;">Cảm ơn bạn đã mua hàng tại AuraPC!</h1>
-    <p style="margin:0 0 16px;color:#666;">Xin chào ${(order.shippingAddress && order.shippingAddress.fullName) ? order.shippingAddress.fullName : 'bạn'},</p>
-    <p style="margin:0 0 16px;">Đơn hàng của bạn đã được xác nhận thành công.</p>
-    <div style="background:#f9f9f9;padding:16px;border-radius:8px;margin:16px 0;">
-      <p style="margin:0 0 8px;"><strong>Thông tin đơn hàng:</strong></p>
-      <p style="margin:0 0 4px;">Mã đơn: <strong>#${order.orderNumber}</strong></p>
-      <p style="margin:0 0 4px;">Tổng tiền: <strong>${Number(order.total).toLocaleString('vi-VN')}₫</strong></p>
-      <p style="margin:0;">Hóa đơn điện tử của bạn được đính kèm trong email này (file PDF).</p>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5;color:#333;">
+  <div style="max-width:600px;margin:0 auto;background:#fff;">
+    <div style="padding:24px;background:#1a1a2e;text-align:center;">
+      <span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#fff;">AURA</span><span style="font-size:1.4rem;font-weight:800;letter-spacing:3px;color:#f97316;">PC</span>
     </div>
-    <p style="margin:24px 0 0;font-size:0.9rem;color:#888;">Trân trọng.<br><strong>AuraPC</strong></p>
+    <div style="padding:24px;">
+      <h2 style="margin:0 0 8px;font-size:1.1rem;color:#1a1a2e;">Cảm ơn bạn đã mua hàng tại AuraPC!</h2>
+      <p style="color:#666;font-size:0.9rem;">Đơn hàng <strong>#${order.orderNumber}</strong> đã được xác nhận.</p>
+      <p style="color:#666;font-size:0.9rem;">Hóa đơn điện tử được đính kèm trong email này dưới dạng file PDF.</p>
+      <div style="margin:20px 0;padding:16px;background:#f8f9fa;border-radius:8px;">
+        <p style="margin:0 0 4px;font-size:0.85rem;color:#666;">Tổng thanh toán:</p>
+        <p style="margin:0;font-size:1.25rem;font-weight:700;color:#f97316;">${Number(order.total).toLocaleString('vi-VN')}đ</p>
+      </div>
+      <p style="color:#999;font-size:0.8rem;">Nếu bạn có thắc mắc, vui lòng liên hệ bộ phận hỗ trợ AuraPC.</p>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #eee;text-align:center;">
+      <p style="margin:0;font-size:0.8rem;color:#999;">AuraPC — Gaming PC & Linh kiện chính hãng</p>
+    </div>
   </div>
 </body>
-</html>
-            `,
-            attachments: [
-              {
-                filename: `HoaDon_${order.orderNumber}.pdf`,
-                content: pdfBuffer,
-              },
-            ],
+</html>`,
+            attachments: [{
+              filename: `HoaDon_${order.orderNumber}.pdf`,
+              content: pdfBuffer,
+            }],
           });
-          console.log(`[Orders] Đã gửi hóa đơn PDF đến ${emailTo} cho đơn ${order.orderNumber}`);
-        } else {
-          console.warn('[Orders] Chưa cấu hình SMTP (EMAIL_USER/EMAIL_PASS). Không gửi được hóa đơn qua email.');
+        } catch (emailErr) {
+          console.error('[Orders] Lỗi gửi email hóa đơn:', emailErr.message);
         }
-      } catch (emailErr) {
-        console.error('[Orders] Lỗi gửi email hóa đơn:', emailErr.message);
-        // Không trả lỗi về client - đơn đã tạo thành công, chỉ gửi email thất bại
-      }
+      })();
     }
-
-    res.status(201).json(order);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
