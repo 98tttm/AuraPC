@@ -7,13 +7,13 @@ import { environment } from '../../../environments/environment';
 const API_BASE = environment.apiUrl || 'http://localhost:3000/api';
 
 @Component({
-  selector: 'app-checkout-momo-return',
+  selector: 'app-checkout-zalopay-return',
   standalone: true,
   imports: [],
-  templateUrl: './checkout-momo-return.component.html',
-  styleUrls: ['./checkout-momo-return.component.css'],
+  templateUrl: './checkout-zalopay-return.component.html',
+  styleUrls: ['./checkout-zalopay-return.component.css'],
 })
-export class CheckoutMomoReturnComponent implements OnInit {
+export class CheckoutZalopayReturnComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -25,27 +25,33 @@ export class CheckoutMomoReturnComponent implements OnInit {
   orderNumber = '';
 
   ngOnInit(): void {
-    const resultCode = this.route.snapshot.queryParamMap.get('resultCode');
-    const orderId = this.route.snapshot.queryParamMap.get('orderId') ?? '';
-    const msg = this.route.snapshot.queryParamMap.get('message');
+    const params = this.route.snapshot.queryParamMap;
+    const status = params.get('status');
+    const appTransId = params.get('apptransid') || '';
 
-    this.orderNumber = orderId;
+    // Extract orderNumber from app_trans_id (format: yymmdd_ORDERNUM)
+    if (appTransId) {
+      this.orderNumber = appTransId.split('_').slice(1).join('_');
+    }
 
-    if (resultCode !== '0') {
+    // ZaloPay status: 1 = success, -49 = user cancelled, other = failed
+    if (status !== '1') {
       this.isSuccess = false;
       this.loading = false;
-      this.message = msg || 'Thanh toán thất bại hoặc đã bị hủy.';
+      this.message = status === '-49'
+        ? 'Bạn đã hủy giao dịch ZaloPay.'
+        : 'Thanh toán thất bại hoặc đã bị hủy.';
       return;
     }
 
     // Call backend to confirm payment and create the order
-    this.http.get<{ success: boolean; orderNumber: string }>(`${API_BASE}/payment/momo/confirm`, {
-      params: { orderId, resultCode: resultCode! },
+    this.http.get<{ success: boolean; orderNumber: string }>(`${API_BASE}/payment/zalopay/confirm`, {
+      params: { apptransid: appTransId, status: status! },
     }).subscribe({
       next: (res) => {
         this.isSuccess = true;
-        this.orderNumber = res.orderNumber || orderId;
-        this.message = 'Thanh toán MoMo thành công!';
+        this.orderNumber = res.orderNumber || this.orderNumber;
+        this.message = 'Thanh toán ZaloPay thành công!';
         this.loading = false;
         this.cart.clear();
         try { sessionStorage.removeItem('aurapc_checkout_payment_method'); } catch { }

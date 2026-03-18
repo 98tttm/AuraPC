@@ -72,6 +72,7 @@ export class CheckoutComponent implements OnInit {
 
   submitting = signal(false);
   errorMessage = signal<string | null>(null);
+  dedupedOrderNumber = signal<string | null>(null);
 
   // Voucher from cart page
   appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number } | null>(null);
@@ -354,6 +355,7 @@ export class CheckoutComponent implements OnInit {
 
   submitOrder() {
     this.errorMessage.set(null);
+    this.dedupedOrderNumber.set(null);
 
     // Guest Info check
     if (!this.fullName.trim() || !this.phone.trim()) {
@@ -405,24 +407,49 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    // QR / ZaloPay: không tạo đơn ngay — lưu payload + summary, chuyển sang trang thanh toán tương ứng.
-    if (this.paymentMethod === 'qr' || this.paymentMethod === 'zalopay') {
+    // QR: lưu payload vào sessionStorage, chuyển sang trang thanh toán QR thủ công.
+    if (this.paymentMethod === 'qr') {
       const payload = this.buildOrderPayload();
       const summary = {
         originalTotal: this.originalTotal(),
         directDiscount: this.directDiscount(),
         amount: this.selectedTotal(),
       };
-      const storageKey = this.paymentMethod === 'qr' ? 'aurapc_qr_pending' : 'aurapc_zalopay_pending';
-      const route = this.paymentMethod === 'qr' ? '/checkout-qr-payment' : '/checkout-zalopay-payment';
       try {
-        sessionStorage.setItem(storageKey, JSON.stringify({ ...payload, ...summary }));
+        sessionStorage.setItem('aurapc_qr_pending', JSON.stringify({ ...payload, ...summary }));
         sessionStorage.setItem('aurapc_checkout_payment_method', this.paymentMethod);
       } catch (e) {
         this.errorMessage.set('Không thể lưu thông tin. Vui lòng thử lại.');
         return;
       }
-      this.router.navigate([route], { queryParams: { amount: this.selectedTotal() } });
+      this.router.navigate(['/checkout-qr-payment'], { queryParams: { amount: this.selectedTotal() } });
+      return;
+    }
+
+    // ZaloPay: Khởi tạo thanh toán với server và redirect tới cổng ZaloPay
+    if (this.paymentMethod === 'zalopay') {
+      this.submitting.set(true);
+      const payload = this.buildOrderPayload();
+      this.api.createZaloPayPayment({
+        items: payload.items,
+        shippingAddress: payload.shippingAddress,
+        directDiscount: this.directDiscount(),
+      }).subscribe({
+        next: (res) => {
+          if (res.orderUrl) {
+            // Redirect user to ZaloPay gateway
+            window.location.href = res.orderUrl;
+          } else {
+            this.submitting.set(false);
+            this.errorMessage.set('Không nhận được URL thanh toán từ ZaloPay.');
+          }
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          if (err?.error?.orderNumber) this.dedupedOrderNumber.set(err.error.orderNumber);
+          this.errorMessage.set(err?.error?.message || 'Lỗi khi khởi tạo thanh toán ZaloPay.');
+        }
+      });
       return;
     }
 
@@ -447,6 +474,7 @@ export class CheckoutComponent implements OnInit {
         },
         error: (err) => {
           this.submitting.set(false);
+          if (err?.error?.orderNumber) this.dedupedOrderNumber.set(err.error.orderNumber);
           this.errorMessage.set(err?.error?.message || 'Lỗi khi khởi tạo thanh toán MoMo.');
         }
       });

@@ -107,6 +107,25 @@ export interface OrderListItem {
 /** Kết quả tra cứu đơn (GET /api/orders/track/:orderNumber) - đầy đủ thông tin */
 export type TrackOrderResult = Omit<OrderListItem, 'user'>;
 
+export interface WarrantyItem {
+  serialNumber: string | null;
+  productName: string;
+  productSlug: string | null;
+  productImage: string;
+  qty: number;
+  price: number;
+  warrantyMonths: number;
+  purchaseDate: string | null;
+  expiryDate: string | null;
+  status: 'valid' | 'expired' | 'unknown';
+}
+
+export interface WarrantyLookupResult {
+  orderNumber: string;
+  deliveredAt: string;
+  items: WarrantyItem[];
+}
+
 export interface ProductsResponse {
   items: Product[];
   total: number;
@@ -354,6 +373,15 @@ export class ApiService {
     return this.http.post<{ success: boolean; payUrl: string }>(`${BASE}/payment/momo/create`, payload);
   }
 
+  /** Gửi yêu cầu thanh toán ZaloPay */
+  createZaloPayPayment(payload: {
+    items: { product: string; name: string; price: number; qty: number }[];
+    shippingAddress: Record<string, string>;
+    directDiscount?: number;
+  }): Observable<{ success: boolean; orderUrl: string; orderNumber: string; appTransId: string }> {
+    return this.http.post<{ success: boolean; orderUrl: string; orderNumber: string; appTransId: string }>(`${BASE}/payment/zalopay/create`, payload);
+  }
+
   validatePromotion(code: string, orderAmount: number): Observable<{
     valid: boolean;
     message?: string;
@@ -414,6 +442,14 @@ export class ApiService {
   trackOrder(orderNumber: string): Observable<Omit<OrderListItem, 'user'>> {
     const num = orderNumber.trim().replace(/^ORD\-/i, '').toUpperCase();
     return this.http.get<Omit<OrderListItem, 'user'>>(`${BASE}/orders/track/${encodeURIComponent(num)}`);
+  }
+
+  /** Tra cứu bảo hành theo Serial Number hoặc mã đơn hàng */
+  lookupWarranty(query: string): Observable<WarrantyLookupResult> {
+    const q = query.trim().toUpperCase();
+    return this.http.get<WarrantyLookupResult>(`${BASE}/warranty/lookup`, {
+      params: new HttpParams().set('q', q),
+    });
   }
 
   requestOrderCancellation(orderNumber: string, reason?: string): Observable<OrderListItem> {

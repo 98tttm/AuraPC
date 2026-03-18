@@ -33,6 +33,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/checkout-zalopay-payment').then((m) => m.CheckoutZalopayPaymentComponent),
   },
   {
+    path: 'checkout-zalopay-return',
+    loadComponent: () => import('./pages/checkout-zalopay-return/checkout-zalopay-return.component').then((m) => m.CheckoutZalopayReturnComponent),
+  },
+  {
     path: 'checkout-atm-payment',
     loadComponent: () => import('./pages/checkout-atm-payment').then((m) => m.CheckoutAtmPaymentComponent),
   },
@@ -88,6 +92,11 @@ export const routes: Routes = [
     path: 'tra-cuu-don-hang',
     loadComponent: () =>
       import('./pages/track-order/track-order.component').then((m) => m.TrackOrderComponent),
+  },
+  {
+    path: 'tra-cuu-bao-hanh',
+    loadComponent: () =>
+      import('./pages/warranty-lookup/warranty-lookup.component').then((m) => m.WarrantyLookupComponent),
   },
   { path: '**', redirectTo: '' },
 ];

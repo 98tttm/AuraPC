@@ -1,0 +1,84 @@
+<div class="warranty-page">
+  <nav class="warranty-breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span class="warranty-breadcrumb__sep">/</span>
+    <a routerLink="/ho-tro">Hỗ trợ</a>
+    <span class="warranty-breadcrumb__sep">/</span>
+    <span class="warranty-breadcrumb__current">Tra cứu bảo hành</span>
+  </nav>
+
+  <div class="warranty-search">
+    <div class="warranty-search__box">
+      <svg class="warranty-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M9 12l2 2 4-4"/>
+        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+      </svg>
+      <input
+        type="text"
+        class="warranty-search__input"
+        placeholder="Nhập Serial Number (APC-...) hoặc mã đơn hàng"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        (keydown.enter)="lookup()"
+      />
+      <button
+        type="button"
+        class="warranty-search__btn"
+        [disabled]="loading() || !query().trim()"
+        (click)="lookup()"
+      >
+        {{ loading() ? 'Đang tra...' : 'Tra cứu' }}
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="warranty-error">{{ error() }}</p>
+  }
+
+  @if (result(); as data) {
+    <div class="warranty-result">
+      <h2 class="warranty-result__title">Thông tin bảo hành — Đơn #{{ data.orderNumber }}</h2>
+      <p class="warranty-result__date">Ngày giao hàng: {{ formatDate(data.deliveredAt) }}</p>
+
+      @if (data.items.length === 0) {
+        <p class="warranty-empty">Không có sản phẩm nào trong đơn hàng này.</p>
+      } @else {
+        <ul class="warranty-items">
+          @for (item of data.items; track $index) {
+            <li class="warranty-item">
+              <div class="warranty-item__img-wrap">
+                @if (item.productImage) {
+                  <img [src]="item.productImage" [alt]="item.productName" class="warranty-item__img" />
+                } @else {
+                  <div class="warranty-item__img warranty-item__img--placeholder">—</div>
+                }
+              </div>
+              <div class="warranty-item__info">
+                @if (item.productSlug) {
+                  <a [routerLink]="['/san-pham', item.productSlug]" class="warranty-item__link">{{ item.productName }}</a>
+                } @else {
+                  <span class="warranty-item__name">{{ item.productName }}</span>
+                }
+                @if (item.serialNumber) {
+                  <span class="warranty-item__serial">S/N: {{ item.serialNumber }}</span>
+                }
+                <span class="warranty-item__warranty-info">
+                  Bảo hành: {{ item.warrantyMonths }} tháng
+                  · Hạn đến: {{ formatDate(item.expiryDate) }}
+                </span>
+              </div>
+              <span
+                class="warranty-item__status"
+                [class.warranty-item__status--valid]="item.status === 'valid'"
+                [class.warranty-item__status--expired]="item.status === 'expired'"
+              >
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

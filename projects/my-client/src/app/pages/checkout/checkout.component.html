@@ -318,6 +318,11 @@
                     @if (errorMessage()) {
                     <div class="checkout-submit-error">
                         {{ errorMessage() }}
+                        @if (dedupedOrderNumber()) {
+                          <a [routerLink]="['/tra-cuu-don-hang']" [queryParams]="{ order: dedupedOrderNumber() }" class="checkout-dedup-link">
+                            Xem đơn hàng #{{ dedupedOrderNumber() }}
+                          </a>
+                        }
                     </div>
                     }
 
