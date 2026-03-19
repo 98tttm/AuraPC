@@ -13,13 +13,19 @@ const LEGACY_SAMPLE_CONFIG = Object.freeze({
     secretKey: 'at67qH6mk8g5HI1JT10ZKd9T7k9m2g3P',
 });
 
+// Smart fallback: use FRONTEND_URL / PORT to avoid hardcoded localhost in production
+const frontendBase = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+const backendPort = process.env.PORT || 3000;
+const backendBase = process.env.RENDER_EXTERNAL_URL
+    || (process.env.NODE_ENV === 'production' ? frontendBase.replace(/\/+$/, '').replace('client', 'backend') : `http://localhost:${backendPort}`);
+
 const config = {
     partnerCode: env('MOMO_PARTNER_CODE', ''),
     accessKey: env('MOMO_ACCESS_KEY', ''),
     secretKey: env('MOMO_SECRET_KEY', ''),
     endpoint: env('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create'),
-    redirectUrl: env('MOMO_REDIRECT_URL', 'http://localhost:4200/checkout-momo-return'),
-    ipnUrl: env('MOMO_IPN_URL', 'http://localhost:3000/api/payment/momo/ipn'),
+    redirectUrl: env('MOMO_REDIRECT_URL', `${frontendBase}/checkout-momo-return`),
+    ipnUrl: env('MOMO_IPN_URL', `${backendBase}/api/payment/momo/ipn`),
     partnerName: env('MOMO_PARTNER_NAME', ''),
     storeId: env('MOMO_STORE_ID', ''),
     mockMode: ['1', 'true', 'yes', 'on'].includes(env('MOMO_MOCK_MODE', 'false').toLowerCase()),

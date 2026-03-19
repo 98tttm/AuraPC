@@ -221,7 +221,8 @@ async function createOrderFromPending(pendingData, { isPaid = true } = {}) {
 
     // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
     if (pendingData.requestInvoice && pendingData.invoiceEmail) {
-        sendInvoiceEmail(order.toObject ? order.toObject() : order, pendingData.invoiceEmail, pendingData.invoiceType).catch(() => {});
+        sendInvoiceEmail(order.toObject ? order.toObject() : order, pendingData.invoiceEmail, pendingData.invoiceType)
+            .catch(err => console.error(`[Email] Gửi hóa đơn thất bại cho đơn #${order.orderNumber}:`, err.message));
     }
 
     return order;

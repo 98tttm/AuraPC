@@ -70,6 +70,12 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.layoutService.toggleSidebar();
   }
 
+  closeSidebarOnMobile(): void {
+    if (window.innerWidth <= 1024 && this.sidebarCollapsed()) {
+      this.layoutService.toggleSidebar();
+    }
+  }
+
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }

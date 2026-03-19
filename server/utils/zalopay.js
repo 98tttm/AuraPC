@@ -7,14 +7,20 @@ function env(name, fallback) {
   return fallback;
 }
 
+// Smart fallback: use FRONTEND_URL / PORT to avoid hardcoded localhost in production
+const frontendBase = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+const backendPort = process.env.PORT || 3000;
+const backendBase = process.env.RENDER_EXTERNAL_URL
+  || (process.env.NODE_ENV === 'production' ? frontendBase.replace(/\/+$/, '').replace('client', 'backend') : `http://localhost:${backendPort}`);
+
 const config = {
   appId: env('ZALOPAY_APP_ID', '2554'),
   key1: env('ZALOPAY_KEY1', 'sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn'),
   key2: env('ZALOPAY_KEY2', 'trMrHtvjo6myautxDUiAcYsVtaeQ8nhf'),
   endpoint: env('ZALOPAY_ENDPOINT', 'https://sb-openapi.zalopay.vn/v2/create'),
   queryEndpoint: env('ZALOPAY_QUERY_ENDPOINT', 'https://sb-openapi.zalopay.vn/v2/query'),
-  callbackUrl: env('ZALOPAY_CALLBACK_URL', 'http://localhost:3000/api/payment/zalopay/callback'),
-  redirectUrl: env('ZALOPAY_REDIRECT_URL', 'http://localhost:4200/checkout-zalopay-return'),
+  callbackUrl: env('ZALOPAY_CALLBACK_URL', `${backendBase}/api/payment/zalopay/callback`),
+  redirectUrl: env('ZALOPAY_REDIRECT_URL', `${frontendBase}/checkout-zalopay-return`),
 };
 
 /**

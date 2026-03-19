@@ -484,16 +484,53 @@
   overflow: auto;
 }
 
+/* ── Backdrop (mobile only) ── */
+.sidebar-backdrop {
+  display: none;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-220px);
+    transform: translateX(-100%);
     width: 220px;
+    transition: transform 0.25s ease;
   }
 
   .layout--collapsed .sidebar {
     transform: translateX(0);
     width: 220px;
+  }
+
+  /* Override desktop collapsed styles — show full sidebar content on mobile */
+  .layout--collapsed .sidebar__logo-text,
+  .layout--collapsed .sidebar__link-text,
+  .layout--collapsed .sidebar__user-info {
+    opacity: 1;
+    width: auto;
+  }
+
+  .layout--collapsed .sidebar__header {
+    padding: 1.25rem 1.25rem 0;
+    justify-content: flex-start;
+  }
+
+  .layout--collapsed .sidebar__nav {
+    padding: 0 0.75rem;
+  }
+
+  .layout--collapsed .sidebar__link {
+    justify-content: flex-start;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .layout--collapsed .sidebar__footer {
+    padding: 1rem 0.75rem;
+  }
+
+  .layout--collapsed .sidebar__user {
+    justify-content: flex-start;
+    padding: 0.5rem;
   }
 
   .main-wrapper {
@@ -502,6 +539,15 @@
 
   .layout--collapsed .main-wrapper {
     margin-left: 0;
+  }
+
+  /* Backdrop overlay */
+  .layout--collapsed .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99;
   }
 }
 

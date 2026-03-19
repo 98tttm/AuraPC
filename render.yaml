@@ -10,7 +10,33 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
+      - key: JWT_SECRET
+        sync: false
       - key: FRONTEND_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: MOMO_PARTNER_CODE
+        sync: false
+      - key: MOMO_ACCESS_KEY
+        sync: false
+      - key: MOMO_SECRET_KEY
+        sync: false
+      - key: MOMO_REDIRECT_URL
+        sync: false
+      - key: MOMO_IPN_URL
+        sync: false
+      - key: MOMO_MOCK_MODE
+        sync: false
+      - key: ZALOPAY_CALLBACK_URL
+        sync: false
+      - key: ZALOPAY_REDIRECT_URL
+        sync: false
+      - key: REPLICATE_API_TOKEN
         sync: false
       - key: AURA_VISUAL_WEBHOOK_URL
         sync: false
