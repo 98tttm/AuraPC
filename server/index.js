@@ -52,6 +52,8 @@ const allowedOrigins = [
   'https://aura-pc-client.vercel.app',
   'https://aura-pc-admin.vercel.app',
   'https://aurapc-admin.vercel.app',
+  'https://www.aurapc.io.vn',
+  'https://aurapc.io.vn',
   'http://localhost:4200',
   'http://localhost:4201',
   'http://localhost:3000',
