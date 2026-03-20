@@ -66,10 +66,11 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (Math.max(1, parseInt(page, 10)) - 1) * parseInt(limit, 10);
+    const sortField = (status === 'delivered') ? { deliveredAt: -1 } : { createdAt: -1 };
     const [items, total] = await Promise.all([
       Order.find(filter)
         .populate('user', 'phoneNumber profile.fullName avatar')
-        .sort({ createdAt: -1 })
+        .sort(sortField)
         .skip(skip)
         .limit(parseInt(limit, 10))
         .lean(),

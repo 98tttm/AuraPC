@@ -116,8 +116,9 @@ router.get('/', requireAuth, async (req, res) => {
     const userObjectId = new mongoose.Types.ObjectId(userId);
     const q = { user: userObjectId };
     if (status && status !== 'all') q.status = status;
+    const sortField = (status === 'delivered') ? { deliveredAt: -1 } : { createdAt: -1 };
     const orders = await Order.find(q)
-      .sort({ createdAt: -1 })
+      .sort(sortField)
       .populate('items.product', 'name slug images')
       .lean();
     res.json(orders);

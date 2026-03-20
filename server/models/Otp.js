@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const otpSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, unique: true },
     code: { type: String, required: true },
+    attempts: { type: Number, default: 0 },
+    lockedUntil: { type: Date, default: null },
     createdAt: { type: Date, default: Date.now, expires: 300 }, // TTL 5 phút (300 giây)
 });
 

@@ -410,7 +410,13 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     const list = [...this.orders()];
     if (list.length <= 1) return list;
 
-    list.sort((a, b) => this.orderCreatedAtMs(b) - this.orderCreatedAtMs(a));
+    const tab = this.orderStatusTab();
+    list.sort((a, b) => {
+      if (tab === 'delivered') {
+        return this.orderDateMs(b, 'deliveredAt') - this.orderDateMs(a, 'deliveredAt');
+      }
+      return this.orderCreatedAtMs(b) - this.orderCreatedAtMs(a);
+    });
 
     const visible: OrderListItem[] = [];
     const groups = new Map<string, OrderListItem[]>();
@@ -1048,6 +1054,12 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   private orderCreatedAtMs(order: OrderListItem): number {
     const time = order.createdAt ? new Date(order.createdAt).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
+  }
+
+  private orderDateMs(order: OrderListItem, field: string): number {
+    const value = (order as any)[field];
+    const time = value ? new Date(value).getTime() : 0;
     return Number.isNaN(time) ? 0 : time;
   }
 

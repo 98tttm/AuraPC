@@ -72,6 +72,7 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ status: 1, deliveredAt: -1 });
 orderSchema.index({ 'cancelRequest.status': 1 });
 orderSchema.index({ 'returnRequest.status': 1 });
 orderSchema.index({ 'items.serialNumber': 1 });

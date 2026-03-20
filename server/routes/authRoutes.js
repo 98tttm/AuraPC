@@ -33,6 +33,9 @@ function generateOtp() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
+const OTP_MAX_ATTEMPTS = 3;
+const OTP_LOCK_DURATION_MS = 60 * 60 * 1000; // 1 giờ
+
 /** POST /api/auth/request-otp - Gửi OTP (log ra console). */
 router.post('/request-otp', async (req, res) => {
   try {
@@ -53,11 +56,23 @@ router.post('/request-otp', async (req, res) => {
       });
     }
     const stored = toStoredPhone(raw);
+
+    // Kiểm tra khóa tạm thời do nhập sai OTP quá nhiều lần
+    const existing = await Otp.findOne({ phoneNumber: stored });
+    if (existing?.lockedUntil && existing.lockedUntil > new Date()) {
+      const minutesLeft = Math.ceil((existing.lockedUntil - Date.now()) / 60000);
+      return res.status(429).json({
+        success: false,
+        error: 'OTP_LOCKED',
+        message: `Số điện thoại tạm khóa do nhập sai OTP quá ${OTP_MAX_ATTEMPTS} lần. Vui lòng thử lại sau ${minutesLeft} phút.`,
+      });
+    }
+
     const code = generateOtp();
-    // Lưu OTP vào MongoDB (upsert: nếu đã có SĐT thì cập nhật code mới)
+    // Lưu OTP vào MongoDB (upsert: nếu đã có SĐT thì cập nhật code mới, reset attempts)
     await Otp.findOneAndUpdate(
       { phoneNumber: stored },
-      { code, createdAt: new Date() },
+      { code, attempts: 0, lockedUntil: null, createdAt: new Date() },
       { upsert: true, new: true }
     );
     if (process.env.NODE_ENV !== 'production') {
@@ -96,8 +111,7 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     const stored = toStoredPhone(raw);
-    // Tìm và xóa OTP từ MongoDB (findOneAndDelete: lấy + xóa atomic)
-    const record = await Otp.findOneAndDelete({ phoneNumber: stored });
+    const record = await Otp.findOne({ phoneNumber: stored });
     if (!record) {
       return res.status(400).json({
         success: false,
@@ -105,15 +119,43 @@ router.post('/verify-otp', async (req, res) => {
         message: 'Mã xác thực không chính xác hoặc đã hết hạn. Vui lòng thử lại.',
       });
     }
+
+    // Kiểm tra khóa tạm thời
+    if (record.lockedUntil && record.lockedUntil > new Date()) {
+      const minutesLeft = Math.ceil((record.lockedUntil - Date.now()) / 60000);
+      return res.status(429).json({
+        success: false,
+        error: 'OTP_LOCKED',
+        message: `Tài khoản tạm khóa do nhập sai OTP quá ${OTP_MAX_ATTEMPTS} lần. Vui lòng thử lại sau ${minutesLeft} phút.`,
+      });
+    }
+
     if (record.code !== code) {
-      // OTP sai — tạo lại record (vì đã xóa)
-      await Otp.create({ phoneNumber: stored, code: record.code });
+      // OTP sai — tăng số lần thử
+      const newAttempts = (record.attempts || 0) + 1;
+      const updateFields = { attempts: newAttempts };
+      if (newAttempts >= OTP_MAX_ATTEMPTS) {
+        updateFields.lockedUntil = new Date(Date.now() + OTP_LOCK_DURATION_MS);
+      }
+      await Otp.updateOne({ _id: record._id }, { $set: updateFields });
+
+      const remaining = OTP_MAX_ATTEMPTS - newAttempts;
+      if (remaining <= 0) {
+        return res.status(429).json({
+          success: false,
+          error: 'OTP_LOCKED',
+          message: `Nhập sai OTP quá ${OTP_MAX_ATTEMPTS} lần. Tài khoản tạm khóa 1 giờ.`,
+        });
+      }
       return res.status(400).json({
         success: false,
         error: 'OTP_INVALID',
-        message: 'Mã xác thực không chính xác. Vui lòng thử lại.',
+        message: `Mã xác thực không chính xác. Bạn còn ${remaining} lần thử.`,
       });
     }
+
+    // OTP đúng — xóa record
+    await Otp.deleteOne({ _id: record._id });
 
     const now = new Date();
     let user = await User.findOne({ phoneNumber: stored }).lean();
