@@ -257,6 +257,19 @@ export class CartComponent {
     }
   }
 
+  onQtyInput(event: Event, productId: string, item: CartItem): void {
+    if (!productId) return;
+    const stock = item.product.stock ?? 0;
+    let val = parseInt((event.target as HTMLInputElement).value, 10);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > stock) {
+      val = stock;
+      this.toast.showInfo(`Chỉ còn ${stock} sản phẩm trong kho`);
+    }
+    (event.target as HTMLInputElement).value = String(val);
+    this.cart.setQty(productId, val);
+  }
+
   // ---- Delete with confirmation popup ----
 
   requestDeleteSingle(productId: string) {

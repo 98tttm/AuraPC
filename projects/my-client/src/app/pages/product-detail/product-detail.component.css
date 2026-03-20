@@ -341,9 +341,21 @@
   text-align: center;
   font-size: 1rem;
   font-weight: 600;
+  border: none;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+  height: 36px;
   line-height: 36px;
+  outline: none;
+  background: #fff;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  padding: 0;
+}
+.pd-qty-val::-webkit-outer-spin-button,
+.pd-qty-val::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .pd-qty-stock {

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CheckoutStepperComponent } from '../../components/checkout-stepper/checkout-stepper.component';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-checkout-success',
@@ -11,7 +12,7 @@ import { CheckoutStepperComponent } from '../../components/checkout-stepper/chec
       <div class="container">
         <app-checkout-stepper [step]="4"></app-checkout-stepper>
         <div class="success-card">
-          <div class="success-icon">✓</div>
+          <div class="success-icon">&#10003;</div>
           <h1>Đặt hàng thành công!</h1>
           <p>Cảm ơn bạn đã đặt hàng tại AuraPC</p>
           @if (orderNumber) {
@@ -19,9 +20,22 @@ import { CheckoutStepperComponent } from '../../components/checkout-stepper/chec
           }
           <p class="success-note">Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận đơn hàng.</p>
           <div class="success-actions">
+            @if (orderNumber) {
+              <button type="button" class="btn btn--invoice" (click)="downloadInvoice()" [disabled]="downloading()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                {{ downloading() ? 'Đang tải...' : 'Tải hóa đơn PDF' }}
+              </button>
+            }
             <a routerLink="/" class="btn btn--primary">Về trang chủ</a>
             <a routerLink="/san-pham" class="btn btn--outline">Tiếp tục mua sắm</a>
           </div>
+          @if (invoiceError()) {
+            <p class="invoice-error">{{ invoiceError() }}</p>
+          }
         </div>
       </div>
     </section>
@@ -37,17 +51,45 @@ import { CheckoutStepperComponent } from '../../components/checkout-stepper/chec
     .order-number strong { color: #FF6D2D; }
     .success-note { font-size: 0.9rem; margin-top: 1rem; color: #666; }
     .success-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
-    .btn { display: inline-block; padding: 0.875rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; font-size: 0.95rem; }
     .btn--primary { background: #1a1a1a; color: #fff; }
     .btn--primary:hover { background: #333; transform: translateY(-1px); }
     .btn--outline { background: #fff; border: 1px solid #d9d9d9; color: #1a1a1a; }
     .btn--outline:hover { border-color: #FF6D2D; color: #FF6D2D; }
+    .btn--invoice { background: #FF6D2D; color: #fff; }
+    .btn--invoice:hover { background: #e55a1b; transform: translateY(-1px); }
+    .btn--invoice:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .invoice-error { color: #dc2626; font-size: 0.85rem; margin-top: 1rem; }
   `]
 })
 export class CheckoutSuccessComponent {
+  private api = inject(ApiService);
   orderNumber: string | null = null;
+  downloading = signal(false);
+  invoiceError = signal<string | null>(null);
 
   constructor(private route: ActivatedRoute) {
     this.orderNumber = this.route.snapshot.queryParamMap.get('order');
+  }
+
+  downloadInvoice(): void {
+    if (!this.orderNumber || this.downloading()) return;
+    this.downloading.set(true);
+    this.invoiceError.set(null);
+    this.api.downloadInvoice(this.orderNumber).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `HoaDon_${this.orderNumber}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloading.set(false);
+      },
+      error: () => {
+        this.invoiceError.set('Không thể tải hóa đơn. Vui lòng thử lại sau.');
+        this.downloading.set(false);
+      },
+    });
   }
 }

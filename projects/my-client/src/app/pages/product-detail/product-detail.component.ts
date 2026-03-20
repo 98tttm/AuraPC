@@ -593,6 +593,19 @@ export class ProductDetailComponent implements OnDestroy {
     }
   }
 
+  onQtyInput(event: Event): void {
+    const val = parseInt((event.target as HTMLInputElement).value, 10);
+    const stock = this.productStock();
+    if (isNaN(val) || val < 1) {
+      this.quantity.set(1);
+    } else if (val > stock) {
+      this.quantity.set(stock);
+    } else {
+      this.quantity.set(val);
+    }
+    (event.target as HTMLInputElement).value = String(this.quantity());
+  }
+
   /** Mua ngay: thêm vào giỏ + chuyển hướng tới trang giỏ hàng */
   buyNow(): void {
     const p = this.product();

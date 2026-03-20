@@ -59,7 +59,11 @@
           </div>
           <div class="summary-row">
             <span class="summary-label">Phí vận chuyển</span>
+            @if (shippingFee <= 0) {
             <span class="summary-val summary-val--free">Miễn phí</span>
+            } @else {
+            <span class="summary-val">{{ formatPrice(shippingFee) }}</span>
+            }
           </div>
 
           <div class="summary-divider"></div>
@@ -77,7 +81,7 @@
           </button>
 
           <p class="qr-terms">
-            Bằng việc bấm xác nhận, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> của AuraPC. Chúng tôi sẽ đối soát và xác nhận đơn hàng trong thời gian sớm nhất.
+            Bằng việc bấm xác nhận, bạn đồng ý với <a routerLink="/ve-aurapc/chinh-sach-bao-mat-du-lieu-ca-nhan">Điều khoản dịch vụ</a> của AuraPC. Chúng tôi sẽ đối soát và xác nhận đơn hàng trong thời gian sớm nhất.
           </p>
         </div>
       </div>

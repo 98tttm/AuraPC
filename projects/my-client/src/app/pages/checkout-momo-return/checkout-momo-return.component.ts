@@ -1,7 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CartService } from '../../core/services/cart.service';
+import { ApiService } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
 
 const API_BASE = environment.apiUrl || 'http://localhost:3000/api';
@@ -18,11 +19,14 @@ export class CheckoutMomoReturnComponent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private cart = inject(CartService);
+  private api = inject(ApiService);
 
   isSuccess = false;
   loading = true;
   message = '';
   orderNumber = '';
+  downloading = signal(false);
+  invoiceError = signal<string | null>(null);
 
   ngOnInit(): void {
     const resultCode = this.route.snapshot.queryParamMap.get('resultCode');
@@ -60,5 +64,26 @@ export class CheckoutMomoReturnComponent implements OnInit {
 
   continueShopping(): void {
     this.router.navigate(['/']);
+  }
+
+  downloadInvoice(): void {
+    if (!this.orderNumber || this.downloading()) return;
+    this.downloading.set(true);
+    this.invoiceError.set(null);
+    this.api.downloadInvoice(this.orderNumber).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `HoaDon_${this.orderNumber}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloading.set(false);
+      },
+      error: () => {
+        this.invoiceError.set('Không thể tải hóa đơn. Vui lòng thử lại sau.');
+        this.downloading.set(false);
+      },
+    });
   }
 }

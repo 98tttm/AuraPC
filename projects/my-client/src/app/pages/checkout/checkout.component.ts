@@ -125,8 +125,14 @@ export class CheckoutComponent implements OnInit {
     return Math.min(Math.round(subtotal * v.discountPercent / 100), v.discountAmount);
   });
 
-  /** Final total after voucher */
-  finalTotal = computed(() => Math.max(0, this.selectedTotal() - this.voucherDiscount()));
+  /** Shipping fee: free for orders >= 500.000₫ */
+  shippingFee = computed(() => {
+    const subtotal = this.selectedTotal() - this.voucherDiscount();
+    return subtotal >= 500000 ? 0 : 30000;
+  });
+
+  /** Final total after voucher + shipping */
+  finalTotal = computed(() => Math.max(0, this.selectedTotal() - this.voucherDiscount() + this.shippingFee()));
 
   ngOnInit(): void {
     // Load provinces for address dropdowns
@@ -422,7 +428,7 @@ export class CheckoutComponent implements OnInit {
         this.errorMessage.set('Không thể lưu thông tin. Vui lòng thử lại.');
         return;
       }
-      this.router.navigate(['/checkout-qr-payment'], { queryParams: { amount: this.selectedTotal() } });
+      this.router.navigate(['/checkout-qr-payment'], { queryParams: { amount: this.finalTotal() } });
       return;
     }
 

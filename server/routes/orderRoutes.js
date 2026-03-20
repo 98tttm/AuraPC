@@ -15,6 +15,8 @@ const { requireAuth, optionalAuth, requireUserOrAdmin } = require('../middleware
 const router = express.Router();
 const DELIVERY_CONFIRM_DELAY_MS = 30 * 60 * 1000;
 const ALLOWED_PAYMENT_METHODS = ['cod', 'qr', 'momo', 'zalopay', 'atm'];
+const FREE_SHIPPING_THRESHOLD = 500000; // 500.000₫
+const SHIPPING_FEE = 30000; // 30.000₫
 
 function generateOrderNumber() {
   const now = new Date();
@@ -149,7 +151,7 @@ router.post('/', optionalAuth, async (req, res) => {
     const {
       items,
       shippingAddress,
-      shippingFee = 0,
+      shippingFee: clientShippingFee,
       discount = 0,
       paymentMethod = 'cod',
       isPaid = false,
@@ -246,7 +248,9 @@ router.post('/', optionalAuth, async (req, res) => {
     }
 
     const totalDiscount = (Number(discount) || 0) + promoDiscount;
-    const total = subtotal + (Number(shippingFee) || 0) - totalDiscount;
+    // Server-side shipping fee calculation — ignore client value
+    const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const total = subtotal + shippingFee - totalDiscount;
     const userObjectId = resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId) ? new mongoose.Types.ObjectId(resolvedUserId) : null;
     const duplicateOrder = await findRecentDuplicateOrder({
       userId: resolvedUserId,
@@ -498,6 +502,26 @@ router.post('/:orderNumber/return-request', requireAuth, async (req, res) => {
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/** GET /api/orders/:orderNumber/invoice — download invoice PDF (public, by order number) */
+router.get('/:orderNumber/invoice', async (req, res) => {
+  try {
+    const orderNumber = (req.params.orderNumber || '').trim().toUpperCase();
+    const order = await Order.findOne({ orderNumber })
+      .populate('items.product', 'name slug images')
+      .lean();
+    if (!order) return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+    const pdfBuffer = await buildInvoicePdf(order, 'personal');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="HoaDon_${orderNumber}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ error: 'Không thể tạo hóa đơn' });
   }
 });
 

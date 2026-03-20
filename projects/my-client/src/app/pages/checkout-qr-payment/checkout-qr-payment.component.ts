@@ -33,6 +33,7 @@ export class CheckoutQrPaymentComponent implements OnInit {
   amount = 0;
   originalTotal = 0;
   directDiscount = 0;
+  shippingFee = 0;
   confirmSubmitting = false;
   confirmError = '';
 
@@ -62,6 +63,9 @@ export class CheckoutQrPaymentComponent implements OnInit {
     }
     if (pending?.originalTotal != null) this.originalTotal = Number(pending.originalTotal);
     if (pending?.directDiscount != null) this.directDiscount = Number(pending.directDiscount);
+    // Calculate shipping fee from amount
+    const subtotalAfterDiscount = this.originalTotal - this.directDiscount;
+    this.shippingFee = subtotalAfterDiscount >= 500000 ? 0 : 30000;
   }
 
   private getPending(): PendingPayload | null {

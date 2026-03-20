@@ -452,6 +452,12 @@ export class ApiService {
     });
   }
 
+  downloadInvoice(orderNumber: string): Observable<Blob> {
+    return this.http.get(`${BASE}/orders/${encodeURIComponent(orderNumber)}/invoice`, {
+      responseType: 'blob',
+    });
+  }
+
   requestOrderCancellation(orderNumber: string, reason?: string): Observable<OrderListItem> {
     return this.http.post<OrderListItem>(`${BASE}/orders/${encodeURIComponent(orderNumber)}/cancel-request`, {
       reason: reason || '',

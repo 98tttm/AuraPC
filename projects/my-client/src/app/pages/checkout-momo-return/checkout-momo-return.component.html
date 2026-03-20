@@ -22,12 +22,32 @@
     </div>
     <h2 style="font-size: 24px; color: #333; margin-bottom: 10px;">Thanh toán Thành Công!</h2>
     <p style="color: #555; margin-bottom: 5px;">Mã đơn hàng: <strong>{{ orderNumber }}</strong></p>
-    <p style="color: #555; margin-bottom: 30px;">Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đang được xử lý.</p>
-    <button
-      style="background: #FF6D2D; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: background 0.2s;"
-      (click)="continueShopping()">
-      Quay lại trang chủ
-    </button>
+    <p style="color: #555; margin-bottom: 20px;">Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đang được xử lý.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      @if (orderNumber) {
+        <button
+          style="background: #FF6D2D; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;"
+          [style.opacity]="downloading() ? '0.6' : '1'"
+          [style.cursor]="downloading() ? 'not-allowed' : 'pointer'"
+          [disabled]="downloading()"
+          (click)="downloadInvoice()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          {{ downloading() ? 'Đang tải...' : 'Tải hóa đơn PDF' }}
+        </button>
+      }
+      <button
+        style="background: #1a1a1a; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background 0.2s;"
+        (click)="continueShopping()">
+        Quay lại trang chủ
+      </button>
+    </div>
+    @if (invoiceError()) {
+      <p style="color: #dc2626; font-size: 0.85rem; margin-top: 12px;">{{ invoiceError() }}</p>
+    }
     } @else {
     <div style="color: #dc3545; margin-bottom: 20px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none"

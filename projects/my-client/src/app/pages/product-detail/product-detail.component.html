@@ -101,7 +101,7 @@
           <span class="pd-qty-label">Số lượng:</span>
           <div class="pd-qty-control">
             <button class="pd-qty-btn" (click)="decreaseQty()" [disabled]="quantity() <= 1">−</button>
-            <span class="pd-qty-val">{{ quantity() }}</span>
+            <input type="number" class="pd-qty-val" [value]="quantity()" (change)="onQtyInput($event)" min="1" [max]="productStock()" />
             <button class="pd-qty-btn" (click)="increaseQty()" [disabled]="quantity() >= productStock()">+</button>
           </div>
           <span class="pd-qty-stock">{{ productStock() }} sản phẩm có sẵn</span>

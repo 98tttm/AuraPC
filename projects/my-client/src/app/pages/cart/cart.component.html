@@ -93,7 +93,7 @@
                         <span class="cart-item__out-of-stock">Hết hàng</span>
                         } @else {
                         <button class="qty-btn" (click)="decreaseQty(productId(item.product))">−</button>
-                        <span class="qty-val">{{ item.qty }}</span>
+                        <input type="number" class="qty-val" [value]="item.qty" (change)="onQtyInput($event, productId(item.product), item)" min="1" [max]="item.product.stock ?? 99" />
                         <button class="qty-btn" [disabled]="isMaxStock(item)" (click)="increaseQty(productId(item.product))">+</button>
                         }
                     </div>
@@ -162,7 +162,7 @@
 
                     <p class="summary-terms">
                         Bằng việc tiến hành đặt mua hàng, bạn đồng ý với
-                        <a href="#">Điều khoản dịch vụ</a> của AuraPC
+                        <a routerLink="/ve-aurapc/chinh-sach-bao-mat-du-lieu-ca-nhan">Điều khoản dịch vụ</a> của AuraPC
                     </p>
 
                     <div class="summary-payments">

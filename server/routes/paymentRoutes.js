@@ -11,6 +11,9 @@ const { createAdminNotification } = require('../utils/adminNotifications');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
 
+const FREE_SHIPPING_THRESHOLD = 500000; // 500.000₫
+const SHIPPING_FEE = 30000; // 30.000₫
+
 // ── Pending Payments Store ──────────────────────────────────────────
 // Order is NOT created until payment is confirmed (callback/IPN/redirect).
 // Pending data is stored in memory, keyed by orderNumber.
@@ -209,7 +212,7 @@ async function createOrderFromPending(pendingData, { isPaid = true } = {}) {
         items: pendingData.orderItems,
         total: pendingData.finalTotal,
         discount: pendingData.discountAmount,
-        shippingFee: 0,
+        shippingFee: pendingData.shippingFee || 0,
         shippingAddress: pendingData.shippingAddress,
         paymentMethod: pendingData.paymentMethod,
         isPaid,
@@ -292,8 +295,9 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        const { orderItems, finalTotal: total, discountAmount } = await validateAndBuildItems(items, directDiscount);
-        finalTotal = total;
+        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount } = await validateAndBuildItems(items, directDiscount);
+        const shippingFeeCalc = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+        finalTotal = subtotalAfterDiscount + shippingFeeCalc;
 
         const orderNumber = generateOrderNumber('MOMO');
 
@@ -342,6 +346,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             orderItems,
             finalTotal,
             discountAmount,
+            shippingFee: shippingFeeCalc,
             shippingAddress,
             paymentMethod,
             requestInvoice: !!requestInvoice,
@@ -532,7 +537,9 @@ router.post('/zalopay/create', requireAuth, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        const { orderItems, finalTotal, discountAmount } = await validateAndBuildItems(items, directDiscount);
+        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount } = await validateAndBuildItems(items, directDiscount);
+        const shippingFeeCalc = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+        const finalTotal = subtotalAfterDiscount + shippingFeeCalc;
         const orderNumber = generateOrderNumber('ZLP');
 
         // Check for duplicate orders
@@ -595,6 +602,7 @@ router.post('/zalopay/create', requireAuth, async (req, res) => {
             orderItems,
             finalTotal,
             discountAmount,
+            shippingFee: shippingFeeCalc,
             shippingAddress,
             paymentMethod: 'zalopay',
             zaloPayTransId: zaloPayload.app_trans_id,
