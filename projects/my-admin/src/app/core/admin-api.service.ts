@@ -309,14 +309,19 @@ export class AdminApiService {
   }
 
   // ======== Products ========
-  getProducts(params?: { page?: number; limit?: number; category?: string; search?: string; stockStatus?: string }): Observable<ProductsListResponse> {
+  getProducts(params?: { page?: number; limit?: number; category?: string; search?: string; stockStatus?: string; brand?: string }): Observable<ProductsListResponse> {
     let p = new HttpParams();
     if (params?.page != null) p = p.set('page', params.page.toString());
     if (params?.limit != null) p = p.set('limit', params.limit.toString());
     if (params?.category) p = p.set('category', params.category);
     if (params?.search) p = p.set('search', params.search);
     if (params?.stockStatus) p = p.set('stockStatus', params.stockStatus);
+    if (params?.brand) p = p.set('brand', params.brand);
     return this.http.get<ProductsListResponse>(`${BASE}/admin/products`, { params: p });
+  }
+
+  getBrands(): Observable<string[]> {
+    return this.http.get<string[]>(`${BASE}/admin/products/brands`);
   }
 
   getCategoryStats(): Observable<{ stats: { name: string; count: number }[]; total: number }> {
@@ -516,6 +521,21 @@ export class AdminApiService {
   deletePromotion(id: string): Observable<{ deleted: boolean }> {
     return this.http.delete<{ deleted: boolean }>(`${BASE}/admin/promotions/${id}`);
   }
+
+  // ======== Warranty ========
+
+  getWarrantyRecords(params?: { page?: number; limit?: number; search?: string; status?: string }): Observable<WarrantyListResponse> {
+    let hp = new HttpParams();
+    if (params?.page) hp = hp.set('page', String(params.page));
+    if (params?.limit) hp = hp.set('limit', String(params.limit));
+    if (params?.search) hp = hp.set('search', params.search);
+    if (params?.status) hp = hp.set('status', params.status);
+    return this.http.get<WarrantyListResponse>(`${BASE}/admin/warranty`, { params: hp });
+  }
+
+  getWarrantyStats(): Observable<WarrantyStats> {
+    return this.http.get<WarrantyStats>(`${BASE}/admin/warranty/stats`);
+  }
 }
 
 export interface Promotion {
@@ -533,4 +553,33 @@ export interface Promotion {
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface WarrantyRecord {
+  serialNumber: string;
+  productName: string;
+  productSlug: string | null;
+  productImage: string;
+  qty: number;
+  price: number;
+  warrantyMonths: number;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  purchaseDate: string | null;
+  expiryDate: string | null;
+  status: 'valid' | 'expired' | 'unknown';
+}
+
+export interface WarrantyListResponse {
+  items: WarrantyRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface WarrantyStats {
+  total: number;
+  valid: number;
+  expired: number;
 }

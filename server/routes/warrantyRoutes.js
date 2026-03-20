@@ -6,10 +6,12 @@ const router = express.Router();
 /** GET /api/warranty/lookup?q=<query> - public warranty lookup by serial number or order number */
 router.get('/lookup', async (req, res) => {
   try {
-    const q = (req.query.q || '').toString().trim().toUpperCase();
+    let q = (req.query.q || '').toString().trim().toUpperCase();
     if (!q) {
       return res.status(400).json({ error: 'Vui lòng nhập mã Serial Number hoặc mã đơn hàng' });
     }
+    // Strip common prefixes users may copy from UI (e.g. "#ORD-AP260315ZEUHBV")
+    q = q.replace(/^#?ORD-/, '');
 
     let order;
     let matchedSerial = null;

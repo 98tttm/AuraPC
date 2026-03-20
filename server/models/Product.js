@@ -36,6 +36,7 @@ productSchema.index({ category: 1 });
 productSchema.index({ category_id: 1 });
 productSchema.index({ category_ids: 1 });
 productSchema.index({ primaryCategoryId: 1 });
+productSchema.index({ brand: 1 });
 productSchema.index({ featured: 1, active: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

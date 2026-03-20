@@ -27,10 +27,12 @@ export class ProductsListAdminComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   categories = signal<Category[]>([]);
+  brands = signal<string[]>([]);
   page = 1;
   limit = 20;
   searchQuery = '';
   categoryFilter = '';
+  brandFilter = '';
   stockFilter = '';
   sortColumn = '';
   sortDir: 'asc' | 'desc' = 'asc';
@@ -64,6 +66,10 @@ export class ProductsListAdminComponent implements OnInit {
       next: (list) => this.categories.set(list),
       error: () => {},
     });
+    this.api.getBrands().subscribe({
+      next: (list) => this.brands.set(list),
+      error: () => {},
+    });
     this.load();
     this.loadCategoryStats();
     this.loadStockStats();
@@ -72,7 +78,7 @@ export class ProductsListAdminComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery, category: this.categoryFilter || undefined, stockStatus: this.stockFilter || undefined }).subscribe({
+    this.api.getProducts({ page: this.page, limit: this.limit, search: this.searchQuery, category: this.categoryFilter || undefined, stockStatus: this.stockFilter || undefined, brand: this.brandFilter || undefined }).subscribe({
       next: (res) => {
         this.items.set(res.items);
         this.total.set(res.total);
@@ -123,6 +129,11 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   onCategoryFilter(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  onBrandFilter(): void {
     this.page = 1;
     this.load();
   }

@@ -67,7 +67,7 @@ async function resolveCategories(items) {
 
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 20, category, search, stockStatus } = req.query;
+    const { page = 1, limit = 20, category, search, stockStatus, brand } = req.query;
     const filter = {};
     // Stock status filter: 'in-stock' (>=10), 'low-stock' (1-9), 'out-of-stock' (0)
     if (stockStatus === 'out-of-stock') {
@@ -78,18 +78,50 @@ router.get('/', async (req, res) => {
       filter.stock = { $gte: 10 };
     }
     if (category) {
-      // Support filtering by category _id (numeric or ObjectId) or category_id string
-      filter.$or = [
-        { category: category },
-        { primaryCategoryId: isNaN(category) ? undefined : Number(category) },
-        { category_id: category },
-      ].filter((f) => Object.values(f)[0] !== undefined);
+      // Find the selected category and all its descendants
+      const allCats = await Category.find({}, 'category_id parent_id _id').lean();
+      const selectedCat = allCats.find((c) => String(c._id) === String(category));
+      const selectedCategoryId = selectedCat?.category_id;
+
+      // Collect all descendant category_ids (BFS)
+      const matchIds = new Set();
+      if (selectedCategoryId) matchIds.add(selectedCategoryId);
+      // Also match by _id directly
+      const matchObjectIds = [category];
+      if (!isNaN(category)) matchObjectIds.push(Number(category));
+
+      if (selectedCategoryId) {
+        const queue = [selectedCategoryId];
+        while (queue.length > 0) {
+          const parentId = queue.shift();
+          for (const c of allCats) {
+            if (String(c.parent_id) === String(parentId) && !matchIds.has(c.category_id)) {
+              matchIds.add(c.category_id);
+              queue.push(c.category_id);
+            }
+          }
+        }
+      }
+
+      const categoryIdArr = [...matchIds].filter(Boolean);
+      const catConditions = [];
+      if (categoryIdArr.length > 0) {
+        catConditions.push({ category_id: { $in: categoryIdArr } });
+        catConditions.push({ category_ids: { $in: categoryIdArr } });
+      }
+      catConditions.push({ category: { $in: matchObjectIds } });
+      if (!isNaN(category)) catConditions.push({ primaryCategoryId: Number(category) });
+      filter.$or = catConditions;
+    }
+    if (brand) {
+      filter.brand = new RegExp(`^${brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
     }
     if (search && search.trim()) {
       const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const searchFilter = [
         { name: new RegExp(escapedSearch, 'i') },
         { slug: new RegExp(escapedSearch, 'i') },
+        { brand: new RegExp(escapedSearch, 'i') },
       ];
       if (filter.$or) {
         filter.$and = [{ $or: filter.$or }, { $or: searchFilter }];
@@ -132,6 +164,17 @@ router.get('/category-stats', async (req, res) => {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
     res.json({ stats, total: products.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Distinct brands across ALL products
+router.get('/brands', async (req, res) => {
+  try {
+    const brands = await Product.distinct('brand', { brand: { $ne: '' } });
+    brands.sort((a, b) => a.localeCompare(b));
+    res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

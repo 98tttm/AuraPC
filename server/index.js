@@ -35,6 +35,7 @@ const faqRoutes = require('./routes/faqRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
 const adminPromotionRoutes = require('./routes/admin/promotionRoutes');
 const warrantyRoutes = require('./routes/warrantyRoutes');
+const adminWarrantyRoutes = require('./routes/admin/warrantyRoutes');
 
 connectDB();
 
@@ -121,6 +122,7 @@ app.use('/api/faqs', faqRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/admin/promotions', adminPromotionRoutes);
 app.use('/api/warranty', warrantyRoutes);
+app.use('/api/admin/warranty', adminWarrantyRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));

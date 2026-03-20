@@ -113,6 +113,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/promotions-admin/promotion-form.component').then((m) => m.PromotionFormComponent),
       },
+      {
+        path: 'warranty',
+        loadComponent: () =>
+          import('./pages/warranty-admin/warranty-admin.component').then((m) => m.WarrantyAdminComponent),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

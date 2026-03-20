@@ -1,0 +1,168 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2>Bảo hành</h2>
+    <p>Quản lý bảo hành sản phẩm đã giao</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert-error">{{ error() }}</div>
+}
+
+<!-- Stat Cards -->
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Tổng bảo hành</span>
+    <span class="stat-card__value">{{ statsTotal() }}</span>
+    <span class="stat-card__sub">sản phẩm</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon stat-card__icon--success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Còn bảo hành</span>
+    <span class="stat-card__value">{{ statsValid() }}</span>
+    <span class="stat-card__sub">sản phẩm</span>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__header">
+      <div class="stat-card__icon stat-card__icon--danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+    </div>
+    <span class="stat-card__label">Hết bảo hành</span>
+    <span class="stat-card__value">{{ statsExpired() }}</span>
+    <span class="stat-card__sub">sản phẩm</span>
+  </div>
+</div>
+
+<!-- Warranty Table -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3 class="card-title">Danh sách bảo hành</h3>
+      <p class="card-subtitle">Tra cứu bảo hành theo Serial Number, mã đơn, tên sản phẩm</p>
+    </div>
+    <div class="card-header__actions">
+      <select class="category-filter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilter()">
+        <option value="">Tất cả</option>
+        <option value="valid">Còn bảo hành</option>
+        <option value="expired">Hết bảo hành</option>
+      </select>
+      <div class="search-box">
+        <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-box__input" placeholder="S/N, mã đơn, tên SP..."
+          [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" />
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-table">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton--text" style="width: 140px"></div>
+          <div style="flex: 1">
+            <div class="skeleton skeleton--text" style="width: 60%"></div>
+          </div>
+          <div class="skeleton skeleton--text" style="width: 100px"></div>
+          <div class="skeleton skeleton--text" style="width: 80px"></div>
+          <div class="skeleton skeleton--text" style="width: 80px"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>Sản phẩm</th>
+          <th>Đơn hàng</th>
+          <th>Khách hàng</th>
+          <th>Ngày mua</th>
+          <th>Hạn bảo hành</th>
+          <th>Thời hạn</th>
+          <th>Trạng thái</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.serialNumber) {
+          <tr>
+            <td><span class="serial-code">{{ item.serialNumber }}</span></td>
+            <td>
+              <div class="product-cell">
+                @if (item.productImage) {
+                  <img [src]="item.productImage" alt="" class="product-cell__img" />
+                }
+                <span class="product-cell__name">{{ item.productName }}</span>
+              </div>
+            </td>
+            <td><span class="order-code">#{{ item.orderNumber }}</span></td>
+            <td>
+              <div class="customer-cell">
+                <span class="customer-cell__name">{{ item.customerName || '—' }}</span>
+                <span class="customer-cell__phone">{{ item.customerPhone }}</span>
+              </div>
+            </td>
+            <td>{{ formatDate(item.purchaseDate) }}</td>
+            <td>{{ formatDate(item.expiryDate) }}</td>
+            <td>{{ item.warrantyMonths }} tháng</td>
+            <td>
+              <span class="badge" [class.badge--valid]="item.status === 'valid'" [class.badge--expired]="item.status === 'expired'">
+                {{ getStatusLabel(item.status) }}
+              </span>
+              @if (item.status === 'valid' && daysRemaining(item.expiryDate) !== null) {
+                <span class="days-remaining">còn {{ daysRemaining(item.expiryDate) }} ngày</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="empty-state-cell">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Chưa có sản phẩm bảo hành nào</span>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button class="pagination__btn" [disabled]="page <= 1" (click)="goToPage(page - 1)">Trước</button>
+        @for (p of visiblePages; track $index) {
+          @if (p === -1) {
+            <span class="pagination__ellipsis">...</span>
+          } @else {
+            <button class="pagination__btn" [class.pagination__btn--active]="page === p" (click)="goToPage(p)">
+              {{ p }}
+            </button>
+          }
+        }
+        <button class="pagination__btn" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">Sau</button>
+      </div>
+    }
+  }
+</div>
