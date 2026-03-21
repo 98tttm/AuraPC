@@ -1,0 +1,558 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  AuraPC - Entity Relationship Diagram (ERD)                 ║
+// ║  Paste this into https://dbdiagram.io to render             ║
+// ║  Total: 20 Entities | MongoDB + Mongoose                    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// ────────────────────────────────────────────────
+// NHÓM 1: NGƯỜI DÙNG & XÁC THỰC
+// ────────────────────────────────────────────────
+
+Table User {
+  _id ObjectId [pk, note: 'Primary Key']
+  email String [unique, note: 'Optional']
+  phoneNumber String [unique, not null, note: 'Required - SĐT Việt Nam']
+  username String [note: 'Optional']
+  profile__fullName String [note: 'Họ và tên']
+  profile__dateOfBirth Date [note: 'Ngày sinh']
+  profile__gender String [note: 'Giới tính']
+  avatar String [note: 'URL ảnh đại diện']
+  active Boolean [default: true, note: 'Trạng thái tài khoản']
+  lastLogin Date [note: 'Lần đăng nhập cuối']
+  followerCount Number [default: 0]
+  followingCount Number [default: 0]
+  createdAt Date [note: 'Mongoose timestamps']
+  updatedAt Date [note: 'Mongoose timestamps']
+
+  Note: 'Khách hàng - Đăng nhập bằng OTP qua SĐT'
+
+  indexes {
+    email
+  }
+}
+
+Table UserAddress {
+  _id ObjectId [pk, note: 'Embedded trong User.addresses[]']
+  user_id ObjectId [ref: > User._id, not null, note: 'FK → User']
+  label String [default: 'Nhà riêng', note: 'Nhà riêng | Văn phòng']
+  fullName String [not null, note: 'Tên người nhận']
+  phone String [not null, note: 'SĐT người nhận']
+  city String [note: 'Tỉnh/Thành phố']
+  district String [note: 'Quận/Huyện']
+  ward String [note: 'Phường/Xã']
+  address String [note: 'Địa chỉ cụ thể (số nhà, đường)']
+  isDefault Boolean [default: false, note: 'Địa chỉ mặc định']
+
+  Note: 'Embedded subdocument trong User.addresses[]'
+}
+
+Table UserFollow {
+  follower_id ObjectId [ref: > User._id, note: 'Người theo dõi']
+  following_id ObjectId [ref: > User._id, note: 'Người được theo dõi']
+
+  Note: 'Quan hệ N:N self-ref - Lưu trong User.followers[] và User.following[]'
+}
+
+Table Admin {
+  _id ObjectId [pk, note: 'Primary Key']
+  email String [unique, not null, note: 'Email đăng nhập, lowercase']
+  password String [not null, note: 'Mã hóa bcrypt']
+  name String [default: 'Admin', note: 'Tên hiển thị']
+  role String [default: 'admin', note: 'Vai trò']
+  avatar String [note: 'URL ảnh đại diện']
+  lastLogin Date [note: 'Lần đăng nhập cuối']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Quản trị viên - Tách biệt với User, dùng email/password'
+}
+
+Table Otp {
+  _id ObjectId [pk]
+  phoneNumber String [unique, not null, note: 'SĐT yêu cầu OTP']
+  code String [not null, note: 'Mã OTP 6 số']
+  attempts Number [default: 0, note: 'Số lần nhập sai']
+  lockedUntil Date [note: 'Khóa đến thời điểm (sau 3 lần sai)']
+  createdAt Date [note: 'TTL: tự xóa sau 5 phút']
+
+  Note: 'Mã xác thực OTP - TTL 5 phút, khóa 1 giờ sau 3 lần sai'
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 2: SẢN PHẨM & DANH MỤC
+// ────────────────────────────────────────────────
+
+Table Product {
+  _id ObjectId [pk]
+  name String [not null, note: 'Tên sản phẩm']
+  slug String [unique, not null, note: 'URL-friendly slug']
+  description String [note: 'Mô tả dạng text']
+  shortDescription String [note: 'Mô tả ngắn']
+  description_html String [note: 'Mô tả dạng HTML']
+  price Number [not null, note: 'Giá bán hiện tại']
+  salePrice Number [note: 'Giá khuyến mãi']
+  old_price Number [note: 'Giá gốc (trước giảm)']
+  category Mixed [note: 'Legacy - tên danh mục']
+  category_id String [note: 'ID danh mục chính']
+  category_ids Array [note: 'String[] - Nhiều danh mục']
+  primaryCategoryId Number [note: 'ID danh mục chính (số)']
+  categoryIds Array [note: 'Number[] - Nhiều danh mục (số)']
+  images Mixed [note: 'Mảng URL ảnh sản phẩm']
+  specs Mixed [note: 'Thông số kỹ thuật (object)']
+  techSpecs Mixed [note: 'Thông số chi tiết (object)']
+  brand String [note: 'Thương hiệu (ASUS, MSI, ...)']
+  stock Number [default: 0, note: 'Số lượng tồn kho']
+  featured Boolean [default: false, note: 'Sản phẩm nổi bật']
+  active Boolean [default: true, note: 'Đang kinh doanh']
+  warrantyMonths Number [default: 24, note: 'Thời hạn bảo hành (tháng)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Sản phẩm - Laptop, PC, linh kiện gaming'
+
+  indexes {
+    slug [unique]
+    category
+    category_id
+    category_ids
+    primaryCategoryId
+    brand
+    (featured, active)
+  }
+}
+
+Table Category {
+  _id Mixed [pk, note: 'Number hoặc ObjectId']
+  category_id String [note: 'ID dạng string']
+  name String [not null, note: 'Tên danh mục']
+  slug String [unique, not null, note: 'URL-friendly slug']
+  url String [note: 'URL nguồn']
+  source_url String [note: 'URL gốc (scraper)']
+  parent_id Mixed [ref: > Category._id, note: 'FK → Category (self-ref danh mục cha)']
+  level Number [default: 0, note: 'Cấp độ danh mục (0=gốc)']
+  product_count Number [default: 0, note: 'Số sản phẩm']
+  description String [note: 'Mô tả danh mục']
+  image String [note: 'Ảnh danh mục']
+  is_active Boolean [default: true, note: 'Trạng thái hiển thị']
+  display_order Number [default: 0, note: 'Thứ tự sắp xếp']
+  meta Mixed [note: 'Metadata bổ sung']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Danh mục sản phẩm - Cấu trúc cây cha-con'
+
+  indexes {
+    slug
+    category_id
+    parent_id
+    level
+    display_order
+  }
+}
+
+Table ProductReview {
+  _id ObjectId [pk]
+  product ObjectId [ref: > Product._id, not null, note: 'FK → Product']
+  user ObjectId [ref: > User._id, not null, note: 'FK → User']
+  type String [not null, note: 'review | comment']
+  rating Number [note: 'Đánh giá 1-5 sao (chỉ type=review)']
+  content String [not null, note: 'Nội dung đánh giá/bình luận']
+  images Array [note: 'String[] - Ảnh đính kèm']
+  parent ObjectId [ref: > ProductReview._id, note: 'FK → ProductReview (self-ref trả lời)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Đánh giá & bình luận sản phẩm - Hỗ trợ trả lời lồng nhau'
+
+  indexes {
+    (product, parent, createdAt)
+    (product, type)
+    (user, product, type)
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 3: ĐƠN HÀNG & THANH TOÁN
+// ────────────────────────────────────────────────
+
+Table Order {
+  _id ObjectId [pk]
+  orderNumber String [unique, not null, note: 'Mã đơn: AP260321XXXXXX']
+  user ObjectId [ref: > User._id, note: 'FK → User (null = khách vãng lai)']
+  shippingAddress__fullName String [note: 'Tên người nhận']
+  shippingAddress__phone String [note: 'SĐT người nhận']
+  shippingAddress__email String [note: 'Email người nhận']
+  shippingAddress__address String [note: 'Địa chỉ cụ thể']
+  shippingAddress__city String [note: 'Tỉnh/Thành phố']
+  shippingAddress__district String [note: 'Quận/Huyện']
+  shippingAddress__ward String [note: 'Phường/Xã']
+  shippingAddress__note String [note: 'Ghi chú giao hàng']
+  status String [default: 'pending', note: 'pending|confirmed|processing|shipped|delivered|cancelled']
+  total Number [not null, note: 'Tổng tiền thanh toán']
+  shippingFee Number [default: 0, note: '0 nếu >= 500k, 30k nếu < 500k']
+  discount Number [default: 0, note: 'Tổng giảm giá']
+  appliedPromotion__code String [note: 'Mã voucher đã dùng']
+  appliedPromotion__discountPercent Number [note: 'Phần trăm giảm']
+  appliedPromotion__discountAmount Number [note: 'Số tiền giảm']
+  paymentMethod String [default: 'cod', note: 'cod|qr|momo|zalopay|atm']
+  isPaid Boolean [default: false, note: 'Đã thanh toán?']
+  paidAt Date [note: 'Thời điểm thanh toán']
+  zaloPayTransId String [note: 'Mã giao dịch ZaloPay']
+  shippedAt Date [note: 'Ngày gửi hàng']
+  deliveredAt Date [note: 'Ngày khách xác nhận đã nhận']
+  cancelledAt Date [note: 'Ngày hủy đơn']
+  cancelRequest__status String [default: 'none', note: 'none|pending|approved|rejected']
+  cancelRequest__reason String [note: 'Lý do hủy']
+  cancelRequest__requestedAt Date [note: 'Ngày yêu cầu hủy']
+  cancelRequest__resolvedAt Date [note: 'Ngày xử lý']
+  cancelRequest__resolvedBy ObjectId [ref: > Admin._id, note: 'FK → Admin xử lý']
+  cancelRequest__note String [note: 'Ghi chú admin']
+  returnRequest__status String [default: 'none', note: 'none|pending|approved|rejected']
+  returnRequest__reason String [note: 'Lý do trả hàng']
+  returnRequest__requestedAt Date [note: 'Ngày yêu cầu trả']
+  returnRequest__resolvedAt Date [note: 'Ngày xử lý']
+  returnRequest__resolvedBy ObjectId [ref: > Admin._id, note: 'FK → Admin xử lý']
+  returnRequest__note String [note: 'Ghi chú admin']
+  createdAt Date [note: 'Ngày đặt hàng']
+  updatedAt Date
+
+  Note: 'Đơn hàng - Quy trình: pending → confirmed → processing → shipped → delivered'
+
+  indexes {
+    status
+    createdAt
+    (user, createdAt)
+    (status, deliveredAt)
+    cancelRequest__status
+    returnRequest__status
+    orderNumber [unique]
+  }
+}
+
+Table OrderItem {
+  _id ObjectId [pk, note: 'Embedded trong Order.items[]']
+  order_id ObjectId [ref: > Order._id, not null, note: 'FK → Order']
+  product ObjectId [ref: > Product._id, not null, note: 'FK → Product']
+  name String [not null, note: 'Tên SP tại thời điểm mua']
+  price Number [not null, note: 'Đơn giá tại thời điểm mua']
+  qty Number [not null, note: 'Số lượng (min: 1)']
+  serialNumber String [note: 'S/N bảo hành (gán khi giao)']
+
+  Note: 'Embedded subdocument trong Order.items[] - Snapshot giá tại thời điểm đặt'
+}
+
+Table Promotion {
+  _id ObjectId [pk]
+  code String [unique, not null, note: 'Mã voucher (uppercase)']
+  description String [note: 'Mô tả khuyến mãi']
+  discountPercent Number [not null, note: 'Phần trăm giảm giá (1-100)']
+  maxDiscountAmount Number [note: 'Giảm tối đa (VNĐ)']
+  minOrderAmount Number [default: 0, note: 'Đơn hàng tối thiểu']
+  maxUsage Number [note: 'Tổng lượt sử dụng tối đa']
+  usedCount Number [default: 0, note: 'Đã sử dụng']
+  maxUsagePerUser Number [default: 1, note: 'Mỗi user dùng tối đa']
+  startDate Date [not null, note: 'Ngày bắt đầu']
+  endDate Date [not null, note: 'Ngày kết thúc']
+  isActive Boolean [default: true, note: 'Trạng thái kích hoạt']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Mã khuyến mãi / Voucher giảm giá'
+
+  indexes {
+    code [unique]
+    endDate
+  }
+}
+
+Table PromotionUsage {
+  _id ObjectId [pk]
+  promotion ObjectId [ref: > Promotion._id, not null, note: 'FK → Promotion']
+  user ObjectId [ref: > User._id, not null, note: 'FK → User']
+  order ObjectId [ref: > Order._id, note: 'FK → Order (optional)']
+  usedAt Date [default: 'now', note: 'Thời điểm sử dụng']
+
+  Note: 'Lịch sử sử dụng mã khuyến mãi'
+
+  indexes {
+    (promotion, user)
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 4: GIỎ HÀNG & PC BUILDER
+// ────────────────────────────────────────────────
+
+Table Cart {
+  _id ObjectId [pk]
+  user ObjectId [ref: - User._id, unique, not null, note: 'FK → User (1:1)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Giỏ hàng - Mỗi User có tối đa 1 Cart'
+}
+
+Table CartItem {
+  _id ObjectId [pk, note: 'Embedded trong Cart.items[]']
+  cart_id ObjectId [ref: > Cart._id, not null, note: 'FK → Cart']
+  product ObjectId [ref: > Product._id, not null, note: 'FK → Product']
+  quantity Number [not null, default: 1, note: 'Số lượng (min: 1)']
+
+  Note: 'Embedded subdocument trong Cart.items[]'
+}
+
+Table Builder {
+  _id ObjectId [pk]
+  shareId String [unique, note: 'ID chia sẻ cấu hình (auto-gen)']
+  user ObjectId [ref: > User._id, note: 'FK → User (optional, null = guest)']
+  components Mixed [note: 'Object chứa linh kiện đã chọn']
+  auraVisualImage String [note: 'Ảnh 3D cấu hình']
+  createdAt Date [note: 'TTL: tự xóa sau 7 ngày']
+  updatedAt Date
+
+  Note: 'AuraBuilder - Bộ cấu hình PC tùy chỉnh, TTL 7 ngày'
+
+  indexes {
+    user
+    createdAt
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 5: BLOG & NỘI DUNG
+// ────────────────────────────────────────────────
+
+Table Blog {
+  _id ObjectId [pk]
+  title String [not null, note: 'Tiêu đề bài viết']
+  slug String [unique, not null, note: 'URL-friendly slug']
+  excerpt String [note: 'Tóm tắt ngắn']
+  content String [note: 'Nội dung bài viết']
+  coverImage String [note: 'Ảnh bìa']
+  author String [default: 'AuraPC', note: 'Tên tác giả']
+  published Boolean [default: false, note: 'Đã xuất bản?']
+  publishedAt Date [note: 'Ngày xuất bản']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Bài viết blog / tin tức'
+
+  indexes {
+    slug [unique]
+    published
+  }
+}
+
+Table Faq {
+  _id ObjectId [pk]
+  question String [not null, note: 'Câu hỏi']
+  answer String [not null, note: 'Câu trả lời']
+  category String [default: 'chung', note: 'chung|don-hang|thanh-toan|bao-hanh|khac']
+  order Number [default: 0, note: 'Thứ tự hiển thị']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Câu hỏi thường gặp (FAQ)'
+
+  indexes {
+    (category, order)
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 6: AURA HUB (CỘNG ĐỒNG)
+// ────────────────────────────────────────────────
+
+Table Post {
+  _id ObjectId [pk]
+  author ObjectId [ref: > User._id, not null, note: 'FK → User tác giả']
+  content String [note: 'Nội dung bài đăng']
+  images Array [note: 'String[] - Ảnh đính kèm']
+  topic String [note: 'Chủ đề bài đăng']
+  status String [default: 'approved', note: 'pending|approved|rejected']
+  reviewedBy ObjectId [ref: > Admin._id, note: 'FK → Admin duyệt bài']
+  reviewedAt Date [note: 'Ngày duyệt']
+  rejectedReason String [note: 'Lý do từ chối']
+  likeCount Number [default: 0, note: 'Số lượt thích']
+  commentCount Number [default: 0, note: 'Số bình luận']
+  shareCount Number [default: 0, note: 'Số lượt chia sẻ']
+  repostCount Number [default: 0, note: 'Số lượt repost']
+  viewCount Number [default: 0, note: 'Số lượt xem']
+  isRepost Boolean [default: false, note: 'Là bài repost?']
+  originalPost ObjectId [ref: > Post._id, note: 'FK → Post gốc (self-ref repost)']
+  repostedBy ObjectId [ref: > User._id, note: 'FK → User repost']
+  poll__endsAt Date [note: 'Thời hạn bình chọn']
+  poll__totalVotes Number [default: 0, note: 'Tổng số phiếu']
+  replyOption String [default: 'anyone', note: 'anyone|followers|mentioned']
+  scheduledAt Date [note: 'Đăng theo lịch']
+  isPublished Boolean [default: true, note: 'Đã đăng?']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Bài đăng AuraHub - Mạng xã hội cộng đồng'
+
+  indexes {
+    (author, createdAt)
+    (topic, createdAt)
+    (isPublished, scheduledAt)
+    likeCount
+    (status, createdAt)
+  }
+}
+
+Table PostLike {
+  post_id ObjectId [ref: > Post._id, note: 'Bài đăng được thích']
+  user_id ObjectId [ref: > User._id, note: 'Người thích']
+
+  Note: 'Quan hệ N:N - Lưu trong Post.likes[]'
+}
+
+Table PollOption {
+  _id ObjectId [pk, note: 'Embedded trong Post.poll.options[]']
+  post_id ObjectId [ref: > Post._id, note: 'FK → Post']
+  text String [not null, note: 'Nội dung lựa chọn']
+  voteCount Number [default: 0, note: 'Số phiếu']
+
+  Note: 'Embedded subdocument trong Post.poll.options[]'
+}
+
+Table PollVote {
+  option_id ObjectId [ref: > PollOption._id, note: 'Lựa chọn được bầu']
+  user_id ObjectId [ref: > User._id, note: 'Người bầu']
+
+  Note: 'Quan hệ N:N - Lưu trong PollOption.votes[]'
+}
+
+Table HubComment {
+  _id ObjectId [pk]
+  post ObjectId [ref: > Post._id, not null, note: 'FK → Post']
+  author ObjectId [ref: > User._id, not null, note: 'FK → User']
+  content String [not null, note: 'Nội dung bình luận']
+  images Array [note: 'String[] - Ảnh đính kèm']
+  likeCount Number [default: 0, note: 'Số lượt thích']
+  parentComment ObjectId [ref: > HubComment._id, note: 'FK → HubComment (self-ref trả lời)']
+  replyCount Number [default: 0, note: 'Số trả lời']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Bình luận bài đăng AuraHub - Hỗ trợ trả lời lồng nhau'
+
+  indexes {
+    (post, createdAt)
+    parentComment
+  }
+}
+
+Table HubCommentLike {
+  comment_id ObjectId [ref: > HubComment._id, note: 'Bình luận được thích']
+  user_id ObjectId [ref: > User._id, note: 'Người thích']
+
+  Note: 'Quan hệ N:N - Lưu trong HubComment.likes[]'
+}
+
+Table Share {
+  _id ObjectId [pk]
+  post ObjectId [ref: > Post._id, not null, note: 'FK → Post']
+  user ObjectId [ref: > User._id, not null, note: 'FK → User']
+  method String [default: 'copy_link', note: 'copy_link|copy_image|embed']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Lượt chia sẻ bài đăng AuraHub'
+
+  indexes {
+    post
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 7: THÔNG BÁO
+// ────────────────────────────────────────────────
+
+Table AdminNotification {
+  _id ObjectId [pk]
+  type String [not null, note: 'order_new|order_cancel_request|order_return_request|order_delivered']
+  order ObjectId [ref: > Order._id, not null, note: 'FK → Order']
+  orderNumber String [not null, note: 'Mã đơn hàng']
+  title String [not null, note: 'Tiêu đề thông báo']
+  message String [not null, note: 'Nội dung thông báo']
+  metadata Mixed [note: 'Dữ liệu bổ sung (status, total, ...)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Thông báo cho Admin - Đơn mới, yêu cầu hủy/trả'
+
+  indexes {
+    createdAt
+    (orderNumber, createdAt)
+  }
+}
+
+Table AdminNotificationRead {
+  notification_id ObjectId [ref: > AdminNotification._id, note: 'Thông báo']
+  admin_id ObjectId [ref: > Admin._id, note: 'Admin đã đọc']
+
+  Note: 'Quan hệ N:N - Lưu trong AdminNotification.readBy[]'
+}
+
+Table UserNotification {
+  _id ObjectId [pk]
+  user ObjectId [ref: > User._id, not null, note: 'FK → User']
+  type String [not null, note: 'order_confirmed|order_processing|order_shipped|...']
+  title String [not null, note: 'Tiêu đề thông báo']
+  message String [not null, note: 'Nội dung thông báo']
+  metadata Mixed [note: 'Dữ liệu bổ sung']
+  readAt Date [note: 'Thời điểm đã đọc (null = chưa đọc)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Thông báo cho User - Cập nhật trạng thái đơn hàng'
+
+  indexes {
+    (user, createdAt)
+    (user, readAt)
+  }
+}
+
+// ────────────────────────────────────────────────
+// NHÓM 8: HỖ TRỢ KHÁCH HÀNG (LIVE CHAT)
+// ────────────────────────────────────────────────
+
+Table SupportConversation {
+  _id ObjectId [pk]
+  user ObjectId [ref: - User._id, unique, not null, note: 'FK → User (1:1)']
+  assignedAdmin ObjectId [ref: > Admin._id, note: 'FK → Admin phụ trách']
+  archived Boolean [default: false, note: 'Đã lưu trữ?']
+  lastMessagePreview String [note: 'Xem trước tin nhắn cuối']
+  lastMessageBy String [default: 'user', note: 'user | admin']
+  lastMessageAt Date [note: 'Thời điểm tin nhắn cuối']
+  unreadForAdmin Number [default: 0, note: 'Tin chưa đọc (phía admin)']
+  unreadForUser Number [default: 0, note: 'Tin chưa đọc (phía user)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Cuộc hội thoại hỗ trợ - Mỗi User 1 cuộc hội thoại'
+
+  indexes {
+    user [unique]
+    archived
+    lastMessageAt
+  }
+}
+
+Table SupportMessage {
+  _id ObjectId [pk]
+  conversation ObjectId [ref: > SupportConversation._id, not null, note: 'FK → SupportConversation']
+  senderType String [not null, note: 'user | admin']
+  senderUser ObjectId [ref: > User._id, note: 'FK → User (nếu senderType=user)']
+  senderAdmin ObjectId [ref: > Admin._id, note: 'FK → Admin (nếu senderType=admin)']
+  content String [not null, note: 'Nội dung tin nhắn (max 2000 ký tự)']
+  createdAt Date
+  updatedAt Date
+
+  Note: 'Tin nhắn trong cuộc hội thoại hỗ trợ'
+
+  indexes {
+    (conversation, createdAt)
+  }
+}

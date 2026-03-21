@@ -11,42 +11,31 @@ const { createAdminNotification } = require('../utils/adminNotifications');
 const { buildInvoicePdf } = require('../utils/invoicePdf');
 const { getEmailTransporter } = require('../utils/email');
 
+const PendingPayment = require('../models/PendingPayment');
+
 const FREE_SHIPPING_THRESHOLD = 500000; // 500.000₫
 const SHIPPING_FEE = 30000; // 30.000₫
 
-// ── Pending Payments Store ──────────────────────────────────────────
+// ── Pending Payments Store (MongoDB) ────────────────────────────────
 // Order is NOT created until payment is confirmed (callback/IPN/redirect).
-// Pending data is stored in memory, keyed by orderNumber.
-// Auto-expires after 30 minutes.
+// Pending data is stored in MongoDB with 30-minute TTL (auto-deleted).
 
-const pendingPayments = new Map();
-const PENDING_TTL = 30 * 60 * 1000; // 30 min
-
-function storePending(orderNumber, data) {
-    pendingPayments.set(orderNumber, { ...data, createdAt: Date.now() });
+async function storePending(orderNumber, data) {
+    await PendingPayment.findOneAndUpdate(
+        { orderNumber },
+        { orderNumber, data, createdAt: new Date() },
+        { upsert: true },
+    );
 }
 
-function getPending(orderNumber) {
-    const entry = pendingPayments.get(orderNumber);
-    if (!entry) return null;
-    if (Date.now() - entry.createdAt > PENDING_TTL) {
-        pendingPayments.delete(orderNumber);
-        return null;
-    }
-    return entry;
+async function getPending(orderNumber) {
+    const doc = await PendingPayment.findOne({ orderNumber }).lean();
+    return doc ? doc.data : null;
 }
 
-function removePending(orderNumber) {
-    pendingPayments.delete(orderNumber);
+async function removePending(orderNumber) {
+    await PendingPayment.deleteOne({ orderNumber });
 }
-
-// Cleanup expired entries every 10 min
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of pendingPayments) {
-        if (now - entry.createdAt > PENDING_TTL) pendingPayments.delete(key);
-    }
-}, 10 * 60 * 1000);
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -397,7 +386,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
         }
 
         // Store pending — order will be created only when IPN/redirect confirms payment
-        storePending(orderNumber, pendingData);
+        await storePending(orderNumber, pendingData);
 
         return res.json({ success: true, payUrl: momoResponse.data.payUrl });
     } catch (error) {
@@ -458,24 +447,24 @@ router.post('/momo/ipn', async (req, res) => {
                     await existingOrder.save();
                     await notifyPaidOrder(existingOrder);
                 }
-                removePending(orderId);
+                await removePending(orderId);
                 console.log(`Order ${orderId} marked as paid from MoMo IPN`);
                 return res.status(204).send();
             }
 
             // Create order from pending data
-            const pendingData = getPending(orderId);
+            const pendingData = await getPending(orderId);
             if (pendingData) {
                 const order = await createOrderFromPending(pendingData, { isPaid: true });
                 await notifyPaidOrder(order);
-                removePending(orderId);
+                await removePending(orderId);
                 console.log(`Order ${orderId} created and marked as paid from MoMo IPN`);
             } else {
                 console.error('MoMo IPN - No pending data for:', orderId);
             }
         } else {
             // Payment failed — just remove pending, no order created
-            removePending(orderId);
+            await removePending(orderId);
             console.log(`MoMo IPN: Payment failed for ${orderId}, status ${resultCode}`);
         }
 
@@ -499,23 +488,23 @@ router.get('/momo/confirm', requireAuth, async (req, res) => {
         // Check if order already exists (created by IPN)
         const existingOrder = await Order.findOne({ orderNumber: orderId });
         if (existingOrder) {
-            removePending(orderId);
+            await removePending(orderId);
             return res.json({ success: true, orderNumber: existingOrder.orderNumber, alreadyCreated: true });
         }
 
         if (String(resultCode) !== '0') {
-            removePending(orderId);
+            await removePending(orderId);
             return res.status(400).json({ success: false, message: 'Thanh toán không thành công.' });
         }
 
-        const pendingData = getPending(orderId);
+        const pendingData = await getPending(orderId);
         if (!pendingData) {
             return res.status(404).json({ success: false, message: 'Phiên thanh toán đã hết hạn.' });
         }
 
         const order = await createOrderFromPending(pendingData, { isPaid: true });
         await notifyPaidOrder(order);
-        removePending(orderId);
+        await removePending(orderId);
 
         return res.json({ success: true, orderNumber: order.orderNumber });
     } catch (error) {
@@ -596,7 +585,7 @@ router.post('/zalopay/create', requireAuth, async (req, res) => {
         }
 
         // Store pending — order will be created only when callback/confirm confirms payment
-        storePending(orderNumber, {
+        await storePending(orderNumber, {
             orderNumber,
             userId,
             orderItems,
@@ -669,17 +658,17 @@ router.post('/zalopay/callback', async (req, res) => {
                 await existingOrder.save();
                 await notifyPaidOrder(existingOrder);
             }
-            removePending(orderNumber);
+            await removePending(orderNumber);
             return res.json({ return_code: 1, return_message: 'success' });
         }
 
         // Create order from pending data
-        const pendingData = getPending(orderNumber);
+        const pendingData = await getPending(orderNumber);
         if (pendingData) {
             pendingData.zaloPayTransId = String(callbackData.zp_trans_id || appTransId);
             const order = await createOrderFromPending(pendingData, { isPaid: true });
             await notifyPaidOrder(order);
-            removePending(orderNumber);
+            await removePending(orderNumber);
             console.log(`Order ${orderNumber} created and marked as paid from ZaloPay callback`);
         } else {
             console.error('ZaloPay Callback - No pending data for:', orderNumber);
@@ -707,16 +696,16 @@ router.get('/zalopay/confirm', requireAuth, async (req, res) => {
         // Check if order already exists (created by callback)
         const existingOrder = await Order.findOne({ orderNumber });
         if (existingOrder) {
-            removePending(orderNumber);
+            await removePending(orderNumber);
             return res.json({ success: true, orderNumber: existingOrder.orderNumber, alreadyCreated: true });
         }
 
         if (String(status) !== '1') {
-            removePending(orderNumber);
+            await removePending(orderNumber);
             return res.status(400).json({ success: false, message: 'Thanh toán không thành công.' });
         }
 
-        const pendingData = getPending(orderNumber);
+        const pendingData = await getPending(orderNumber);
         if (!pendingData) {
             return res.status(404).json({ success: false, message: 'Phiên thanh toán đã hết hạn.' });
         }
@@ -724,7 +713,7 @@ router.get('/zalopay/confirm', requireAuth, async (req, res) => {
         pendingData.zaloPayTransId = apptransid;
         const order = await createOrderFromPending(pendingData, { isPaid: true });
         await notifyPaidOrder(order);
-        removePending(orderNumber);
+        await removePending(orderNumber);
 
         return res.json({ success: true, orderNumber: order.orderNumber });
     } catch (error) {
