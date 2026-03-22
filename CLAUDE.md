@@ -84,6 +84,8 @@ Interactive PC configurator with component selection. Configs are saved with a `
 
 ## Environment Setup
 
+- **MoMo sandbox trên máy local** (ví thật test) vs **mock trên Render**: `server/docs/MOMO_LOCAL.md`
+
 Copy `server/.env.example` to `server/.env` and fill in:
 - `MONGODB_URI` — MongoDB connection string (**REQUIRED**)
 - `JWT_SECRET` — Secret for JWT signing (**REQUIRED**, server won't start without it)
@@ -97,6 +99,8 @@ Copy `server/.env.example` to `server/.env` and fill in:
 - **Frontend**: Vercel — auto-deploys from `main`, builds `my-client`, SPA rewrites via `vercel.json`
 - **Backend**: Render (Singapore, free tier) — auto-deploys from `main`, port 10000, config in `render.yaml`
 - **Production API**: `https://aurapc-backend.onrender.com/api`
+- **Render env / MoMo–ZaloPay–domain alignment**: `server/docs/DEPLOY_RENDER.md` (canonical `FRONTEND_URL` + return URLs; AuraVisual; post-deploy tests)
+- **If secrets were exposed**: `server/docs/SECURITY_ROTATION.md`
 
 ## Security
 

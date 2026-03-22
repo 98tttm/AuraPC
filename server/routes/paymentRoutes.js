@@ -49,10 +49,14 @@ function generateOrderNumber(prefix = 'MOMO') {
 }
 
 function buildMockPayUrl(orderNumber, paymentMethod) {
-    // Prefer FRONTEND_URL for mock mode (redirectUrl may still be localhost)
+    // Mock: always send user to FRONTEND_URL when set (same host as checkout).
+    // Avoids Vercel NOT_FOUND when MOMO_REDIRECT_URL points at wrong project (e.g. aurapc.vercel.app).
+    const frontend = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
     let baseRedirect = momoUtils.config.redirectUrl;
-    if (baseRedirect.includes('localhost') && process.env.FRONTEND_URL) {
-        baseRedirect = `${process.env.FRONTEND_URL.replace(/\/$/, '')}/checkout-momo-return`;
+    if (frontend) {
+        baseRedirect = `${frontend}/checkout-momo-return`;
+    } else if (baseRedirect.includes('localhost')) {
+        baseRedirect = 'http://localhost:4200/checkout-momo-return';
     }
     const url = new URL(baseRedirect);
     const message = paymentMethod === 'atm'

@@ -1,0 +1,118 @@
+const { h1, h2, h3, h4, p, bullet, numberedItem, spacer, pageBreak, makeTable } = require('./report-helpers');
+
+module.exports = function chapter5() {
+  return [
+    h1('CHƯƠNG 5: TỔNG KẾT'),
+    pageBreak(),
+
+    h2('5.1. Đánh giá đồ án'),
+
+    h3('5.1.1. Ưu điểm'),
+    p('Qua quá trình nghiên cứu, thiết kế và phát triển, đồ án AuraPC đã đạt được nhiều kết quả đáng ghi nhận:', { indent: true }),
+    spacer(),
+
+    p('**Về mặt chức năng:**', { indent: true }),
+    bullet('**Hệ thống TMĐT hoàn chỉnh:** Đã xây dựng thành công nền tảng thương mại điện tử với đầy đủ các module cốt lõi: quản lý sản phẩm, giỏ hàng, đặt hàng, thanh toán (4 phương thức), theo dõi đơn hàng, đánh giá sản phẩm, quản lý tài khoản, hệ thống khuyến mãi và thông báo real-time.'),
+    bullet('**PC Builder (Aura Builder):** Công cụ lắp ráp cấu hình PC tương tác, cho phép chọn 13 loại linh kiện, lưu cấu hình với shareId (link chia sẻ 7 ngày), xuất PDF chi tiết và gửi email. Đây là tính năng khác biệt so với đa số đối thủ.'),
+    bullet('**AI Chatbot (AruBot):** Tích hợp mô hình ngôn ngữ lớn Qwen 3 235B thông qua Replicate API, với khả năng tư vấn sản phẩm dựa trên catalog thực tế (cached từ database), matching sản phẩm 4 cấp độ (slug → name → regex → fuzzy) và gợi ý sản phẩm phù hợp nhu cầu.'),
+    bullet('**Cộng đồng AuraHub:** Mạng xã hội mini cho game thủ với đầy đủ tính năng: đăng bài (text + ảnh + poll), bình luận lồng, thích, repost, chia sẻ, follow/unfollow, trending, kiểm duyệt nội dung (moderation workflow).'),
+    bullet('**Thanh toán đa kênh:** Tích hợp thành công 4 phương thức thanh toán: MoMo, ZaloPay (signature verification, IPN callback), COD + OTP xác nhận, và chuyển khoản ATM/QR. Server-side price verification chống gian lận.'),
+    bullet('**Hỗ trợ khách hàng real-time:** Chat trực tiếp giữa khách hàng và admin qua Socket.IO, với typing indicator, lưu trữ lịch sử hội thoại và thông báo real-time.'),
+    spacer(),
+
+    p('**Về mặt kỹ thuật:**', { indent: true }),
+    bullet('**Kiến trúc hiện đại:** Sử dụng các công nghệ mới nhất: Angular 21 (standalone components, signals), Express 5.2, Mongoose 9.1, Socket.IO, Three.js. Monorepo structure cho phép chia sẻ code giữa client và admin.'),
+    bullet('**Trực quan hóa 3D:** Tích hợp Three.js trên trang chủ với mô hình PC gaming tương tác (xoay, zoom, hotspot interaction) và Google Model Viewer cho trang chi tiết sản phẩm. Đây là yếu tố tạo sự khác biệt lớn về trải nghiệm.'),
+    bullet('**Bảo mật tốt:** JWT authentication không sử dụng fallback secret, OTP validation, server-side price verification, HMAC-SHA256 signature cho payment callbacks, CORS whitelist, duplicate order detection.'),
+    bullet('**Real-time communication:** Socket.IO với room-based architecture (user:userId, admin), JWT auth on connection, cho phép cập nhật trạng thái đơn hàng, tin nhắn hỗ trợ và thông báo theo thời gian thực.'),
+    bullet('**Responsive Design:** Giao diện hỗ trợ đầy đủ desktop (1920px+), tablet (768px) và mobile (375px) với layout tối ưu cho từng kích thước.'),
+    bullet('**Admin Panel chuyên nghiệp:** Giao diện quản trị Shopify Polaris-inspired với Dark/Light theme, sidebar collapsible, dashboard KPI, data tables với filter/sort/pagination, toast notifications và confirm dialogs.'),
+    bullet('**Deployment tự động:** CI/CD pipeline: GitHub push → Vercel auto-build (frontend) + Render auto-deploy (backend). Health check endpoint giám sát trạng thái database.'),
+    spacer(),
+
+    p('**Về mặt trải nghiệm người dùng:**', { indent: true }),
+    bullet('Giao diện Vietnamese-first: Routes sử dụng slug tiếng Việt (/san-pham, /tai-khoan, /ho-tro), nội dung hiển thị tiếng Việt, format tiền tệ VND.'),
+    bullet('Đăng nhập passwordless (OTP qua SĐT): Phù hợp với thói quen người dùng Việt Nam, không cần nhớ mật khẩu.'),
+    bullet('Hỗ trợ mua hàng không cần đăng nhập (Guest checkout): Giảm barrier cho người dùng mới.'),
+    bullet('Tra cứu đơn hàng công khai: Không cần đăng nhập, chỉ cần mã đơn hàng.'),
+    spacer(),
+
+    h3('5.1.2. Nhược điểm'),
+    p('Bên cạnh những kết quả đạt được, đồ án vẫn còn một số hạn chế cần cải thiện:', { indent: true }),
+    spacer(),
+
+    p('**Về mặt bảo mật (chưa hoàn thiện):**', { indent: true }),
+    bullet('Chưa tích hợp helmet middleware cho security headers (X-Content-Type-Options, X-Frame-Options, CSP).'),
+    bullet('Chưa có rate limiting cho các endpoint nhạy cảm (OTP, login) — có nguy cơ brute force.'),
+    bullet('File upload chưa có MIME type validation — có thể upload file không phải ảnh.'),
+    bullet('Một số endpoint chưa có authorization đầy đủ (order detail, builder write endpoints).'),
+    bullet('Vẫn sử dụng bypassSecurityTrustHtml ở product-detail component (nguy cơ XSS).'),
+    bullet('Chưa có express-mongo-sanitize để chống NoSQL injection.'),
+    spacer(),
+
+    p('**Về mặt chức năng:**', { indent: true }),
+    bullet('AuraVisual (3D render PC Builder) sử dụng hardcoded localhost:5678 — không hoạt động trên production.'),
+    bullet('Chưa có hệ thống quản lý đơn vận (shipping tracking integration) với các đơn vị vận chuyển.'),
+    bullet('Chưa hỗ trợ multi-language (hiện chỉ có tiếng Việt).'),
+    bullet('Hệ thống OTP sử dụng devOtp trong development — chưa tích hợp SMS gateway thực tế cho production.'),
+    bullet('Chưa có hệ thống quản lý kho hàng nâng cao (warehouse management, inventory alerts).'),
+    bullet('AruBot AI chatbot phụ thuộc vào Replicate API (Qwen 3) — latency cao và chi phí token.'),
+    spacer(),
+
+    p('**Về mặt hiệu suất:**', { indent: true }),
+    bullet('Backend deploy trên Render free tier (Singapore) — cold start chậm (30-60 giây sau thời gian idle).'),
+    bullet('Chưa có caching layer (Redis) cho các truy vấn thường xuyên (danh sách sản phẩm, danh mục).'),
+    bullet('Hình ảnh sản phẩm chưa được tối ưu (chưa có CDN, lazy loading ảnh, WebP format).'),
+    bullet('Còn khoảng 30 console.log statements trong production code cần cleanup.'),
+    spacer(),
+
+    p('**Về mặt kiểm thử:**', { indent: true }),
+    bullet('Test coverage chưa đầy đủ — chỉ có một số unit tests cơ bản (Jest cho backend, Karma cho frontend).'),
+    bullet('Chưa có integration tests cho các luồng quan trọng (checkout flow, payment flow).'),
+    bullet('Chưa có end-to-end tests (Cypress hoặc Playwright).'),
+    spacer(),
+
+    h2('5.2. Hướng phát triển trong tương lai'),
+    p('Dựa trên các hạn chế đã nhận diện và xu hướng công nghệ, nhóm đề xuất các hướng phát triển sau:', { indent: true }),
+    spacer(),
+
+    p('**Giai đoạn 1 — Hoàn thiện bảo mật và hiệu suất:**', { indent: true }),
+    numberedItem('Tích hợp helmet, express-rate-limit, express-mongo-sanitize middleware.'),
+    numberedItem('Thêm MIME type validation và Content-Disposition cho file uploads.'),
+    numberedItem('Fix authorization gaps (order detail, builder write, address IDOR).'),
+    numberedItem('Thay thế bypassSecurityTrustHtml bằng Angular sanitizer.'),
+    numberedItem('Thêm Redis caching layer cho product queries và session management.'),
+    numberedItem('Migrate backend lên Render paid tier hoặc VPS (loại bỏ cold start).'),
+    numberedItem('Tích hợp CDN (Cloudflare/CloudFront) cho static assets và ảnh sản phẩm.'),
+    spacer(),
+
+    p('**Giai đoạn 2 — Mở rộng chức năng:**', { indent: true }),
+    numberedItem('Tích hợp SMS gateway thực tế (Twilio, SpeedSMS, eSMS) cho OTP production.'),
+    numberedItem('Tích hợp vận chuyển: API GHTK, GHN, Viettel Post cho tracking đơn hàng real-time.'),
+    numberedItem('Hệ thống notification nâng cao: push notification (FCM), email digest, SMS alerts.'),
+    numberedItem('Wishlist (Danh sách yêu thích): Cho phép users lưu sản phẩm quan tâm.'),
+    numberedItem('So sánh sản phẩm: Bảng so sánh specs giữa 2-3 sản phẩm cùng loại.'),
+    numberedItem('Loyalty program: Tích điểm mua hàng, đổi voucher, membership tiers.'),
+    numberedItem('Advanced Analytics: Google Analytics 4, Facebook Pixel, conversion tracking.'),
+    spacer(),
+
+    p('**Giai đoạn 3 — Mobile App và AI nâng cao:**', { indent: true }),
+    numberedItem('Phát triển ứng dụng di động (React Native hoặc Flutter) với shared API backend.'),
+    numberedItem('Nâng cấp AruBot: Fine-tune model trên dữ liệu AuraPC, thêm voice input, product comparison.'),
+    numberedItem('Recommendation Engine: Gợi ý sản phẩm dựa trên lịch sử mua hàng và hành vi duyệt web (collaborative filtering).'),
+    numberedItem('AuraVisual production: Deploy 3D rendering service, real-time PC visualization trong Builder.'),
+    numberedItem('Multi-language support: Tiếng Anh, tiếng Nhật (mở rộng thị trường).'),
+    numberedItem('PWA (Progressive Web App): Offline support, install to home screen, push notifications.'),
+    spacer(),
+
+    p('**Giai đoạn 4 — Mở rộng quy mô:**', { indent: true }),
+    numberedItem('Microservices architecture: Tách monolith thành các service độc lập (auth, product, order, payment, chat).'),
+    numberedItem('Kubernetes deployment: Container orchestration cho auto-scaling.'),
+    numberedItem('Multi-tenant admin: Cho phép nhiều seller đăng bán sản phẩm (marketplace model).'),
+    numberedItem('Data warehouse: Xây dựng hệ thống phân tích dữ liệu lớn (BigQuery, Elasticsearch) cho business intelligence.'),
+    numberedItem('Mở rộng danh mục: Console gaming, gaming peripherals cao cấp, custom modding services.'),
+    spacer(),
+
+    p('Tóm lại, đồ án AuraPC đã đạt được mục tiêu xây dựng một nền tảng thương mại điện tử PC gaming toàn diện, tích hợp nhiều công nghệ hiện đại như 3D visualization, AI chatbot, real-time communication và thanh toán trực tuyến. Mặc dù còn một số hạn chế cần cải thiện, đồ án đã cung cấp nền tảng vững chắc để phát triển thêm trong tương lai, với tiềm năng trở thành sản phẩm thực tế phục vụ cộng đồng game thủ Việt Nam.', { indent: true }),
+  ];
+};

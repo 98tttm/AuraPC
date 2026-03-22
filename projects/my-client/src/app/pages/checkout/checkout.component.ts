@@ -473,8 +473,16 @@ export class CheckoutComponent implements OnInit {
       }).subscribe({
         next: (res) => {
           if (res.payUrl) {
-            // Chuyển hướng người dùng qua cổng MoMo
-            window.location.href = res.payUrl;
+            if (res.mock) {
+              this.toast.showInfo(
+                'Chế độ demo: không mở ví MoMo thật. Đang chuyển đến trang xác nhận thanh toán…',
+              );
+              setTimeout(() => {
+                window.location.href = res.payUrl;
+              }, 1400);
+            } else {
+              window.location.href = res.payUrl;
+            }
           } else {
             this.submitting.set(false);
             this.errorMessage.set('Không nhận được URL thanh toán từ MoMo.');

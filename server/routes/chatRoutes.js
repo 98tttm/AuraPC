@@ -174,10 +174,29 @@ router.get('/debug-catalog', async (req, res) => {
   }
 });
 
+function isLocalhostWebhook(url) {
+  try {
+    const u = new URL(url);
+    return ['localhost', '127.0.0.1', '0.0.0.0'].includes(u.hostname);
+  } catch (_) {
+    return false;
+  }
+}
+
 router.post('/auravisual', requireAuth, async (req, res) => {
-  const webhookUrl = process.env.AURA_VISUAL_WEBHOOK_URL;
+  const webhookUrl =
+    process.env.AURA_VISUAL_WEBHOOK_URL ||
+    (process.env.NODE_ENV !== 'production'
+      ? 'http://localhost:5678/webhook/auravisual-trigger'
+      : '');
   if (!webhookUrl) {
     return res.status(503).json({ error: 'AURA_VISUAL_WEBHOOK_URL is not configured on the server.' });
+  }
+  if (process.env.NODE_ENV === 'production' && isLocalhostWebhook(webhookUrl)) {
+    return res.status(503).json({
+      error:
+        'AuraVisual is disabled in production: AURA_VISUAL_WEBHOOK_URL must be a public URL (not localhost). Unset it or set a deployed n8n/tunnel URL.',
+    });
   }
 
   const { components } = req.body || {};

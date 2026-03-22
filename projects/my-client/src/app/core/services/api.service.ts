@@ -369,8 +369,11 @@ export class ApiService {
     shippingAddress: Record<string, string>;
     paymentMethod: string;
     directDiscount?: number;
-  }): Observable<{ success: boolean; payUrl: string }> {
-    return this.http.post<{ success: boolean; payUrl: string }>(`${BASE}/payment/momo/create`, payload);
+  }): Observable<{ success: boolean; payUrl: string; mock?: boolean; deduped?: boolean }> {
+    return this.http.post<{ success: boolean; payUrl: string; mock?: boolean; deduped?: boolean }>(
+      `${BASE}/payment/momo/create`,
+      payload,
+    );
   }
 
   /** Gửi yêu cầu thanh toán ZaloPay */

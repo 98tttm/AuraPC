@@ -1,0 +1,269 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Sitemap - Client" id="sitemap-client">
+    <mxGraphModel dx="2200" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ROOT -->
+        <mxCell id="root" value="AuraPC Client Site" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;fontColor=#FFFFFF;fontSize=14;fontStyle=1;strokeColor=#0D1642;shadow=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="540" y="20" width="220" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- LEVEL 1 NODES -->
+        <mxCell id="L1_auth" value="Login / Register" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="-60" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_home" value="Homepage&lt;br&gt;&lt;font style=&quot;font-size:9px;font-style:italic&quot;&gt;/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="140" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_product" value="Product&lt;br&gt;&lt;font style=&quot;font-size:9px;font-style:italic&quot;&gt;/san-pham&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="340" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_cart" value="Cart &amp; Checkout&lt;br&gt;&lt;font style=&quot;font-size:9px;font-style:italic&quot;&gt;/cart&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="540" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_account" value="Account&lt;br&gt;&lt;font style=&quot;font-size:9px;font-style:italic&quot;&gt;/tai-khoan&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="740" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_about" value="About AuraPC&lt;br&gt;&lt;font style=&quot;font-size:9px;font-style:italic&quot;&gt;/ve-aurapc&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="940" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="L1_other" value="Other Pages" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#283593;fontColor=#FFFFFF;fontSize=11;fontStyle=1;strokeColor=#1A237E;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="130" width="150" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ROOT to L1 edges -->
+        <mxCell id="e_root_auth" edge="1" source="root" target="L1_auth" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_home" edge="1" source="root" target="L1_home" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_product" edge="1" source="root" target="L1_product" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_cart" edge="1" source="root" target="L1_cart" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_account" edge="1" source="root" target="L1_account" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_about" edge="1" source="root" target="L1_about" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_root_other" edge="1" source="root" target="L1_other" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== AUTH children ===== -->
+        <mxCell id="auth_login" value="Login Page&lt;br&gt;(OTP Phone)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="auth_register" value="Register Page&lt;br&gt;(OTP Verify)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="275" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="auth_forgot" value="Forgot Password&lt;br&gt;(OTP Reset)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="330" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_auth1" edge="1" source="L1_auth" target="auth_login" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_auth2" edge="1" source="L1_auth" target="auth_register" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_auth3" edge="1" source="L1_auth" target="auth_forgot" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== HOMEPAGE children ===== -->
+        <mxCell id="home_hero" value="Hero Section&lt;br&gt;(3D Canvas)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="home_featured" value="Featured Products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="275" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="home_categories" value="Category Showcase" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="330" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="home_promo" value="Promotions / News" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="385" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="home_video" value="Intro Video" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="440" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="home_testimonials" value="Testimonials&lt;br&gt;(Customer Reviews)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="495" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_home1" edge="1" source="L1_home" target="home_hero" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_home2" edge="1" source="L1_home" target="home_featured" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_home3" edge="1" source="L1_home" target="home_categories" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_home4" edge="1" source="L1_home" target="home_promo" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_home5" edge="1" source="L1_home" target="home_video" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_home6" edge="1" source="L1_home" target="home_testimonials" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== PRODUCT children ===== -->
+        <mxCell id="prod_categories" value="Product Categories" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="290" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_prod_cat" edge="1" source="L1_product" target="prod_categories" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Category items -->
+        <mxCell id="cat_all" value="All Products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="290" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_cpu" value="CPU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="332" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_mainboard" value="Mainboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="374" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_ram" value="RAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="416" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_gpu" value="GPU (Graphics Card)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="458" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_ssd" value="SSD / Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="500" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_psu" value="Power Supply (PSU)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="542" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_case" value="PC Case" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="584" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_cooler" value="Cooling / Fans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="626" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat_peripherals" value="Peripherals&lt;br&gt;(Keyboard, Mouse, Monitor)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontSize=9;strokeColor=#CE93D8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="668" width="120" height="42" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_cat1" edge="1" source="prod_categories" target="cat_all" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat2" edge="1" source="prod_categories" target="cat_cpu" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat3" edge="1" source="prod_categories" target="cat_mainboard" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat4" edge="1" source="prod_categories" target="cat_ram" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat5" edge="1" source="prod_categories" target="cat_gpu" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat6" edge="1" source="prod_categories" target="cat_ssd" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat7" edge="1" source="prod_categories" target="cat_psu" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat8" edge="1" source="prod_categories" target="cat_case" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat9" edge="1" source="prod_categories" target="cat_cooler" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cat10" edge="1" source="prod_categories" target="cat_peripherals" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Product Detail (sub of product listing) -->
+        <mxCell id="prod_detail" value="Product Detail&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;(Images, Price, Specs,&lt;br&gt;3D Model, Description)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="740" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_prod_detail" edge="1" source="cat_peripherals" target="prod_detail" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Product Reviews -->
+        <mxCell id="prod_reviews" value="Product Reviews&lt;br&gt;&amp; Ratings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="810" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_prod_reviews" edge="1" source="prod_detail" target="prod_reviews" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== CART & CHECKOUT children ===== -->
+        <mxCell id="cart_summary" value="Cart Summary&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;(Items, Quantities, Totals)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="220" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="cart_checkout" value="Checkout&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/checkout&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="280" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_cart1" edge="1" source="L1_cart" target="cart_summary" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_cart2" edge="1" source="L1_cart" target="cart_checkout" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Checkout sub-pages -->
+        <mxCell id="ck_address" value="Shipping Address" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontSize=9;strokeColor=#FFB74D;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="350" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="ck_payment" value="Payment Method" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontSize=9;strokeColor=#FFB74D;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="392" width="120" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_ck1" edge="1" source="cart_checkout" target="ck_address" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_ck2" edge="1" source="cart_checkout" target="ck_payment" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Payment methods -->
+        <mxCell id="pay_momo" value="MoMo Payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;fontSize=9;strokeColor=#F48FB1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="470" y="450" width="110" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="pay_zalopay" value="ZaloPay Payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;fontSize=9;strokeColor=#F48FB1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="470" y="492" width="110" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="pay_atm" value="ATM / QR Transfer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;fontSize=9;strokeColor=#F48FB1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="470" y="534" width="110" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="pay_cod" value="COD (Cash on Delivery)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;fontSize=9;strokeColor=#F48FB1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="470" y="576" width="110" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_pay1" edge="1" source="ck_payment" target="pay_momo" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_pay2" edge="1" source="ck_payment" target="pay_zalopay" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_pay3" edge="1" source="ck_payment" target="pay_atm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_pay4" edge="1" source="ck_payment" target="pay_cod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Checkout success -->
+        <mxCell id="ck_success" value="Order Success&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/checkout-success&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;fontSize=10;strokeColor=#81C784;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="630" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_ck_success" edge="1" source="pay_cod" target="ck_success" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== ACCOUNT children ===== -->
+        <mxCell id="acc_profile" value="Profile&lt;br&gt;(Personal Info)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acc_address" value="Address Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="275" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acc_orders" value="Order History" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="330" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acc_reviews" value="My Reviews" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="385" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acc_support" value="Support Tickets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="440" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_acc1" edge="1" source="L1_account" target="acc_profile" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_acc2" edge="1" source="L1_account" target="acc_address" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_acc3" edge="1" source="L1_account" target="acc_orders" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_acc4" edge="1" source="L1_account" target="acc_reviews" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_acc5" edge="1" source="L1_account" target="acc_support" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== ABOUT children ===== -->
+        <mxCell id="about_intro" value="About Us" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="about_support" value="Contact &amp; Support&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/ho-tro&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="275" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="about_community" value="AuraHub&lt;br&gt;(Community)&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/aura-hub&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="330" width="130" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="about_policies" value="Policies Pages&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;(Shipping, Returns, etc.)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="395" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="about_faq" value="FAQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="450" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_about1" edge="1" source="L1_about" target="about_intro" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_about2" edge="1" source="L1_about" target="about_support" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_about3" edge="1" source="L1_about" target="about_community" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_about4" edge="1" source="L1_about" target="about_policies" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_about5" edge="1" source="L1_about" target="about_faq" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- ===== OTHER PAGES children ===== -->
+        <mxCell id="other_blog" value="Blogs&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/blog&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="220" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="other_chatbot" value="AruBot&lt;br&gt;(AI Chatbot)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="275" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="other_builder" value="Aura Builder&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/aura-builder&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="330" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="other_track" value="Order Tracking&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/tra-cuu-don-hang&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="385" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="other_warranty" value="Warranty Lookup&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/tra-cuu-bao-hanh&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="440" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="other_collab" value="Collabs / Campaigns&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/collabs/minecraft&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="495" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_other1" edge="1" source="L1_other" target="other_blog" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_other2" edge="1" source="L1_other" target="other_chatbot" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_other3" edge="1" source="L1_other" target="other_builder" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_other4" edge="1" source="L1_other" target="other_track" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_other5" edge="1" source="L1_other" target="other_warranty" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_other6" edge="1" source="L1_other" target="other_collab" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Blog detail -->
+        <mxCell id="blog_detail" value="Blog Detail&lt;br&gt;&lt;font style=&quot;font-size:8px&quot;&gt;/blog/:slug&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;fontSize=10;strokeColor=#9FA8DA;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="560" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_blog_detail" edge="1" source="other_blog" target="blog_detail" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

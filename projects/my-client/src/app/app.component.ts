@@ -1,7 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, inject, HostListener, signal, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -9,10 +8,6 @@ import { ToastComponent } from './components/toast/toast.component';
 import { ChatbotWidgetComponent } from './components/chatbot-widget/chatbot-widget.component';
 import { SupportChatWidgetComponent } from './components/support-chat-widget/support-chat-widget.component';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RealtimeService } from './core/services/realtime.service';
-import { AuthService } from './core/services/auth.service';
-import { ToastService } from './core/services/toast.service';
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -116,10 +111,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private scrollObserver: IntersectionObserver | null = null;
   private mutationObs: MutationObserver | null = null;
   private observedEls = new WeakSet<Element>();
-  private supportMsgSub: Subscription | null = null;
-  private auth = inject(AuthService);
-  private toast = inject(ToastService);
-  private realtime = inject(RealtimeService);
 
   constructor(
     private router: Router,
@@ -127,20 +118,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initScrollAnimations();
-    this.supportMsgSub = this.realtime.supportMessageCreated$.subscribe((payload) => {
-      const currentUserId = this.auth.currentUser()?._id;
-      if (!currentUserId || payload.conversation.user?._id !== currentUserId) return;
-      if (payload.message.senderType === 'admin') {
-        const name = payload.message.sender?.name || 'Nhân viên tư vấn';
-        this.toast.showInfo(`💬 ${name}: ${payload.message.content.slice(0, 80)}`);
-      }
-    });
+    // Tin nhắn tư vấn chỉ hiển thị trong khung chat (SupportChatWidget), không bật toast/popup toàn trang.
   }
 
   ngOnDestroy(): void {
     this.scrollObserver?.disconnect();
     this.mutationObs?.disconnect();
-    this.supportMsgSub?.unsubscribe();
   }
 
   private initScrollAnimations(): void {

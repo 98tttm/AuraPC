@@ -1,3 +1,7 @@
+# Render: set env in dashboard (this file does not store secrets).
+# Canonical client: use ONE host for FRONTEND_URL, MOMO_REDIRECT_URL, ZALOPAY_REDIRECT_URL
+# (e.g. https://www.aurapc.io.vn/... ) so payment return does not hit a wrong Vercel project (NOT_FOUND).
+# See server/docs/DEPLOY_RENDER.md for full checklist.
 services:
   - type: web
     name: aurapc-backend

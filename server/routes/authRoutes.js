@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const Otp = require('../models/Otp');
 const { signToken, requireAuth } = require('../middleware/auth');
+const { createClient } = require('@supabase/supabase-js');
 
 const router = express.Router();
 
@@ -200,19 +201,21 @@ const fs = require('fs');
 // Ensure uploads dir exists
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
-  },
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+const SUPABASE_AVATAR_BUCKET = process.env.SUPABASE_AVATAR_BUCKET || process.env.SUPABASE_HUB_BUCKET || 'hub-images';
+const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  : null;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
-const upload = multer({ storage: storage });
 
 /** PUT /api/auth/profile - Cập nhật thông tin cá nhân */
 router.put('/profile', requireAuth, async (req, res) => {
@@ -252,8 +255,33 @@ router.post('/avatar', requireAuth, upload.single('avatar'), async (req, res) =>
     const userId = req.userId;
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
-    // URL file: /uploads/filename
-    const avatarUrl = `/uploads/${req.file.filename}`;
+    const ext = path.extname(req.file.originalname || '').toLowerCase() || '.jpg';
+    const filename = `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    let avatarUrl = `/uploads/${filename}`;
+
+    // Prefer Supabase Storage so all users/devices can view avatar consistently
+    if (supabase) {
+      const objectPath = `avatars/${userId}/${filename}`;
+      const { error: uploadError } = await supabase.storage
+        .from(SUPABASE_AVATAR_BUCKET)
+        .upload(objectPath, req.file.buffer, {
+          contentType: req.file.mimetype || 'application/octet-stream',
+          upsert: false,
+        });
+
+      if (!uploadError) {
+        const { data } = supabase.storage.from(SUPABASE_AVATAR_BUCKET).getPublicUrl(objectPath);
+        if (data?.publicUrl) avatarUrl = data.publicUrl;
+      } else {
+        console.error('[POST /api/auth/avatar] Supabase upload failed, fallback to local:', uploadError.message);
+      }
+    }
+
+    // Local fallback (dev): store file if Supabase not configured/failed
+    if (!avatarUrl.startsWith('http')) {
+      const fullPath = path.join(uploadDir, filename);
+      fs.writeFileSync(fullPath, req.file.buffer);
+    }
 
     await User.findByIdAndUpdate(userId, { $set: { avatar: avatarUrl } });
     const user = await User.findById(userId).lean();

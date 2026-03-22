@@ -46,3 +46,10 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Claude / tool temp cwd markers
+tmpclaude-*-cwd
+**/tmpclaude-*-cwd
+
+# User uploads (local dev)
+server/uploads/
+

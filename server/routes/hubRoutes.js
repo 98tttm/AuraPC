@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 const Post = require('../models/Post');
 const HubComment = require('../models/HubComment');
 const Share = require('../models/Share');
@@ -13,15 +14,15 @@ const router = express.Router();
 // === Upload config ===
 const uploadDir = 'uploads/hub';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+const SUPABASE_HUB_BUCKET = process.env.SUPABASE_HUB_BUCKET || 'hub-images';
+const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, 'hub-' + unique + path.extname(file.originalname));
-    },
-});
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
 
 // === Default topic list ===
 const DEFAULT_TOPICS = [
@@ -540,17 +541,48 @@ router.get('/trending', async (req, res) => {
 // ─── UPLOAD ──────────────────────────────────────────────
 
 /** POST /api/hub/upload — Upload ảnh */
-router.post('/upload', requireAuth, upload.array('images', 5), (req, res) => {
-    try {
-        if (!req.files || !req.files.length) {
-            return res.status(400).json({ message: 'Không có file nào' });
-        }
-        const urls = req.files.map((f) => `/uploads/hub/${f.filename}`);
-        res.json({ urls });
-    } catch (err) {
-        console.error('Hub POST upload error:', err);
-        res.status(500).json({ message: 'Lỗi server' });
+router.post('/upload', requireAuth, upload.array('images', 5), async (req, res) => {
+  try {
+    if (!req.files || !req.files.length) {
+      return res.status(400).json({ message: 'Không có file nào' });
     }
+    if (!supabase) {
+      return res.status(503).json({
+        message: 'Supabase Storage chưa được cấu hình đúng. Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY.',
+      });
+    }
+
+    const urls = [];
+    for (const f of req.files) {
+      const ext = path.extname(f.originalname || '').toLowerCase() || '.jpg';
+      const objectPath = `hub/${req.userId}/${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(SUPABASE_HUB_BUCKET)
+        .upload(objectPath, f.buffer, {
+          contentType: f.mimetype || 'application/octet-stream',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Hub Supabase upload error:', uploadError);
+        return res.status(500).json({
+          message: `Không upload được ảnh lên storage: ${uploadError.message || 'Unknown error'}`,
+        });
+      }
+
+      const { data } = supabase.storage.from(SUPABASE_HUB_BUCKET).getPublicUrl(objectPath);
+      if (!data?.publicUrl) {
+        return res.status(500).json({ message: 'Không lấy được URL public của ảnh.' });
+      }
+      urls.push(data.publicUrl);
+    }
+
+    res.json({ urls });
+  } catch (err) {
+    console.error('Hub POST upload error:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
 });
 
 module.exports = router;
