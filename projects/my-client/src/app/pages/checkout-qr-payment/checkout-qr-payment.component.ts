@@ -105,12 +105,14 @@ export class CheckoutQrPaymentComponent implements OnInit {
       paymentMethod: 'qr',
       isPaid: true,
       user: userId ?? undefined,
+      ...((pending as any).promotionCode ? { promotionCode: (pending as any).promotionCode } : {}),
     }).subscribe({
       next: (res) => {
         this.cart.clear();
         try {
           sessionStorage.removeItem(PENDING_KEY);
           sessionStorage.removeItem('aurapc_checkout_payment_method');
+          sessionStorage.removeItem('appliedVoucher');
         } catch {}
         this.confirmSubmitting = false;
         this.router.navigate(['/checkout-success'], { queryParams: { order: res.orderNumber } });

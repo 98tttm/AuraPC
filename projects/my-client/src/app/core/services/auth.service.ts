@@ -26,6 +26,9 @@ export interface User {
   lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
+  googleId?: string;
+  facebookId?: string;
+  authProvider?: 'phone' | 'google' | 'facebook';
 }
 
 export interface RequestOtpResponse {
@@ -56,7 +59,7 @@ export class AuthService {
       const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
       if (raw) {
         const user = JSON.parse(raw) as User;
-        if (user && user.phoneNumber) this.currentUser.set(user);
+        if (user && (user.phoneNumber || user.googleId || user.facebookId)) this.currentUser.set(user);
       }
     } catch {
       // ignore invalid stored user
@@ -94,6 +97,30 @@ export class AuthService {
 
   verifyOtp(phoneNumber: string, otp: string): Observable<VerifyOtpResponse> {
     return this.http.post<VerifyOtpResponse>(`${BASE}/verify-otp`, { phoneNumber, otp }).pipe(
+      tap((res) => {
+        if (res.success && res.user) {
+          this.currentUser.set(res.user);
+          this.persistUser(res.user);
+          if (res.token) this.persistToken(res.token);
+        }
+      })
+    );
+  }
+
+  loginWithGoogle(idToken: string): Observable<VerifyOtpResponse> {
+    return this.http.post<VerifyOtpResponse>(`${BASE}/google`, { idToken }).pipe(
+      tap((res) => {
+        if (res.success && res.user) {
+          this.currentUser.set(res.user);
+          this.persistUser(res.user);
+          if (res.token) this.persistToken(res.token);
+        }
+      })
+    );
+  }
+
+  loginWithFacebook(accessToken: string): Observable<VerifyOtpResponse> {
+    return this.http.post<VerifyOtpResponse>(`${BASE}/facebook`, { accessToken }).pipe(
       tap((res) => {
         if (res.success && res.user) {
           this.currentUser.set(res.user);

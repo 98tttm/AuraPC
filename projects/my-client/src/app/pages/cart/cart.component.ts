@@ -38,7 +38,7 @@ export class CartComponent {
   showVoucherModal = signal(false);
   voucherLoading = signal(false);
   voucherError = signal('');
-  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number } | null>(null);
+  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number; maxDiscountAmount: number | null } | null>(null);
 
   // Computed cart items directly from service
   cartItems = computed(() => this.cart.getItems());
@@ -182,7 +182,9 @@ export class CartComponent {
     const v = this.appliedVoucher();
     if (!v) return 0;
     const subtotal = this.selectedTotal();
-    return Math.min(Math.round(subtotal * v.discountPercent / 100), v.discountAmount);
+    const rawDiscount = Math.round(subtotal * v.discountPercent / 100);
+    // Use maxDiscountAmount as cap (if set), otherwise no cap
+    return v.maxDiscountAmount != null ? Math.min(rawDiscount, v.maxDiscountAmount) : rawDiscount;
   });
 
   /** Final total after all discounts */
@@ -362,6 +364,7 @@ export class CartComponent {
             description: res.promotion.description,
             discountPercent: res.promotion.discountPercent,
             discountAmount: res.promotion.discountAmount,
+            maxDiscountAmount: res.promotion.maxDiscountAmount ?? null,
           });
           // Store in sessionStorage for checkout page
           sessionStorage.setItem('appliedVoucher', JSON.stringify(this.appliedVoucher()));
@@ -400,6 +403,13 @@ export class CartComponent {
         this.toast.showInfo(`"${item.product.name}" chỉ còn ${stock} sản phẩm. Vui lòng giảm số lượng.`);
         return;
       }
+    }
+    // Sync voucher state to sessionStorage (clear stale voucher if none applied)
+    const voucher = this.appliedVoucher();
+    if (voucher) {
+      sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
+    } else {
+      sessionStorage.removeItem('appliedVoucher');
     }
     this.router.navigate(['/checkout']);
   }

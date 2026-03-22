@@ -193,8 +193,8 @@ router.post('/', optionalAuth, async (req, res) => {
       if (qty > stock) {
         return res.status(400).json({ error: `Sản phẩm "${dbProduct.name}" chỉ còn ${stock} sản phẩm trong kho.` });
       }
-      // Use actual DB price (price field = current selling price)
-      const verifiedPrice = dbProduct.price ?? 0;
+      // Use sale price if available, otherwise regular price
+      const verifiedPrice = dbProduct.salePrice ?? dbProduct.price ?? 0;
       verifiedItems.push({
         product: item.product,
         name: dbProduct.name || item.name,

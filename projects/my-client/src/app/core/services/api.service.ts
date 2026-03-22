@@ -388,7 +388,7 @@ export class ApiService {
   validatePromotion(code: string, orderAmount: number): Observable<{
     valid: boolean;
     message?: string;
-    promotion?: { _id: string; code: string; description: string; discountPercent: number; discountAmount: number };
+    promotion?: { _id: string; code: string; description: string; discountPercent: number; discountAmount: number; maxDiscountAmount: number | null };
   }> {
     return this.http.post<any>(`${BASE}/promotions/validate`, { code, orderAmount });
   }

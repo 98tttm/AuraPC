@@ -58,7 +58,7 @@ export class CheckoutZalopayReturnComponent implements OnInit {
         this.message = 'Thanh toán ZaloPay thành công!';
         this.loading = false;
         this.cart.clear();
-        try { sessionStorage.removeItem('aurapc_checkout_payment_method'); } catch { }
+        try { sessionStorage.removeItem('aurapc_checkout_payment_method'); sessionStorage.removeItem('appliedVoucher'); } catch { }
       },
       error: (err) => {
         this.isSuccess = false;

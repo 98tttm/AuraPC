@@ -18,13 +18,13 @@ const addressSchema = new mongoose.Schema(
 );
 
 /**
- * User: đăng nhập bằng SĐT + OTP.
+ * User: đăng nhập bằng SĐT + OTP hoặc social login (Google, Facebook).
  * Các trường optional (email, username, profile, avatar) để trống lúc tạo, cập nhật sau.
  */
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, default: '' },
-    phoneNumber: { type: String, required: true, unique: true, trim: true },
+    phoneNumber: { type: String, unique: true, sparse: true, trim: true, default: null },
     username: { type: String, default: '' },
     profile: {
       fullName: { type: String, default: '' },
@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: '' },
     active: { type: Boolean, default: true },
     lastLogin: { type: Date, default: null },
+    // Social login
+    googleId: { type: String, default: null },
+    facebookId: { type: String, default: null },
+    authProvider: { type: String, enum: ['phone', 'google', 'facebook'], default: 'phone' },
     // AuraHub social graph
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -47,7 +51,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true, strict: true }
 );
 
-/* phoneNumber đã có index từ unique: true, không khai báo thêm tránh duplicate */
 userSchema.index({ email: 1 });
+userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
+userSchema.index({ facebookId: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('User', userSchema);

@@ -4,6 +4,8 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Promotion = require('../models/Promotion');
+const PromotionUsage = require('../models/PromotionUsage');
 const { requireAuth } = require('../middleware/auth');
 const momoUtils = require('../utils/momo');
 const zalopayUtils = require('../utils/zalopay');
@@ -145,9 +147,9 @@ async function notifyPaidOrder(order) {
 
 /**
  * Validate items, check stock, calculate total.
- * Returns { orderItems, finalTotal, discountAmount } or throws.
+ * Returns { orderItems, finalTotal, discountAmount, promoDiscount, appliedPromotion } or throws.
  */
-async function validateAndBuildItems(items, directDiscount) {
+async function validateAndBuildItems(items, directDiscount, { promotionCode, userId } = {}) {
     const productIds = items
         .map((item) => item.product)
         .filter((id) => id && mongoose.Types.ObjectId.isValid(id));
@@ -190,9 +192,47 @@ async function validateAndBuildItems(items, directDiscount) {
     }
 
     const discountAmount = Number(directDiscount) || 0;
-    const finalTotal = Math.max(0, originalTotal - discountAmount);
+    const subtotal = Math.max(0, originalTotal - discountAmount);
 
-    return { orderItems, finalTotal, discountAmount };
+    // === PROMOTION VALIDATION ===
+    let promoDiscount = 0;
+    let appliedPromotion = null;
+    let validatedPromo = null;
+    if (promotionCode) {
+        validatedPromo = await Promotion.findOne({ code: promotionCode.toUpperCase().trim(), isActive: true });
+        if (!validatedPromo) {
+            throw Object.assign(new Error('Mã giảm giá không hợp lệ.'), { statusCode: 400 });
+        }
+        const now = new Date();
+        if (now < new Date(validatedPromo.startDate) || now > new Date(validatedPromo.endDate)) {
+            throw Object.assign(new Error('Mã giảm giá đã hết hạn.'), { statusCode: 400 });
+        }
+        if (validatedPromo.maxUsage != null && validatedPromo.usedCount >= validatedPromo.maxUsage) {
+            throw Object.assign(new Error('Mã giảm giá đã hết lượt sử dụng.'), { statusCode: 400 });
+        }
+        if (subtotal < validatedPromo.minOrderAmount) {
+            throw Object.assign(new Error('Đơn hàng không đạt giá trị tối thiểu để dùng mã.'), { statusCode: 400 });
+        }
+        if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+            const userUsageCount = await PromotionUsage.countDocuments({ promotion: validatedPromo._id, user: userId });
+            if (userUsageCount >= validatedPromo.maxUsagePerUser) {
+                throw Object.assign(new Error('Bạn đã sử dụng mã này đủ số lần.'), { statusCode: 400 });
+            }
+        }
+        const rawDiscount = (subtotal * validatedPromo.discountPercent) / 100;
+        promoDiscount = Math.round(
+            validatedPromo.maxDiscountAmount != null ? Math.min(rawDiscount, validatedPromo.maxDiscountAmount) : rawDiscount
+        );
+        appliedPromotion = {
+            code: validatedPromo.code,
+            discountPercent: validatedPromo.discountPercent,
+            discountAmount: promoDiscount,
+        };
+    }
+
+    const finalTotal = Math.max(0, subtotal - promoDiscount);
+
+    return { orderItems, finalTotal, discountAmount: discountAmount + promoDiscount, promoDiscount, appliedPromotion, validatedPromo };
 }
 
 /**
@@ -208,12 +248,23 @@ async function createOrderFromPending(pendingData, { isPaid = true } = {}) {
         shippingFee: pendingData.shippingFee || 0,
         shippingAddress: pendingData.shippingAddress,
         paymentMethod: pendingData.paymentMethod,
+        appliedPromotion: pendingData.appliedPromotion || undefined,
         isPaid,
         paidAt: isPaid ? new Date() : null,
         status: 'pending',
         zaloPayTransId: pendingData.zaloPayTransId || null,
     });
     await order.save();
+
+    // Track promotion usage
+    if (pendingData.validatedPromoId && pendingData.userId) {
+        const userObjectId = mongoose.Types.ObjectId.isValid(pendingData.userId)
+            ? new mongoose.Types.ObjectId(pendingData.userId) : null;
+        if (userObjectId) {
+            await Promotion.updateOne({ _id: pendingData.validatedPromoId }, { $inc: { usedCount: 1 } });
+            await PromotionUsage.create({ promotion: pendingData.validatedPromoId, user: userObjectId, order: order._id });
+        }
+    }
 
     // Gửi hóa đơn điện tử qua email nếu khách yêu cầu
     if (pendingData.requestInvoice && pendingData.invoiceEmail) {
@@ -278,7 +329,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
 
     try {
         const userId = req.userId;
-        const { items, shippingAddress, directDiscount, requestInvoice, invoiceEmail, invoiceType } = req.body;
+        const { items, shippingAddress, directDiscount, promotionCode, requestInvoice, invoiceEmail, invoiceType } = req.body;
 
         if (!['momo', 'atm'].includes(paymentMethod)) {
             return res.status(400).json({ success: false, message: 'Invalid payment method' });
@@ -288,7 +339,7 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount } = await validateAndBuildItems(items, directDiscount);
+        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount, appliedPromotion, validatedPromo } = await validateAndBuildItems(items, directDiscount, { promotionCode, userId });
         const shippingFeeCalc = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
         finalTotal = subtotalAfterDiscount + shippingFeeCalc;
 
@@ -342,6 +393,8 @@ router.post('/momo/create', requireAuth, async (req, res) => {
             shippingFee: shippingFeeCalc,
             shippingAddress,
             paymentMethod,
+            appliedPromotion: appliedPromotion || undefined,
+            validatedPromoId: validatedPromo?._id || null,
             requestInvoice: !!requestInvoice,
             invoiceEmail: invoiceEmail || '',
             invoiceType: invoiceType || 'personal',
@@ -524,13 +577,13 @@ router.get('/momo/confirm', requireAuth, async (req, res) => {
 router.post('/zalopay/create', requireAuth, async (req, res) => {
     try {
         const userId = req.userId;
-        const { items, shippingAddress, directDiscount, requestInvoice, invoiceEmail, invoiceType } = req.body;
+        const { items, shippingAddress, directDiscount, promotionCode, requestInvoice, invoiceEmail, invoiceType } = req.body;
 
         if (!items || !items.length) {
             return res.status(400).json({ success: false, message: 'Cart items required' });
         }
 
-        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount } = await validateAndBuildItems(items, directDiscount);
+        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount, appliedPromotion, validatedPromo } = await validateAndBuildItems(items, directDiscount, { promotionCode, userId });
         const shippingFeeCalc = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
         const finalTotal = subtotalAfterDiscount + shippingFeeCalc;
         const orderNumber = generateOrderNumber('ZLP');
@@ -599,6 +652,8 @@ router.post('/zalopay/create', requireAuth, async (req, res) => {
             shippingAddress,
             paymentMethod: 'zalopay',
             zaloPayTransId: zaloPayload.app_trans_id,
+            appliedPromotion: appliedPromotion || undefined,
+            validatedPromoId: validatedPromo?._id || null,
             requestInvoice: !!requestInvoice,
             invoiceEmail: invoiceEmail || '',
             invoiceType: invoiceType || 'personal',

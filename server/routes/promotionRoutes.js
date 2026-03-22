@@ -65,6 +65,7 @@ router.post('/validate', async (req, res) => {
         description: promotion.description,
         discountPercent: promotion.discountPercent,
         discountAmount: Math.round(discountAmount),
+        maxDiscountAmount: promotion.maxDiscountAmount ?? null,
       },
     });
   } catch (err) {

@@ -1,8 +1,10 @@
 const express = require('express');
+const axios = require('axios');
 const User = require('../models/User');
 const Otp = require('../models/Otp');
 const { signToken, requireAuth } = require('../middleware/auth');
 const { createClient } = require('@supabase/supabase-js');
+const { OAuth2Client } = require('google-auth-library');
 
 const router = express.Router();
 
@@ -190,6 +192,125 @@ router.post('/verify-otp', async (req, res) => {
   } catch (err) {
     console.error('[POST /api/auth/verify-otp]', err);
     res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// === Social Login: Google ===
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+/** POST /api/auth/google — Login/Register with Google ID token */
+router.post('/google', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ success: false, message: 'ID token is required.' });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({ googleId }).lean();
+
+    if (!user && email) {
+      // Link to existing user with same email
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) {
+        existing.googleId = googleId;
+        existing.lastLogin = new Date();
+        if (!existing.avatar && picture) existing.avatar = picture;
+        if (!existing.profile.fullName && name) existing.profile.fullName = name;
+        await existing.save();
+        user = await User.findById(existing._id).lean();
+      }
+    }
+
+    if (!user) {
+      const newUser = await User.create({
+        googleId,
+        email: email ? email.toLowerCase() : '',
+        phoneNumber: null,
+        profile: { fullName: name || '' },
+        avatar: picture || '',
+        authProvider: 'google',
+        active: true,
+        lastLogin: new Date(),
+      });
+      user = newUser.toObject();
+    } else {
+      await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+      user = await User.findById(user._id).lean();
+    }
+
+    const out = { ...user, id: user._id.toString() };
+    const token = signToken({ userId: out.id, phoneNumber: user.phoneNumber || null });
+    res.json({ success: true, user: out, token });
+  } catch (err) {
+    console.error('[POST /api/auth/google]', err);
+    res.status(401).json({ success: false, message: 'Đăng nhập Google thất bại.' });
+  }
+});
+
+// === Social Login: Facebook ===
+
+/** POST /api/auth/facebook — Login/Register with Facebook access token */
+router.post('/facebook', async (req, res) => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) {
+      return res.status(400).json({ success: false, message: 'Access token is required.' });
+    }
+
+    const fbResponse = await axios.get('https://graph.facebook.com/me', {
+      params: {
+        fields: 'id,name,email,picture.type(large)',
+        access_token: accessToken,
+      },
+    });
+    const { id: facebookId, name, email, picture } = fbResponse.data;
+    const avatarUrl = picture?.data?.url || '';
+
+    let user = await User.findOne({ facebookId }).lean();
+
+    if (!user && email) {
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) {
+        existing.facebookId = facebookId;
+        existing.lastLogin = new Date();
+        if (!existing.avatar && avatarUrl) existing.avatar = avatarUrl;
+        if (!existing.profile.fullName && name) existing.profile.fullName = name;
+        await existing.save();
+        user = await User.findById(existing._id).lean();
+      }
+    }
+
+    if (!user) {
+      const newUser = await User.create({
+        facebookId,
+        email: email ? email.toLowerCase() : '',
+        phoneNumber: null,
+        profile: { fullName: name || '' },
+        avatar: avatarUrl,
+        authProvider: 'facebook',
+        active: true,
+        lastLogin: new Date(),
+      });
+      user = newUser.toObject();
+    } else {
+      await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+      user = await User.findById(user._id).lean();
+    }
+
+    const out = { ...user, id: user._id.toString() };
+    const token = signToken({ userId: out.id, phoneNumber: user.phoneNumber || null });
+    res.json({ success: true, user: out, token });
+  } catch (err) {
+    console.error('[POST /api/auth/facebook]', err);
+    res.status(401).json({ success: false, message: 'Đăng nhập Facebook thất bại.' });
   }
 });
 

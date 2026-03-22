@@ -1,7 +1,10 @@
 import {
   Component, ChangeDetectionStrategy, signal, computed, inject, OnDestroy, ViewChildren, QueryList,
-  HostListener, Inject, PLATFORM_ID, ElementRef, ViewChild,
+  HostListener, Inject, PLATFORM_ID, ElementRef, ViewChild, NgZone,
 } from '@angular/core';
+
+declare const google: any;
+declare const FB: any;
 import { isPlatformBrowser, DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -90,13 +93,15 @@ export class HeaderComponent implements OnDestroy {
     return `${m} phút ${sec} giây`;
   });
 
-  /** Tên hiển thị bên cạnh icon user: fullName hoặc SĐT (format 0xxxxxxxxx) */
+  /** Tên hiển thị bên cạnh icon user: fullName hoặc SĐT hoặc email */
   userDisplayName = computed(() => {
     const u = this.auth.currentUser();
     if (!u) return '';
     const name = u.profile?.fullName?.trim();
     if (name) return name;
-    return this.formatPhoneForDisplay(u.phoneNumber);
+    if (u.phoneNumber) return this.formatPhoneForDisplay(u.phoneNumber);
+    if (u.email) return u.email;
+    return 'User';
   });
 
   private cart = inject(CartService);
@@ -104,6 +109,7 @@ export class HeaderComponent implements OnDestroy {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private api = inject(ApiService);
+  private ngZone = inject(NgZone);
   notif = inject(NotificationService);
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private searchSubject = new Subject<string>();
@@ -623,6 +629,84 @@ export class HeaderComponent implements OnDestroy {
         this.otpError.set(msg);
       },
     });
+  }
+
+  // === Social Login ===
+
+  onGoogleLogin(): void {
+    if (typeof google === 'undefined') {
+      this.phoneError.set('Google SDK chưa tải xong. Vui lòng thử lại.');
+      return;
+    }
+    google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: any) => {
+        this.ngZone.run(() => {
+          this.auth.loginWithGoogle(response.credential).subscribe({
+            next: () => {
+              this.loginSuccess.set(true);
+              setTimeout(() => {
+                this.overlayClosing.set(true);
+                setTimeout(() => this.closeLoginPopup(), 280);
+              }, 400);
+            },
+            error: (err: any) => {
+              this.phoneError.set(err?.error?.message || 'Đăng nhập Google thất bại.');
+            },
+          });
+        });
+      },
+    });
+    google.accounts.id.prompt((notification: any) => {
+      // If One Tap is dismissed or not available, fall back to button-based popup
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        google.accounts.oauth2.initCodeClient({
+          client_id: environment.googleClientId,
+          scope: 'email profile openid',
+          ux_mode: 'popup',
+          callback: () => {},
+        });
+        // Use the renderButton approach as fallback
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+        google.accounts.id.renderButton(tempDiv, { type: 'icon' });
+        const btn = tempDiv.querySelector('div[role="button"]') as HTMLElement;
+        if (btn) btn.click();
+        setTimeout(() => tempDiv.remove(), 100);
+      }
+    });
+  }
+
+  onFacebookLogin(): void {
+    if (typeof FB === 'undefined') {
+      this.phoneError.set('Facebook SDK chưa tải xong. Vui lòng thử lại.');
+      return;
+    }
+    FB.init({
+      appId: environment.facebookAppId,
+      cookie: true,
+      xfbml: false,
+      version: 'v21.0',
+    });
+    FB.login((response: any) => {
+      this.ngZone.run(() => {
+        if (response.authResponse) {
+          this.auth.loginWithFacebook(response.authResponse.accessToken).subscribe({
+            next: () => {
+              this.loginSuccess.set(true);
+              setTimeout(() => {
+                this.overlayClosing.set(true);
+                setTimeout(() => this.closeLoginPopup(), 280);
+              }, 400);
+            },
+            error: (err: any) => {
+              this.phoneError.set(err?.error?.message || 'Đăng nhập Facebook thất bại.');
+            },
+          });
+        }
+      });
+    }, { scope: 'email,public_profile' });
   }
 
   getOtpDigit(index: number): string {

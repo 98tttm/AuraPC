@@ -75,7 +75,7 @@ export class CheckoutComponent implements OnInit {
   dedupedOrderNumber = signal<string | null>(null);
 
   // Voucher from cart page
-  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number } | null>(null);
+  appliedVoucher = signal<{ code: string; description: string; discountPercent: number; discountAmount: number; maxDiscountAmount: number | null } | null>(null);
 
   /** COD: popup xác nhận OTP */
   showCodOtpPopup = signal(false);
@@ -122,7 +122,9 @@ export class CheckoutComponent implements OnInit {
     const v = this.appliedVoucher();
     if (!v) return 0;
     const subtotal = this.selectedTotal();
-    return Math.min(Math.round(subtotal * v.discountPercent / 100), v.discountAmount);
+    const rawDiscount = Math.round(subtotal * v.discountPercent / 100);
+    // Use maxDiscountAmount as cap (if set), otherwise no cap
+    return v.maxDiscountAmount != null ? Math.min(rawDiscount, v.maxDiscountAmount) : rawDiscount;
   });
 
   /** Shipping fee: free for orders >= 500.000₫ */
@@ -440,6 +442,7 @@ export class CheckoutComponent implements OnInit {
         items: payload.items,
         shippingAddress: payload.shippingAddress,
         directDiscount: this.directDiscount(),
+        ...(payload.promotionCode ? { promotionCode: payload.promotionCode } : {}),
         ...(payload.requestInvoice && payload.invoiceEmail ? { requestInvoice: true, invoiceEmail: payload.invoiceEmail, invoiceType: payload.invoiceType } : {}),
       }).subscribe({
         next: (res) => {
@@ -469,6 +472,7 @@ export class CheckoutComponent implements OnInit {
         shippingAddress: payload.shippingAddress,
         paymentMethod: this.paymentMethod,
         directDiscount: this.directDiscount(),
+        ...(payload.promotionCode ? { promotionCode: payload.promotionCode } : {}),
         ...(payload.requestInvoice && payload.invoiceEmail ? { requestInvoice: true, invoiceEmail: payload.invoiceEmail, invoiceType: payload.invoiceType } : {}),
       }).subscribe({
         next: (res) => {
