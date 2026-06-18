@@ -87,6 +87,13 @@
   opacity: 0.8;
 }
 
+.footer__social-img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
+}
+
 .footer__logo {
   display: inline-flex;
   align-items: center;

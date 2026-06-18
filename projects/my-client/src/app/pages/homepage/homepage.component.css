@@ -24,6 +24,163 @@
   text-align: center;
 }
 
+.homepage-ad-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.homepage-ad-popup__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.56);
+  backdrop-filter: blur(1px);
+}
+
+.homepage-ad-popup__panel {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 86vw);
+  border-radius: 6px;
+  filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.45));
+}
+
+.homepage-ad-popup__viewport {
+  border-radius: 6px;
+  overflow: hidden;
+  background: #050914;
+  transition: aspect-ratio 0.25s ease;
+}
+
+.homepage-ad-popup__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+.homepage-ad-popup__link {
+  display: block;
+  flex: 0 0 100%;
+  background: #050914;
+  height: 100%;
+}
+
+.homepage-ad-popup__link img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.homepage-ad-popup__close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #050505;
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+}
+
+.homepage-ad-popup__close:hover {
+  background: #1a1a1a;
+}
+
+.homepage-ad-popup__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 38px;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.homepage-ad-popup__nav:hover {
+  background: rgba(0, 0, 0, 0.82);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.homepage-ad-popup__nav--prev {
+  left: -58px;
+}
+
+.homepage-ad-popup__nav--next {
+  right: -58px;
+}
+
+.homepage-ad-popup__dots {
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.homepage-ad-popup__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.homepage-ad-popup__dot--active {
+  background: #fff;
+}
+
+@media (max-width: 700px) {
+  .homepage-ad-popup {
+    padding: 16px;
+  }
+
+  .homepage-ad-popup__close {
+    top: -14px;
+    right: -10px;
+    width: 34px;
+    height: 34px;
+    font-size: 26px;
+  }
+
+  .homepage-ad-popup__nav {
+    width: 34px;
+    height: 34px;
+    font-size: 30px;
+  }
+
+  .homepage-ad-popup__nav--prev {
+    left: 8px;
+  }
+
+  .homepage-ad-popup__nav--next {
+    right: 8px;
+  }
+}
+
 /* ============================================
    INTRO: Logo + universe background + loading bar
    ============================================ */
@@ -781,8 +938,7 @@ a.featured__card {
   overflow: hidden;
   text-decoration: none;
   position: relative;
-  aspect-ratio: 4 / 3.45;
-  min-height: 430px;
+  aspect-ratio: 1 / 1;
 }
 .featured__banner img {
   position: absolute;
@@ -792,15 +948,45 @@ a.featured__card {
   object-fit: cover;
   transition: transform 0.5s ease;
 }
+
+.featured__banner--ad-square {
+  background: #050914;
+}
+
+.featured__banner--ad-square img {
+  object-fit: contain;
+}
+
 .featured__banner:hover img {
   transform: scale(1.02);
+}
+
+.wide-promo {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 0 3.5rem;
+}
+
+.wide-promo__link {
+  display: block;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #050505;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.32);
+}
+
+.wide-promo__link img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1920 / 615;
+  object-fit: cover;
 }
 
 /* ============================================
    CATEGORIES  (Corsair-style: image-fill + overlay text)
    ============================================ */
 .categories {
-  padding: 4rem 0;
+  padding: 2rem 0 4rem;
 }
 
 .categories__grid {
@@ -1321,6 +1507,41 @@ a.blog__card {
 
 .auralab__deal:hover .auralab__deal-img img {
   transform: scale(1.05);
+}
+
+.auralab__side .auralab__deal:nth-child(2) {
+  position: relative;
+  background: #170202;
+  min-height: 190px;
+  flex: 0 0 auto;
+}
+
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0;
+}
+
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-badge,
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-desc {
+  display: none;
+}
+
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-link {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  font-size: 0;
+}
+
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-img {
+  width: 100%;
+}
+
+.auralab__side .auralab__deal:nth-child(2) .auralab__deal-img img {
+  object-fit: contain;
+  background: #170202;
 }
 
 /* ============================================

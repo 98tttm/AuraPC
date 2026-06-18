@@ -7,16 +7,18 @@ import { FooterComponent } from './components/footer/footer.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ChatbotWidgetComponent } from './components/chatbot-widget/chatbot-widget.component';
 import { SupportChatWidgetComponent } from './components/support-chat-widget/support-chat-widget.component';
+import { SideAdBannersComponent } from './components/side-ad-banners/side-ad-banners.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent, SupportChatWidgetComponent, ChatbotWidgetComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastComponent, FooterComponent, SupportChatWidgetComponent, ChatbotWidgetComponent, SideAdBannersComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: { '[class.route-aura-builder]': 'hideFooter()' },
   template: `
     <app-toast></app-toast>
     <app-header></app-header>
+    <app-side-ad-banners></app-side-ad-banners>
     <main>
       <router-outlet></router-outlet>
     </main>

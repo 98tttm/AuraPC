@@ -13,6 +13,39 @@
 }
 
 <!-- Nội dung chính: hiện dần khi intro biến mất -->
+@if (introComplete() && homepageAdVisible()) {
+<div class="homepage-ad-popup" role="dialog" aria-modal="true" aria-label="AuraPC promotion">
+  <div class="homepage-ad-popup__backdrop" (click)="closeHomepageAd()"></div>
+  <div class="homepage-ad-popup__panel" [style.width]="homepageAds[homepageAdIndex()].width">
+    <button type="button" class="homepage-ad-popup__close" (click)="closeHomepageAd()" aria-label="Đóng quảng cáo">
+      <span aria-hidden="true">×</span>
+    </button>
+    <button type="button" class="homepage-ad-popup__nav homepage-ad-popup__nav--prev" (click)="prevHomepageAd()"
+      aria-label="Quảng cáo trước">
+      <span aria-hidden="true">‹</span>
+    </button>
+    <div class="homepage-ad-popup__viewport" [style.aspect-ratio]="homepageAds[homepageAdIndex()].ratio">
+      <div class="homepage-ad-popup__track" [style.transform]="'translateX(-' + (homepageAdIndex() * 100) + '%)'">
+        @for (ad of homepageAds; track ad.image) {
+        <a class="homepage-ad-popup__link" [href]="ad.href" target="_blank" rel="noopener noreferrer sponsored">
+          <img [src]="ad.image" [alt]="ad.alt" />
+        </a>
+        }
+      </div>
+    </div>
+    <button type="button" class="homepage-ad-popup__nav homepage-ad-popup__nav--next" (click)="nextHomepageAd()"
+      aria-label="Quảng cáo tiếp theo">
+      <span aria-hidden="true">›</span>
+    </button>
+    <div class="homepage-ad-popup__dots" aria-hidden="true">
+      @for (ad of homepageAds; track ad.image; let i = $index) {
+      <span [class.homepage-ad-popup__dot--active]="i === homepageAdIndex()" class="homepage-ad-popup__dot"></span>
+      }
+    </div>
+  </div>
+</div>
+}
+
 <div class="main-reveal" [class.main-reveal--visible]="introComplete()">
   <!-- ============================================
      HERO: Interactive 3D Model
@@ -174,11 +207,22 @@
         <a routerLink="/collabs/minecraft" class="featured__banner fade-in-left">
           <img src="assets/thumbnail/minecraft.png" alt="Minecraft Collection" />
         </a>
-        <a routerLink="/san-pham" class="featured__banner fade-in-right">
-          <img src="https://cdn.hstatic.net/products/200000837185/z7049726315218_d0bebb98d1012105fcdb43e541a93628_828e23027d604fbd82160758a63c353c.jpg" alt="VENGEANCE a7500" />
+        <a href="https://shopee.vn/search?keyword=AuraPC" target="_blank" rel="noopener noreferrer sponsored"
+          class="featured__banner featured__banner--ad-square fade-in-right">
+          <img src="assets/ads/shopee-aurapc.png" alt="AuraPC Shopee Mall" />
         </a>
       </div>
       }
+    </div>
+  </section>
+
+  <section class="wide-promo">
+    <div class="container">
+      <a class="wide-promo__link" href="https://shopee.vn/search?keyword=AuraPC" target="_blank"
+        rel="noopener noreferrer sponsored">
+        <img src="assets/ads/homepage-wide-rog-007.jpg" alt="ROG GeForce RTX 50 Series First Light promotion"
+          loading="lazy" />
+      </a>
     </div>
   </section>
 
@@ -341,7 +385,7 @@
               <a routerLink="/san-pham" class="auralab__deal-link">MUA NGAY &gt;</a>
             </div>
             <div class="auralab__deal-img">
-              <img src="assets/images/aura-deals.jpg" alt="Ưu đãi đặc biệt" loading="lazy" />
+              <img src="assets/ads/homepage-special-deal.png" alt="Đại tiệc ROG Giáng Sinh ly kỳ" loading="lazy" />
             </div>
           </div>
         </div>

@@ -138,6 +138,32 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   private isMobile = false;
   private headerCycleTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private headerCycleIntervalId: ReturnType<typeof setInterval> | null = null;
+  private homepageAdIntervalId: ReturnType<typeof setInterval> | null = null;
+  homepageAdVisible = signal(true);
+  homepageAdIndex = signal(0);
+  readonly homepageAds = [
+    {
+      image: 'assets/ads/homepage-main-popup.png',
+      alt: 'AuraPC ASUS Year-End Sale',
+      href: 'https://shopee.vn/search?keyword=AuraPC',
+      width: 'min(560px, 86vw)',
+      ratio: '1 / 1',
+    },
+    {
+      image: 'assets/ads/homepage-main-popup-2.png',
+      alt: 'AuraPC Logitech Shopee Mall summer sale',
+      href: 'https://shopee.vn/search?keyword=AuraPC',
+      width: 'min(430px, 82vw)',
+      ratio: '3 / 4',
+    },
+    {
+      image: 'assets/ads/homepage-main-popup-3.png',
+      alt: 'AuraPC ASUS TUF Gaming F15 FX507',
+      href: 'https://shopee.vn/search?keyword=AuraPC',
+      width: 'min(560px, 86vw)',
+      ratio: '1 / 1',
+    },
+  ];
 
   /* Build hotspots from config */
   hotspots: Hotspot[] = HOTSPOT_CONFIG.map(cfg => ({
@@ -268,6 +294,21 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   productPrice(p: Product): number { return p.salePrice ?? p.price; }
 
+  closeHomepageAd(): void {
+    this.homepageAdVisible.set(false);
+    this.stopHomepageAdCarousel();
+  }
+
+  nextHomepageAd(): void {
+    this.homepageAdIndex.update((index) => (index + 1) % this.homepageAds.length);
+    this.restartHomepageAdCarousel();
+  }
+
+  prevHomepageAd(): void {
+    this.homepageAdIndex.update((index) => (index - 1 + this.homepageAds.length) % this.homepageAds.length);
+    this.restartHomepageAdCarousel();
+  }
+
   /** Ảnh bìa blog: chỉ dùng coverImage từ DB hoặc placeholder (đã bỏ lấy ảnh từ content để cấu hình lại). */
   blogCoverUrl(b: BlogPost): string {
     const cover = b?.coverImage?.trim();
@@ -285,6 +326,9 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      this.startHomepageAdCarousel();
+    }
     this.api.getFeaturedProducts(8).subscribe({
       next: (list) => this.featuredProducts.set(Array.isArray(list) ? list : []),
       error: () => {},
@@ -305,6 +349,26 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: () => {},
     });
+  }
+
+  private startHomepageAdCarousel(): void {
+    if (this.homepageAdIntervalId != null) return;
+    this.homepageAdIntervalId = setInterval(() => {
+      if (!this.homepageAdVisible()) return;
+      this.homepageAdIndex.update((index) => (index + 1) % this.homepageAds.length);
+      this.cdr.detectChanges();
+    }, 2000);
+  }
+
+  private stopHomepageAdCarousel(): void {
+    if (this.homepageAdIntervalId == null) return;
+    clearInterval(this.homepageAdIntervalId);
+    this.homepageAdIntervalId = null;
+  }
+
+  private restartHomepageAdCarousel(): void {
+    this.stopHomepageAdCarousel();
+    this.startHomepageAdCarousel();
   }
 
   ngAfterViewInit(): void {
@@ -720,6 +784,7 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.headerCycleTimeoutId != null) clearTimeout(this.headerCycleTimeoutId);
     if (this.headerCycleIntervalId != null) clearInterval(this.headerCycleIntervalId);
+    this.stopHomepageAdCarousel();
     if (this.animationId) cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.onResize);
     this.renderer?.dispose();

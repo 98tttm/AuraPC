@@ -1,0 +1,19 @@
+@if (!hidden()) {
+  @for (banner of banners; track banner.side) {
+    <a
+      class="side-ad side-ad--{{ banner.side }}"
+      [href]="banner.href"
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      [attr.aria-label]="banner.eyebrow + ' - ' + banner.title"
+    >
+      <img [src]="banner.image" [alt]="banner.title" class="side-ad__image" loading="lazy" />
+      <span class="side-ad__shade"></span>
+      <span class="side-ad__content">
+        <span class="side-ad__eyebrow">{{ banner.eyebrow }}</span>
+        <span class="side-ad__title">{{ banner.title }}</span>
+        <span class="side-ad__cta">{{ banner.cta }}</span>
+      </span>
+    </a>
+  }
+}
