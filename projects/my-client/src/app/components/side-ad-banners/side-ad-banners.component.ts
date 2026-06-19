@@ -12,10 +12,12 @@ type SideAdBanner = {
   cta: string;
 };
 
+const SHOPEE_MALL_URL = 'https://shopee.vn/shop/793341363';
+
 const SIDE_AD_BANNERS: SideAdBanner[] = [
   {
     side: 'left',
-    href: 'https://www.tiktok.com/search?q=AuraPC%20Shop',
+    href: SHOPEE_MALL_URL,
     title: 'Radeon RX 9000',
     eyebrow: 'TikTok Shop',
     image: 'assets/ads/tiktok-radeon-side.png',
@@ -23,7 +25,7 @@ const SIDE_AD_BANNERS: SideAdBanner[] = [
   },
   {
     side: 'right',
-    href: 'https://shopee.vn/search?keyword=AuraPC',
+    href: SHOPEE_MALL_URL,
     title: 'Shopee Mall',
     eyebrow: 'Shopee',
     image: 'assets/ads/shopee-aurapc.png',

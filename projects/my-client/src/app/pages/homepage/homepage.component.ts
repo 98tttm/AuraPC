@@ -89,6 +89,8 @@ interface Hotspot {
   productSlug?: string;
 }
 
+const SHOPEE_MALL_URL = 'https://shopee.vn/shop/793341363';
+
 @Component({
   selector: 'app-homepage',
   standalone: true,
@@ -145,21 +147,21 @@ export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
     {
       image: 'assets/ads/homepage-main-popup.png',
       alt: 'AuraPC ASUS Year-End Sale',
-      href: 'https://shopee.vn/search?keyword=AuraPC',
+      href: SHOPEE_MALL_URL,
       width: 'min(560px, 86vw)',
       ratio: '1 / 1',
     },
     {
       image: 'assets/ads/homepage-main-popup-2.png',
       alt: 'AuraPC Logitech Shopee Mall summer sale',
-      href: 'https://shopee.vn/search?keyword=AuraPC',
+      href: SHOPEE_MALL_URL,
       width: 'min(430px, 82vw)',
       ratio: '3 / 4',
     },
     {
       image: 'assets/ads/homepage-main-popup-3.png',
       alt: 'AuraPC ASUS TUF Gaming F15 FX507',
-      href: 'https://shopee.vn/search?keyword=AuraPC',
+      href: SHOPEE_MALL_URL,
       width: 'min(560px, 86vw)',
       ratio: '1 / 1',
     },
