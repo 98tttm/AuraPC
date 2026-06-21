@@ -22,4 +22,5 @@ const FOOTER_CATEGORIES: { name: string; slug: string }[] = [
 export class FooterComponent {
   categories = FOOTER_CATEGORIES;
   readonly shopeeMallUrl = 'https://shopee.vn/shop/793341363';
+  readonly tiktokShopUrl = 'https://vt.tiktok.com/ZSQKxnAjg/?page=TikTokShop';
 }

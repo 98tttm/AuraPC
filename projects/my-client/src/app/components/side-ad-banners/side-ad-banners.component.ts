@@ -13,11 +13,12 @@ type SideAdBanner = {
 };
 
 const SHOPEE_MALL_URL = 'https://shopee.vn/shop/793341363';
+const TIKTOK_SHOP_URL = 'https://vt.tiktok.com/ZSQKxnAjg/?page=TikTokShop';
 
 const SIDE_AD_BANNERS: SideAdBanner[] = [
   {
     side: 'left',
-    href: SHOPEE_MALL_URL,
+    href: TIKTOK_SHOP_URL,
     title: 'Radeon RX 9000',
     eyebrow: 'TikTok Shop',
     image: 'assets/ads/tiktok-radeon-side.png',
