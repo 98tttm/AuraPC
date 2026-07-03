@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
+const cloudinary = require('cloudinary').v2;
 const Post = require('../models/Post');
 const HubComment = require('../models/HubComment');
 const Share = require('../models/Share');
@@ -23,6 +24,18 @@ const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
   : null;
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
+
+// === Cloudinary config (primary upload backend, fallback when Supabase project is paused) ===
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+}
+const CLOUDINARY_FOLDER = process.env.CLOUDINARY_FOLDER || 'hub';
+const cloudinaryEnabled = !!process.env.CLOUDINARY_CLOUD_NAME;
 
 // === Default topic list ===
 const DEFAULT_TOPICS = [
@@ -546,31 +559,57 @@ router.post('/upload', requireAuth, upload.array('images', 5), async (req, res) 
     if (!req.files || !req.files.length) {
       return res.status(400).json({ message: 'Không có file nào' });
     }
-    if (!supabase) {
+    // Prefer Cloudinary; fall back to Supabase if Cloudinary env not set.
+    const useCloudinary = cloudinaryEnabled;
+    if (!useCloudinary && !supabase) {
       return res.status(503).json({
-        message: 'Supabase Storage chưa được cấu hình đúng. Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY.',
+        message: 'Storage chưa được cấu hình đúng. Thiếu Cloudinary hoặc Supabase env vars.',
       });
     }
 
     const urls = [];
     for (const f of req.files) {
-      const ext = path.extname(f.originalname || '').toLowerCase() || '.jpg';
-      const objectPath = `hub/${req.userId}/${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+      const publicBaseId = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
 
+      if (useCloudinary) {
+        const dataUri = `data:${f.mimetype || 'image/jpeg'};base64,${f.buffer.toString('base64')}`;
+        const publicId = `hub/${req.userId}/${publicBaseId}`;
+        let result;
+        try {
+          result = await cloudinary.uploader.upload(dataUri, {
+            public_id: publicId,
+            overwrite: false,
+            resource_type: 'image',
+            folder: undefined, // public_id already includes 'hub/<userid>/' prefix
+          });
+        } catch (cldErr) {
+          console.error('Hub Cloudinary upload error:', cldErr);
+          return res.status(500).json({
+            message: `Không upload được ảnh lên Cloudinary: ${cldErr.message || 'Unknown error'}`,
+          });
+        }
+        if (!result?.secure_url) {
+          return res.status(500).json({ message: 'Không lấy được URL public của ảnh.' });
+        }
+        urls.push(result.secure_url);
+        continue;
+      }
+
+      // Supabase fallback (kept for backward-compat)
+      const ext = path.extname(f.originalname || '').toLowerCase() || '.jpg';
+      const objectPath = `hub/${req.userId}/${publicBaseId}${ext}`;
       const { error: uploadError } = await supabase.storage
         .from(SUPABASE_HUB_BUCKET)
         .upload(objectPath, f.buffer, {
           contentType: f.mimetype || 'application/octet-stream',
           upsert: false,
         });
-
       if (uploadError) {
         console.error('Hub Supabase upload error:', uploadError);
         return res.status(500).json({
           message: `Không upload được ảnh lên storage: ${uploadError.message || 'Unknown error'}`,
         });
       }
-
       const { data } = supabase.storage.from(SUPABASE_HUB_BUCKET).getPublicUrl(objectPath);
       if (!data?.publicUrl) {
         return res.status(500).json({ message: 'Không lấy được URL public của ảnh.' });
