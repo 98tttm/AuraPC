@@ -807,4 +807,289 @@ router.post('/zalopay/query', requireAuth, async (req, res) => {
     }
 });
 
+// ── VietQR ───────────────────────────────────────────────────────────
+//
+// VietQR flow khác MoMo/ZaloPay ở hai điểm chính:
+//   1. Không có SDK / API key gọi tới ngân hàng — chỉ render QR tĩnh
+//      EMVCo từ BIN + số tài khoản + amount + addInfo. Dùng public
+//      image API của VietQR (img.vietqr.io — không auth, miễn phí).
+//   2. Bank app không phải lúc nào cũng gọi IPN về backend → app phải
+//      luôn cung cấp endpoint /confirm thủ công và polling /status.
+//
+// Order chỉ được tạo khi backend xác nhận thanh toán — đồng nhất
+// pattern với momo/zalopay (store pending → IPN/confirm → create order).
+
+function buildVietQrImageUrl(bankBin, accountNo, templateId, amount, addInfo, accountName) {
+    const params = new URLSearchParams();
+    params.set('amount', String(Math.round(Number(amount) || 0)));
+    if (addInfo) params.set('addInfo', addInfo);
+    if (accountName) params.set('accountName', accountName);
+    return `https://img.vietqr.io/image/${bankBin}-${accountNo}-${templateId}.png?${params.toString()}`;
+}
+
+/**
+ * Sinh chuỗi EMVCo TLV từ account/amount để app có thể render QR local
+ * bằng ZXing nếu image API vietqr.io không khả dụng (offline / rate-limit).
+ * Theo NAPAS IBFT spec — đủ trường để app bank đọc được.
+ */
+function buildVietQrEmvco({ bankBin, accountNo, amount, addInfo }) {
+    function tlv(id, value) {
+        const v = Buffer.from(value || '', 'utf8');
+        return `${id}${String(v.length).padStart(2, '0')}${v.toString('latin1')}`;
+    }
+    // 00: Payload Format Indicator (QRIBFCT)
+    // 01: Point of Initiation Method (12 = dynamic, có amount)
+    // 38: Merchant Account Information (NAPAS) — phải có sub-TLV
+    // 53: Transaction Currency (704 = VND)
+    // 54: Transaction Amount
+    // 58: Country Code (VN)
+    // 62: Additional Data Field (addInfo trong sub-TLV 08)
+    // 63: CRC (tính sau)
+    const merchantInfo =
+        tlv('00', 'AURA.PC') +                 // GUID NAPAS
+        tlv('01', String(bankBin || '')) +      // BIN
+        tlv('02', String(accountNo || ''));     // Số tài khoản
+    const amountStr = String(Math.round(Number(amount) || 0));
+    const addInfoSub = tlv('08', String(addInfo || ''));
+    const payload =
+        tlv('00', '01') +
+        tlv('01', '12') +
+        tlv('38', merchantInfo) +
+        tlv('53', '704') +
+        (amountStr !== '0' ? tlv('54', amountStr) : '') +
+        tlv('58', 'VN') +
+        tlv('62', addInfoSub) +
+        '6304';
+    // CRC16-CCITT (poly 0x1021, init 0xFFFF) theo EMVCo spec
+    const buf = Buffer.from(payload, 'latin1');
+    let crc = 0xFFFF;
+    for (let i = 0; i < buf.length; i++) {
+        crc ^= buf[i] << 8;
+        for (let j = 0; j < 8; j++) {
+            if (crc & 0x8000) crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+            else crc = (crc << 1) & 0xFFFF;
+        }
+    }
+    const crcHex = crc.toString(16).toUpperCase().padStart(4, '0');
+    return payload + crcHex;
+}
+
+function getVietQrConfig() {
+    const bankBin = process.env.VIETQR_BANK_BIN || '';
+    const accountNo = process.env.VIETQR_ACCOUNT_NO || '';
+    const accountName = process.env.VIETQR_ACCOUNT_NAME || 'AURA PC';
+    const templateId = process.env.VIETQR_TEMPLATE || 'compact2';
+    const isMock = !bankBin || !accountNo;
+    return { bankBin, accountNo, accountName, templateId, isMock };
+}
+
+// POST /api/payment/vietqr/create
+router.post('/vietqr/create', requireAuth, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { items, shippingAddress, directDiscount, promotionCode, requestInvoice, invoiceEmail, invoiceType } = req.body;
+
+        if (!items || !items.length) {
+            return res.status(400).json({ success: false, message: 'Cart items required' });
+        }
+
+        const { orderItems, finalTotal: subtotalAfterDiscount, discountAmount, appliedPromotion, validatedPromo } = await validateAndBuildItems(items, directDiscount, { promotionCode, userId });
+        const shippingFeeCalc = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+        const finalTotal = subtotalAfterDiscount + shippingFeeCalc;
+        const orderNumber = generateOrderNumber('VIQ');
+
+        const duplicateOrder = await findRecentDuplicateOrder({
+            userId,
+            items: orderItems,
+            shippingAddress: shippingAddress || {},
+            total: finalTotal,
+            paymentMethod: 'vietqr',
+        });
+        if (duplicateOrder) {
+            return res.status(409).json({
+                success: false,
+                message: `Bạn vừa tạo một đơn tương tự gần đây. Vui lòng kiểm tra đơn #${duplicateOrder.orderNumber}.`,
+                orderNumber: duplicateOrder.orderNumber,
+                deduped: true,
+            });
+        }
+
+        const cfg = getVietQrConfig();
+        const addInfo = `AuraPC ${orderNumber}`;
+        const qrUrl = cfg.isMock
+            ? ''
+            : buildVietQrImageUrl(cfg.bankBin, cfg.accountNo, cfg.templateId, finalTotal, addInfo, cfg.accountName);
+        const qrData = buildVietQrEmvco({
+            bankBin: cfg.bankBin,
+            accountNo: cfg.accountNo,
+            amount: finalTotal,
+            addInfo,
+        });
+
+        await storePending(orderNumber, {
+            orderNumber,
+            userId,
+            orderItems,
+            finalTotal,
+            discountAmount,
+            shippingFee: shippingFeeCalc,
+            shippingAddress,
+            paymentMethod: 'vietqr',
+            vietqrBankBin: cfg.bankBin,
+            vietqrAccountNo: cfg.accountNo,
+            vietqrAccountName: cfg.accountName,
+            vietqrAddInfo: addInfo,
+            appliedPromotion: appliedPromotion || undefined,
+            validatedPromoId: validatedPromo?._id || null,
+            requestInvoice: !!requestInvoice,
+            invoiceEmail: invoiceEmail || '',
+            invoiceType: invoiceType || 'personal',
+        });
+
+        return res.json({
+            success: true,
+            orderNumber,
+            qrUrl,                      // public image URL — null nếu mock-mode
+            qrData,                     // chuỗi EMVCo để app render local
+            amount: finalTotal,
+            bankBin: cfg.bankBin,
+            accountNo: cfg.accountNo,
+            accountName: cfg.accountName,
+            addInfo,
+            mock: cfg.isMock,
+        });
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ success: false, message: error.message });
+        }
+        console.error('VietQR Create Exception:', error);
+        return res.status(500).json({ success: false, message: 'Lỗi server khi tạo thanh toán VietQR' });
+    }
+});
+
+// POST /api/payment/vietqr/notify
+// Public webhook từ ngân hàng / bên trung gian (nếu có). Body:
+//   { orderNumber, status, amount, transactionId? }
+// status 'PAID' / '00' = thành công (mọi giá trị khác = không xác nhận).
+// Idempotent — gọi hai lần vẫn cho cùng kết quả, không tạo Order trùng.
+router.post('/vietqr/notify', async (req, res) => {
+    try {
+        const { orderNumber, status, amount, transactionId } = req.body || {};
+        if (!orderNumber) {
+            return res.status(400).json({ success: false, message: 'orderNumber required' });
+        }
+        const ok = ['PAID', '00', 'SUCCESS', 'COMPLETED'].includes(String(status || '').toUpperCase());
+        if (!ok) {
+            return res.json({ success: false, message: 'Status not PAID, ignored.' });
+        }
+
+        const existingOrder = await Order.findOne({ orderNumber });
+        if (existingOrder) {
+            if (!existingOrder.isPaid) {
+                existingOrder.isPaid = true;
+                existingOrder.paidAt = new Date();
+                if (transactionId) existingOrder.vietqrTransId = String(transactionId);
+                await existingOrder.save();
+                await notifyPaidOrder(existingOrder);
+            }
+            await removePending(orderNumber);
+            return res.json({ success: true, orderNumber: existingOrder.orderNumber, alreadyCreated: true });
+        }
+
+        const pendingData = await getPending(orderNumber);
+        if (!pendingData) {
+            return res.status(404).json({ success: false, message: 'Phiên thanh toán đã hết hạn.' });
+        }
+        if (transactionId) pendingData.vietqrTransId = String(transactionId);
+        const order = await createOrderFromPending(pendingData, { isPaid: true });
+        await notifyPaidOrder(order);
+        await removePending(orderNumber);
+        console.log(`[VietQR] Order ${orderNumber} created from bank notify. amount=${amount}`);
+        return res.json({ success: true, orderNumber: order.orderNumber });
+    } catch (error) {
+        console.error('VietQR Notify Exception:', error);
+        return res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// POST /api/payment/vietqr/confirm
+// App gọi khi user bấm "Tôi đã thanh toán". Loại bỏ phụ thuộc vào IPN
+// từ ngân hàng — quan trọng vì app VietinBank/VietcomBank/MBVCB không
+// hỗ trợ IPN out. Tạo Order từ pending và đánh dấu isPaid=true.
+router.post('/vietqr/confirm', requireAuth, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { orderNumber, amount } = req.body || {};
+        if (!orderNumber) {
+            return res.status(400).json({ success: false, message: 'orderNumber required' });
+        }
+
+        const existingOrder = await Order.findOne({ orderNumber });
+        if (existingOrder) {
+            if (String(existingOrder.user) !== String(userId)) {
+                return res.status(403).json({ success: false, message: 'Đơn không thuộc tài khoản này.' });
+            }
+            if (!existingOrder.isPaid) {
+                existingOrder.isPaid = true;
+                existingOrder.paidAt = new Date();
+                await existingOrder.save();
+                await notifyPaidOrder(existingOrder);
+            }
+            await removePending(orderNumber);
+            return res.json({ success: true, orderNumber: existingOrder.orderNumber, alreadyCreated: true });
+        }
+
+        const pendingData = await getPending(orderNumber);
+        if (!pendingData) {
+            return res.status(404).json({ success: false, message: 'Phiên thanh toán đã hết hạn hoặc đơn không tồn tại.' });
+        }
+        if (String(pendingData.userId) !== String(userId)) {
+            return res.status(403).json({ success: false, message: 'Đơn không thuộc tài khoản này.' });
+        }
+        if (amount && Number(amount) !== Number(pendingData.finalTotal)) {
+            console.warn(`[VietQR] Amount mismatch ${orderNumber}: client=${amount} pending=${pendingData.finalTotal}`);
+        }
+        const order = await createOrderFromPending(pendingData, { isPaid: true });
+        await notifyPaidOrder(order);
+        await removePending(orderNumber);
+        return res.json({ success: true, orderNumber: order.orderNumber });
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ success: false, message: error.message });
+        }
+        console.error('VietQR Confirm Exception:', error);
+        return res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
+// GET /api/payment/vietqr/status
+// Polled bởi VietQrPaymentActivity mỗi 3s (max 60s). Trả status theo
+// pending lẫn Order đã tạo — app dùng để biết khi bật success UI.
+router.get('/vietqr/status', requireAuth, async (req, res) => {
+    try {
+        const { orderNumber } = req.query;
+        if (!orderNumber) {
+            return res.status(400).json({ success: false, message: 'orderNumber required' });
+        }
+        const order = await Order.findOne({ orderNumber }).lean();
+        if (order) {
+            return res.json({
+                success: true,
+                status: order.isPaid ? 'paid' : 'pending',
+                isPaid: !!order.isPaid,
+                paymentStatus: order.isPaid ? 'PAID' : 'PENDING',
+                orderId: order._id,
+            });
+        }
+        const pending = await getPending(String(orderNumber));
+        if (pending) {
+            return res.json({ success: true, status: 'pending', isPaid: false, paymentStatus: 'PENDING' });
+        }
+        return res.json({ success: false, status: 'expired', message: 'Không tìm thấy phiên thanh toán.' });
+    } catch (error) {
+        console.error('VietQR Status Exception:', error);
+        return res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+});
+
 module.exports = router;
