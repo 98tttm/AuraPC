@@ -2,422 +2,311 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const Order = require('../models/Order');
-const Product = require('../models/Product');
 const User = require('../models/User');
 
-// Middleware để check admin auth
-const adminAuth = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ success: false, error: 'Unauthorized' });
-        }
-        
-        // Verify admin token (điều chỉnh theo logic auth của bạn)
-        const token = authHeader.split(' ')[1];
-        // TODO: Verify token với admin collection
-        
-        next();
-    } catch (error) {
-        res.status(401).json({ success: false, error: 'Unauthorized' });
+// BUDGET TIERS (VNĐ)
+const BUDGET_TIERS = {
+    NEW: {
+        name: 'new',
+        label: 'Khách Mới',
+        minSpent: 0,
+        maxSpent: 0,
+        color: '#9CA3AF', // Gray
+        description: 'Mới tham gia, chưa có lịch sử mua hàng',
+        recommendations: ['Sản phẩm bán chạy', 'Ưu đãi mới', 'Combo tiết kiệm']
+    },
+    BUDGET: {
+        name: 'budget',
+        label: 'Khách Tiết Kiệm',
+        minSpent: 1,
+        maxSpent: 5000000, // 5 triệu
+        color: '#10B981', // Green
+        description: 'Chi tiêu dưới 5 triệu VNĐ',
+        recommendations: ['Sản phẩm giá rẻ', 'Khuyến mãi', 'Trả góp 0%']
+    },
+    STANDARD: {
+        name: 'standard',
+        label: 'Khách Tiêu Chuẩn',
+        minSpent: 5000000, // 5 triệu
+        maxSpent: 20000000, // 20 triệu
+        color: '#3B82F6', // Blue
+        description: 'Chi tiêu từ 5-20 triệu VNĐ',
+        recommendations: ['Sản phẩm phổ thông', 'Bộ PC cơ bản', 'Laptop văn phòng']
+    },
+    PREMIUM: {
+        name: 'premium',
+        label: 'Khách Cao Cấp',
+        minSpent: 20000000, // 20 triệu
+        maxSpent: 50000000, // 50 triệu
+        color: '#8B5CF6', // Purple
+        description: 'Chi tiêu từ 20-50 triệu VNĐ',
+        recommendations: ['Laptop gaming', 'PC mid-range', 'Màn hình chuyên dụng']
+    },
+    VIP: {
+        name: 'vip',
+        label: 'Khách VIP',
+        minSpent: 50000000, // 50 triệu
+        maxSpent: Infinity,
+        color: '#F59E0B', // Gold
+        description: 'Chi tiêu trên 50 triệu VNĐ',
+        recommendations: ['PC cao cấp', 'Laptop workstation', 'Build custom RGB', 'Hỗ trợ 24/7']
     }
 };
 
-// ANONYMIZE user ID bằng hash (một chiều, không reversible)
+// ANONYMIZE user ID
 const hashUserId = (userId) => {
     if (!userId) return null;
-    return crypto.createHash('sha256')
-        .update(String(userId))
-        .digest('hex')
-        .substring(0, 16);
+    return crypto.createHash('sha256').update(String(userId)).digest('hex').substring(0, 16);
 };
 
-// GET /api/analytics/ml-training-data
-// Trả về data đã anonymize cho ML training
-router.get('/ml-training-data', async (req, res) => {
-    try {
-        // 1. Lấy purchase patterns từ tất cả orders đã hoàn thành
-        const orders = await Order.find({ status: 'completed' })
-            .select('userId items.categoryId items.productId totalAmount createdAt')
-            .lean();
-
-        // 2. Aggregate data theo user
-        const userPurchaseMap = {};
-        
-        orders.forEach(order => {
-            const userId = hashUserId(order.userId);
-            if (!userId) return;
-            
-            if (!userPurchaseMap[userId]) {
-                userPurchaseMap[userId] = {
-                    userId,
-                    totalSpent: 0,
-                    orderCount: 0,
-                    categories: new Set(),
-                    products: new Set(),
-                    orderValues: [],
-                    lastOrderDate: null,
-                    firstOrderDate: null
-                };
-            }
-            
-            const userData = userPurchaseMap[userId];
-            userData.totalSpent += order.totalAmount || 0;
-            userData.orderCount += 1;
-            userData.orderValues.push(order.totalAmount || 0);
-            
-            if (order.items) {
-                order.items.forEach(item => {
-                    if (item.categoryId) userData.categories.add(item.categoryId);
-                    if (item.productId) userData.products.add(item.productId);
-                });
-            }
-            
-            const orderDate = new Date(order.createdAt);
-            if (!userData.lastOrderDate || orderDate > userData.lastOrderDate) {
-                userData.lastOrderDate = orderDate;
-            }
-            if (!userData.firstOrderDate || orderDate < userData.firstOrderDate) {
-                userData.firstOrderDate = orderDate;
-            }
-        });
-
-        // Convert Set to Array
-        const purchasePatterns = Object.values(userPurchaseMap).map(p => ({
-            userId: p.userId,
-            totalSpent: Math.round(p.totalSpent),
-            orderCount: p.orderCount,
-            avgOrderValue: p.orderCount > 0 ? Math.round(p.totalSpent / p.orderCount) : 0,
-            categoryCount: p.categories.size,
-            productCount: p.products.size,
-            categories: Array.from(p.categories).slice(0, 20),
-            products: Array.from(p.products).slice(0, 20),
-            lastOrderDaysAgo: p.lastOrderDate ? 
-                Math.round((Date.now() - p.lastOrderDate) / (1000 * 60 * 60 * 24)) : 999,
-            customerAgeDays: p.firstOrderDate && p.lastOrderDate ?
-                Math.round((p.lastOrderDate - p.firstOrderDate) / (1000 * 60 * 60 * 24)) : 0
-        }));
-
-        // 3. Tính segment distribution
-        const segments = purchasePatterns.reduce((acc, p) => {
-            let segment;
-            if (p.orderCount === 0) segment = 'new';
-            else if (p.avgOrderValue > 15000000) segment = 'high_roller';
-            else if (p.totalSpent > 50000000) segment = 'vip';
-            else if (p.customerAgeDays > 90) segment = 'loyal';
-            else if (p.orderCount >= 3) segment = 'regular';
-            else segment = 'occasional';
-            acc[segment] = (acc[segment] || 0) + 1;
-            return acc;
-        }, {});
-
-        // 4. Tính category popularity
-        const categoryStats = {};
-        orders.forEach(order => {
-            if (order.items) {
-                order.items.forEach(item => {
-                    if (item.categoryId) {
-                        if (!categoryStats[item.categoryId]) {
-                            categoryStats[item.categoryId] = { count: 0, revenue: 0 };
-                        }
-                        categoryStats[item.categoryId].count += 1;
-                        categoryStats[item.categoryId].revenue += (order.totalAmount || 0) / (order.items.length || 1);
-                    }
-                });
-            }
-        });
-
-        res.json({
-            success: true,
-            meta: {
-                totalUsers: purchasePatterns.length,
-                totalOrders: orders.length,
-                segments,
-                exportedAt: new Date().toISOString()
-            },
-            purchasePatterns,
-            categoryStats,
-            segmentDefinitions: {
-                new: 'Chưa mua hoặc mới tạo tài khoản',
-                high_roller: 'Giá trị đơn hàng trung bình > 15M',
-                vip: 'Tổng chi tiêu > 50M',
-                loyal: 'Khách hàng > 90 ngày',
-                regular: 'Đã mua >= 3 đơn',
-                occasional: 'Mua ít (1-2 đơn)'
-            }
-        });
-
-    } catch (error) {
-        console.error('ML Training Data Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+// Get tier by total spent
+const getTierBySpent = (spent) => {
+    for (const tier of Object.values(BUDGET_TIERS)) {
+        if (spent >= tier.minSpent && spent < tier.maxSpent) {
+            return tier;
+        }
     }
-});
+    return BUDGET_TIERS.STANDARD;
+};
 
-// GET /api/analytics/best-sellers
-// Trả về best sellers cho cold start recommendations
-router.get('/best-sellers', async (req, res) => {
+// GET /api/analytics/user-segment?userId=xxx
+// Trả về segment của 1 user cụ thể
+router.get('/user-segment', async (req, res) => {
     try {
-        const orders = await Order.find({ status: 'completed' })
-            .select('items.productId items.name items.categoryId items.price items.quantity')
-            .lean();
-
-        // Aggregate product sales
-        const productSales = {};
+        const { userId } = req.query;
         
-        orders.forEach(order => {
-            if (order.items) {
-                order.items.forEach(item => {
-                    const productId = String(item.productId);
-                    if (!productSales[productId]) {
-                        productSales[productId] = {
-                            productId,
-                            productName: item.name || 'Unknown',
-                            categoryId: item.categoryId,
-                            soldCount: 0,
-                            revenue: 0
-                        };
-                    }
-                    productSales[productId].soldCount += item.quantity || 1;
-                    productSales[productId].revenue += (item.price || 0) * (item.quantity || 1);
-                });
-            }
-        });
+        if (!userId) {
+            return res.status(400).json({ success: false, error: 'userId required' });
+        }
 
-        const bestSellers = Object.values(productSales)
-            .sort((a, b) => b.soldCount - a.soldCount)
-            .slice(0, 50)
-            .map(p => ({
-                ...p,
-                revenue: Math.round(p.revenue)
-            }));
-
-        res.json({
-            success: true,
-            count: bestSellers.length,
-            bestSellers
-        });
-
-    } catch (error) {
-        console.error('Best Sellers Error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// GET /api/analytics/co-purchases
-// Trả về sản phẩm thường được mua cùng nhau
-router.get('/co-purchases', async (req, res) => {
-    try {
-        const orders = await Order.find({ status: 'completed' })
-            .select('items.productId')
-            .lean();
-
-        // Build co-purchase matrix
-        const coPurchaseMap = {};
-        
-        orders.forEach(order => {
-            if (order.items && order.items.length > 1) {
-                const productIds = order.items
-                    .map(i => String(i.productId))
-                    .filter(id => id);
-                
-                // Create pairs
-                for (let i = 0; i < productIds.length; i++) {
-                    for (let j = i + 1; j < productIds.length; j++) {
-                        const key = [productIds[i], productIds[j]].sort().join('-');
-                        coPurchaseMap[key] = (coPurchaseMap[key] || 0) + 1;
-                    }
-                }
-            }
-        });
-
-        // Convert to array and sort
-        const coPurchases = Object.entries(coPurchaseMap)
-            .map(([key, count]) => {
-                const [product1, product2] = key.split('-');
-                return { product1, product2, count };
-            })
-            .filter(c => c.count >= 2) // Chỉ lấy các cặp có >= 2 lần mua cùng nhau
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 100);
-
-        res.json({
-            success: true,
-            count: coPurchases.length,
-            coPurchases
-        });
-
-    } catch (error) {
-        console.error('Co-purchases Error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// GET /api/analytics/category-affinity
-// Trả về category affinity matrix (user thích category nào)
-router.get('/category-affinity', async (req, res) => {
-    try {
-        const orders = await Order.find({ status: 'completed' })
-            .select('userId items.categoryId')
-            .lean();
-
-        // Build user -> categories map
-        const userCategories = {};
-        
-        orders.forEach(order => {
-            const userId = hashUserId(order.userId);
-            if (!userId) return;
-            
-            if (!userCategories[userId]) {
-                userCategories[userId] = new Set();
-            }
-            
-            if (order.items) {
-                order.items.forEach(item => {
-                    if (item.categoryId) {
-                        userCategories[userId].add(String(item.categoryId));
-                    }
-                });
-            }
-        });
-
-        // Build category -> users matrix
-        const categoryUsers = {};
-        Object.values(userCategories).forEach(categories => {
-            categories.forEach(cat => {
-                if (!categoryUsers[cat]) {
-                    categoryUsers[cat] = new Set();
-                }
-                Object.keys(userCategories).forEach(userId => {
-                    if (userCategories[userId].has(cat)) {
-                        categoryUsers[cat].add(userId);
-                    }
-                });
-            });
-        });
-
-        // Calculate affinity scores
-        const categoryAffinity = Object.entries(categoryUsers).map(([cat1, users1]) => {
-            const affinities = Object.entries(categoryUsers)
-                .filter(([cat2]) => cat1 !== cat2)
-                .map(([cat2, users2]) => {
-                    const intersection = new Set([...users1].filter(x => users2.has(x)));
-                    const union = new Set([...users1, ...users2]);
-                    const jaccard = union.size > 0 ? intersection.size / union.size : 0;
-                    return {
-                        categoryId: cat2,
-                        overlapUsers: intersection.size,
-                        affinityScore: Math.round(jaccard * 100) / 100
-                    };
-                })
-                .filter(a => a.overlapUsers >= 3)
-                .sort((a, b) => b.affinityScore - a.affinityScore)
-                .slice(0, 5);
-            
-            return {
-                categoryId: cat1,
-                totalUsers: users1.size,
-                topAffinities: affinities
-            };
-        });
-
-        res.json({
-            success: true,
-            count: categoryAffinity.length,
-            categoryAffinity
-        });
-
-    } catch (error) {
-        console.error('Category Affinity Error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// GET /api/analytics/summary
-// Trả về tổng hợp stats cho dashboard
-router.get('/summary', async (req, res) => {
-    try {
-        const now = new Date();
-        const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-        const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-
-        // Stats tổng quan
-        const totalOrders = await Order.countDocuments({ status: 'completed' });
-        const totalUsers = await User.countDocuments();
-        const totalProducts = await Product.countDocuments();
-
-        // Revenue
-        const totalRevenue = await Order.aggregate([
-            { $match: { status: 'completed' } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+        // Calculate total spent from delivered orders
+        const totalSpent = await Order.aggregate([
+            { $match: { user: userId, status: 'delivered' } },
+            { $group: { _id: null, total: { $sum: '$total' } } }
         ]);
 
-        // 30-day stats
-        const last30DaysOrders = await Order.countDocuments({
-            status: 'completed',
-            createdAt: { $gte: thirtyDaysAgo }
-        });
+        const spent = totalSpent[0]?.total || 0;
+        const tier = getTierBySpent(spent);
         
-        const last30DaysRevenue = await Order.aggregate([
-            { 
-                $match: { 
-                    status: 'completed',
-                    createdAt: { $gte: thirtyDaysAgo }
-                } 
-            },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-        ]);
-
-        // Orders trend (7 ngày gần nhất)
-        const ordersTrend = await Order.aggregate([
-            { 
-                $match: { 
-                    status: 'completed',
-                    createdAt: { $gte: sevenDaysAgo }
-                } 
-            },
+        // Get additional stats
+        const orderStats = await Order.aggregate([
+            { $match: { user: userId } },
             {
                 $group: {
-                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-                    count: { $sum: 1 },
-                    revenue: { $sum: '$totalAmount' }
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    avgOrderValue: { $avg: '$total' },
+                    maxOrderValue: { $max: '$total' },
+                    firstOrderDate: { $min: '$createdAt' },
+                    lastOrderDate: { $max: '$createdAt' }
                 }
-            },
-            { $sort: { _id: 1 } }
+            }
         ]);
 
-        // Top categories
-        const topCategories = await Order.aggregate([
-            { $match: { status: 'completed' } },
+        const stats = orderStats[0] || {};
+        const daysSinceFirstOrder = stats.firstOrderDate 
+            ? Math.round((Date.now() - new Date(stats.firstOrderDate)) / (1000 * 60 * 60 * 24))
+            : 0;
+
+        res.json({
+            success: true,
+            userId: hashUserId(userId),
+            tier: {
+                ...tier,
+                totalSpent: spent,
+                tierName: tier.label,
+                tierColor: tier.color
+            },
+            stats: {
+                totalOrders: stats.totalOrders || 0,
+                avgOrderValue: Math.round(stats.avgOrderValue || 0),
+                maxOrderValue: stats.maxOrderValue || 0,
+                firstOrderDate: stats.firstOrderDate,
+                lastOrderDate: stats.lastOrderDate,
+                daysSinceFirstOrder
+            },
+            nextTier: getNextTier(tier.name, spent),
+            recommendations: getRecommendationsForTier(tier.name, spent)
+        });
+
+    } catch (error) {
+        console.error('User Segment Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/analytics/segments-distribution
+// Trả về phân bố các segment trong hệ thống
+router.get('/segments-distribution', async (req, res) => {
+    try {
+        const distribution = {};
+        
+        for (const tier of Object.values(BUDGET_TIERS)) {
+            distribution[tier.name] = {
+                ...tier,
+                count: 0,
+                revenue: 0,
+                avgSpent: 0
+            };
+        }
+
+        // Get all delivered orders grouped by user
+        const userOrders = await Order.aggregate([
+            { $match: { status: 'delivered' } },
+            {
+                $group: {
+                    _id: '$user',
+                    totalSpent: { $sum: '$total' },
+                    orderCount: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Count users in each tier
+        userOrders.forEach(order => {
+            const tier = getTierBySpent(order.totalSpent);
+            distribution[tier.name].count++;
+            distribution[tier.name].revenue += order.totalSpent;
+        });
+
+        // Calculate averages
+        Object.values(distribution).forEach(d => {
+            d.avgSpent = d.count > 0 ? Math.round(d.revenue / d.count) : 0;
+        });
+
+        // Add new users (registered but no orders)
+        const totalUsersWithOrders = userOrders.length;
+        const totalUsers = await User.countDocuments();
+        distribution[BUDGET_TIERS.NEW.name].count = totalUsers - totalUsersWithOrders;
+
+        res.json({
+            success: true,
+            totalUsers,
+            totalUsersWithOrders,
+            distribution: Object.values(distribution)
+        });
+
+    } catch (error) {
+        console.error('Segments Distribution Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/analytics/tier-recommendations
+// Trả về recommendations dựa trên tier
+router.get('/tier-recommendations', async (req, res) => {
+    try {
+        const { tier } = req.query;
+        const tierInfo = BUDGET_TIERS[tier?.toUpperCase()] || BUDGET_TIERS.STANDARD;
+
+        res.json({
+            success: true,
+            tier: tierInfo.name,
+            recommendations: getRecommendationsForTier(tierInfo.name, 0)
+        });
+
+    } catch (error) {
+        console.error('Tier Recommendations Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/analytics/personalized-products
+// Trả về products phù hợp với tier của user
+router.get('/personalized-products', async (req, res) => {
+    try {
+        const { tier, limit = 20 } = req.query;
+        const tierInfo = BUDGET_TIERS[tier?.toUpperCase()] || BUDGET_TIERS.STANDARD;
+        
+        // Get price range based on tier
+        let minPrice = tierInfo.minSpent * 0.3; // Start at 30% of tier min
+        let maxPrice = tierInfo.maxSpent === Infinity 
+            ? tierInfo.minSpent * 3 // 3x for VIP
+            : tierInfo.maxSpent * 1.2; // 120% for others
+
+        // Get best sellers in price range
+        const products = await Order.aggregate([
+            { $match: { status: 'delivered' } },
             { $unwind: '$items' },
             {
-                $group: {
-                    _id: '$items.categoryId',
-                    count: { $sum: '$items.quantity' },
-                    revenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+                $match: {
+                    'items.price': { $gte: minPrice, $lte: maxPrice }
                 }
             },
-            { $sort: { count: -1 } },
-            { $limit: 10 }
+            {
+                $group: {
+                    _id: '$items.product',
+                    productName: { $first: '$items.name' },
+                    soldCount: { $sum: '$items.qty' },
+                    avgPrice: { $avg: '$items.price' },
+                    revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } }
+                }
+            },
+            { $sort: { soldCount: -1 } },
+            { $limit: parseInt(limit) }
         ]);
 
         res.json({
             success: true,
-            stats: {
-                totalOrders,
-                totalUsers,
-                totalProducts,
-                totalRevenue: totalRevenue[0]?.total || 0,
-                last30DaysOrders,
-                last30DaysRevenue: last30DaysRevenue[0]?.total || 0
-            },
-            ordersTrend,
-            topCategories
+            tier: tierInfo.name,
+            priceRange: { min: minPrice, max: maxPrice },
+            products: products.map(p => ({
+                productId: p._id,
+                name: p.productName,
+                soldCount: p.soldCount,
+                avgPrice: Math.round(p.avgPrice),
+                revenue: Math.round(p.revenue)
+            }))
         });
 
     } catch (error) {
-        console.error('Summary Error:', error);
+        console.error('Personalized Products Error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+// Helper functions
+function getNextTier(currentTier, currentSpent) {
+    const tierOrder = ['new', 'budget', 'standard', 'premium', 'vip'];
+    const currentIndex = tierOrder.indexOf(currentTier);
+    
+    if (currentIndex === -1 || currentIndex === tierOrder.length - 1) {
+        return null;
+    }
+
+    const nextTier = BUDGET_TIERS[tierOrder[currentIndex + 1]];
+    const amountNeeded = nextTier.minSpent - currentSpent;
+    
+    return {
+        tier: nextTier.name,
+        label: nextTier.label,
+        amountNeeded: Math.max(0, amountNeeded),
+        color: nextTier.color
+    };
+}
+
+function getRecommendationsForTier(tierName, spent) {
+    const baseRecs = BUDGET_TIERS[tierName.toUpperCase()]?.recommendations || [];
+    
+    // Add personalized recommendations based on spending
+    const personalizedRecs = [];
+    
+    if (spent > 0 && spent < 5000000) {
+        personalizedRecs.push('Gói trả góp 0% lãi suất');
+        personalizedRecs.push('Thẻ thành viên giảm 5%');
+    } else if (spent >= 5000000 && spent < 20000000) {
+        personalizedRecs.push('Tích điểm đổi quà');
+        personalizedRecs.push('Ưu đãi sinh nhật 10%');
+    } else if (spent >= 20000000 && spent < 50000000) {
+        personalizedRecs.push('Hỗ trợ kỹ thuật ưu tiên');
+        personalizedRecs.push('Bảo hành 24 tháng');
+    } else if (spent >= 50000000) {
+        personalizedRecs.push('Account manager riêng');
+        personalizedRecs.push('Giao hàng nhanh 2h');
+        personalizedRecs.push('Ưu đãi upgrade đặc biệt');
+    }
+    
+    return [...baseRecs, ...personalizedRecs];
+}
 
 module.exports = router;
