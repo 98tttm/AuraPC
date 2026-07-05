@@ -36,6 +36,7 @@ const promotionRoutes = require('./routes/promotionRoutes');
 const adminPromotionRoutes = require('./routes/admin/promotionRoutes');
 const warrantyRoutes = require('./routes/warrantyRoutes');
 const adminWarrantyRoutes = require('./routes/admin/warrantyRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 connectDB();
 
@@ -125,6 +126,7 @@ app.use('/api/promotions', promotionRoutes);
 app.use('/api/admin/promotions', adminPromotionRoutes);
 app.use('/api/warranty', warrantyRoutes);
 app.use('/api/admin/warranty', adminWarrantyRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads'));
